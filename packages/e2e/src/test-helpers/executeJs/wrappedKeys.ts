@@ -454,27 +454,27 @@ export const registerWrappedKeysExecuteJsTests = () => {
 
           throw error;
         }
+      });
     });
-  });
 
-  describe('Solana network', () => {
-    test('generatePrivateKey creates a new Solana wrapped key', async () => {
+    describe('Solana network', () => {
+      test('generatePrivateKey creates a new Solana wrapped key', async () => {
         const pkpSessionSigs = await createPkpSessionSigs();
 
-      const { pkpAddress, generatedPublicKey, id } =
-        await wrappedKeysApi.generatePrivateKey({
-          pkpSessionSigs,
-          network: SOLANA_NETWORK,
-          litClient: ctx.litClient,
-          memo: randomMemo('sol-generate'),
-        });
+        const { pkpAddress, generatedPublicKey, id } =
+          await wrappedKeysApi.generatePrivateKey({
+            pkpSessionSigs,
+            network: SOLANA_NETWORK,
+            litClient: ctx.litClient,
+            memo: randomMemo('sol-generate'),
+          });
 
-      expect(pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
-      expect(() => assertIsAddress(generatedPublicKey)).not.toThrow();
-      expect(id).toEqual(expect.any(String));
-    });
+        expect(pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(() => assertIsAddress(generatedPublicKey)).not.toThrow();
+        expect(id).toEqual(expect.any(String));
+      });
 
-    test('exportPrivateKey decrypts a stored Solana wrapped key', async () => {
+      test('exportPrivateKey decrypts a stored Solana wrapped key', async () => {
         const { id, publicKey } = await generateSolanaWrappedKeyForTest(
           randomMemo('sol-export')
         );
@@ -504,99 +504,101 @@ export const registerWrappedKeysExecuteJsTests = () => {
           exportedPublicKey
         );
 
-      expect(derivedPublicKey).toBe(publicKey);
-    });
-
-    test('listEncryptedKeyMetadata returns metadata for Solana keys', async () => {
-      const memo = randomMemo('sol-list');
-      const { id } = await generateSolanaWrappedKeyForTest(memo);
-      const pkpSessionSigs = await createPkpSessionSigs();
-
-      const metadata = await wrappedKeysApi.listEncryptedKeyMetadata({
-        pkpSessionSigs,
-        litClient: ctx.litClient,
+        expect(derivedPublicKey).toBe(publicKey);
       });
 
-      const entry = metadata.find((item) => item.id === id);
-      expect(entry).toBeDefined();
-      expect(entry?.memo).toBe(memo);
-    });
+      test('listEncryptedKeyMetadata returns metadata for Solana keys', async () => {
+        const memo = randomMemo('sol-list');
+        const { id } = await generateSolanaWrappedKeyForTest(memo);
+        const pkpSessionSigs = await createPkpSessionSigs();
 
-    test('getEncryptedKey fetches ciphertext for a Solana key', async () => {
-      const { id } = await generateSolanaWrappedKeyForTest(randomMemo('sol-get'));
-      const pkpSessionSigs = await createPkpSessionSigs();
+        const metadata = await wrappedKeysApi.listEncryptedKeyMetadata({
+          pkpSessionSigs,
+          litClient: ctx.litClient,
+        });
 
-      const storedKey = await wrappedKeysApi.getEncryptedKey({
-        pkpSessionSigs,
-        litClient: ctx.litClient,
-        id,
+        const entry = metadata.find((item) => item.id === id);
+        expect(entry).toBeDefined();
+        expect(entry?.memo).toBe(memo);
       });
 
-      expect(storedKey.id).toBe(id);
-      expect(storedKey.ciphertext).toBeTruthy();
-      expect(storedKey.dataToEncryptHash).toBeTruthy();
-      expect(storedKey.keyType).toBe('ed25519');
-    });
+      test('getEncryptedKey fetches ciphertext for a Solana key', async () => {
+        const { id } = await generateSolanaWrappedKeyForTest(
+          randomMemo('sol-get')
+        );
+        const pkpSessionSigs = await createPkpSessionSigs();
 
-    test('storeEncryptedKey persists provided Solana ciphertext', async () => {
-      const pkpSessionSigs = await createPkpSessionSigs();
-      const payload = createSolanaStorePayload();
+        const storedKey = await wrappedKeysApi.getEncryptedKey({
+          pkpSessionSigs,
+          litClient: ctx.litClient,
+          id,
+        });
 
-      const result = await wrappedKeysApi.storeEncryptedKey({
-        pkpSessionSigs,
-        litClient: ctx.litClient,
-        ...payload,
+        expect(storedKey.id).toBe(id);
+        expect(storedKey.ciphertext).toBeTruthy();
+        expect(storedKey.dataToEncryptHash).toBeTruthy();
+        expect(storedKey.keyType).toBe('ed25519');
       });
 
-      expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
-      expect(result.id).toEqual(expect.any(String));
-    });
+      test('storeEncryptedKey persists provided Solana ciphertext', async () => {
+        const pkpSessionSigs = await createPkpSessionSigs();
+        const payload = createSolanaStorePayload();
 
-    test('storeEncryptedKeyBatch persists multiple Solana ciphertexts', async () => {
-      const pkpSessionSigs = await createPkpSessionSigs();
-      const keyBatch = [
-        createSolanaStorePayload(),
-        createSolanaStorePayload(),
-      ];
+        const result = await wrappedKeysApi.storeEncryptedKey({
+          pkpSessionSigs,
+          litClient: ctx.litClient,
+          ...payload,
+        });
 
-      const result = await wrappedKeysApi.storeEncryptedKeyBatch({
-        pkpSessionSigs,
-        litClient: ctx.litClient,
-        keyBatch,
+        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.id).toEqual(expect.any(String));
       });
 
-      expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
-      expect(result.ids.length).toBe(keyBatch.length);
-      for (const id of result.ids) {
-        expect(id).toEqual(expect.any(String));
-      }
-    });
+      test('storeEncryptedKeyBatch persists multiple Solana ciphertexts', async () => {
+        const pkpSessionSigs = await createPkpSessionSigs();
+        const keyBatch = [
+          createSolanaStorePayload(),
+          createSolanaStorePayload(),
+        ];
 
-    test('importPrivateKey persists a Solana wrapped key', async () => {
-      const pkpSessionSigs = await createPkpSessionSigs();
-      const keyPair = nacl.sign.keyPair();
-      const secretKeyBytes = keyPair.secretKey;
-      const publicKey = bs58.encode(keyPair.publicKey);
-      const privateKeyHex = Buffer.from(secretKeyBytes).toString('hex');
+        const result = await wrappedKeysApi.storeEncryptedKeyBatch({
+          pkpSessionSigs,
+          litClient: ctx.litClient,
+          keyBatch,
+        });
 
-      const memo = randomMemo('sol-import');
-      const result = await wrappedKeysApi.importPrivateKey({
-        pkpSessionSigs,
-        litClient: ctx.litClient,
-        privateKey: privateKeyHex,
-        publicKey,
-        keyType: 'ed25519',
-        memo,
+        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.ids.length).toBe(keyBatch.length);
+        for (const id of result.ids) {
+          expect(id).toEqual(expect.any(String));
+        }
       });
 
-      expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
-      expect(result.id).toEqual(expect.any(String));
-    });
+      test('importPrivateKey persists a Solana wrapped key', async () => {
+        const pkpSessionSigs = await createPkpSessionSigs();
+        const keyPair = nacl.sign.keyPair();
+        const secretKeyBytes = keyPair.secretKey;
+        const publicKey = bs58.encode(keyPair.publicKey);
+        const privateKeyHex = Buffer.from(secretKeyBytes).toString('hex');
 
-    test('signMessageWithEncryptedKey signs messages with Solana keys', async () => {
-      const { id, publicKey } = await generateSolanaWrappedKeyForTest(
-        randomMemo('sol-sign-message')
-      );
+        const memo = randomMemo('sol-import');
+        const result = await wrappedKeysApi.importPrivateKey({
+          pkpSessionSigs,
+          litClient: ctx.litClient,
+          privateKey: privateKeyHex,
+          publicKey,
+          keyType: 'ed25519',
+          memo,
+        });
+
+        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.id).toEqual(expect.any(String));
+      });
+
+      test('signMessageWithEncryptedKey signs messages with Solana keys', async () => {
+        const { id, publicKey } = await generateSolanaWrappedKeyForTest(
+          randomMemo('sol-sign-message')
+        );
         const pkpSessionSigs = await createPkpSessionSigs();
         const message = 'hello from solana wrapped-keys';
 
