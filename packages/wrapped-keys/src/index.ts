@@ -19,10 +19,6 @@ import {
   NETWORK_SOLANA,
 } from './lib/constants';
 import {
-  createSessionSigsForWrappedKeys,
-  createWrappedKeysAuthContext,
-} from './lib/helpers/create-session-sigs';
-import {
   setLitActionsCode,
   setLitActionsCodeCommon,
 } from './lib/lit-actions-client/code-repository';
@@ -52,11 +48,6 @@ export const api = {
 export const config = {
   setLitActionsCode,
   setLitActionsCodeCommon,
-};
-
-export const helpers = {
-  createWrappedKeysAuthContext,
-  createSessionSigsForWrappedKeys,
 };
 
 export type {
@@ -94,5 +85,3 @@ export type {
 } from './lib/lit-actions-client/types';
 
 export type { SupportedNetworks } from './lib/service-client/types';
-
-export { createSessionSigsForWrappedKeys, createWrappedKeysAuthContext };
