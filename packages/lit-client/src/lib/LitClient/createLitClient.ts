@@ -39,6 +39,8 @@ import {
   LitNodeSignature,
   PkpIdentifierRaw,
   RequestItem,
+  AuthSig,
+  ExecuteJsResponse,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -61,6 +63,10 @@ import {
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
 import { NagaNetworkModule } from './type';
+import type {
+  NagaLitClient,
+  NagaLitClientContext,
+} from './types/NagaLitClient.type';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -155,7 +161,7 @@ export const createLitClient = async ({
  */
 export const _createNagaLitClient = async (
   networkModule: NagaNetworkModule
-) => {
+): Promise<NagaLitClient> => {
   const _stateManager = await networkModule.createStateManager<
     Awaited<ReturnType<typeof orchestrateHandshake>>,
     NagaNetworkModule
@@ -195,9 +201,15 @@ export const _createNagaLitClient = async (
     const currentHandshakeResult = _stateManager.getCallbackResult();
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
+    if (!currentHandshakeResult) {
       throw new Error(
         'Handshake result is not available from state manager at the time of pkpSign.'
+      );
+    }
+
+    if (!currentConnectionInfo) {
+      throw new Error(
+        'Connection info is not available from state manager at the time of pkpSign.'
       );
     }
 
@@ -270,14 +282,20 @@ export const _createNagaLitClient = async (
   async function _signSessionKey(params: {
     nodeUrls: string[];
     requestBody: z.infer<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
-  }) {
+  }): Promise<AuthSig> {
     // 1. 🟩 get the fresh handshake results
     const currentHandshakeResult = _stateManager.getCallbackResult();
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
+    if (!currentHandshakeResult) {
       throw new Error(
         'Handshake result is not available from state manager at the time of pkpSign.'
+      );
+    }
+
+    if (!currentConnectionInfo) {
+      throw new Error(
+        'Connection info is not available from state manager at the time of pkpSign.'
       );
     }
 
@@ -316,14 +334,20 @@ export const _createNagaLitClient = async (
     requestBody: z.infer<
       typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
     >;
-  }) {
+  }): Promise<AuthSig> {
     // 1. 🟩 get the fresh handshake results
     const currentHandshakeResult = _stateManager.getCallbackResult();
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
+    if (!currentHandshakeResult) {
       throw new Error(
         'Handshake result is not available from state manager at the time of pkpSign.'
+      );
+    }
+
+    if (!currentConnectionInfo) {
+      throw new Error(
+        'Connection info is not available from state manager at the time of pkpSign.'
       );
     }
 
@@ -331,12 +355,6 @@ export const _createNagaLitClient = async (
       currentConnectionInfo,
       currentHandshakeResult
     );
-
-    if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
-        'Handshake result is not available from state manager at the time of pkpSign.'
-      );
-    }
 
     // 2. 🟪 Create requests
     const requestArray =
@@ -367,16 +385,22 @@ export const _createNagaLitClient = async (
 
   async function _executeJs(
     params: z.infer<typeof networkModule.api.executeJs.schemas.Input>
-  ) {
+  ): Promise<ExecuteJsResponse> {
     _logger.info(`🔥 executing JS with ${params.code ? 'code' : 'ipfsId'}`);
 
     // 🟩 get the fresh handshake results
     const currentHandshakeResult = _stateManager.getCallbackResult();
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
+    if (!currentHandshakeResult) {
       throw new Error(
         'Handshake result is not available from state manager at the time of executeJs.'
+      );
+    }
+
+    if (!currentConnectionInfo) {
+      throw new Error(
+        'Connection info is not available from state manager at the time of executeJs.'
       );
     }
 
@@ -390,15 +414,19 @@ export const _createNagaLitClient = async (
     // request array to the `networkModule`. It encapsulates logic specific to the
     // active network (e.g., pricing, thresholds, metadata) and returns a set of
     // structured requests ready to be dispatched to the nodes.
-    const requestArray = (await networkModule.api.executeJs.createRequest({
-      // add pricing context for Lit Actions
-      pricingContext: {
-        product: 'LIT_ACTION',
-        userMaxPrice: params.userMaxPrice,
-        nodePrices: jitContext.nodePrices,
-        threshold: currentHandshakeResult.threshold,
-      },
-      authContext: params.authContext,
+    type ExecuteJsCreateRequestParams = Parameters<
+      typeof networkModule.api.executeJs.createRequest
+    >[0];
+
+    const pricingContext: ExecuteJsCreateRequestParams['pricingContext'] = {
+      product: 'LIT_ACTION',
+      userMaxPrice: params.userMaxPrice,
+      nodePrices: jitContext.nodePrices,
+      threshold: currentHandshakeResult.threshold,
+    };
+
+    const baseExecuteJsParams = {
+      pricingContext,
       executionContext: {
         code: params.code,
         ipfsId: params.ipfsId,
@@ -409,7 +437,22 @@ export const _createNagaLitClient = async (
       useSingleNode: params.useSingleNode,
       responseStrategy: params.responseStrategy,
       jitContext,
-    })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
+    };
+
+    const executeJsParams: ExecuteJsCreateRequestParams =
+      'sessionSigs' in params && params.sessionSigs
+        ? {
+            ...baseExecuteJsParams,
+            sessionSigs: params.sessionSigs,
+          }
+        : {
+            ...baseExecuteJsParams,
+            authContext: params.authContext,
+          };
+
+    const requestArray = (await networkModule.api.executeJs.createRequest(
+      executeJsParams
+    )) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
     const requestId = requestArray[0].requestId;
 
@@ -567,10 +610,17 @@ export const _createNagaLitClient = async (
     );
 
     // ========== Encrypt ==========
+    const encryptionPayload =
+      dataAsUint8Array instanceof Uint8Array
+        ? dataAsUint8Array
+        : new Uint8Array(dataAsUint8Array);
+
+    const identityBytes = uint8arrayFromString(identityParam, 'utf8');
+
     const ciphertext = await blsEncrypt(
       currentHandshakeResult.coreNodeConfig.subnetPubKey,
-      dataAsUint8Array,
-      uint8arrayFromString(identityParam, 'utf8')
+      encryptionPayload,
+      identityBytes
     );
 
     return {
@@ -605,9 +655,15 @@ export const _createNagaLitClient = async (
     const currentHandshakeResult = _stateManager.getCallbackResult();
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
+    if (!currentHandshakeResult) {
       throw new Error(
         'Handshake result is not available from state manager at the time of decrypt.'
+      );
+    }
+
+    if (!currentConnectionInfo) {
+      throw new Error(
+        'Connection info is not available from state manager at the time of decrypt.'
       );
     }
 
@@ -615,12 +671,6 @@ export const _createNagaLitClient = async (
       currentConnectionInfo,
       currentHandshakeResult
     );
-
-    if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
-        'Handshake result is not available from state manager at the time of decrypt.'
-      );
-    }
 
     if (!currentHandshakeResult.coreNodeConfig?.subnetPubKey) {
       throw new Error('subnetPubKey cannot be null');
@@ -714,13 +764,14 @@ export const _createNagaLitClient = async (
     return response;
   }
 
-  const litClient = {
+  const litClient: NagaLitClient = {
+    networkName: networkModule.getNetworkName(),
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
     // maybe you will need connectionInfo: _stateManager.getLatestConnectionInfo(),
     encrypt: _encrypt,
     decrypt: _decrypt,
-    getContext: async () => {
+    getContext: async (): Promise<NagaLitClientContext> => {
       return {
         latestBlockhash: await _stateManager.getLatestBlockhash(),
         latestConnectionInfo: _stateManager.getLatestConnectionInfo(),
