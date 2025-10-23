@@ -63,11 +63,11 @@ function updateConstantsFile(cidRepo, cidRepoCommon) {
 
 const LIT_ACTION_CID_REPOSITORY: LitCidRepository = ${renderLitActionRepository(
     cidRepo
-  )};
+  )}
 
 const LIT_ACTION_CID_REPOSITORY_COMMON: LitCidRepositoryCommon = ${renderLitActionRepositoryCommon(
     cidRepoCommon
-  )};
+  )}
 
 export { LIT_ACTION_CID_REPOSITORY, LIT_ACTION_CID_REPOSITORY_COMMON };
 `;
