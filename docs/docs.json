@@ -157,7 +157,9 @@
             "group": "$LITKEY Token",
             "pages": [
               "governance/litkey/overview",
-              "governance/litkey/initial-allocation-and-distribution"
+              "governance/litkey/initial-allocation-and-distribution",
+              "governance/litkey/lit-chain",
+              "governance/litkey/bridging-and-addresses"
             ]
           },
           {
