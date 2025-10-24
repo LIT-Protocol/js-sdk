@@ -565,6 +565,9 @@ importers:
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
+      typestub-ipfs-only-hash:
+        specifier: ^4.0.0
+        version: 4.0.0(encoding@0.1.13)
       viem:
         specifier: 2.38.x
         version: 2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
@@ -14822,6 +14825,12 @@ packages:
     engines: { node: '>=14.17' }
     hasBin: true
 
+  typestub-ipfs-only-hash@4.0.0:
+    resolution:
+      {
+        integrity: sha512-HKLePX0XiPiyqoueSfvCLL9SIzvKBXjASaRoR0yk/gUbbK7cqejU6/tjhihwmzBCvWbx5aMQ2LYsYIpMK7Ikpg==,
+      }
+
   typical@4.0.0:
     resolution:
       {
@@ -27579,6 +27588,13 @@ snapshots:
       yaml: 2.8.1
 
   typescript@5.8.3: {}
+
+  typestub-ipfs-only-hash@4.0.0(encoding@0.1.13):
+    dependencies:
+      ipfs-only-hash: 4.0.0(encoding@0.1.13)
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   typical@4.0.0: {}
 
