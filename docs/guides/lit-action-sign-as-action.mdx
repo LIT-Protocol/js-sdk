@@ -69,3 +69,21 @@ const { keccak256, arrayify } = ethers.utils;
 ```
 
 This approach keeps the derivation entirely within the Lit Action context. Because the public key depends only on the Action CID and signing scheme, you can rely on `Lit.Actions.getActionPublicKey` for a deterministic identity without needing to execute the Action externally first.
+
+## Derive the Same Public Key from Client Code
+
+If you prefer to resolve the Lit Action public key outside of the Action runtime—e.g., inside tests or other tooling—the SDK now exposes a helper that calls the on-chain PubkeyRouter contract.
+
+```ts
+import { createLitClient } from "@lit-protocol/lit-client";
+import { nagaDev } from "@lit-protocol/networks";
+import { keccak256, stringToBytes } from "viem";
+
+const litClient = await createLitClient({ network: nagaDev });
+const derivedKeyId = keccak256(stringToBytes(`lit_action_${actionIpfsCid}`));
+const actionPublicKey = await litClient.utils.getDerivedKeyId(derivedKeyId);
+
+console.log("Derived Lit Action pubkey:", actionPublicKey);
+```
+
+Under the hood, `getDerivedKeyId` routes through `PubkeyRouter.getDerivedPubkey`, passing the staking contract address and the default Naga key set (`naga-keyset1`) (will be dynamic in the future). This mirrors the same key derivation the nodes perform, letting you confirm identities or signatures without re-running the Lit Action.
