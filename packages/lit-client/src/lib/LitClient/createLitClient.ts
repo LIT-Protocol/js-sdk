@@ -732,6 +732,33 @@ export const _createNagaLitClient = async (
         executeJs: _executeJs,
       };
     },
+    utils: {
+      getDerivedKeyId: async (derivedKeyId: string) => {
+        const contractManager = _stateManager.contractManager;
+
+        if (!contractManager) {
+          throw new Error('Contract manager is not available from state manager');
+        }
+
+        const pubkeyRouterContract = contractManager.pubkeyRouterContract;
+
+        if (
+          !pubkeyRouterContract?.read?.getDerivedPubkey ||
+          !contractManager.stakingContract
+        ) {
+          throw new Error('Required contracts are not available on the contract manager');
+        }
+
+        // TODO: support configurable key set ids per network when required
+        const DEFAULT_KEY_SET_ID = 'naga-keyset1';
+
+        return pubkeyRouterContract.read.getDerivedPubkey([
+          contractManager.stakingContract.address,
+          DEFAULT_KEY_SET_ID,
+          derivedKeyId,
+        ]);
+      },
+    },
     getChainConfig: () => {
       const viemConfig = networkModule.getChainConfig();
       const rpcUrl = networkModule.getRpcUrl();
