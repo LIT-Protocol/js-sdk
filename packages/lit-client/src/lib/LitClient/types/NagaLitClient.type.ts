@@ -120,6 +120,20 @@ export interface NagaLitClient extends BaseLitClient<NagaLitClientContext> {
    * @returns Promise resolving to the current client context
    */
   getContext: () => Promise<NagaLitClientContext>;
+  /**
+   * Utility helpers for interacting with network-level resources
+   */
+  utils: {
+    /**
+     * Resolves the derived public key for a given derived key identifier
+     * @example
+     * ```ts
+     * import { keccak256, stringToBytes } from 'viem';
+     * const derivedKeyId = keccak256(stringToBytes(`lit_action_${IPFS_CID}`));
+     * ```
+     */
+    getDerivedKeyId: (derivedKeyId: string) => Promise<string>;
+  };
 
   /**
    * Gets chain configuration including Viem config and RPC URL
