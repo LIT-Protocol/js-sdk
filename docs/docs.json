@@ -91,9 +91,10 @@
             ]
           },
           {
-            "group": "Access Control Conditions",
+            "group": "Utilities",
             "pages": [
-              "sdk/sdk-reference/access-control-conditions/functions/createAccBuilder"
+              "sdk/sdk-reference/access-control-conditions/functions/createAccBuilder",
+              "sdk/sdk-reference/lit-client/functions/getIpfsId"
             ]
           },
           {

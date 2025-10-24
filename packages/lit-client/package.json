@@ -25,9 +25,29 @@
   "main": "./index.js",
   "typings": "./index.d.ts",
   "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./index.js",
+      "import": "./index.js"
+    },
+    "./ipfs": {
+      "types": "./ipfs/index.d.ts",
+      "require": "./ipfs/index.js",
+      "import": "./ipfs/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "ipfs": [
+        "ipfs/index.d.ts"
+      ]
+    }
+  },
   "dependencies": {
     "@lit-protocol/uint8arrays": "7.1.1",
     "bs58": "^6.0.0",
+    "typestub-ipfs-only-hash": "^4.0.0",
     "zod": "3.24.3"
   },
   "peerDependencies": {
