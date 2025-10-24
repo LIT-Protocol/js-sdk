@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function AddLitChainButton() {
+export const AddLitChainButton = () => {
   const addNetwork = () => {
     const params = [
       {
