@@ -235,8 +235,6 @@ export const createStateManager = async <T>(params: {
       eventStateManager.stop();
       // clearInterval(timer);
     },
-
-    contractManager,
-    stakingContract
+    stakingContract,
   };
 };

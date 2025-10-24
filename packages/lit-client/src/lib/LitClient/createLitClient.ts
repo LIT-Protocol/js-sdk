@@ -737,7 +737,9 @@ export const _createNagaLitClient = async (
         const contractManager = _stateManager.contractManager;
 
         if (!contractManager) {
-          throw new Error('Contract manager is not available from state manager');
+          throw new Error(
+            'Contract manager is not available from state manager'
+          );
         }
 
         const pubkeyRouterContract = contractManager.pubkeyRouterContract;
@@ -746,7 +748,9 @@ export const _createNagaLitClient = async (
           !pubkeyRouterContract?.read?.getDerivedPubkey ||
           !contractManager.stakingContract
         ) {
-          throw new Error('Required contracts are not available on the contract manager');
+          throw new Error(
+            'Required contracts are not available on the contract manager'
+          );
         }
 
         // TODO: support configurable key set ids per network when required
