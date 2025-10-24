@@ -9,7 +9,7 @@ const config = {
     '^.+\\.(ts|tsx|js|mjs)$': 'babel-jest',
   },
   transformIgnorePatterns: [],
-  testMatch: ['**/node_modules/@lit-protocol/e2e/dist/specs/**/*.spec.js'],
+  testMatch: ['**/node_modules/@lit-protocol/e2e/dist/specs/**/*.spec.(ts|js)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'cjs', 'json'],
 };
 

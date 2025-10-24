@@ -42,7 +42,7 @@ npx lit-e2e
 # Equivalent manual invocation
 npx jest \
   --config node_modules/@lit-protocol/e2e/dist/jest.e2e.package.config.cjs \
-  node_modules/@lit-protocol/e2e/dist/specs/e2e.spec.js
+  node_modules/@lit-protocol/e2e/dist/specs/e2e.spec.ts
 ```
 
 Both commands honour additional Jest flags (e.g. `--runInBand`, `--verbose`), so you can tailor runs to your infrastructure.

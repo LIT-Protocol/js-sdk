@@ -15,8 +15,8 @@
       "require": "./dist/index.js"
     },
     "./specs/e2e": {
-      "import": "./dist/specs/e2e.spec.js",
-      "require": "./dist/specs/e2e.spec.js"
+      "import": "./dist/specs/e2e.spec.ts",
+      "require": "./dist/specs/e2e.spec.ts"
     },
     "./jest-config": {
       "import": "./dist/jest.e2e.package.config.cjs",

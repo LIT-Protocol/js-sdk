@@ -16,27 +16,17 @@
           "packages/e2e/example.js",
           "packages/e2e/jest.e2e.package.config.cjs",
           {
+            "input": "packages/e2e/src",
+            "glob": "e2e.spec.ts",
+            "output": "specs"
+          },
+          {
             "input": "packages/e2e/bin",
             "glob": "**/*.cjs",
             "output": "bin"
           }
         ],
         "updateBuildableProjectDepsInPackageJson": true
-      },
-      "dependsOn": [
-        "^build",
-        {
-          "target": "build-specs"
-        }
-      ]
-    },
-    "build-specs": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["dist/packages/e2e/specs"],
-      "options": {
-        "outputPath": "dist/packages/e2e/specs",
-        "main": "packages/e2e/src/e2e.spec.ts",
-        "tsConfig": "packages/e2e/tsconfig.spec.build.json"
       },
       "dependsOn": [
         "^build"
