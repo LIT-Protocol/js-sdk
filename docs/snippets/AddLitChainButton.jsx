@@ -25,6 +25,11 @@ export const AddLitChainButton = () => {
   };
 
   return (
-    <button onClick={addNetwork}>Add Lit Chain to Metamask</button>
+    <button
+      onClick={addNetwork}
+      className="px-5 py-2 rounded-md bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-semibold shadow-md hover:from-[#fb923c] hover:to-[#ea580c] focus:outline-none focus:ring-2 focus:ring-[#F97316] transition-all"
+    >
+      Add Lit Chain to Metamask
+    </button>
   );
 }
