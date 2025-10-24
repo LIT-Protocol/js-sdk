@@ -7,3 +7,4 @@ export * from './helper/NetworkManager';
 export { printAligned } from './helper/utils';
 export { getOrCreatePkp } from './helper/pkp-utils';
 export { createShivaClient } from './helper/shiva-client';
+export type { AuthContext } from './types';

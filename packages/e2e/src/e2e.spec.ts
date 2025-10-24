@@ -1,24 +1,21 @@
 import {
   createCustomAuthContext,
-  createPkpAuthContext,
-} from './helper/auth-contexts';
-import {
-  createExecuteJsTest,
-  createPkpSignTest,
-  createPkpEncryptDecryptTest,
   createEncryptDecryptFlowTest,
-  createPkpPermissionsManagerFlowTest,
   createEoaNativeAuthFlowTest,
+  createExecuteJsTest,
+  createPaymentDelegationFlowTest,
+  createPaymentManagerFlowTest,
+  createPkpEncryptDecryptTest,
+  createPkpPermissionsManagerFlowTest,
+  createPkpSignTest,
   createViemSignMessageTest,
   createViemSignTransactionTest,
   createViemSignTypedDataTest,
   createViewPKPsByAddressTest,
   createViewPKPsByAuthDataTest,
-  createPaymentManagerFlowTest,
-  createPaymentDelegationFlowTest,
-} from './helper/tests';
-import { init } from './init';
-import { AuthContext } from './types';
+  init,
+} from '@lit-protocol/e2e';
+import type { AuthContext } from '@lit-protocol/e2e';
 
 const RPC_OVERRIDE = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 if (RPC_OVERRIDE) {

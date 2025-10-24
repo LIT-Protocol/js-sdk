@@ -5,10 +5,10 @@ Utilities and ready-made specs for Lit Protocol end-to-end testing. This package
 ## Installation
 
 ```bash
-pnpm add -D jest @lit-protocol/e2e @lit-protocol/lit-client @lit-protocol/networks viem
+pnpm add -D @lit-protocol/e2e
 ```
 
-> The package depends on `jest` being available in the consumer workspace. Install any additional peer dependencies (for example `ts-node` if you prefer to author specs in TypeScript directly).
+The CLI bundles Jest, Babel presets, and all required helpers. Install any additional project-specific tooling (for example `ts-node` if you prefer to author specs in TypeScript directly).
 
 ## Required Environment
 
@@ -37,12 +37,12 @@ The published package contains the compiled `e2e.spec.ts`. You can execute it ei
 
 ```bash
 # Preferred: CLI wrapper injects the packaged config automatically
-npx lit-e2e
+pnpm exec lit-e2e
 
 # Equivalent manual invocation
-npx jest \
-  --config node_modules/@lit-protocol/e2e/dist/jest.e2e.package.config.cjs \
-  node_modules/@lit-protocol/e2e/dist/specs/e2e.spec.ts
+pnpm exec jest \
+  --config node_modules/@lit-protocol/e2e/jest.e2e.package.config.cjs \
+  node_modules/@lit-protocol/e2e/specs/e2e.spec.ts
 ```
 
 Both commands honour additional Jest flags (e.g. `--runInBand`, `--verbose`), so you can tailor runs to your infrastructure.
@@ -73,10 +73,28 @@ describe('Epoch rollover', () => {
 Execute custom specs with the same packaged config:
 
 ```bash
-npx jest --config node_modules/@lit-protocol/e2e/dist/jest.e2e.package.config.cjs qa-epoch.spec.ts
+pnpm exec jest --config node_modules/@lit-protocol/e2e/jest.e2e.package.config.cjs qa-epoch.spec.ts
+
+# or add them on the fly with the CLI
+pnpm exec lit-e2e --patterns qa-epoch.spec.ts
 ```
 
 ## Bundled APIs
+
+## Optional Local Scaffolding
+
+Prefer to maintain project-local configs? Let the CLI create them for you:
+
+```bash
+pnpm exec lit-e2e init
+```
+
+This generates:
+
+- `jest.e2e.local.cjs` – a wrapper that runs the packaged suite and your own specs
+- `babel.config.cjs` – delegates to the package’s Babel presets
+
+Update your Jest scripts to reference `jest.e2e.local.cjs` if you take this route.
 
 Key exports now available from the package:
 
