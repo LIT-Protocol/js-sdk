@@ -1,21 +1,26 @@
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { TestEnv } from './createTestEnv';
 import { ViemAccountAuthenticator } from '@lit-protocol/auth';
-import { getOrCreatePkp } from './pkp-utils';
 import { PKPData } from '@lit-protocol/schemas';
-import { fundAccount } from './fundAccount';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AuthContext } from '../types';
-import { parseEther } from 'viem/utils';
+import { TestEnv } from './createTestEnv';
+import { fundAccount } from './fundAccount';
+import { getOrCreatePkp } from './pkp-utils';
 
 type CreateTestAccountOpts = {
   label: string;
   fundAccount: boolean;
   fundLedger: boolean;
+  hasEoaAuthContext?: boolean;
   hasPKP: boolean;
   fundPKP: boolean;
   fundPKPLedger: boolean;
+  hasPKPAuthContext?: boolean;
   sponsor?: {
     restrictions: {
+      /**
+       * This price will be divided by threshold to get per-request price
+       * Make sure to keep your Ledger Balance high enough to cover this!
+       */
       totalMaxPriceInWei: string;
       requestsPerPeriod: string;
       periodSeconds: string;
@@ -32,6 +37,9 @@ export type CreateTestAccountResult = {
   pkpViemAccount?: Awaited<
     ReturnType<TestEnv['litClient']['getPkpViemAccount']>
   >;
+  paymentManager?: Awaited<
+    ReturnType<TestEnv['litClient']['getPaymentManager']>
+  >;
 };
 
 export async function createTestAccount(
@@ -42,6 +50,11 @@ export async function createTestAccount(
   // 1. store result
   let person: CreateTestAccountResult = {
     account: privateKeyToAccount(generatePrivateKey()),
+    pkp: undefined,
+    eoaAuthContext: undefined,
+    pkpAuthContext: undefined,
+    pkpViemAccount: undefined,
+    paymentManager: undefined,
   };
 
   const personAccountAuthData = await ViemAccountAuthenticator.authenticate(
@@ -64,22 +77,24 @@ export async function createTestAccount(
     );
 
     // -- create EOA auth context
-    person.eoaAuthContext = await testEnv.authManager.createEoaAuthContext({
-      config: {
-        account: person.account,
-      },
-      authConfig: {
-        statement: 'I authorize the Lit Protocol to execute this Lit Action.',
-        domain: 'example.com',
-        resources: [
-          ['lit-action-execution', '*'],
-          ['pkp-signing', '*'],
-          ['access-control-condition-decryption', '*'],
-        ],
-        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-      },
-      litClient: testEnv.litClient,
-    });
+    if (opts.hasEoaAuthContext) {
+      person.eoaAuthContext = await testEnv.authManager.createEoaAuthContext({
+        config: {
+          account: person.account,
+        },
+        authConfig: {
+          statement: 'I authorize the Lit Protocol to execute this Lit Action.',
+          domain: 'example.com',
+          resources: [
+            ['lit-action-execution', '*'],
+            ['pkp-signing', '*'],
+            ['access-control-condition-decryption', '*'],
+          ],
+          expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+        },
+        litClient: testEnv.litClient,
+      });
+    }
   } // ... end if fundAccount
 
   // 4. also fund the ledger
@@ -120,21 +135,23 @@ export async function createTestAccount(
       });
     }
 
-    // Create PKP auth context
-    person.pkpAuthContext = await testEnv.authManager.createPkpAuthContext({
-      authData: personAccountAuthData,
-      pkpPublicKey: person.pkp.pubkey,
-      authConfig: {
-        resources: [
-          ['pkp-signing', '*'],
-          ['lit-action-execution', '*'],
-          ['access-control-condition-decryption', '*'],
-        ],
-        // 30m expiration
-        expiration: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
-      },
-      litClient: testEnv.litClient,
-    });
+    // -- Create PKP auth context
+    if (opts.hasPKPAuthContext) {
+      person.pkpAuthContext = await testEnv.authManager.createPkpAuthContext({
+        authData: personAccountAuthData,
+        pkpPublicKey: person.pkp.pubkey,
+        authConfig: {
+          resources: [
+            ['pkp-signing', '*'],
+            ['lit-action-execution', '*'],
+            ['access-control-condition-decryption', '*'],
+          ],
+          // 30m expiration
+          expiration: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
+        },
+        litClient: testEnv.litClient,
+      });
+    }
 
     // Create PKP viem account
     person.pkpViemAccount = await testEnv.litClient.getPkpViemAccount({
@@ -146,7 +163,7 @@ export async function createTestAccount(
 
   if (opts.sponsor) {
     // 1. get payment manager
-    const personPaymentManager = await testEnv.litClient.getPaymentManager({
+    person.paymentManager = await testEnv.litClient.getPaymentManager({
       account: person.account,
     });
 
@@ -162,7 +179,7 @@ export async function createTestAccount(
     //   periodSeconds: opts.sponsor.restrictions.periodSeconds,
     // });
     try {
-      const tx = await personPaymentManager.setRestriction({
+      const tx = await person.paymentManager.setRestriction({
         // totalMaxPrice: wei.toString(),
         totalMaxPrice: opts.sponsor.restrictions.totalMaxPriceInWei,
         requestsPerPeriod: opts.sponsor.restrictions.requestsPerPeriod,
@@ -183,7 +200,7 @@ export async function createTestAccount(
 
     try {
       console.log(`- Sponsoring users:`, userAddresses);
-      const tx = await personPaymentManager.delegatePaymentsBatch({
+      const tx = await person.paymentManager.delegatePaymentsBatch({
         userAddresses: userAddresses,
       });
       console.log(`[delegatePaymentsBatch] TX Hash: ${tx.hash}`);
