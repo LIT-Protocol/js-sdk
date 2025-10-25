@@ -1,5 +1,16 @@
 # @lit-protocol/networks
 
+## 8.2.0
+
+### Minor Changes
+
+- 4d339d1: introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime
+
+### Patch Changes
+
+- Updated dependencies [4d339d1]
+  - @lit-protocol/contracts@0.7.0
+
 ## 8.1.0
 
 ### Minor Changes

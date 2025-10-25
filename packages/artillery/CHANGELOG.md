@@ -1,5 +1,12 @@
 # @lit-protocol/artillery
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [4d339d1]
+  - @lit-protocol/e2e@3.0.0
+
 ## 0.0.4
 
 ### Patch Changes

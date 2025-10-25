@@ -15433,11 +15433,6 @@ module.exports = {
             },
             {
               "inputs": [],
-              "name": "MustBeLessThan100",
-              "type": "error"
-            },
-            {
-              "inputs": [],
               "name": "MustBeNonzero",
               "type": "error"
             },
