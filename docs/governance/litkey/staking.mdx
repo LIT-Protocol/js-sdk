@@ -1,0 +1,63 @@
+---
+title: "Staking and Delegation"
+---
+
+<Tip>
+A 10% bonus will be applied to stakers / delegators who participate in the [Lit Staking Contest](/node-ops/staking-contest/logistics) to select the genesis operator set. This bonus will be applied to your locked balance after the v1 DKG. Stake or delegate using the Lit staking portal: https://staking.litprotocol.com/
+</Tip>
+
+This page covers how staking and delegation works for token holders. If you're a node operator, please check out the related staking and delegation page in the [node operations](/node-ops/staking-and-delegation) documentation.
+
+## Overview
+
+LITKEY token holders can lock their tokens to help secure the Lit network and earn a share of staking rewards. To delegate your tokens to a Lit Node Operator, please visit the [Lit staking portal](https://staking.litprotocol.com/). If you’re a node operator, or interested in running a node, please visit the [node operations docs](/node-ops/overview).
+
+Staking rewards are distributed according to each individual's **stake weight**, calculated as a function of the number of tokens staked and a time lock mechanism, covered in depth in the sections below. Staking reward distribution will begin after the staking contest emds and the genesis node operator set has been selected. Details [here](/node-ops/staking-contest/logistics).
+
+Please see the sections below for details on how staking rewards are calculated, distributed, and how you can participate in securing the Lit network today. 
+
+## Calculating Staking Rewards
+
+All staking and delegation takes place on the official Lit Protocol staking portal. This is where you can delegate your tokens to a node operator of your choosing and manage your staking rewards.
+
+### Rewards and Timelocks
+
+Stakers earn rewards for delegating tokens to node operators participating in an *active* Lit network. Rewards are calculated using a timelock mechanism (covered below) that increases rewards for stakers who lock their tokens for longer periods of time. This mechanism incentivizes long-term alignment and participation with the protocol.
+
+- Rewards are distributed programmatically via the Lit staking contract.
+
+- Rewards are configured per network and may differ between [Realms](https://spark.litprotocol.com/enhancing-threshold-security-and-performance-at-scale-introducing-shadow-splicing/).
+
+- Only stakers who delegate to active node operators—those selected to run a node—receive rewards. Tokens delegated to standby node operators will not accrue rewards at this time.
+
+### Reward Calculation 
+
+All \$LITKEY staking rewards are calculated based on stake weight, a unique reward mechanism inspired by ve mechanics. Stake-weight is calculated as a function of both the quantity of $LITKEY tokens staked as well as the length of time for which they are locked for. This timelock can range from two weeks to four years, depending on the preferences of each individual staker. Longer lock durations yield higher multipliers on rewards, signaling greater commitment and aligning incentives toward long-term network sustainability. The relative nature of this weighting means that overall rewards depend not only on an individual’s stake but also on the staking decisions of other participants in the network.
+
+For an in-depth look at the formula used to calculate stake weight and total reward distribution, please reference the \$LITKEY [token white paper](https://github.com/LIT-Protocol/LITKEY-Token-Paper-v1).
+
+#### Decay Mechanism
+
+By default, all tokens that are staked remain locked for the timelock that is selected until the unlock is triggered. At that time, stake weight will continue to decay until the tokens are fully unlocked. 
+
+#### Bonus for Pre-DKG Stakers / Delegators
+
+A [staking contest](/node-ops/staking-contest/logistics) is being run to select the genesis node operator set, open to all prospective node operators and / or token delegators. A 10% bonus will be applied to the locked balance of anyone who participates in the contest. The bonus will be distributed after the v1 DKG is complete.
+
+#### Transition to veLITKEY
+
+After the v1 DKG is complete and the Naga Mainnet is live, the \$LITKEY staking model will transition to veLITKEY. The veLITKEY model permanently aligns LITKEY token issuance with network productivity and revenue generation, helping Lit Protocol transition into a self-sustaining, revenue-backed economy governed by stakeholders. Through veLITKEY staking, token holders gain long-term governance over ecosystem funding, with inflation protection applying to voting weight. Ecosystem builders are rewarded via vote dictated rewards based on real usage, ensuring that incentives flow to productive participants.
+
+Details on the veLITKEY model can be found [here](https://litprotocol.discourse.group/t/lip-001-velitkey-a-token-model-for-sovereign-economic-development/14).
+
+## Delegating LITKEY
+
+<Tip>
+If you're a node operator, please visit the relevant [node operator documentation](/node-ops/overview).
+</Tip>
+
+In order to delegate to a node operator of your choosing, please visit the [staking portal](https://staking.litprotocol.com/). 
+
+As a LITKEY holder, you can delegate your tokens to any node operator given they have registered their node on the staking portal. By delegating your stake to a node operator, you are helping them boost their rank during the staking contest, increasing the chance of them being selected for the genesis validator set. All delegators retain ownership of their tokens while sharing in the staking rewards distributed to each node.
+
+### Instructions
