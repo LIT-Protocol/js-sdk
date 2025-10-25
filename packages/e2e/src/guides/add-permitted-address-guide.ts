@@ -39,7 +39,7 @@ console.log('✅ aliceViemAccountAuthData:', aliceViemAccountAuthData);
 try {
   await fundAccount(aliceViemAccount, localMasterAccount, nagaLocal, {
     ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-    thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+    thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
   });
   console.log('✅ Account Funded.');
 } catch (e) {
@@ -143,7 +143,7 @@ const pkpViemAccount = await litClient.getPkpViemAccount({
 
 await fundAccount(pkpViemAccount, localMasterAccount, nagaLocal, {
   ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-  thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+  thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
 });
 
 const pkpViemAccountPermissionsManager =

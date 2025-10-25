@@ -29,9 +29,7 @@
         ],
         "updateBuildableProjectDepsInPackageJson": true
       },
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",

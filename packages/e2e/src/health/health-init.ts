@@ -149,7 +149,7 @@ export const initHealthCheck = async (
    */
   await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
     ifLessThan: LIVE_NETWORK_FUNDING_AMOUNT,
-    thenFundWith: LIVE_NETWORK_FUNDING_AMOUNT,
+    thenFund: LIVE_NETWORK_FUNDING_AMOUNT,
   });
 
   /**

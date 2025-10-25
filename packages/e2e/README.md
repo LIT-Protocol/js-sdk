@@ -25,27 +25,32 @@ LOG_LEVEL=info
 
 # Optional local overrides
 NAGA_LOCAL_CONTEXT_PATH=./lit-assets/blockchain/contracts/networkContext.json
-NAGA_LOCAL_CONTEXT_NAME=naga-develop
 LIT_YELLOWSTONE_PRIVATE_RPC_URL=http://127.0.0.1:8545
 ```
 
 Make sure the referenced network (local Naga cluster, Shiva-managed testnet, or live subnet) is running and reachable from your test machine.
 
-## Run the Bundled Suite
+## Run the Canonical Suite
 
-The published package contains the compiled `e2e.spec.ts`. You can execute it either through the provided CLI or by calling Jest directly:
+The published suite now imports everything from the package entrypoint, so you can execute it directly through Jest without wiring up helper paths manually.
 
 ```bash
-# Preferred: CLI wrapper injects the packaged config automatically
-pnpm exec lit-e2e
-
-# Equivalent manual invocation
 pnpm exec jest \
   --config node_modules/@lit-protocol/e2e/jest.e2e.package.config.cjs \
-  node_modules/@lit-protocol/e2e/specs/e2e.spec.ts
+  --runTestsByPath node_modules/@lit-protocol/e2e/src/e2e.spec.ts \
+  --runInBand
 ```
 
-Both commands honour additional Jest flags (e.g. `--runInBand`, `--verbose`), so you can tailor runs to your infrastructure.
+Prefer local config files? Run `pnpm lit-e2e init` once to scaffold `jest.e2e.local.cjs` and `babel.config.cjs`, then:
+
+```bash
+pnpm exec jest \
+  --config jest.e2e.local.cjs \
+  --runTestsByPath node_modules/@lit-protocol/e2e/src/e2e.spec.ts \
+  --runInBand
+```
+
+That is the only CLI command most teams need; all other helpers are available via imports.
 
 ## Author Your Own Specs
 
@@ -63,7 +68,9 @@ describe('Epoch rollover', () => {
 
     const before = await shiva.inspectEpoch();
     await shiva.transitionEpochAndWait();
-    const after = await shiva.waitForEpochChange({ baselineEpoch: before.epoch });
+    const after = await shiva.waitForEpochChange({
+      baselineEpoch: before.epoch,
+    });
 
     expect(after.epoch).not.toEqual(before.epoch);
   });
@@ -74,9 +81,6 @@ Execute custom specs with the same packaged config:
 
 ```bash
 pnpm exec jest --config node_modules/@lit-protocol/e2e/jest.e2e.package.config.cjs qa-epoch.spec.ts
-
-# or add them on the fly with the CLI
-pnpm exec lit-e2e --patterns qa-epoch.spec.ts
 ```
 
 ## Bundled APIs
@@ -108,7 +112,7 @@ Refer to the source under `packages/e2e/src/helper` for additional exported func
 ## Troubleshooting
 
 - **Jest not found** – install it locally (`pnpm add -D jest`). The CLI wrapper will exit with a helpful message if the dependency is missing.
-- **Missing signatures on naga-local** – provide `NAGA_LOCAL_CONTEXT_PATH` and optional `NAGA_LOCAL_CONTEXT_NAME` so the init routine calls `nagaLocal.withLocalContext`.
+- **Missing signatures on naga-local** – provide `NAGA_LOCAL_CONTEXT_PATH` so the init routine calls `nagaLocal.withLocalContext`.
 - **RPC connectivity** – when pointing at a private RPC, set `LIT_YELLOWSTONE_PRIVATE_RPC_URL` so the Lit Client bypasses defaults.
 
 With these additions, QA can stay in sync with the canonical Lit Protocol E2E coverage while extending it with custom assertions tailored to fast-epoch or failure scenarios.

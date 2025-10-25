@@ -138,7 +138,7 @@ export const init = async (
           'function';
 
       if (isNagaLocalModule(_baseNetworkModule)) {
-        const localContextName = process.env['NAGA_LOCAL_CONTEXT_NAME'];
+        const localContextName = process.env['NETWORK'];
 
         console.log(
           '✅ Loading naga-local signatures from NAGA_LOCAL_CONTEXT_PATH:',
@@ -183,17 +183,17 @@ export const init = async (
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
   await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
-    thenFundWith: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   await fundAccount(bobViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
-    thenFundWith: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   await fundAccount(eveViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
-    thenFundWith: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   /**
@@ -337,7 +337,7 @@ export const init = async (
 
   await fundAccount(alicePkpViemAccount, masterAccount, _networkModule, {
     ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-    thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+    thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
   });
 
   /**
