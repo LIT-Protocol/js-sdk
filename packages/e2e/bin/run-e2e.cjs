@@ -23,10 +23,14 @@ function createLocalWrapper() {
     fs.copyFileSync(BABEL_CONFIG_SRC, babelDest);
     console.log(`✅ Created ${path.relative(cwd, babelDest)}`);
   } else {
-    console.warn(`⚠️ ${path.relative(cwd, babelDest)} already exists, skipping`);
+    console.warn(
+      `⚠️ ${path.relative(cwd, babelDest)} already exists, skipping`
+    );
   }
 
-  console.log('✨ Local scaffolding complete. Point Jest at jest.e2e.local.cjs to run from this project.');
+  console.log(
+    '✨ Local scaffolding complete. Point Jest at jest.e2e.local.cjs to run from this project.'
+  );
 }
 
 const [, , command] = process.argv;

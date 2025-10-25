@@ -19,7 +19,7 @@ const testEnv: Record<
 
 export function createEnvVars(): EnvVars {
   // 1. Get network string
-  const network = process.env['NETWORK']!!; 
+  const network = process.env['NETWORK']!!;
 
   if (!network || !supportedNetworks.includes(network as any)) {
     throw new Error(
