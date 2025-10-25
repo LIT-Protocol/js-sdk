@@ -16,7 +16,7 @@ type CreateTestAccountOpts = {
   fundPKPLedger: boolean;
   sponsor?: {
     restrictions: {
-      totalMaxPriceInEth: string;
+      totalMaxPriceInWei: string;
       requestsPerPeriod: string;
       periodSeconds: string;
     };
@@ -153,17 +153,18 @@ export async function createTestAccount(
     // 2. Set Restrictions
 
     // Convert to Wei using Viem
-    const wei = parseEther(opts.sponsor.restrictions.totalMaxPriceInEth);
+    // const wei = parseEther(opts.sponsor.restrictions.totalMaxPriceInEth);
 
-    console.log(`- Setting sponsorship restrictions:`, {
-      totalMaxPriceInEth: opts.sponsor.restrictions.totalMaxPriceInEth,
-      totalMaxPriceInWei: wei.toString(),
-      requestsPerPeriod: opts.sponsor.restrictions.requestsPerPeriod,
-      periodSeconds: opts.sponsor.restrictions.periodSeconds,
-    });
+    // console.log(`- Setting sponsorship restrictions:`, {
+    //   totalMaxPriceInEth: opts.sponsor.restrictions.totalMaxPriceInEth,
+    //   totalMaxPriceInWei: wei.toString(),
+    //   requestsPerPeriod: opts.sponsor.restrictions.requestsPerPeriod,
+    //   periodSeconds: opts.sponsor.restrictions.periodSeconds,
+    // });
     try {
       const tx = await personPaymentManager.setRestriction({
-        totalMaxPrice: wei.toString(),
+        // totalMaxPrice: wei.toString(),
+        totalMaxPrice: opts.sponsor.restrictions.totalMaxPriceInWei,
         requestsPerPeriod: opts.sponsor.restrictions.requestsPerPeriod,
         periodSeconds: opts.sponsor.restrictions.periodSeconds,
       });

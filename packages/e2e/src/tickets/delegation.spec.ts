@@ -21,11 +21,15 @@ describe('payment delegation test', () => {
     bobAccount = await createTestAccount(testEnv, {
       label: 'Bob',
       fundAccount: true,
-      fundLedger: true,
+      hasEoaAuthContext: true,
+      fundLedger: false,
       hasPKP: true,
-      fundPKP: true,
-      fundPKPLedger: true,
+      fundPKP: false,
+      hasPKPAuthContext: false,
+      fundPKPLedger: false,
     });
+
+    console.log('bobAccount:', bobAccount);
 
     if (!bobAccount.pkp?.ethAddress) {
       throw new Error("Bob's PKP does not have an ethAddress");
@@ -35,27 +39,74 @@ describe('payment delegation test', () => {
     alice = await createTestAccount(testEnv, {
       label: 'Alice',
       fundAccount: true,
-      fundLedger: false,
+      fundLedger: true,
       hasPKP: true,
       fundPKP: true,
       fundPKPLedger: true,
       sponsor: {
         restrictions: {
-          totalMaxPriceInEth: '0.05',
+          totalMaxPriceInWei: '1000000000000000000',
           requestsPerPeriod: '100',
           periodSeconds: '5',
         },
-        userAddresses: [bobAccount.pkp.ethAddress],
+        userAddresses: [bobAccount.account.address],
       },
     });
 
-    // 3. Now, Bob tries to execute JS using Alice's sponsorship
-    const res = await testEnv.litClient.chain.ethereum.pkpSign({
-      authContext: bobAccount.pkpAuthContext!,
-      pubKey: bobAccount.pkp?.pubkey!,
-      toSign: 'Hello, world!',
+    // 3. Take a snapshot of Alice's Ledger balance before Bob's request
+    const aliceBeforeBalance = await testEnv.masterPaymentManager.getBalance({
+      userAddress: alice.account.address,
     });
 
-    console.log('res:', res);
+    console.log(
+      "[BEFORE] Alice's Ledger balance before Bob's request:",
+      aliceBeforeBalance
+    );
+
+    // 3. Now, Bob tries to sign with his PKP using Alice's sponsorship
+    await testEnv.litClient.chain.ethereum.pkpSign({
+      authContext: bobAccount.eoaAuthContext!,
+      pubKey: bobAccount.pkp?.pubkey!,
+      toSign: 'Hello, world!',
+      userMaxPrice: 200000000000000000n, // 0.2 ETH in Wei
+    });
+
+    // 4. Finally, check that Alice's Ledger balance has decreased
+    const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance({
+      userAddress: alice.account.address,
+    });
+
+    console.log(
+      "[AFTER] Alice's Ledger balance after Bob's request:",
+      aliceBalanceAfter
+    );
+
+    expect(BigInt(aliceBalanceAfter.raw.availableBalance)).toBeLessThan(
+      BigInt(aliceBeforeBalance.raw.availableBalance)
+    );
+
+    // 5. Now, Alice removes Bob from her sponsorship
+    await alice.paymentManager!.undelegatePaymentsBatch({
+      userAddresses: [bobAccount.account.address],
+    });
+
+    // 6. Bob should now fail to sign with his PKP due to lack of sponsorship
+    let didFail = false;
+    try {
+      await testEnv.litClient.chain.ethereum.pkpSign({
+        authContext: bobAccount.eoaAuthContext!,
+        pubKey: bobAccount.pkp?.pubkey!,
+        toSign: 'Hello again, world!',
+        userMaxPrice: 200000000000000000n, // 0.2 ETH in Wei
+      });
+    } catch (e) {
+      didFail = true;
+      console.log(
+        "As expected, Bob's PKP sign failed after Alice removed sponsorship:",
+        e
+      );
+    }
+
+    expect(didFail).toBe(true);
   });
 });
