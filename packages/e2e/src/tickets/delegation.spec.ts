@@ -21,10 +21,10 @@ describe('payment delegation test', () => {
     bobAccount = await createTestAccount(testEnv, {
       label: 'Bob',
       fundAccount: true,
-      fundLedger: false,
+      fundLedger: true,
       hasPKP: true,
-      fundPKP: false,
-      fundPKPLedger: false,
+      fundPKP: true,
+      fundPKPLedger: true,
     });
 
     if (!bobAccount.pkp?.ethAddress) {
@@ -51,7 +51,7 @@ describe('payment delegation test', () => {
 
     // 3. Now, Bob tries to execute JS using Alice's sponsorship
     const res = await testEnv.litClient.chain.ethereum.pkpSign({
-      authContext: bobAccount.eoaAuthContext!,
+      authContext: bobAccount.pkpAuthContext!,
       pubKey: bobAccount.pkp?.pubkey!,
       toSign: 'Hello, world!',
     });
