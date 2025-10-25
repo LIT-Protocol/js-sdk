@@ -97,6 +97,70 @@ console.log(`Deposit successful: ${result.hash}`);
 
 </Steps>
 
+## Payment Delegation
+
+The Payment Manager lets one account sponsor the execution costs of another. See the following full lifecycle: Alice funds her ledger, delegates limits to Bob, Bob spends from Alice's balance, and Alice later revokes access. The snippets below mirror that scenario so you can recreate it locally.
+
+- `Alice` is the sponsor. She configures spending limits and delegates them to Bob.
+- `Bob` is the delegate. He signs with his PKP and provides `userMaxPrice` that fits within Alice's limits.
+- When Bob spends funds, Alice's ledger balance decreases.
+- Alice can immediately revoke Bob's access; further requests then fail.
+
+```typescript
+import { createLitClient } from '@lit-protocol/lit-client';
+import { nagaTest } from '@lit-protocol/networks';
+
+// Assume you've already funded Alice's ledger using depositForUser
+const litClient = await createLitClient({ network: nagaTest });
+const alicePaymentManager = await litClient.getPaymentManager({
+  account: aliceViemAccount,
+});
+
+// 1. Configure Alice's spending restrictions for all delegates
+await alicePaymentManager.setRestriction({
+  totalMaxPrice: '1000000000000000000', // 1 ETH (wei string)
+  requestsPerPeriod: '100',
+  periodSeconds: '5',
+});
+
+// 2. Delegate access to Bob's EOA address
+await alicePaymentManager.delegatePaymentsBatch({
+  userAddresses: [bobAddress],
+});
+
+// 3. Optionally inspect Alice's ledger balance before Bob spends
+const before = await alicePaymentManager.getBalance({
+  userAddress: aliceViemAccount.address,
+});
+console.log('Alice balance before Bob signs:', before.raw.availableBalance);
+```
+
+When Bob signs, the execution is charged against Alice's ledger (as long as Bob's `userMaxPrice` is within Alice's configured limit).
+
+```typescript
+await litClient.chain.ethereum.pkpSign({
+  authContext: bobAuthContext, // Created with Bob's account
+  pubKey: bobPkpPublicKey,
+  toSign: 'Hello, world!',
+  userMaxPrice: 200000000000000000n, // 0.2 ETH in Wei
+});
+```
+
+After Bob signs, Alice's balance drops. She can revoke Bob immediately using `undelegatePaymentsBatch`. Subsequent attempts by Bob will fail.
+
+```typescript
+// 4. Confirm Alice's balance decreased
+const after = await alicePaymentManager.getBalance({
+  userAddress: aliceViemAccount.address,
+});
+console.log('Alice balance after Bob signs:', after.raw.availableBalance);
+
+// 5. Revoke Bob's access
+await alicePaymentManager.undelegatePaymentsBatch({
+  userAddresses: [bobAddress],
+});
+```
+
 ## Auth Service API Endpoints
 
 Leverage the hosted Auth Service to manage delegation without exposing private keys in your application:
@@ -113,7 +177,7 @@ import { nagaTest } from '@lit-protocol/networks';
 // 1. Create the Lit client for the naga-test environment
 const litClient = await createLitClient({ network: nagaTest });
 
-const authServiceBaseUrl = 'https://naga-test-auth-service.example.com';
+const authServiceBaseUrl = 'https://naga-test-auth-service.getlit.dev';
 const apiKey = process.env.LIT_API_KEY!;
 
 // 3. Register a payer wallet (store the secret securely server-side)
@@ -148,5 +212,3 @@ console.log('Delegation submitted with tx hash:', delegateResponse.txHash);
 - The response includes the derived wallet address and the random `payerSecretKey`. The server does not store this secret; you must persist it securely on the client side.
 - Later, `/add-users` expects both headers (`x-api-key` and `payer-secret-key`). The service recomputes the same derivation index and wallet on the fly, so the same header pair always maps to the same child wallet.
 - Calling `/register-payer` again with the same API key issues a new random `payerSecretKey`, which leads to a different child wallet. Choose whether to rotate secrets or keep the original one depending on your application needs.
-
-![](https://www.plantuml.com/plantuml/png/XPAn3jCm48PtFyMfKw8IiKSAQcab1a1K58c1CXpEaLWaJcHVIlFs6DkKcBHYYy-Vl_Floyuo6fxwJh3YZc0_SGjdCbSb2KuuzwGPZjHHWwm6BSJeS2NLYAw-ENJAxMy0BOJFT7ifyz3lGbodv3l5qG3lKMD3nlFn-ndh6RTyr3lSFTN5MYo96Xc_eINOh8F2OT1iKFeUzuKGLGKVgL6MoS28CnceAX5lNhnQ1YpXzE7y2LwQY1SUl-ZiLk2eYXyqvsA1hqw_8Kq6cKARCqb3VD57CkfAy1ExZXY-cw67NbC_Q2LX2quCJfnwdJXSi0ogp_xilguDMNlH2_rRcdt2-0m4aoLZ_viGwxhmv3BSYz2iiDuSAXxwydMLEmwaX8RYBBDSnABR_plY4fmCcToZEbUgMM1Ub0uxGoc7INCk0XNJf509Ibj6pGfvPVyNhUCZnRfzZIpRp4VCHGgxu_TVo1zSlAxuim75WoPy0qEIrCWhPJeBZxPeswUpjvEKP2rix-IET3trtIy0)
