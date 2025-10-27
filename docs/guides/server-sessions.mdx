@@ -12,8 +12,8 @@ This pattern keeps the delegation scoped (resources and expiration are enforced 
 # Workflow
 
 1. **Client generates a session keypair** with `generateSessionKeyPair()`.
-2. **Client mints a delegation auth signature** with `authManager.generatePkpDelegationAuthSig`, scoping the allowed abilities and expiration.
-3. **Client sends the bundle** `{ sessionKeyPair, delegationAuthSig, pkpPublicKey }` to the server over a secure channel.
+2. **Client creates a delegation auth signature** with `authManager.generatePkpDelegationAuthSig`, scoping the allowed Lit resources and expiration.
+3. **Client sends the bundle** { sessionKeyPair, delegationAuthSig, pkpPublicKey }` to the server over a secure channel.
 4. **Server restores an auth context** using `authManager.createPkpAuthContextFromPreGenerated`.
 5. **Server issues fresh session signatures on demand** (e.g., `authManager.createPkpSessionSigs`) immediately before calling SDK helpers such as the wrapped-keys API or `pkpSign`.
 
@@ -94,7 +94,7 @@ const authContext =
     delegationAuthSig: decodedPayload.delegationAuthSig,
   });
 
-// ONly call this when the downstream API explicitly requires session sigs
+// Only call this when the downstream API explicitly requires session sigs
 const pkpSessionSigs = await serverAuthManager.createPkpSessionSigs({
   sessionKeyPair: decodedPayload.sessionKeyPair,
   pkpPublicKey: parsedEnvelope.pkpPublicKey,
