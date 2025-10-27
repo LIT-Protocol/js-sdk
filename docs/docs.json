@@ -158,9 +158,9 @@
             "pages": [
               "governance/litkey/overview",
               "governance/litkey/initial-allocation-and-distribution",
+              "governance/litkey/staking",
               "governance/litkey/lit-chain",
-              "governance/litkey/bridging-and-addresses",
-              "governance/litkey/staking"
+              "governance/litkey/bridging-and-addresses"
             ]
           },
           {
