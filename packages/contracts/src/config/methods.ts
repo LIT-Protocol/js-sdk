@@ -40,6 +40,7 @@ export const METHODS_TO_EXTRACT = [
   'PubkeyRouter.ethAddressToPkpId',
   'PubkeyRouter.getPubkey',
   'PubkeyRouter.getEthAddress',
+  'PubkeyRouter.getDerivedPubkey',
 
   // Ledger:
   'Ledger.deposit',
