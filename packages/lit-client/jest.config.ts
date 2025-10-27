@@ -13,4 +13,5 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/lit-client',
   setupFilesAfterEnv: ['../../jest.setup.js'],
+  testEnvironment: 'node',
 };
