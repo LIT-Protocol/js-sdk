@@ -180,7 +180,10 @@
             "group": "$LITKEY Token",
             "pages": [
               "governance/litkey/overview",
-              "governance/litkey/initial-allocation-and-distribution"
+              "governance/litkey/initial-allocation-and-distribution",
+              "governance/litkey/staking",
+              "governance/litkey/lit-chain",
+              "governance/litkey/bridging-and-addresses"
             ]
           },
           {
@@ -188,8 +191,7 @@
             "pages": [
               "governance/airdrop/overview",
               "governance/airdrop/eligibility-criteria",
-              "governance/airdrop/claiming",
-              "governance/airdrop/rewards"
+              "governance/airdrop/claiming"
             ]
           }
         ]
