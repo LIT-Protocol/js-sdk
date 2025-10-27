@@ -159,7 +159,8 @@
               "governance/litkey/overview",
               "governance/litkey/initial-allocation-and-distribution",
               "governance/litkey/lit-chain",
-              "governance/litkey/bridging-and-addresses"
+              "governance/litkey/bridging-and-addresses",
+              "governance/litkey/staking"
             ]
           },
           {
@@ -167,8 +168,7 @@
             "pages": [
               "governance/airdrop/overview",
               "governance/airdrop/eligibility-criteria",
-              "governance/airdrop/claiming",
-              "governance/airdrop/rewards"
+              "governance/airdrop/claiming"
             ]
           }
         ]
