@@ -12,7 +12,7 @@ Unlike the Core API flows (`pkpSign`, `executeJs`, `encryptAndDecrypt`) that acc
 # How the flow differs from other Core API methods
 
 - **Why generate a delegation auth sig?**  
-  You delegate your PKP to an ephemeral session key so the wrapped-keys Lit Actions can execute without presenting your long-lived auth credentials. The delegation constrains the permissions (`pkp-signing`, `lit-action-execution`, `access-control-condition-decryption`) and sets an expiry window, limiting blast radius if the session key is ever leaked.
+  You delegate your PKP to an ephemeral session key so the wrapped-keys Lit Actions can execute without presenting your long-lived auth credentials. The delegation constrains the permissions (`pkp-signing`, `lit-action-execution`, `access-control-condition-decryption`) and sets an expiry window, limiting blast radius if the session key is ever leaked. Refer to the [Lit resources guide](/sdk/resources/lit-resources-and-abilities) for the full catalogue of resource prefixes and abilities.
 
 - **Why supply PKP session signatures?**  
   Wrapped-keys endpoints reuse the same session bundle across all networks (for example, Lambda functions in the v7 stack). Provide `pkpSessionSigs` produced by `authManager.createPkpSessionSigs` so the Lit nodes can verify the delegated permissions before executing the action.

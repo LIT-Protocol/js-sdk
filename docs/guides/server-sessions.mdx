@@ -12,7 +12,7 @@ This pattern keeps the delegation scoped (resources and expiration are enforced 
 # Workflow
 
 1. **Client generates a session keypair** with `generateSessionKeyPair()`.
-2. **Client creates a delegation auth signature** with `authManager.generatePkpDelegationAuthSig`, scoping the allowed Lit resources and expiration.
+2. **Client creates a delegation auth signature** with `authManager.generatePkpDelegationAuthSig`, scoping the allowed [Lit resources](/sdk/resources/lit-resources-and-abilities) and expiration.
 3. **Client sends the bundle** { sessionKeyPair, delegationAuthSig, pkpPublicKey }` to the server over a secure channel.
 4. **Server restores an auth context** using `authManager.createPkpAuthContextFromPreGenerated`.
 5. **Server issues fresh session signatures on demand** (e.g., `authManager.createPkpSessionSigs`) immediately before calling SDK helpers such as the wrapped-keys API or `pkpSign`.
@@ -116,7 +116,7 @@ await serverLitClient.chain.ethereum.pkpSign({
 # Security considerations
 
 - **Treat the session keypair like a secret.** Whoever holds the private key can mint new session signatures until the delegation expires.
-- **Scope the delegation.** Restrict resources to the minimal Lit resources needed and set conservative expirations.
+- **Scope the delegation.** Restrict resources to the minimal [Lit resources](/sdk/resources/lit-resources-and-abilities) needed and set conservative expirations.
 - **Rotate on failure.** If a node joins or leaves the network the server can simply regenerate session signatures with the current handshake; if that fails, request a fresh delegation from the client.
 
 # When to use this pattern
