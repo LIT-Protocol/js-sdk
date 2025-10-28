@@ -157,6 +157,7 @@ export const createContractsManager = <T, M>(
       contractData.PubkeyRouter.methods.deriveEthAddressFromPubkey,
       contractData.PubkeyRouter.methods.ethAddressToPkpId,
       contractData.PubkeyRouter.methods.getEthAddress,
+      contractData.PubkeyRouter.methods.getDerivedPubkey,
       contractData.PubkeyRouter.methods.getPubkey,
       ...contractData.PubkeyRouter.events,
     ],

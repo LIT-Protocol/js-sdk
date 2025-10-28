@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Lit JS SDK Documentation",
+  "name": "Lit Protocol Documentation",
   "colors": {
     "primary": "#EA580C",
     "light": "#F97316",
@@ -91,9 +91,10 @@
             ]
           },
           {
-            "group": "Access Control Conditions",
+            "group": "Utilities",
             "pages": [
-              "sdk/sdk-reference/access-control-conditions/functions/createAccBuilder"
+              "sdk/sdk-reference/access-control-conditions/functions/createAccBuilder",
+              "sdk/sdk-reference/lit-client/functions/getIpfsId"
             ]
           },
           {
@@ -127,6 +128,12 @@
             ]
           },
           {
+            "group": "Guides",
+            "pages": [
+              "guides/lit-action-sign-as-action"
+            ]
+          },
+          {
             "group": "FAQ",
             "pages": [
               "faqs/index"
@@ -150,7 +157,10 @@
             "group": "$LITKEY Token",
             "pages": [
               "governance/litkey/overview",
-              "governance/litkey/initial-allocation-and-distribution"
+              "governance/litkey/initial-allocation-and-distribution",
+              "governance/litkey/staking",
+              "governance/litkey/lit-chain",
+              "governance/litkey/bridging-and-addresses"
             ]
           },
           {
@@ -158,8 +168,7 @@
             "pages": [
               "governance/airdrop/overview",
               "governance/airdrop/eligibility-criteria",
-              "governance/airdrop/claiming",
-              "governance/airdrop/rewards"
+              "governance/airdrop/claiming"
             ]
           }
         ]

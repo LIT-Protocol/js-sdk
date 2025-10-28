@@ -1,0 +1,89 @@
+---
+title: 'Derive Lit Action Public Keys'
+description: 'How to deterministically derive and verify a Lit Action identity without executing it externally.'
+---
+
+# Derive a Lit Action Public Key Locally
+
+## Question
+
+I want to call `Lit.Actions.signAsAction`. I know the action identity is derived from the Action's IPFS CID, but I cannot find a way to obtain the public key outside of the Action runtime. `Lit.Actions.getActionPublicKey` works within the Action, while `executeJs` only exposes `signatures.<name>.publicKey` after a signing operation. Is there a way to deterministically derive the Action's public key locally without running the Action?
+
+## Answer
+
+Yes. Inside the Lit Action you can deterministically derive the Action identity (and therefore its public key) from the same inputs the nodes use: the Action's IPFS CID and the signing scheme. The snippet below shows the complete flow:
+
+1. Produce the 32-byte message hash the Lit nodes expect.
+2. Call `Lit.Actions.signAsAction` to sign that message with the Action identity.
+3. Derive the Action public key via `Lit.Actions.getActionPublicKey`, passing the Action CID and signing scheme.
+4. Optionally verify the signature with `Lit.Actions.verifyActionSignature`.
+
+```js
+const { sigName, toSign } = jsParams; // 'publicKey' not required; derive it from the Action IPFS CID
+const { keccak256, arrayify } = ethers.utils;
+
+(async () => {
+  // 1) Produce a 32-byte hash of the input (Lit Actions expect a 32-byte message for ECDSA schemes)
+  const msgBytes = new TextEncoder().encode(toSign);
+  const msgHashHex = keccak256(msgBytes);       // 0x-prefixed hex string
+  const msgHashBytes = arrayify(msgHashHex);    // Uint8Array
+
+  // 2) Sign as the current Lit Action (deterministic Action identity, not a PKP)
+  //    Supported schemes include 'EcdsaK256Sha256' (secp256k1) among others.
+  const signingScheme = 'EcdsaK256Sha256';
+  const signature = await Lit.Actions.signAsAction({
+    toSign: msgHashBytes,
+    sigName,
+    signingScheme,
+  });
+
+  // 3) Derive this Action's public key deterministically from its IPFS CID + scheme
+  //    This does not require a PKP and is always the same for a given (CID, scheme).
+  const actionIpfsCid = Lit.Auth.actionIpfsIdStack[0];
+  const actionPublicKey = await Lit.Actions.getActionPublicKey({
+    signingScheme,
+    actionIpfsCid,
+  });
+
+  // 4) (Optional) Verify that the signature was produced by this Action identity
+  const verified = await Lit.Actions.verifyActionSignature({
+    signingScheme,
+    actionIpfsCid,
+    toSign: msgHashBytes,
+    signOutput: signature,
+  });
+
+  // 5) Return a structured response for clients to consume
+  Lit.Actions.setResponse({
+    response: JSON.stringify({
+      sigName,
+      signingScheme,
+      message: toSign,
+      messageHash: msgHashHex,
+      signature,          // string; format depends on scheme
+      actionPublicKey,    // string; hex or JSON depending on scheme
+      verified,           // boolean
+    }),
+  });
+})();
+```
+
+This approach keeps the derivation entirely within the Lit Action context. Because the public key depends only on the Action CID and signing scheme, you can rely on `Lit.Actions.getActionPublicKey` for a deterministic identity without needing to execute the Action externally first.
+
+## Derive the Same Public Key from Client Code
+
+If you prefer to resolve the Lit Action public key outside of the Action runtime - e.g., inside tests or other tooling—the SDK now exposes a helper that calls the on-chain PubkeyRouter contract.
+
+```ts
+import { createLitClient } from "@lit-protocol/lit-client";
+import { nagaDev } from "@lit-protocol/networks";
+import { keccak256, stringToBytes } from "viem";
+
+const litClient = await createLitClient({ network: nagaDev });
+const derivedKeyId = keccak256(stringToBytes(`lit_action_${actionIpfsCid}`));
+const actionPublicKey = await litClient.utils.getDerivedKeyId(derivedKeyId);
+
+console.log("Derived Lit Action pubkey:", actionPublicKey);
+```
+
+Under the hood, `getDerivedKeyId` routes through `PubkeyRouter.getDerivedPubkey`, passing the staking contract address and the default Naga key set (`naga-keyset1`) (will be dynamic in the future). This mirrors the same key derivation the nodes perform, letting you confirm identities or signatures without re-running the Lit Action.
