@@ -4,23 +4,23 @@ description: "Configure the authentication manager with storage options and auth
 ---
 
 <Tip>
-See SDK Reference for more details on the Auth Manager. [Auth Manager Reference](/sdk/sdk-reference/auth/functions/createAuthManager)
+See the [Auth Manager Reference API](/sdk/sdk-reference/auth/functions/createAuthManager) for more details on how to create an Auth Manager.
 </Tip>
 
 ## Overview & Key Concepts
 
-The Auth Manager handles authentication flows and session persistence.
+The Auth Manager is responsible for managing authentication state and session persistence in your Lit Protocol application. It handles the storage and retrieval of authentication credentials, enabling users to maintain active sessions across page refreshes and application restarts without re-authenticating.
 
-### AuthContext Creation
+### What the Auth Manager Stores
 
-This method caches two components:
+When you authenticate with Lit Protocol, the Auth Manager caches critical authentication data locally:
 
-**Session Key Pair**: A temporary cryptographic key pair generated on the client side that acts as a temporary identity for the client application. It consists of:
+**Session Key Pair**: A temporary cryptographic key pair that represents your current session with Lit Protocol:
 
-- **Public key** - shared with the Lit nodes
-- **Secret key (private key)** - kept securely on the client
+- **Public key** - Shared with Lit nodes to identify your session
+- **Secret key (private key)** - Kept securely in local storage, never transmitted
 
-**Delegation AuthSig (Inner Auth Sig)**: A cryptographic attestation from the Lit Protocol nodes that authorises your session key to act on behalf of your PKP
+**Delegation AuthSig (Inner Auth Sig)**: A cryptographic attestation from the Lit Protocol nodes that authorizes your session key to perform operations on behalf of your PKP
 
 <Steps>
   <Step title="Install the SDK">
@@ -48,15 +48,15 @@ bun add @lit-protocol/auth viem
 </CodeGroup>
 
 <Note>
-  <code>viem</code> must be installed in your application because the SDK no longer bundles it.
+  <code>viem</code> must be installed as a dependency because the Lit JS SDK does not bundle it.
 </Note>
   </Step>
   <Step title="Choose Storage Plugin">
-    Choose the appropriate network based on your development stage and requirements, then create your Lit Client instance.
+    Choose the appropriate storage plugin based on your environment and requirements, then create your Auth Manager instance.
 
     <CodeGroup>
 
-```typescript browser
+```typescript Browser Local Storage
 import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
 
 const authManager = createAuthManager({
@@ -67,7 +67,7 @@ const authManager = createAuthManager({
 });
 ```
 
-```typescript node.js
+```typescript Node.js Local Storage
 import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
 
 const authManager = createAuthManager({
@@ -79,7 +79,7 @@ const authManager = createAuthManager({
 });
 ```
 
-```typescript custom
+```typescript Custom Storage Plugin
 import { createAuthManager } from "@lit-protocol/auth";
 
 // Custom storage plugin example
@@ -116,10 +116,10 @@ const authManager = createAuthManager({
 
 ## Storage Options Comparison
 
-Select the appropriate network environment based on your development stage and requirements. Each network offers different characteristics for testing and production use cases.
+Choose your storage plugin based on where your application runs and how you want to manage session data.
 
 | Storage Type         | Persistence                             | Use Case                                           | Environment  |
 | -------------------- | --------------------------------------- | -------------------------------------------------- | ------------ |
-| **localStorage**     | Survives page refresh & browser restart | Web applications, client-side storage              | Browser      |
-| **localStorageNode** | File-based persistent storage           | Node.js applications, server-side scripts          | Node.js only |
-| **custom**           | Depends on implementation               | Database storage, encrypted storage, cloud storage | Custom       |
+| **localStorage**     | Survives page refresh & browser restart | Best for most web apps - sessions persist across browser restarts without additional setup | Browser      |
+| **localStorageNode** | File-based persistent storage           | Ideal for CLI tools, backend services, or automated scripts that need to maintain sessions | Node.js only |
+| **custom**           | Depends on implementation               | Use when you need centralized session management, enhanced security, multi-device sync, or database storage | Custom       |

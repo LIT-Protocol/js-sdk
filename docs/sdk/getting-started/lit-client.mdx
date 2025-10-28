@@ -4,7 +4,7 @@ description: "Configure the Lit Protocol client for the Lit JS SDK"
 ---
 
 <Tip>
-See SDK Reference for more details on the Lit Client. [Lit Client Reference](/sdk/sdk-reference/lit-client/functions/createLitClient)
+See the [Lit Client Reference API](/sdk/sdk-reference/lit-client/functions/createLitClient) for more details on how to create a Lit Client.
 </Tip>
 
 ## Overview
@@ -43,11 +43,9 @@ The Lit Client is the core interface for interacting with the Lit Protocol netwo
   <Step title="Network Configuration & Client Creation">
     Choose the appropriate network based on your development stage and requirements, then create your Lit Client instance.
 
-    Choose the appropriate network based on your development stage and requirements, then create your Lit Client instance.
-
 <CodeGroup>
 
-```typescript dev
+```typescript Naga Dev
 import { nagaDev } from "@lit-protocol/networks";
 import { createLitClient } from "@lit-protocol/lit-client";
 
@@ -56,8 +54,7 @@ const litClient = await createLitClient({
 });
 ```
 
-```typescript test
-// ❗️ Currently in development. Coming soon...
+```typescript Naga Test
 import { nagaTest } from "@lit-protocol/networks";
 import { createLitClient } from "@lit-protocol/lit-client";
 
@@ -66,7 +63,7 @@ const litClient = await createLitClient({
 });
 ```
 
-```typescript production
+```typescript Naga Mainnet
 // ❗️ Currently in development. Coming soon...
 import { nagaProduction } from "@lit-protocol/networks";
 import { createLitClient } from "@lit-protocol/lit-client";
@@ -83,10 +80,8 @@ const litClient = await createLitClient({
 
 ## Network Comparison
 
-Select the appropriate network environment based on your development stage and requirements. Each network offers different characteristics for testing and production use cases.
-
 | Network        | Type          | Key Persistence  | Payment Required | Use Case               | Status         |
 | -------------- | ------------- | ---------------- | ---------------- | ---------------------- | -------------- |
-| **Dev**        | Centralised   | ❌ Temporary     | ❌ Free          | Development & Testing  | ✅ Available   |
-| **Test**       | Decentralised | ⚠️ No guarantees | ✅ Required      | Pre-production Testing | ❌ Coming Soon |
-| **Production** | Decentralised | ✅ Persistent    | ✅ Required      | Live Applications      | ❌ Coming Soon |
+| **Naga Dev**        | Centralised   | ❌ Temporary     | ❌ Free          | Development & Testing  | ✅ Available   |
+| **Naga Test**       | Decentralised | ⚠️ No guarantees | ✅ Required      | Pre-production Testing | ✅ Available |
+| **Naga Mainnet** | Decentralised | ✅ Persistent    | ✅ Required      | Live Applications      | ❌ Coming Soon |
