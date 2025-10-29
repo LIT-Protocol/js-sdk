@@ -1001,6 +1001,7 @@ export const _createNagaLitClient = async (
       pkpPublicKey: string | Hex;
       authContext: AuthContextSchema2;
       chainConfig: Chain;
+      userMaxPrice?: bigint;
     }) => {
       const _pkpPublicKey = HexPrefixedSchema.parse(params.pkpPublicKey);
 
@@ -1016,6 +1017,7 @@ export const _createNagaLitClient = async (
             toSign: data,
             authContext: params.authContext,
             bypassAutoHashing: options?.bypassAutoHashing,
+            userMaxPrice: params.userMaxPrice,
           });
 
           return res.signature;
