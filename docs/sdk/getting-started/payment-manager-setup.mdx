@@ -4,8 +4,12 @@ description: 'Configure payment system for the Lit JS SDK'
 ---
 
 <Warning>
-  ❗️ Currently free on the dev network, so no need to deposit funds. More
-  details coming soon for test and production networks.
+  ❗️ Payment status by network:
+  - **naga-dev** – usage is currently free; no deposits required.
+  - **naga-test** – payments are enabled using test tokens (see faucet link
+    below).
+  - **Mainnet** – coming soon; mainnet payment details will be announced
+    shortly.
 </Warning>
 
 <Note>
@@ -23,10 +27,11 @@ description: 'Configure payment system for the Lit JS SDK'
 
 The Payment Manager demonstrates Lit Protocol's payment system - a billing system for decentralised cryptographic services. Users pay for compute resources on the Lit network to access core services like:
 
-- Encryption/Decryption - Secure data with programmable access control
-- PKP Signing - Cryptographic keys that can sign transactions based on conditions
-- Lit Actions - Serverless functions with cryptographic capabilities
-  Similar to how you pay AWS for cloud computing, this\system ensures the decentralised network can sustain itself and pay node operators. You can deposit funds, request withdrawals with security delays, and manage balances for yourself or other users (enabling applications to sponsor their users' costs for better UX).
+- [Encryption/Decryption](/sdk/auth-context-consumption/encrypt-and-decrypt) - Secure data with programmable access control.
+- [PKP Signing](/sdk/auth-context-consumption/pkp-sign) - Cryptographic keys that can sign transactions based on conditions.
+- [Lit Actions](/sdk/auth-context-consumption/execute-js) - Serverless functions with cryptographic capabilities.
+
+Similar to how you pay AWS for cloud computing, this system ensures the decentralised network can sustain itself and pay node operators. Each payer keeps a balance in the on-chain Lit Ledger contract funded with `$LITKEY` (or `$tstLPX` on testnet), which the network debits as requests execute. You can deposit funds, request withdrawals with security delays, and manage balances for yourself or other users (enabling applications to sponsor their users' costs for better UX).
 
 <Steps>
   <Step title="Payment Manager Setup">
@@ -40,7 +45,7 @@ const litClient = await createLitClient({ network: nagaTest });
 
 // 2. Get PaymentManager instance (requires account for transactions)
 const paymentManager = await litClient.getPaymentManager({
-account: yourAccount // viem account instance
+  account: yourAccount // viem account instance
 });
 
 ````
@@ -98,49 +103,73 @@ console.log(`Deposit successful: ${result.hash}`);
 
 </Steps>
 
-## Sponsoring Your Users (Capacity Delegation Replacement)
+## Sponsoring Your Users
 
-If your app previously minted Capacity Credits and handed users a `CapacityDelegationAuthSig`, the equivalent Naga flow is:
+<Steps>
+  <Step title="Define spending limit">
 
-1. **Fund a payer wallet** – call `litClient.getPaymentManager({ account })` and deposit `$LITKEY` (`$tstLPX` in testnet) into the ledger contract (see examples above).
-2. **Register the payer** – decide how you want to provision and operate the sponsor wallet:
-   - **Lit-hosted Auth Service** – call `authService.registerPayer`; Lit derives the wallet + `payerSecretKey` for you (ideal for prototypes).
-   - **Self-hosted Auth Service** – deploy the open-source service (see [Auth Services setup](/sdk/getting-started/auth-services)) so derivation stays within your infrastructure. You’ll supply your own `LIT_DELEGATION_ROOT_MNEMONIC`.
-   - **Manual (no Auth Service)** – generate a wallet yourself (e.g. `privateKeyToAccount`) and store the private key securely; you’ll call the Payment Manager directly in the next step.
-3. **Delegate end-user addresses** – map users to the payer:
-   - Using an Auth Service: POST to `authService.add-users`.
-   - Manual route: call `paymentManager.delegatePayments` (for a single user) or `paymentManager.delegatePaymentsBatch` (for multiple users) with your server-side account; this writes to the same Payment Delegation contract.
+  Define spending limits for the users you want to sponsor (values are in wei).
 
-<Note>
-  For production environments we recommend running your own Auth Service (self-hosted) so you retain full custody over the `LIT_DELEGATION_ROOT_MNEMONIC` and derivation secrets. The Lit-hosted Auth Service is handy for prototypes and quick starts, but you still remain responsible for storing the returned `payerSecretKey` securely.
-</Note>
-4. **Users decrypt as normal** – the browser still calls `litClient.decrypt` with an auth context; the network draws fees from the delegated payer instead of the user’s wallet.
+  <CodeGroup>
 
-```typescript server
-// Manual delegation without Auth Service
-import { createLitClient } from '@lit-protocol/lit-client';
-import { privateKeyToAccount } from 'viem/accounts';
-import { nagaTest } from '@lit-protocol/networks';
-
-const payerAccount = privateKeyToAccount(
-  process.env.PAYER_PRIVATE_KEY as `0x${string}`
-);
-const litClient = await createLitClient({ network: nagaTest });
-
-const paymentManager = await litClient.getPaymentManager({
-  account: payerAccount,
+```typescript
+await paymentManager.setRestriction({
+  totalMaxPrice: '1000000000000000000', // 1 ETH equivalent limit
+  requestsPerPeriod: '100', // max number of sponsored requests in a period
+  periodSeconds: '3600', // rolling window (1 hour in this example)
 });
+```
 
-// Delegate a single user
-await paymentManager.delegatePayments({ userAddress: '0xUser...' });
+  </CodeGroup>
 
-// Or delegate multiple users in one transaction
+  </Step>
+
+  <Step title="Delegate users">
+
+  With restrictions set, delegate one or more users to spend from your payer wallet.
+
+  <CodeGroup>
+
+```typescript
 await paymentManager.delegatePaymentsBatch({
   userAddresses: ['0xAlice...', '0xBob...'],
 });
 ```
 
+  </CodeGroup>
+
+  </Step>
+
+  <Step title="Remove users (optional)">
+
+  Undelegate users when you no longer want to sponsor them.
+
+  <CodeGroup>
+
 ```typescript
+await paymentManager.undelegatePaymentsBatch({
+  userAddresses: ['0xAlice...'],
+});
+```
+
+  </CodeGroup>
+
+  </Step>
+</Steps>
+
+## **Alternatively**
+
+Manage delegation via the hosted or self-hosted Auth Service (see [Auth Services setup](/sdk/getting-started/auth-services) for the full flow).
+
+## After Payment Delegation
+
+**Users decrypt as normal** – we still call `litClient.decrypt` with an auth context; the network draws fees from the delegated payer instead of the user’s wallet.
+
+<Note>
+  ℹ️ `userMaxPrice` is recommended for sponsored sessions, typically the same value or less than the the restriction the sponsor set; optional guardrail when self-funded.
+</Note>
+
+```typescript highlight={18}
 // Client-side decrypt with sponsored payments
 const authContext = await authManager.createEoaAuthContext({
   litClient,
@@ -158,7 +187,7 @@ const response = await litClient.decrypt({
   unifiedAccessControlConditions: accs,
   authContext,
   chain: 'ethereum',
-  userMaxPrice: 1000000000000000000n, // required for sponsored sessions, typically the same value as the restriction the sponsor set; optional guardrail when self-funded
+  userMaxPrice: 1000000000000000000n,
 });
 ```
 
@@ -169,8 +198,6 @@ Leverage the hosted Auth Service to manage delegation without exposing private k
 - Call `authService.registerPayer` (hosted or self-hosted) to derive a payer wallet + `payerSecretKey`.
 - Call `authService.delegateUsers` (`/add-users`) to sponsor a list of user addresses.
 - Or skip the service entirely and use the Payment Manager methods directly (example below).
-
-> The legacy (V7, Datil) capacity-credit minting flow has been removed. Payment delegation now interacts directly with the Payment Manager contracts.
 
 ```typescript
 import { createLitClient } from '@lit-protocol/lit-client';
