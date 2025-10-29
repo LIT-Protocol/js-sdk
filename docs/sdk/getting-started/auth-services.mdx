@@ -24,13 +24,32 @@ Lit hosts default Auth Service instances so you can build without deploying infr
 | ----------- | ------------------------------------------- | ------------------------------ | ----- |
 | `naga-dev`  | `https://naga-dev-auth-service.getlit.dev`  | `https://login.litgateway.com` | Use Lit's hosted endpoints while you prototype. Configure your SDK or environment variables with the URLs in this table. |
 | `naga-test` | `https://naga-test-auth-service.getlit.dev` | `https://login.litgateway.com` | Start with the hosted endpoints for staging, then switch to your own infrastructure as you scale. |
-| `naga`      | `Run your own (recommended)`                | `Run your own (recommended)`   | Lit does not operate public Auth Service or Login Server endpoints for `naga` |
+| `naga`      | `Run your own (recommended)`                | `Run your own (recommended)`   | Lit does not (yet) operate public Auth Service or Login Server endpoints for `naga` |
 
 <Note>
   The hosted services are best suited for prototyping. Self-host the Auth
   Service and Login Server for production traffic or when you need custom
   configuration.
 </Note>
+
+## Payment Delegation APIs
+
+The Auth Service also exposes lightweight endpoints that sponsor user requests on the network. These are the same APIs the Lit SDK calls when you use `litClient.authService.registerPayer` / `delegateUsers` from the Payment Manager guide.
+
+- `POST /register-payer`
+  - Headers: `x-api-key`.
+  - Behaviour: generates a random `payerSecretKey`, hashes it with the API key, and derives a child wallet from `LIT_DELEGATION_ROOT_MNEMONIC`.
+  - Response: `{ success, payerWalletAddress, payerSecretKey }`. The service **does not** persist the secret—you must store it securely (KMS, vault, etc.).
+  - Rotation: call the endpoint again with the same API key to rotate the secret and derive a new child wallet.
+- `POST /add-users`
+  - Headers: `x-api-key`, `payer-secret-key`; body is a JSON array of user addresses.
+  - Behaviour: recomputes the same child wallet on the fly and calls `PaymentManager.delegatePaymentsBatch` so the payer sponsors those users.
+
+<Tip>
+  Running the Auth Service yourself keeps the derivation mnemonic and payer secrets inside your infrastructure. The Lit-hosted instance is great for quick starts, but you remain responsible for storing the returned `payerSecretKey`.
+</Tip>
+
+If you prefer not to run an Auth Service at all, you can still sponsor users manually: create a payer wallet, fund it, and call `paymentManager.delegatePayments*` directly from your backend. See [Payment Manager Setup](/sdk/getting-started/payment-manager-setup#sponsoring-your-users-capacity-delegation-replacement) for sample code.
 
 
 ### Install the SDK
