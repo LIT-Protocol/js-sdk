@@ -3,6 +3,7 @@ import { Network } from '../types';
 export type LitActionType =
   | 'signTransaction'
   | 'signMessage'
+  | 'signTypedData'
   | 'generateEncryptedKey'
   | 'exportPrivateKey';
 

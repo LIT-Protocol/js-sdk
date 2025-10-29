@@ -7,6 +7,10 @@
     "evm": "Qmdm4mGn6A8RmqeiDgRPXFt2yYEKCUMUVimSb5iPJfs31e",
     "solana": "QmS4Y6f2zHriNzioxBbysbuXQbjX7ga468CCyYcuY2AeeH"
   },
+  "signTypedData": {
+    "evm": "QmRnMnUbdZznL9vHnS1eFAdH5tQY1Dj59rtYVznLuexatb",
+    "solana": ""
+  },
   "generateEncryptedKey": {
     "evm": "QmfW6g5PJ8SVS56XwDVC5W4gcUnobEempNkR28bj2g99tk",
     "solana": "QmWYcBCZqFmJJzsRfzVRHbPD5Hvuou45sbXPQcQzLbUgKd"

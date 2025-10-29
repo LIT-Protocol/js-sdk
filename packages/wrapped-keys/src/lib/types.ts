@@ -231,9 +231,14 @@ export interface ImportPrivateKeyResult {
   pkpAddress: string;
   id: string;
 }
+interface signTypedDataMessageParams {
+  domain: any;
+  types: Record<string, any[]>;
+  value: Record<string, any>;
+}
 
 interface SignMessageParams {
-  messageToSign: string | Uint8Array;
+  messageToSign: string | Uint8Array | signTypedDataMessageParams;
   id: string;
 }
 

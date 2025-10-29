@@ -3,6 +3,7 @@ import * as exportPrivateKey from './generated/common/exportPrivateKey';
 import * as generateEncryptedEthereumPrivateKey from './generated/ethereum/generateEncryptedEthereumPrivateKey';
 import * as signMessageWithEthereumEncryptedKey from './generated/ethereum/signMessageWithEncryptedEthereumKey';
 import * as signTransactionWithEthereumEncryptedKey from './generated/ethereum/signTransactionWithEncryptedEthereumKey';
+import * as signTypedDataWithEthereumEncryptedKey from './generated/ethereum/signTypedDataWithEncryptedEthereumKey';
 import * as generateEncryptedSolanaPrivateKey from './generated/solana/generateEncryptedSolanaPrivateKey';
 import * as signMessageWithSolanaEncryptedKey from './generated/solana/signMessageWithEncryptedSolanaKey';
 import * as signTransactionWithSolanaEncryptedKey from './generated/solana/signTransactionWithEncryptedSolanaKey';
@@ -21,6 +22,10 @@ const litActionRepository: LitActionCodeRepository = {
   signMessage: {
     evm: signMessageWithEthereumEncryptedKey.code,
     solana: signMessageWithSolanaEncryptedKey.code,
+  },
+  signTypedData: {
+    evm: signTypedDataWithEthereumEncryptedKey.code,
+    solana: '',
   },
   generateEncryptedKey: {
     evm: generateEncryptedEthereumPrivateKey.code,
@@ -47,6 +52,7 @@ export {
   generateEncryptedEthereumPrivateKey,
   signMessageWithEthereumEncryptedKey,
   signTransactionWithEthereumEncryptedKey,
+  signTypedDataWithEthereumEncryptedKey,
   generateEncryptedSolanaPrivateKey,
   signMessageWithSolanaEncryptedKey,
   signTransactionWithSolanaEncryptedKey,
