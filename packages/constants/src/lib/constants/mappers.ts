@@ -1,8 +1,24 @@
 import depd from 'depd';
 
-import { datilDev, datilTest, datil } from '@lit-protocol/contracts';
-
 import { LIT_NETWORK_VALUES } from './constants';
+
+// Legacy root import that drags every network/ABI blob into bundles; keep commented as a warning.
+// import { datil, datilDev, datilTest } from '@lit-protocol/contracts';
+
+// @ts-ignore -- TypeScript can't resolve the subpath because this package compiles to CJS, but runtime bundlers can.
+import { datil as datilContext } from '@lit-protocol/contracts/prod/datil.js';
+// @ts-ignore -- see note above.
+import { datilDev as datilDevContext } from '@lit-protocol/contracts/prod/datil-dev.js';
+// @ts-ignore -- see note above.
+import { datilTest as datilTestContext } from '@lit-protocol/contracts/prod/datil-test.js';
+
+type DatilContext = typeof datilContext;
+type DatilDevContext = typeof datilDevContext;
+type DatilTestContext = typeof datilTestContext;
+
+const datil: DatilContext = datilContext;
+const datilDev: DatilDevContext = datilDevContext;
+const datilTest: DatilTestContext = datilTestContext;
 
 const deprecated = depd('lit-js-sdk:constants:mappers');
 
