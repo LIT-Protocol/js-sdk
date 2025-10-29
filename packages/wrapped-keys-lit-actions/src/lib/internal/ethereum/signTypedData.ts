@@ -1,18 +1,25 @@
+interface TypedDataField {
+  name: string;
+  type: string;
+}
+interface TypedDataMessage {
+  domain: {
+    name?: string;
+    version?: string;
+    chainId?: number | string | bigint;
+    verifyingContract?: string;
+    salt?: string;
+  };
+  types: Record<string, TypedDataField[]>;
+  value: Record<string, string | number>;
+}
 interface SignTypedDataParams {
   privateKey: string;
-  messageToSign: {
-    domain: any;
-    types: Record<string, any[]>;
-    value: Record<string, any>;
-  };
+  messageToSign: TypedDataMessage;
 }
 
 interface VerifyMessageSignatureParams {
-  messageToSign: {
-    domain: any;
-    types: Record<string, any[]>;
-    value: Record<string, any>;
-  };
+  messageToSign: TypedDataMessage;
   signature: string;
 }
 

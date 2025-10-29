@@ -1,15 +1,26 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
 import { signTypedDataEthereumKey } from '../../internal/ethereum/signTypedData';
 
+interface TypedDataField {
+  name: string;
+  type: string;
+}
+interface TypedDataMessage {
+  domain: {
+    name?: string;
+    version?: string;
+    chainId?: number | string | bigint;
+    verifyingContract?: string;
+    salt?: string;
+  };
+  types: Record<string, TypedDataField[]>;
+  value: Record<string, string | number>;
+}
 export interface SignTypedDataWithEncryptedEthereumKeyParams {
   accessControlConditions: string;
   ciphertext: string;
   dataToEncryptHash: string;
-  messageToSign: {
-    domain: any;
-    types: Record<string, any[]>;
-    value: Record<string, any>;
-  };
+  messageToSign: TypedDataMessage;
 }
 
 /**

@@ -73,14 +73,8 @@ export const testFailEthereumSignTypedDataWrappedKeyInvalidDecryption = async (
         ],
       },
       value: {
-        from: {
-          name: 'Alice',
-          wallet: alice.wallet.address,
-        },
-        to: {
-          name: 'Bob',
-          wallet: '0x1234567890123456789012345678901234567890',
-        },
+        from: alice.wallet.address,
+        to: '0x1234567890123456789012345678901234567890',
         contents: 'Hello, Bob!',
       },
     };

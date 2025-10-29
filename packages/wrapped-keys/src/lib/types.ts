@@ -231,10 +231,24 @@ export interface ImportPrivateKeyResult {
   pkpAddress: string;
   id: string;
 }
+
+interface TypedDataField {
+  name: string;
+  type: string;
+}
+
+interface TypedDataDomain {
+  name?: string;
+  version?: string;
+  chainId?: number | string | bigint;
+  verifyingContract?: string;
+  salt?: string;
+}
+
 interface signTypedDataMessageParams {
-  domain: any;
-  types: Record<string, any[]>;
-  value: Record<string, any>;
+  domain: TypedDataDomain;
+  types: Record<string, TypedDataField[]>;
+  value: Record<string, string | number>;
 }
 
 interface SignMessageParams {
