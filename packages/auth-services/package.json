@@ -34,7 +34,7 @@
     "zod-validation-error": "3.4.0"
   },
   "peerDependencies": {
-    "viem": "2.38.x"
+    "viem": "2.38.3"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",

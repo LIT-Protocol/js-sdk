@@ -164,6 +164,6 @@
   },
   "peerDependencies": {
     "typescript": "5.8.3",
-    "viem": "2.38.x"
+    "viem": "2.38.3"
   }
 }

@@ -51,6 +51,6 @@
     "zod": "3.24.3"
   },
   "peerDependencies": {
-    "viem": "2.38.x"
+    "viem": "2.38.3"
   }
 }
