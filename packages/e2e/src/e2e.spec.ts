@@ -1,21 +1,19 @@
+import { createCustomAuthContext } from './helper/auth-contexts';
 import {
-  createCustomAuthContext,
-  createPkpAuthContext,
-} from './helper/auth-contexts';
-import {
-  createExecuteJsTest,
-  createPkpSignTest,
-  createPkpEncryptDecryptTest,
   createEncryptDecryptFlowTest,
-  createPkpPermissionsManagerFlowTest,
   createEoaNativeAuthFlowTest,
+  createExecuteJsDecryptAndCombineTest,
+  createExecuteJsBasicTest,
+  createPaymentDelegationFlowTest,
+  createPaymentManagerFlowTest,
+  createPkpEncryptDecryptTest,
+  createPkpPermissionsManagerFlowTest,
+  createPkpSignTest,
   createViemSignMessageTest,
   createViemSignTransactionTest,
   createViemSignTypedDataTest,
   createViewPKPsByAddressTest,
   createViewPKPsByAuthDataTest,
-  createPaymentManagerFlowTest,
-  createPaymentDelegationFlowTest,
 } from './helper/tests';
 import { init } from './init';
 import { AuthContext } from './types';
@@ -55,7 +53,12 @@ describe('all', () => {
       it('pkpSign', () =>
         createPkpSignTest(ctx, () => ctx.aliceEoaAuthContext)());
       it('executeJs', () =>
-        createExecuteJsTest(ctx, () => ctx.aliceEoaAuthContext)());
+        createExecuteJsBasicTest(ctx, () => ctx.aliceEoaAuthContext)());
+      it('executeJs decryptAndCombine', () =>
+        createExecuteJsDecryptAndCombineTest(
+          ctx,
+          () => ctx.aliceEoaAuthContext
+        )());
       it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
       it('viewPKPsByAuthData', () =>
         createViewPKPsByAuthDataTest(ctx, () => ctx.aliceEoaAuthContext)());
@@ -95,7 +98,7 @@ describe('all', () => {
         it('pkpSign', () =>
           createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
         it('executeJs', () =>
-          createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
+          createExecuteJsBasicTest(ctx, () => ctx.alicePkpAuthContext)());
         it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
         it('viewPKPsByAuthData', () =>
           createViewPKPsByAuthDataTest(ctx, () => ctx.alicePkpAuthContext)());
@@ -136,7 +139,7 @@ describe('all', () => {
             ctx.eveViemAccountPkp.pubkey
           )());
         it('executeJs', () =>
-          createExecuteJsTest(
+          createExecuteJsBasicTest(
             ctx,
             () => eveCustomAuthContext,
             ctx.eveViemAccountPkp.pubkey
