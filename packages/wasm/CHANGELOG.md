@@ -1,14 +1,18 @@
 # @lit-protocol/wasm
 
+## 8.1.0
+
+### Minor Changes
+
+- 761174a: Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before.
+
 ## 8.0.2
 
 ### Patch Changes
 
-
 ## 8.0.1
 
 ### Patch Changes
-
 
 ## 8.0.0
 
