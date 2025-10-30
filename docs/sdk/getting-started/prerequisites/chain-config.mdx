@@ -3,72 +3,79 @@ title: "Chain Config"
 ---
 import { AddLitChainButton } from "/snippets/AddLitChainButton.jsx";
 
-Depending on the Lit Protocol Network that you're using, you'll connect to one of the following Lit chains. For those using one of the Lit **testnets** (Naga Dev or Naga Test) will use the Chronicle Yellowstone Chain. Those building in production on the Naga Mainnet (COMING SOON) will use the Lit Chain. Configuation details for both can be found below:
+Lit Protocol uses dedicated blockchain networks for managing PKP ownership, permissions, and payment operations.
 
-### Chronicle Yellowstone - Lit Protocol Testnet
+If you're using one of the testnets: Naga Dev or Test, you'll connect to Chronicle Yellowstone, while production applications using Naga Mainnet (COMING SOON) will use the Lit Chain. Configuration details for both networks are below:
 
-| Property | Value |
-| -------- | ----- |
-| ChainID | 175188 (0x2ac54) |
-| Currency | tstLPX |
-| RPC URL | `https://yellowstone-rpc.litprotocol.com/` |
+<Tabs>
+  <Tab title="Chronicle Yellowstone - Testnet">
+    ### Chronicle Yellowstone - Lit Protocol Testnet
 
-Also see [Chainlist](https://chainlist.org/chain/175188) for more details.
+    | Property | Value |
+    | -------- | ----- |
+    | ChainID | 175188 (0x2ac54) |
+    | Currency | tstLPX |
+    | RPC URL | `https://yellowstone-rpc.litprotocol.com/` |
 
-
-### Viem Chain Config for the Chronicle Yellowstone network
-
-```ts
-import { Chain, http } from "viem";
-
-export const viemChainConfig: Readonly<Chain> = Object.freeze({
-  id: 175188,
-  name: "Chronicle Yellowstone",
-  nativeCurrency: {
-    name: "Chronicle Yellowstone",
-    symbol: "tstLPX",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://yellowstone-rpc.litprotocol.com/"],
-    },
-    public: {
-      http: ["https://yellowstone-rpc.litprotocol.com/"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Yellowstone Explorer",
-      url: "https://yellowstone-explorer.litprotocol.com/",
-    },
-  },
-});
-```
-
-Alternatively, we also provide a helper function to get the viem chain config. You can use
-
-```ts
-litClient.getChainConfig().viemConfig
-```
-to get the viem chain config. See [Lit Client Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#getchainconfig) for more details.
+    Also see [Chainlist](https://chainlist.org/chain/175188) for more details.
 
 
-### Lit Chain — Lit Protocol Mainnet
+    ### Viem Chain Config for the Chronicle Yellowstone network
 
-<AddLitChainButton />
+    ```ts
+    import { Chain, http } from "viem";
 
-To connect to Lit Chain, you can click the button above or manually add the network parameters below.  For production use cases, you should get a free private RPC URL from Conduit by clicking "Get an API Key" on the [Lit Chain hub page](https://hub.conduit.xyz/lit-chain-1rw3jdu82h).
+    export const viemChainConfig: Readonly<Chain> = Object.freeze({
+      id: 175188,
+      name: "Chronicle Yellowstone",
+      nativeCurrency: {
+        name: "Chronicle Yellowstone",
+        symbol: "tstLPX",
+        decimals: 18,
+      },
+      rpcUrls: {
+        default: {
+          http: ["https://yellowstone-rpc.litprotocol.com/"],
+        },
+        public: {
+          http: ["https://yellowstone-rpc.litprotocol.com/"],
+        },
+      },
+      blockExplorers: {
+        default: {
+          name: "Yellowstone Explorer",
+          url: "https://yellowstone-explorer.litprotocol.com/",
+        },
+      },
+    });
+    ```
 
-<Note>
-The below and additional chain parameters are available [here](https://hub.conduit.xyz/lit-chain-1rw3jdu82h).
-</Note>
+    Alternatively, we also provide a helper function to get the viem chain config. You can use
 
-| Parameter Name     | Value                                              |
-|--------------------|----------------------------------------------------|
-| Chain ID           | 175200                                             |
-| Name               | Lit Chain                                          |
-| RPC URL            | https://lit-chain-rpc.litprotocol.com              |
-| Block Explorer URL | https://lit-chain-explorer.litprotocol.com         |
-| Currency Symbol    | LITKEY                                             |
-| Currency Decimals  | 18                                                 |
+    ```ts
+    litClient.getChainConfig().viemConfig
+    ```
+    to get the viem chain config. See [Lit Client Reference](/sdk/sdk-reference/lit-client/functions/createLitClient#getchainconfig) for more details.
+  </Tab>
+
+  <Tab title="Lit Chain - Mainnet">
+    ### Lit Chain - Lit Protocol Mainnet
+
+    <AddLitChainButton />
+
+    To connect to Lit Chain, you can click the button above or manually add the network parameters below.  For production use cases, you should get a free private RPC URL from Conduit by clicking "Get an API Key" on the [Lit Chain hub page](https://hub.conduit.xyz/lit-chain-1rw3jdu82h).
+
+    <Note>
+    The below and additional chain parameters are available [here](https://hub.conduit.xyz/lit-chain-1rw3jdu82h).
+    </Note>
+
+    | Parameter Name     | Value                                              |
+    |--------------------|----------------------------------------------------|
+    | Chain ID           | 175200                                             |
+    | Name               | Lit Chain                                          |
+    | RPC URL            | https://lit-chain-rpc.litprotocol.com              |
+    | Block Explorer URL | https://lit-chain-explorer.litprotocol.com         |
+    | Currency Symbol    | LITKEY                                             |
+    | Currency Decimals  | 18                                                 |
+  </Tab>
+</Tabs>

@@ -5,7 +5,8 @@ import {
   GenericEncryptedPayloadSchema,
   GenericResultBuilder,
 } from '@lit-protocol/schemas';
-import { AuthSig, NagaJitContext, RequestItem } from '@lit-protocol/types';
+import { RequestItem, NagaJitContext, AuthSig } from '@lit-protocol/types';
+import { NodeError, UnknownError } from '@lit-protocol/constants';
 
 import { E2EERequestManager } from './e2ee-request-manager/E2EERequestManager';
 import { composeLitUrl } from '../endpoints-manager/composeLitUrl';
@@ -95,7 +96,16 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
       }
 
       if (!requests || requests.length === 0) {
-        throw new Error('Failed to generate requests for pkpSign.');
+        throw new UnknownError(
+          {
+            cause: new Error('Request generation produced no entries'),
+            info: {
+              operation: 'pkpSign:createRequest',
+              requestId: _requestId,
+            },
+          },
+          'Failed to generate requests for pkpSign.'
+        );
       }
 
       return requests;
@@ -107,7 +117,12 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
       jitContext: NagaJitContext
     ) => {
       if (!result.success) {
-        E2EERequestManager.handleEncryptedError(result, jitContext, 'PKP Sign');
+        E2EERequestManager.handleEncryptedError(
+          result,
+          jitContext,
+          'PKP Sign',
+          requestId
+        );
       }
 
       const decryptedValues = E2EERequestManager.decryptBatchResponse(
@@ -116,7 +131,16 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
         (decryptedJson) => {
           const pkpSignData = decryptedJson.data;
           if (!pkpSignData) {
-            throw new Error('Decrypted response missing data field');
+            throw new NodeError(
+              {
+                cause: new Error('Decrypted response missing data field'),
+                info: {
+                  operationName: 'PKP Sign',
+                  requestId,
+                },
+              },
+              `PKP Sign failed for request ${requestId}. Decrypted response missing data field`
+            );
           }
 
           const wrappedData = {
@@ -126,6 +150,10 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
 
           const responseData = PKPSignResponseDataSchema.parse(wrappedData);
           return responseData.values[0];
+        },
+        {
+          operationName: 'PKP Sign',
+          requestId,
         }
       );
 
@@ -203,7 +231,8 @@ export function createDecryptAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
         E2EERequestManager.handleEncryptedError(
           result,
           jitContext,
-          'Decryption'
+          'Decryption',
+          requestId
         );
       }
 
@@ -213,9 +242,22 @@ export function createDecryptAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
         (decryptedJson) => {
           const decryptData = decryptedJson.data;
           if (!decryptData) {
-            throw new Error('Decrypted response missing data field');
+            throw new NodeError(
+              {
+                cause: new Error('Decrypted response missing data field'),
+                info: {
+                  operationName: 'Decryption',
+                  requestId,
+                },
+              },
+              `Decryption failed for request ${requestId}. Decrypted response missing data field`
+            );
           }
           return DecryptResponseDataSchema.parse(decryptData);
+        },
+        {
+          operationName: 'Decryption',
+          requestId,
         }
       );
 
@@ -304,7 +346,8 @@ export function createExecuteJsAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
         E2EERequestManager.handleEncryptedError(
           result,
           jitContext,
-          'JS execution'
+          'JS execution',
+          requestId
         );
       }
 
@@ -314,9 +357,22 @@ export function createExecuteJsAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
         (decryptedJson) => {
           const executeJsData = decryptedJson.data;
           if (!executeJsData) {
-            throw new Error('Decrypted response missing data field');
+            throw new NodeError(
+              {
+                cause: new Error('Decrypted response missing data field'),
+                info: {
+                  operationName: 'JS execution',
+                  requestId,
+                },
+              },
+              `JS execution failed for request ${requestId}. Decrypted response missing data field`
+            );
           }
           return executeJsData;
+        },
+        {
+          operationName: 'JS execution',
+          requestId,
         }
       );
 

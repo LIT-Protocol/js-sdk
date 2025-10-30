@@ -1,5 +1,13 @@
 # @lit-protocol/e2e
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [0d20cbf]
+  - @lit-protocol/lit-client@8.2.2
+  - @lit-protocol/networks@8.2.2
+
 ## 3.0.1
 
 ### Patch Changes

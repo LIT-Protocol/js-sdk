@@ -1,4 +1,11 @@
-import { DEV_PRIVATE_KEY, version } from '@lit-protocol/constants';
+import {
+  DEV_PRIVATE_KEY,
+  LitNodeClientBadConfigError,
+  NetworkError,
+  NodeError,
+  UnknownError,
+  version,
+} from '@lit-protocol/constants';
 import { verifyAndDecryptWithSignatureShares } from '@lit-protocol/crypto';
 import {
   AuthData,
@@ -21,7 +28,6 @@ import type { ExpectedAccountOrWalletClient } from '../managers/contract-manager
 import { createChainManagerFactory } from './BaseChainManagerFactory';
 
 // Shared utilities
-import { NetworkError } from '@lit-protocol/constants';
 import {
   combineSignatureShares,
   mostCommonString,
@@ -472,7 +478,14 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         const respondingUrlSet = new Set(respondingUrls);
 
         if (respondingUrls.length === 0) {
-          throw new Error(
+          throw new LitNodeClientBadConfigError(
+            {
+              cause: new Error('Handshake result missing node identity keys'),
+              info: {
+                operation: 'createJitContext',
+                handshakeResult,
+              },
+            },
             `Handshake response did not include any node identity keys. Received handshake result: ${JSON.stringify(
               handshakeResult
             )}`
@@ -483,7 +496,17 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           const serverKey = handshakeResult.serverKeys[url];
 
           if (!serverKey || !serverKey.nodeIdentityKey) {
-            throw new Error(
+            throw new LitNodeClientBadConfigError(
+              {
+                cause: new Error(
+                  `Handshake response missing node identity key for node ${url}`
+                ),
+                info: {
+                  operation: 'createJitContext',
+                  url,
+                  handshakeResult,
+                },
+              },
               `Handshake response missing node identity key for node ${url}. Received handshake result: ${JSON.stringify(
                 handshakeResult
               )}`
@@ -528,7 +551,16 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         );
 
         if (filteredNodePrices.length === 0) {
-          throw new Error(
+          throw new NetworkError(
+            {
+              cause: new Error(
+                'Unable to resolve price data for responding handshake nodes'
+              ),
+              info: {
+                operation: 'createJitContext',
+                respondingUrls: Array.from(respondingUrlSet),
+              },
+            },
             'Unable to resolve price data for responding handshake nodes'
           );
         }
@@ -645,7 +677,16 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           }
 
           if (!requests || requests.length === 0) {
-            throw new Error('Failed to generate requests for pkpSign.');
+            throw new UnknownError(
+              {
+                cause: new Error('Request generation produced no entries'),
+                info: {
+                  operation: 'pkpSign:createRequest',
+                  requestId: _requestId,
+                },
+              },
+              'Failed to generate requests for pkpSign.'
+            );
           }
 
           return requests;
@@ -659,7 +700,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             E2EERequestManager.handleEncryptedError(
               result,
               jitContext,
-              'PKP Sign'
+              'PKP Sign',
+              requestId
             );
           }
 
@@ -669,7 +711,16 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             (decryptedJson) => {
               const pkpSignData = decryptedJson.data;
               if (!pkpSignData) {
-                throw new Error('Decrypted response missing data field');
+                throw new NodeError(
+                  {
+                    cause: new Error('Decrypted response missing data field'),
+                    info: {
+                      operationName: 'PKP Sign',
+                      requestId,
+                    },
+                  },
+                  `PKP Sign failed for request ${requestId}. Decrypted response missing data field`
+                );
               }
 
               const wrappedData = {
@@ -679,6 +730,10 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
 
               const responseData = PKPSignResponseDataSchema.parse(wrappedData);
               return responseData.values[0];
+            },
+            {
+              operationName: 'PKP Sign',
+              requestId,
             }
           );
 
@@ -776,7 +831,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             E2EERequestManager.handleEncryptedError(
               result,
               jitContext,
-              'Decryption'
+              'Decryption',
+              requestId
             );
           }
 
@@ -786,10 +842,23 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             (decryptedJson) => {
               const decryptData = decryptedJson.data;
               if (!decryptData) {
-                throw new Error('Decrypted response missing data field');
+                throw new NodeError(
+                  {
+                    cause: new Error('Decrypted response missing data field'),
+                    info: {
+                      operationName: 'Decryption',
+                      requestId,
+                    },
+                  },
+                  `Decryption failed for request ${requestId}. Decrypted response missing data field`
+                );
               }
               const responseData = DecryptResponseDataSchema.parse(decryptData);
               return responseData;
+            },
+            {
+              operationName: 'Decryption',
+              requestId,
             }
           );
 
@@ -882,13 +951,15 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         handleResponse: async (
           result: z.infer<typeof GenericEncryptedPayloadSchema>,
           pkpPublicKey: Hex | string,
-          jitContext: NagaJitContext
+          jitContext: NagaJitContext,
+          requestId: string
         ) => {
           if (!result.success) {
             E2EERequestManager.handleEncryptedError(
               result,
               jitContext,
-              'Session key signing'
+              'Session key signing',
+              requestId
             );
           }
 
@@ -898,9 +969,22 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             (decryptedJson) => {
               const signSessionKeyData = decryptedJson.data;
               if (!signSessionKeyData) {
-                throw new Error('Decrypted response missing data field');
+                throw new NodeError(
+                  {
+                    cause: new Error('Decrypted response missing data field'),
+                    info: {
+                      operationName: 'Session key signing',
+                      requestId,
+                    },
+                  },
+                  `Session key signing failed for request ${requestId}. Decrypted response missing data field`
+                );
               }
               return signSessionKeyData;
+            },
+            {
+              operationName: 'Session key signing',
+              requestId,
             }
           );
 
@@ -994,13 +1078,14 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           result: z.infer<typeof GenericEncryptedPayloadSchema>,
           pkpPublicKey: Hex | string,
           jitContext: NagaJitContext,
-          requestId?: string
+          requestId: string
         ) => {
           if (!result.success) {
             E2EERequestManager.handleEncryptedError(
               result,
               jitContext,
-              'Sign Custom Session Key'
+              'Sign Custom Session Key',
+              requestId
             );
           }
 
@@ -1010,11 +1095,22 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             (decryptedJson) => {
               const signCustomSessionKeyData = decryptedJson.data;
               if (!signCustomSessionKeyData) {
-                throw new Error(
-                  `[${requestId}] Decrypted response missing data field`
+                throw new NodeError(
+                  {
+                    cause: new Error('Decrypted response missing data field'),
+                    info: {
+                      operationName: 'Sign Custom Session Key',
+                      requestId,
+                    },
+                  },
+                  `Sign Custom Session Key failed for request ${requestId}. Decrypted response missing data field`
                 );
               }
               return signCustomSessionKeyData;
+            },
+            {
+              operationName: 'Sign Custom Session Key',
+              requestId,
             }
           );
 
@@ -1161,7 +1257,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             E2EERequestManager.handleEncryptedError(
               result,
               jitContext,
-              'JS execution'
+              'JS execution',
+              requestId
             );
           }
 
@@ -1172,9 +1269,22 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               (decryptedJson) => {
                 const executeJsData = decryptedJson.data;
                 if (!executeJsData) {
-                  throw new Error('Decrypted response missing data field');
+                  throw new NodeError(
+                    {
+                      cause: new Error('Decrypted response missing data field'),
+                      info: {
+                        operationName: 'JS execution',
+                        requestId,
+                      },
+                    },
+                    `JS execution failed for request ${requestId}. Decrypted response missing data field`
+                  );
                 }
                 return executeJsData;
+              },
+              {
+                operationName: 'JS execution',
+                requestId,
               }
             );
 
