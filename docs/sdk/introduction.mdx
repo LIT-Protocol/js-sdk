@@ -15,29 +15,29 @@ The Lit JS SDK provides a comprehensive toolkit for integrating Lit Protocol's d
 
 ### 1. Client Setup Layer
 
-- **[Lit Client Setup](/sdk/getting-started/lit-client)**: Configure the Lit Protocol client
-- **[Auth Manager Setup](/sdk/getting-started/auth-manager)**: Set up authentication management with configurable storage options
-- **[Payment Manager Setup](/sdk/getting-started/payment-manager-setup)**: Configure payment processing capabilities
-- **[Auth Services Setup](/sdk/getting-started/auth-services)**: Configure auth services
+- **[Lit Client Setup](/sdk/getting-started/lit-client)**: Initialize and configure your connection to the Lit Protocol network
+- **[Auth Manager Setup](/sdk/getting-started/auth-manager)**: Manage authentication state and session persistence across your application
+- **[Payment Manager Setup](/sdk/getting-started/payment-manager-setup)**: Deposit funds and delegate payment for network compute resources
+- **[Auth Services Setup](/sdk/getting-started/auth-services)**: Configure backend services for minting PKPs and managing OAuth-based sign-in flows
 
 ### 2. Authentication Options
 
-- **[PKP Native Authentication](/sdk/auth/pkp-native-auth)**: Programmable Key Pair native authentication options
-- **[PKP Custom Authentication](/sdk/auth/pkp-custom-auth)**: Custom PKP authentication implementations
-- **[EOA Authentication](/sdk/auth/eoa/eoa-auth)**: Externally Owned Account authentication
+- **[PKP Native Authentication](/sdk/auth/pkp-native-auth)**: Authenticate using built-in methods like social login, WebAuthn, or OTP to create and access PKPs
+- **[PKP Custom Authentication](/sdk/auth/pkp-custom-auth)**: Implement custom authentication flows using your own identity providers or auth methods
+- **[EOA Authentication](/sdk/auth/eoa/eoa-auth)**: Use traditional wallet-based authentication with externally owned accounts
 
 ### 3. Auth Context Consumption / Core API Methods
 
-- **[pkpSign](/sdk/auth-context-consumption/pkp-sign)**: - Use your PKP to sign a message
-- **[executeJs](/sdk/auth-context-consumption/execute-js)**: - Use your PKP to execute a JavaScript function
-- **[encryptAndDecrypt](/sdk/auth-context-consumption/encrypt-and-decrypt)**: - Use your PKP to encrypt and decrypt data
+- **[pkpSign](/sdk/auth-context-consumption/pkp-sign)**: Sign transactions and messages using your authenticated PKP wallet
+- **[executeJs](/sdk/auth-context-consumption/execute-js)**: Run serverless JavaScript functions with decentralized access control and key management
+- **[encryptAndDecrypt](/sdk/auth-context-consumption/encrypt-and-decrypt)**: Encrypt data that can only be decrypted by authorized users or under specific conditions
 
 ### 4. PKP Wallet Management
 
-- **[PKP Permissions](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-permissions)**: - Manage PKP permissions
-- **[PKP Viem Account](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-viem-account)**: - Manage PKP Viem account
-- **[PKP View Helpers](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-view-helpers)**: - View PKP permissions
+- **[PKP Permissions](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-permissions)**: Control which users and applications can use your PKP for signing and decryption
+- **[PKP Viem Account](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-viem-account)**: Integrate your PKP with Viem for seamless Ethereum transaction building and signing
+- **[PKP View Helpers](/sdk/sdk-reference/lit-client/functions/createLitClient/pkp-view-helpers)**: Query and inspect PKP permissions and metadata from the blockchain
 
 ### 5. Network Status & Monitoring
 
-- **[Network Status](/sdk/resources/network-status)**: - Monitor real-time uptime and performance of Lit Protocol networks
+- **[Network Status](/sdk/resources/network-status)**: Check real-time health metrics and availability across Lit Protocol's decentralized network
