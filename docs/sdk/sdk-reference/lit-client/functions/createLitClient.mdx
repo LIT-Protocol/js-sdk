@@ -1046,6 +1046,33 @@ Create a Viem-compatible account backed by a PKP.
   </Expandable>
 </ResponseField>
 
+### utils.getDerivedKeyId
+
+Resolve the uncompressed PKP public key for a given derived key identifier.
+
+#### Parameters
+
+<ResponseField name="derivedKeyId" type="string" required>
+  0x-prefixed bytes32 identifier (for example, <code>keccak256(stringToBytes(`lit_action_${ipfsCid}`))</code>).
+</ResponseField>
+
+#### Returns
+
+<ResponseField name="result" type="Promise<string>">
+  0x-prefixed uncompressed public key as returned by the PubkeyRouter contract.
+</ResponseField>
+
+#### Example
+
+```ts
+import { keccak256, stringToBytes } from "viem";
+
+const derivedKeyId = keccak256(stringToBytes(`lit_action_${ipfsCid}`));
+const derivedPubkey = await litClient.utils.getDerivedKeyId(derivedKeyId);
+```
+
+> Note: this helper currently calls `PubkeyRouter.getDerivedPubkey` with the default Naga key set (`naga-keyset1`). See the [Derive Lit Action Public Keys guide](../../../../guides/lit-action-sign-as-action) for an end-to-end workflow.
+
 ### getChainConfig
 
 Returns the chain configuration for the current network.

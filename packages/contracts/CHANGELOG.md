@@ -1,5 +1,17 @@
 # @lit-protocol/contracts
 
+## 0.7.1
+
+### Patch Changes
+
+- 6bd3394: Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network.
+
+## 0.7.0
+
+### Minor Changes
+
+- 4d339d1: introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime
+
 ## 0.6.0
 
 ### Minor Changes

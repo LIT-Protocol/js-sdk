@@ -1072,6 +1072,35 @@ const signatures = {
         "stateMutability": "view",
         "type": "function"
       },
+      "getDerivedPubkey": {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "stakingContract",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "keySetId",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "derivedKeyId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getDerivedPubkey",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
       "getEthAddress": {
         "inputs": [
           {

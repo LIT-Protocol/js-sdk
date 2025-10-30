@@ -15,6 +15,7 @@
  */
 
 import { findMostCommonResponse } from '@lit-protocol/crypto';
+import { NodeError } from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
 import {
   ExecuteJsResponse,
@@ -268,16 +269,25 @@ export const handleResponse = async (
   );
 
   if (!result.success) {
+    const rawError = 'error' in result ? result.error : 'Unknown error';
     _logger.error(
       {
         requestId,
-        error: 'error' in result ? result.error : 'Unknown error',
+        error: rawError,
       },
       'executeJs:handleResponse: Batch failed'
     );
-    throw new Error(
-      `ExecuteJs batch failed: ${JSON.stringify(
-        'error' in result ? result.error : 'Unknown error'
+    throw new NodeError(
+      {
+        cause: new Error('ExecuteJs batch failed'),
+        info: {
+          operationName: 'executeJs',
+          requestId,
+          rawError,
+        },
+      },
+      `ExecuteJs batch failed for request ${requestId}: ${JSON.stringify(
+        rawError
       )}`
     );
   }
@@ -299,8 +309,17 @@ export const handleResponse = async (
   const successfulValues = values.filter((value) => value.success);
 
   if (successfulValues.length < threshold) {
-    throw new Error(
-      `Not enough successful executeJs responses. Expected ${threshold}, got ${successfulValues.length}`
+    throw new NodeError(
+      {
+        cause: new Error('Insufficient successful executeJs responses'),
+        info: {
+          operationName: 'executeJs',
+          requestId,
+          threshold,
+          successfulValues: successfulValues.length,
+        },
+      },
+      `Not enough successful executeJs responses for request ${requestId}. Expected ${threshold}, got ${successfulValues.length}`
     );
   }
 

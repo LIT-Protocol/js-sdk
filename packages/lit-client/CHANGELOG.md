@@ -1,5 +1,30 @@
 # @lit-protocol/lit-client
 
+## 8.2.2
+
+### Patch Changes
+
+- 0d20cbf: Node operations (pkpSign, decrypt, executeJs, session key signing) now emit request-aware errors, letting users share a requestID for log correlation.
+
+## 8.2.1
+
+### Patch Changes
+
+- 6bd3394: Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network.
+
+## 8.2.0
+
+### Minor Changes
+
+- aedfa59: LitClient now offers `getIpfsId` via `@lit-protocol/lit-client/ipfs`, letting apps compute CIDv0 hashes (e.g., `await getIpfsId('hello')`) while keeping bundles lean.
+
+  ```ts
+  import { getIpfsId } from '@lit-protocol/lit-client/ipfs';
+  const cid = await getIpfsId('hello');
+  ```
+
+- 4d339d1: introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime
+
 ## 8.1.0
 
 ### Minor Changes
