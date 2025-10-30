@@ -100,10 +100,19 @@ export const issueSessionFromContext = async (params: {
   // console.log('🔄 _userMaxPrices', _userMaxPrices);
 
   _userMaxPrices.forEach(({ url: nodeAddress, price }) => {
+    // ❗️❗️ TEMPORARY FIX: Convert to hex client-side so the node sees the
+    // intended wei cap until it supports decimal parsing.
+    // Reason: the node deserialises via `serde_json` into
+    // `ethers::types::U256`, which treats bare strings as hex. Sending our
+    // decimal bigint (e.g. "250000000000000000") therefore turns into the much
+    // larger 0x2500... amount.
+    const priceInWei = price;
+    const maxPriceHex = `0x${priceInWei.toString(16)}`;
+
     const toSign: SessionSigningTemplate = {
       ...sessionSigningTemplate,
       nodeAddress,
-      maxPrice: price.toString(),
+      maxPrice: maxPriceHex,
     };
 
     // console.log(`Setting maxprice for ${nodeAddress} to `, price.toString());

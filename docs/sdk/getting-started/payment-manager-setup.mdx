@@ -102,7 +102,7 @@ console.log(`Deposit successful: ${result.hash}`);
 
 </Steps>
 
-## Sponsoring Your Users
+## Payment Delegation / Sponsoring Your Users
 
 <Steps>
   <Step title="Define spending limit">
@@ -136,7 +136,19 @@ await paymentManager.delegatePaymentsBatch({
 ```
 
   </CodeGroup>
+  </Step>
 
+  <Step title="(Optional) Inspect Balance">
+
+  Optionally inspect Payer/Sponsor Ledger balance
+
+    <CodeGroup>
+    ```ts
+  const balance = await paymentManager.getBalance({
+      userAddress: viemAccount.address,
+  });
+    ```
+    </CodeGroup>
   </Step>
 
   <Step title="Remove users (optional)">

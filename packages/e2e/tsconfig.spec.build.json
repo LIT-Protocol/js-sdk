@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "../../dist/packages/e2e/specs",
+    "module": "CommonJS",
+    "target": "ES2022",
+    "declaration": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "types": ["jest"]
+  },
+  "include": ["src/**/*.spec.ts"],
+  "exclude": []
+}

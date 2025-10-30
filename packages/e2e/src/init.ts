@@ -4,6 +4,7 @@ import {
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
 import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
+import type { NagaLocalModule } from '@lit-protocol/networks';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import {
   NetworkName,
@@ -148,7 +149,7 @@ async function initInternal(
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
   await fundAccount(aliceViemAccount, masterAccount, networkModule, {
     ifLessThan: fundingAmount,
-    thenFundWith: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   let bobViemAccount: ViemAccount | undefined;
@@ -165,12 +166,12 @@ async function initInternal(
 
     await fundAccount(bobViemAccount, masterAccount, networkModule, {
       ifLessThan: fundingAmount,
-      thenFundWith: fundingAmount,
+      thenFund: fundingAmount,
     });
 
     await fundAccount(eveViemAccount, masterAccount, networkModule, {
       ifLessThan: fundingAmount,
-      thenFundWith: fundingAmount,
+      thenFund: fundingAmount,
     });
   }
 
@@ -352,7 +353,7 @@ async function initInternal(
 
   await fundAccount(alicePkpViemAccount, masterAccount, networkModule, {
     ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-    thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+    thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
   });
 
   /**

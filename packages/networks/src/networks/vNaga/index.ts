@@ -1,6 +1,9 @@
 // Naga Local
 export { nagaLocal } from './envs/naga-local';
-export type { NagaLocal as NagaLocalModule } from './envs/naga-local/naga-local.module';
+export type {
+  NagaLocal as NagaLocalModule,
+  NagaLocalContextOptions,
+} from './envs/naga-local/naga-local.module';
 
 // Naga Dev
 export { nagaDev } from './envs/naga-dev';

@@ -15,6 +15,7 @@ const localPackages = [
   'schemas',
   'types',
   'wasm',
+  'e2e',
   'wrapped-keys',
   'wrapped-keys-lit-actions',
 ];
