@@ -1,4 +1,8 @@
 import { walletDecrypt, walletEncrypt } from '@lit-protocol/crypto';
+import {
+  LitNodeClientBadConfigError,
+  NodeError,
+} from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
 import { NagaJitContext } from '@lit-protocol/types';
 import { bytesToHex, stringToBytes } from 'viem';
@@ -25,7 +29,15 @@ const encryptRequestData = (
   jitContext: NagaJitContext
 ): z.infer<typeof EncryptedVersion1Schema> => {
   if (!jitContext.keySet[url]) {
-    throw new Error(`No encryption keys found for node URL: ${url}`);
+    throw new LitNodeClientBadConfigError(
+      {
+        cause: new Error(`Missing encryption keys for node URL: ${url}`),
+        info: {
+          url,
+        },
+      },
+      `No encryption keys found for node URL: ${url}`
+    );
   }
 
   return walletEncrypt(
@@ -34,6 +46,11 @@ const encryptRequestData = (
     stringToBytes(JSON.stringify(requestData))
   );
 };
+
+interface DecryptBatchResponseOptions {
+  requestId?: string;
+  operationName?: string;
+}
 
 /**
  * Generic function to decrypt batch responses using JIT context
@@ -45,12 +62,28 @@ const encryptRequestData = (
 const decryptBatchResponse = <T>(
   encryptedResult: z.infer<typeof GenericEncryptedPayloadSchema>,
   jitContext: NagaJitContext,
-  extractResponseData: (decryptedJson: any) => T
+  extractResponseData: (decryptedJson: any) => T,
+  options: DecryptBatchResponseOptions = {}
 ): T[] => {
+  const operationName = options.operationName ?? 'Lit network operation';
+  const requestId = options.requestId;
   const parsedResult = GenericEncryptedPayloadSchema.parse(encryptedResult);
+  const baseMessage = requestId
+    ? `"${operationName}" failed for request ${requestId}`
+    : `"${operationName}" failed`;
 
   if (!parsedResult.success) {
-    throw new Error(`Batch decryption failed: ${JSON.stringify(parsedResult)}`);
+    throw new NodeError(
+      {
+        cause: new Error('Batch decryption failed'),
+        info: {
+          operationName,
+          requestId,
+          parsedResult,
+        },
+      },
+      `${baseMessage}. Batch decryption failed: ${JSON.stringify(parsedResult)}`
+    );
   }
 
   const decryptedValues: T[] = [];
@@ -81,8 +114,18 @@ const decryptBatchResponse = <T>(
     const keyData = verificationKeyToSecretKey[verificationKey];
 
     if (!keyData) {
-      throw new Error(
-        `No secret key found for verification key: ${verificationKey}`
+      throw new NodeError(
+        {
+          cause: new Error(
+            `No secret key found for verification key: ${verificationKey}`
+          ),
+          info: {
+            operationName,
+            requestId,
+            verificationKey,
+          },
+        },
+        `${baseMessage}. No secret key found for verification key: ${verificationKey}`
       );
     }
 
@@ -102,16 +145,36 @@ const decryptBatchResponse = <T>(
       const responseData = extractResponseData(parsedData);
       decryptedValues.push(responseData);
     } catch (decryptError) {
-      const errorMessage =
-        decryptError instanceof Error ? decryptError.message : 'Unknown error';
-      throw new Error(
-        `Failed to decrypt response ${i} with key from ${keyData.url}: ${errorMessage}`
+      const convertedError =
+        decryptError instanceof Error
+          ? decryptError
+          : new Error(String(decryptError));
+      throw new NodeError(
+        {
+          cause: convertedError,
+          info: {
+            operationName,
+            requestId,
+            responseIndex: i,
+            nodeUrl: keyData.url,
+          },
+        },
+        `${baseMessage}. Failed to decrypt response ${i} with key from ${keyData.url}: ${convertedError.message}`
       );
     }
   }
 
   if (decryptedValues.length === 0) {
-    throw new Error('No responses were successfully decrypted');
+    throw new NodeError(
+      {
+        cause: new Error('No responses were successfully decrypted'),
+        info: {
+          operationName,
+          requestId,
+        },
+      },
+      `${baseMessage}. No responses were successfully decrypted`
+    );
   }
 
   return decryptedValues;
@@ -120,13 +183,18 @@ const decryptBatchResponse = <T>(
 const handleEncryptedError = (
   errorResult: any,
   jitContext: NagaJitContext,
-  operationName: string
+  operationName: string,
+  requestId: string
 ): never => {
+  const baseMessage = requestId
+    ? `"${operationName}" failed for request ${requestId}`
+    : `"${operationName}" failed`;
+
   if (errorResult.error && errorResult.error.payload) {
     // Try to decrypt the error payload to get the actual error message
     try {
       _logger.info(
-        {},
+        { requestId },
         `"${operationName}": Attempting to decrypt error payload for detailed error information...`
       );
 
@@ -142,54 +210,97 @@ const handleEncryptedError = (
         jitContext,
         (decryptedJson) => {
           return decryptedJson.data || decryptedJson; // Return whatever we can get
+        },
+        {
+          operationName: `${operationName} error payload`,
+          requestId,
         }
       );
 
       _logger.error(
-        { decryptedErrorValues },
+        { requestId, decryptedErrorValues },
         `"${operationName}": Decrypted error details from nodes:`
       );
 
       // Use the actual error message from the nodes
       const firstError = decryptedErrorValues[0];
       if (firstError && firstError.error) {
-        const errorMessage = firstError.error;
+        const convertedError =
+          firstError.error instanceof Error
+            ? firstError.error
+            : new Error(String(firstError.error));
         const errorDetails = firstError.errorObject
           ? `. Details: ${firstError.errorObject}`
           : '';
-        throw new Error(
-          `"${operationName}" failed. ${errorMessage}${errorDetails}`
+        throw new NodeError(
+          {
+            cause: convertedError,
+            info: {
+              operationName,
+              requestId,
+              rawNodeError: firstError,
+            },
+          },
+          `${baseMessage}. ${convertedError.message}${errorDetails}`
         );
       }
 
       // If no specific error field, show the full decrypted response
-      throw new Error(
-        `"${operationName}" failed. ${JSON.stringify(decryptedErrorValues)}`
+      throw new NodeError(
+        {
+          cause: new Error('Node error payload missing expected structure'),
+          info: {
+            operationName,
+            requestId,
+            decryptedErrorValues,
+          },
+        },
+        `${baseMessage}. ${JSON.stringify(decryptedErrorValues)}`
       );
     } catch (decryptError) {
       _logger.error(
-        { decryptError },
+        { requestId, decryptError },
         `"${operationName}": Failed to decrypt error payload:`
       );
 
-      // If the decryptError is actually our thrown error with the node's message, re-throw it
-      if (
-        decryptError instanceof Error &&
-        decryptError.message.includes(`"${operationName}" failed.`)
-      ) {
+      if (decryptError instanceof NodeError) {
         throw decryptError;
       }
 
-      throw new Error(
-        `"${operationName}" failed. The nodes returned an encrypted error response that could not be decrypted. ` +
-          `This may indicate a configuration or network connectivity issue. ${JSON.stringify(
-            errorResult
-          )}. If you are running custom session sigs, it might mean the validation has failed. We will continue to improve this error message to provide more information.`
+      const convertedError =
+        decryptError instanceof Error
+          ? decryptError
+          : new Error(String(decryptError));
+
+      // If the decryptError is actually our thrown error with the node's message, re-throw it
+      throw new NodeError(
+        {
+          cause: convertedError,
+          info: {
+            operationName,
+            requestId,
+            rawError: errorResult,
+          },
+        },
+        `${baseMessage}. The nodes returned an encrypted error response that could not be decrypted. ${JSON.stringify(
+          errorResult
+        )}. If you are running custom session sigs, it might mean the validation has failed. We will continue to improve this error message to provide more information.`
       );
     }
   } else {
-    throw new Error(
-      `"${operationName}" failed. ${JSON.stringify(errorResult)}`
+    const rawError = errorResult?.error ?? errorResult;
+    const normalizedCause =
+      rawError instanceof Error ? rawError : new Error(String(rawError));
+    throw new NodeError(
+      {
+        cause: normalizedCause,
+        info: {
+          operationName,
+          requestId,
+          rawError: errorResult,
+        },
+      },
+      `${baseMessage}. ${JSON.stringify(errorResult)}`
     );
   }
 };
