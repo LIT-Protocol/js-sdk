@@ -4,6 +4,7 @@ import {
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
 import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
+import type { NagaLocalModule } from '@lit-protocol/networks';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
@@ -125,7 +126,38 @@ export const init = async (
 
   // Dynamic import of network module
   const networksModule = await import('@lit-protocol/networks');
-  const _baseNetworkModule = networksModule[config.importName];
+  let _baseNetworkModule = networksModule[config.importName];
+
+  if (_network === 'naga-local') {
+    const localContextPath = process.env['NAGA_LOCAL_CONTEXT_PATH'];
+    if (localContextPath) {
+      // Type guard: verify the module exposes withLocalContext so TypeScript narrows it to NagaLocal.
+      const isNagaLocalModule = (module: unknown): module is NagaLocalModule =>
+        !!module &&
+        typeof (module as { withLocalContext?: unknown }).withLocalContext ===
+          'function';
+
+      if (isNagaLocalModule(_baseNetworkModule)) {
+        const localContextName = process.env['NETWORK'];
+
+        console.log(
+          '✅ Loading naga-local signatures from NAGA_LOCAL_CONTEXT_PATH:',
+          localContextPath
+        );
+
+        const nagaLocalModule: NagaLocalModule = _baseNetworkModule;
+
+        _baseNetworkModule = await nagaLocalModule.withLocalContext({
+          networkContextPath: localContextPath,
+          networkName: localContextName,
+        });
+      } else {
+        console.warn(
+          '⚠️ NAGA_LOCAL_CONTEXT_PATH is set but nagaLocal.withLocalContext is unavailable in the current networks build.'
+        );
+      }
+    }
+  }
 
   // Optional RPC override from env
   const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
@@ -162,17 +194,17 @@ export const init = async (
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
   await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
-    thenFundWith: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   await fundAccount(bobViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
-    thenFundWith: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   await fundAccount(eveViemAccount, masterAccount, _networkModule, {
     ifLessThan: fundingAmount,
-    thenFundWith: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   /**
@@ -309,7 +341,7 @@ export const init = async (
 
   await fundAccount(alicePkpViemAccount, masterAccount, _networkModule, {
     ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-    thenFundWith: LOCAL_NETWORK_FUNDING_AMOUNT,
+    thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
   });
 
   /**

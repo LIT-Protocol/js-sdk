@@ -1,23 +1,43 @@
 {
   "name": "@lit-protocol/e2e",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "Lit Protocol E2E testing package for running comprehensive integration tests",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "main": "src/index.js",
   "type": "commonjs",
-  "types": "dist/index.d.ts",
+  "types": "src/index.d.ts",
+  "bin": {
+    "lit-e2e": "bin/run-e2e.cjs"
+  },
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./specs/e2e": {
+      "types": "./src/index.d.ts",
+      "default": "./specs/e2e.spec.ts"
+    },
+    "./jest-config": {
+      "default": "./jest.e2e.package.config.cjs"
+    },
+    "./cli": {
+      "default": "./bin/run-e2e.cjs"
+    },
+    "./babel-config": {
+      "default": "./babel.config.cjs"
+    },
+    "./babel.config.cjs": "./babel.config.cjs"
   },
   "files": [
-    "dist",
+    "bin",
+    "src",
+    "specs",
+    "babel.config.cjs",
+    "jest.e2e.package.config.cjs",
+    "CHANGELOG.md",
     "README.md",
     "example.js"
   ],
-  "scripts": {},
   "keywords": [
     "lit-protocol",
     "e2e",
@@ -31,6 +51,35 @@
   "license": "MIT",
   "dependencies": {
     "@lit-protocol/lit-status-sdk": "0.1.8",
+    "@babel/core": "7.28.5",
+    "@babel/preset-env": "7.28.3",
+    "@babel/preset-typescript": "7.27.1",
+    "@ethersproject/transactions": "5.7.0",
+    "@lit-protocol/nacl": "7.1.1",
+    "@lit-protocol/uint8arrays": "7.1.1",
+    "@noble/curves": "1.8.1",
+    "@noble/hashes": "1.8.0",
+    "@openagenda/verror": "3.1.4",
+    "@simplewebauthn/browser": "7.2.0",
+    "@simplewebauthn/typescript-types": "7.0.0",
+    "@t3-oss/env-core": "0.13.8",
+    "@typechain/ethers-v6": "0.5.1",
+    "@wagmi/core": "2.22.1",
+    "babel-jest": "30.2.0",
+    "base64url": "3.0.1",
+    "bs58": "6.0.0",
+    "cbor-web": "9.0.2",
+    "depd": "2.0.0",
+    "ethers": "5.7.2",
+    "jose": "4.14.4",
+    "pako": "2.1.0",
+    "pino": "9.6.0",
+    "pino-caller": "4.0.0",
+    "siwe": "2.3.2",
+    "siwe-recap": "0.0.2-alpha.0",
+    "stytch": "12.4.0",
+    "tslib": "2.8.1",
+    "typechain": "8.3.2",
     "zod": "3.24.3"
   },
   "devDependencies": {
@@ -39,11 +88,21 @@
   },
   "peerDependencies": {
     "@lit-protocol/access-control-conditions": "workspace:*",
+    "@lit-protocol/access-control-conditions-schemas": "workspace:*",
     "@lit-protocol/auth": "workspace:*",
+    "@lit-protocol/auth-helpers": "workspace:*",
+    "@lit-protocol/constants": "workspace:*",
+    "@lit-protocol/contracts": "workspace:*",
+    "@lit-protocol/crypto": "workspace:*",
+    "@lit-protocol/logger": "workspace:*",
     "@lit-protocol/lit-client": "workspace:*",
     "@lit-protocol/networks": "workspace:*",
     "@lit-protocol/schemas": "workspace:*",
-    "viem": "2.38.x"
+    "@lit-protocol/types": "workspace:*",
+    "@lit-protocol/wasm": "workspace:*",
+    "jest": "30.2.0",
+    "viem": "2.38.3",
+    "@types/jest": "30.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

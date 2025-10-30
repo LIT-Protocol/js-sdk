@@ -34,12 +34,22 @@ interface ContractInfo {
   name: string;
 }
 
-interface GenerateSignaturesOptions {
+export interface GenerateSignaturesOptions {
   jsonFilePath: string;
   networkName?: string;
   outputDir?: string;
   useScriptDirectory?: boolean; // If true, paths are relative to script location
   callerPath?: string; // The import.meta.url of the calling script
+}
+
+export interface BuildSignaturesFromContextOptions
+  extends Omit<GenerateSignaturesOptions, 'outputDir'> {}
+
+export interface BuildSignaturesFromContextResult {
+  signatures: GeneratedSignatures;
+  networkName: string;
+  resolvedJsonPath: string;
+  baseDirectory: string;
 }
 
 /**
@@ -179,6 +189,43 @@ function generateAbiSignatures(networkData: NetworkCache) {
   return signatures;
 }
 
+export type GeneratedSignatures = ReturnType<typeof generateAbiSignatures>;
+
+export function buildSignaturesFromContext(
+  options: BuildSignaturesFromContextOptions
+): BuildSignaturesFromContextResult {
+  const {
+    jsonFilePath,
+    networkName = 'custom-network',
+    useScriptDirectory = false,
+    callerPath,
+  } = options;
+
+  if (useScriptDirectory && !callerPath) {
+    throw new Error(
+      'callerPath (import.meta.url) is required when useScriptDirectory is true'
+    );
+  }
+
+  const baseDirectory = getBaseDirectory(useScriptDirectory, callerPath);
+  const resolvedJsonPath = resolvePath(jsonFilePath, baseDirectory);
+
+  console.log(`📝 Processing custom network context: ${resolvedJsonPath}`);
+
+  const rawJsonData = JSON.parse(fs.readFileSync(resolvedJsonPath, 'utf8'));
+  const jsonData = convertToNetworkCache(rawJsonData, networkName);
+
+  console.log('📊 Generating signatures...');
+  const signatures = generateAbiSignatures(jsonData);
+
+  return {
+    signatures,
+    networkName,
+    resolvedJsonPath,
+    baseDirectory,
+  };
+}
+
 /**
  * Generates signature files from a network context JSON file
  * @param options - Configuration options
@@ -187,44 +234,19 @@ function generateAbiSignatures(networkData: NetworkCache) {
 export async function generateSignaturesFromContext(
   options: GenerateSignaturesOptions
 ): Promise<void> {
-  const {
-    jsonFilePath,
-    networkName = 'custom-network',
-    outputDir = './dist/signatures',
-    useScriptDirectory = false,
-    callerPath,
-  } = options;
-
   try {
-    if (useScriptDirectory && !callerPath) {
-      throw new Error(
-        'callerPath (import.meta.url) is required when useScriptDirectory is true'
-      );
-    }
+    const { signatures, networkName, resolvedJsonPath, baseDirectory } =
+      buildSignaturesFromContext(options);
 
-    const baseDir = getBaseDirectory(useScriptDirectory, callerPath);
-    // Don't force relative for jsonFilePath (allow absolute paths)
-    const resolvedJsonPath = resolvePath(jsonFilePath, baseDir);
-    // Force relative for outputDir (always relative to script)
-    const resolvedOutputDir = resolvePath(outputDir, baseDir, true);
+    const outputDir = options.outputDir ?? './dist/signatures';
+    const resolvedOutputDir = resolvePath(outputDir, baseDirectory, true);
 
     // Ensure output directory exists
     if (!fs.existsSync(resolvedOutputDir)) {
       fs.mkdirSync(resolvedOutputDir, { recursive: true });
     }
 
-    console.log(`📝 Processing custom network context: ${resolvedJsonPath}`);
     console.log(`📁 Output directory: ${resolvedOutputDir}`);
-
-    // Read and parse the JSON file
-    const rawJsonData = JSON.parse(fs.readFileSync(resolvedJsonPath, 'utf8'));
-
-    // Convert to NetworkCache format
-    const jsonData = convertToNetworkCache(rawJsonData, networkName);
-
-    // Generate signatures using the standard format
-    console.log('📊 Generating signatures...');
-    const signatures = generateAbiSignatures(jsonData);
 
     // Write signatures to file
     const outputPath = path.join(resolvedOutputDir, `${networkName}.js`);

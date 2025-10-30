@@ -11,7 +11,22 @@
         "outputPath": "dist/packages/e2e",
         "main": "packages/e2e/src/index.ts",
         "tsConfig": "packages/e2e/tsconfig.lib.json",
-        "assets": ["packages/e2e/*.md", "packages/e2e/example.js"],
+        "assets": [
+          "packages/e2e/*.md",
+          "packages/e2e/example.js",
+          "packages/e2e/babel.config.cjs",
+          "packages/e2e/jest.e2e.package.config.cjs",
+          {
+            "input": "packages/e2e/src",
+            "glob": "e2e.spec.ts",
+            "output": "specs"
+          },
+          {
+            "input": "packages/e2e/bin",
+            "glob": "**/*.cjs",
+            "output": "bin"
+          }
+        ],
         "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": ["^build"]

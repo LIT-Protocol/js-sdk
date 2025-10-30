@@ -1,5 +1,12 @@
 # @lit-protocol/auth-services
 
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [761174a]
+  - @lit-protocol/contracts@0.8.0
+
 ## 2.0.5
 
 ### Patch Changes
