@@ -55,7 +55,20 @@ LOCAL_MASTER_ACCOUNT=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf
 NETWORK=<network-name> pnpm run test:e2e all
 ```
 
+## QA Starter Kit workflow
+
+When you need to validate SDK integrations against backend or node features, lean on the [QA Starter Kit](https://github.com/LIT-Protocol/QA-kit). That repo installs published packages, so it mirrors how downstream teams will consume the SDK.
+
+1. The node team opens a feature branch for their service.
+2. Create a matching SDK branch and build the integration for that node change.
+3. Publish a snapshot (prerelease) of the SDK packages so the QA Starter Kit can install them from npm.
+4. Point the QA Starter Kit to that snapshot to perform the e2e flow before promoting the release.
+
+This keeps QA aligned with the packages that will actually ship and avoids the drift that comes with local linking.
+
 # Running it against a local network
+
+Generate a fresh `networkContext.json` for local nodes with `pnpm run gen:local-network-context` before running the e2e tests against the `naga-local` local network.
 
 ## Required Environment Variables
 
@@ -131,6 +144,18 @@ This command must be run manually and is NOT part of the build process, as it re
 ```shell
 DEV_BRANCH=develop GH_API_KEY=github_pat_xxx pnpm run sync:contracts
 ```
+
+## Keeping the docs changelog in sync with the public site
+
+Use the `sync:docs-changelog` script to refresh the changelog that powers [naga.developer.litprotocol.com/changelog](https://naga.developer.litprotocol.com/changelog).
+
+```shell
+pnpm run sync:docs-changelog
+```
+
+> Note: we currently run this manually after the Changeset PR lands in the `naga` main branch, though we expect to automate it in CI in the future.
+
+The script collates the latest entries from `packages/*/CHANGELOG.md` and rewrites the target `changelog.mdx`. Commit and publish the regenerated file in the docs repo so the public changelog stays current.
 
 ---
 
