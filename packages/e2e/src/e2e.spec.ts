@@ -174,7 +174,9 @@ describe('all', () => {
     });
   });
 
-  describe('Tickets', () => {
-    registerPaymentDelegationTicketSuite();
-  });
+  if (process.env['NETWORK'] !== 'naga-dev') {
+    describe('paid networks only', () => {
+      registerPaymentDelegationTicketSuite();
+    });
+  }
 });
