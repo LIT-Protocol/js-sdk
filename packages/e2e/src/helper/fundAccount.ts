@@ -32,7 +32,7 @@ async function getNextNonce(
   globalNonceManager.set(accountAddress, nextNonce + 1);
 
   console.log(
-    `🔢 Using nonce ${nextNonce} for ${accountAddress} (network: ${networkNonce}, cached: ${
+    `- Using nonce ${nextNonce} for ${accountAddress} (network: ${networkNonce}, cached: ${
       cachedNextNonce ?? 'unset'
     })`
   );
@@ -78,14 +78,30 @@ async function sendTransactionWithRetry(
 }
 
 export const fundAccount = async (
-  recipientAccount: Account,
+  recipientAccount: Account | `0x${string}`,
   sponsorAccount: Account,
   networkModule: any,
   options?: {
     ifLessThan?: string;
-    thenFundWith?: string;
+    thenFund?: string;
+    label?: string;
   }
 ) => {
+  console.log(
+    `--- Funding ${
+      options.label === undefined ? '' : options.label
+    } account ---`
+  );
+  let recipientAddress: `0x${string}`;
+
+  if (recipientAccount.hasOwnProperty('address')) {
+    recipientAccount = recipientAccount as Account;
+    recipientAddress = recipientAccount.address;
+  } else {
+    recipientAccount = recipientAccount as `0x${string}`;
+    recipientAddress = recipientAccount;
+  }
+
   const defaultRpcUrl = networkModule.getChainConfig().rpcUrls.default.http[0];
   const isLocalNetwork = defaultRpcUrl.includes('127.0.0.1');
   const customRpcUrl = isLocalNetwork
@@ -93,11 +109,11 @@ export const fundAccount = async (
     : process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 
   if (customRpcUrl) {
-    console.log(`🔧 Using custom E2E RPC URL: ***${customRpcUrl.slice(-6)}`);
+    console.log(`- Using custom E2E RPC URL:`, `***${customRpcUrl.slice(-6)}`);
   } else if (isLocalNetwork) {
-    console.log(`🔧 Using local Anvil RPC URL: ${defaultRpcUrl}`);
+    console.log(`- Using local Anvil RPC URL:`, defaultRpcUrl);
   } else {
-    console.log(`🔧 Using default network RPC URL: ${defaultRpcUrl}`);
+    console.log(`- Using default network RPC URL:`, defaultRpcUrl);
   }
 
   // check account balance
@@ -107,12 +123,12 @@ export const fundAccount = async (
   });
 
   const balance = await publicClient.getBalance({
-    address: recipientAccount.address,
+    address: recipientAddress,
   });
 
   // If balance is less than 1 ETH, fund the account with 0.001 ETH
   if (balance <= parseEther(options?.ifLessThan || '0.001')) {
-    console.log('💰 Funding account with', options?.thenFundWith, 'ETH');
+    console.log(`- Funding ${recipientAddress} with ${options?.thenFund} ETH`);
 
     const walletClient = createWalletClient({
       account: sponsorAccount,
@@ -123,8 +139,8 @@ export const fundAccount = async (
     const nonce = await getNextNonce(publicClient, sponsorAccount.address);
 
     const transactionRequest = {
-      to: recipientAccount.address,
-      value: parseEther(options?.thenFundWith || '1'),
+      to: recipientAddress,
+      value: parseEther(options?.thenFund || '1'),
       chain: networkModule.getChainConfig(),
       nonce,
       account: sponsorAccount, // Add account for retry logic
@@ -136,8 +152,12 @@ export const fundAccount = async (
       publicClient
     );
 
-    console.log('✅ Topped up account with', options?.thenFundWith, 'ETH');
+    console.log(
+      `- Topped up account ${recipientAddress} with`,
+      options?.thenFund,
+      'ETH\n'
+    );
   } else {
-    console.log('✅ Account has enough balance');
+    console.log(`- Account ${recipientAddress} has enough balance\n`);
   }
 };

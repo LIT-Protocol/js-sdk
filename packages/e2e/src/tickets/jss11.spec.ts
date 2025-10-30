@@ -24,7 +24,7 @@ describe('JSS-11: PKP Management and Pagination', () => {
 
     await fundAccount(randomViemAccount, masterViemAccount, NETWORK_MODULE, {
       ifLessThan: '0',
-      thenFundWith: LIVE_NETWORK_FUNDING_AMOUNT,
+      thenFund: LIVE_NETWORK_FUNDING_AMOUNT,
     });
 
     viemAccountAuthData = await ViemAccountAuthenticator.authenticate(
