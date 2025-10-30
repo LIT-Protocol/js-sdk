@@ -1,5 +1,11 @@
 # @lit-protocol/auth-helpers
 
+## 8.1.1
+
+### Patch Changes
+
+- 6bd3394: Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network.
+
 ## 8.1.0
 
 ### Minor Changes

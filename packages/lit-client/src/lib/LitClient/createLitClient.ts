@@ -21,7 +21,13 @@ import {
   PaymentManager,
 } from '@lit-protocol/networks';
 
-import { DEV_PRIVATE_KEY } from '@lit-protocol/constants';
+import {
+  DEV_PRIVATE_KEY,
+  LitNodeClientBadConfigError,
+  LitNodeClientNotReadyError,
+  ParamsMissingError,
+  UnsupportedMethodError,
+} from '@lit-protocol/constants';
 import {
   AuthContextSchema2,
   AuthData,
@@ -103,7 +109,15 @@ export const createLitClient = async ({
     case 'datil':
       return _createDatilLitClient();
     default:
-      throw new Error(`Network module ${network.id} not supported`);
+      throw new UnsupportedMethodError(
+        {
+          cause: new Error('Unsupported network module'),
+          info: {
+            networkId: network.id,
+          },
+        },
+        `Network module ${network.id} not supported`
+      );
   }
 };
 
@@ -175,7 +189,13 @@ export const _createNagaLitClient = async (
 
   // Initial check to ensure handshakeResult is available after setup
   if (!_stateManager.getCallbackResult()) {
-    throw new Error(
+    throw new LitNodeClientNotReadyError(
+      {
+        cause: new Error('Handshake result missing after initialization'),
+        info: {
+          operation: 'initialiseClient',
+        },
+      },
       'Initial handshake result is not available from state manager. LitClient cannot be initialized.'
     );
   }
@@ -196,7 +216,13 @@ export const _createNagaLitClient = async (
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
     if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error('Handshake result unavailable for pkpSign'),
+          info: {
+            operation: 'pkpSign',
+          },
+        },
         'Handshake result is not available from state manager at the time of pkpSign.'
       );
     }
@@ -276,7 +302,13 @@ export const _createNagaLitClient = async (
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
     if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error('Handshake result unavailable for signSessionKey'),
+          info: {
+            operation: 'signSessionKey',
+          },
+        },
         'Handshake result is not available from state manager at the time of pkpSign.'
       );
     }
@@ -307,7 +339,8 @@ export const _createNagaLitClient = async (
     return await networkModule.api.signSessionKey.handleResponse(
       result as any,
       params.requestBody.pkpPublicKey,
-      jitContext
+      jitContext,
+      requestId
     );
   }
 
@@ -322,7 +355,15 @@ export const _createNagaLitClient = async (
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
     if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error(
+            'Handshake result unavailable for signCustomSessionKey'
+          ),
+          info: {
+            operation: 'signCustomSessionKey',
+          },
+        },
         'Handshake result is not available from state manager at the time of pkpSign.'
       );
     }
@@ -333,7 +374,15 @@ export const _createNagaLitClient = async (
     );
 
     if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error(
+            'Handshake result unavailable for signCustomSessionKey'
+          ),
+          info: {
+            operation: 'signCustomSessionKey',
+          },
+        },
         'Handshake result is not available from state manager at the time of pkpSign.'
       );
     }
@@ -375,7 +424,13 @@ export const _createNagaLitClient = async (
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
     if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error('Handshake result unavailable for executeJs'),
+          info: {
+            operation: 'executeJs',
+          },
+        },
         'Handshake result is not available from state manager at the time of executeJs.'
       );
     }
@@ -489,13 +544,27 @@ export const _createNagaLitClient = async (
     const currentHandshakeResult = _stateManager.getCallbackResult();
 
     if (!currentHandshakeResult) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error('Handshake result unavailable for encrypt'),
+          info: {
+            operation: 'encrypt',
+          },
+        },
         'Handshake result is not available from state manager at the time of encrypt.'
       );
     }
 
     if (!currentHandshakeResult.coreNodeConfig?.subnetPubKey) {
-      throw new Error('subnetPubKey cannot be null');
+      throw new LitNodeClientBadConfigError(
+        {
+          cause: new Error('Missing subnetPubKey in handshake result'),
+          info: {
+            operation: 'encrypt',
+          },
+        },
+        'subnetPubKey cannot be null'
+      );
     }
 
     // ========== Convert data to Uint8Array ==========
@@ -527,7 +596,15 @@ export const _createNagaLitClient = async (
 
     // ========== Validate Params ==========
     if (!_validateEncryptionParams(params)) {
-      throw new Error(
+      throw new ParamsMissingError(
+        {
+          cause: new Error(
+            'Required encryption access control parameters missing'
+          ),
+          info: {
+            operation: 'encrypt',
+          },
+        },
         'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
       );
     }
@@ -540,7 +617,13 @@ export const _createNagaLitClient = async (
       await getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
-      throw new Error(
+      throw new ParamsMissingError(
+        {
+          cause: new Error('Failed to hash provided access control parameters'),
+          info: {
+            operation: 'encrypt',
+          },
+        },
         'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
       );
     }
@@ -606,7 +689,13 @@ export const _createNagaLitClient = async (
     const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
 
     if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error('Handshake result unavailable for decrypt'),
+          info: {
+            operation: 'decrypt',
+          },
+        },
         'Handshake result is not available from state manager at the time of decrypt.'
       );
     }
@@ -617,18 +706,40 @@ export const _createNagaLitClient = async (
     );
 
     if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new Error(
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error('Handshake result unavailable for decrypt'),
+          info: {
+            operation: 'decrypt',
+          },
+        },
         'Handshake result is not available from state manager at the time of decrypt.'
       );
     }
 
     if (!currentHandshakeResult.coreNodeConfig?.subnetPubKey) {
-      throw new Error('subnetPubKey cannot be null');
+      throw new LitNodeClientBadConfigError(
+        {
+          cause: new Error('Missing subnetPubKey in handshake result'),
+          info: {
+            operation: 'decrypt',
+          },
+        },
+        'subnetPubKey cannot be null'
+      );
     }
 
     // ========== Validate Params ==========
     if (!_validateEncryptionParams(params)) {
-      throw new Error(
+      throw new ParamsMissingError(
+        {
+          cause: new Error(
+            'Required decryption access control parameters missing'
+          ),
+          info: {
+            operation: 'decrypt',
+          },
+        },
         'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
       );
     }
@@ -641,7 +752,13 @@ export const _createNagaLitClient = async (
       await getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
-      throw new Error(
+      throw new ParamsMissingError(
+        {
+          cause: new Error('Failed to hash provided access control parameters'),
+          info: {
+            operation: 'decrypt',
+          },
+        },
         'You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions'
       );
     }
@@ -950,6 +1067,7 @@ export const _createNagaLitClient = async (
       pkpPublicKey: string | Hex;
       authContext: AuthContextSchema2;
       chainConfig: Chain;
+      userMaxPrice?: bigint;
     }) => {
       const _pkpPublicKey = HexPrefixedSchema.parse(params.pkpPublicKey);
 
@@ -965,6 +1083,7 @@ export const _createNagaLitClient = async (
             toSign: data,
             authContext: params.authContext,
             bypassAutoHashing: options?.bypassAutoHashing,
+            userMaxPrice: params.userMaxPrice,
           });
 
           return res.signature;
@@ -1013,7 +1132,15 @@ export const _createNagaLitClient = async (
 type DatilNetworkModule = LitNetworkModule;
 
 export const _createDatilLitClient = async () => {
-  throw new Error('Datil is not supported yet');
+  throw new UnsupportedMethodError(
+    {
+      cause: new Error('Datil network module is not implemented'),
+      info: {
+        networkId: 'datil',
+      },
+    },
+    'Datil is not supported yet'
+  );
 };
 
 export type LitClientType = Awaited<ReturnType<typeof createLitClient>>;
