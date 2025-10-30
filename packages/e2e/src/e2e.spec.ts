@@ -16,6 +16,7 @@ import {
   init,
 } from '@lit-protocol/e2e';
 import type { AuthContext } from '@lit-protocol/e2e';
+import { registerPaymentDelegationTicketSuite } from './tickets/delegation.suite';
 
 const RPC_OVERRIDE = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 if (RPC_OVERRIDE) {
@@ -171,5 +172,9 @@ describe('all', () => {
 
       it('eoaNativeAuthFlow', () => createEoaNativeAuthFlowTest(ctx)());
     });
+  });
+
+  describe('Tickets', () => {
+    registerPaymentDelegationTicketSuite();
   });
 });
