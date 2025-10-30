@@ -1,5 +1,11 @@
 # @lit-protocol/networks
 
+## 8.2.2
+
+### Patch Changes
+
+- 0d20cbf: Node operations (pkpSign, decrypt, executeJs, session key signing) now emit request-aware errors, letting users share a requestID for log correlation.
+
 ## 8.2.1
 
 ### Patch Changes
