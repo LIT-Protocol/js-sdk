@@ -152,7 +152,18 @@ async function initInternal(
     );
   }
 
-  // Fund accounts based on network type
+  /**
+   * ====================================
+   * Initialise the LitClient
+   * ====================================
+   */
+  const litClient = await createLitClient({ network: _networkModule });
+
+  /**
+   * ====================================
+   * Fund accounts based on network type
+   * ====================================
+   */
   const isLocal = config.type === 'local';
   const masterAccount = isLocal ? localMasterAccount : liveMasterAccount;
   const fundingAmount = isLocal
@@ -187,13 +198,6 @@ async function initInternal(
       thenFundWith: fundingAmount,
     });
   }
-
-  /**
-   * ====================================
-   * Initialise the LitClient
-   * ====================================
-   */
-  const litClient = await createLitClient({ network: _networkModule });
 
   /**
    * ====================================

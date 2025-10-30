@@ -6,7 +6,7 @@ description: "Stytch TOTP 2FA Authentication is a secondary authentication metho
 # Prerequisites
 
 <Warning>
-  ⚠️ Backend Required: This authentication method requires a backend service
+  Backend Required: This authentication method requires a backend service
   that handles Stytch Email OTP operations. The auth service already has the
   implementation in place with the `/stytch/email/send-otp` and
   `/stytch/email/verify-otp` endpoints, but they are disabled by default. Simply
@@ -121,7 +121,7 @@ const authData = await StytchWhatsAppOtpAuthenticator.authenticate({
 
     <Step title="Generate Auth Context">
 
-Use your newly minted PKP to create an AuthContext. This method will cache two things:
+Use your PKP's public key to create an AuthContext. This method will cache two things:
 
 1. session key pair - a temporary cryptographic key pair generated on the client side that acts as a temporary identity for the client application. It consists of:
    - A public key - shared with the Lit nodes
@@ -131,7 +131,7 @@ Use your newly minted PKP to create an AuthContext. This method will cache two t
 ```ts
 const authContext = await authManager.createPkpAuthContext({
   authData: authData, // <-- Retrieved earlier
-  pkpPublicKey: pkpInfo.pubkey, // <-- Minted earlier
+  pkpPublicKey: pkpInfo.pubkey,
   authConfig: {
     resources: [
       ["pkp-signing", "*"],

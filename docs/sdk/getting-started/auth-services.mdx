@@ -20,11 +20,35 @@ The Lit Protocol Auth Services package helps you run the infrastructure required
 
 Lit hosts default Auth Service instances so you can build without deploying infrastructure on day one. Point your application to the URL that matches the network you're targeting:
 
-| Network     | Auth Service URL                            | Login Server                   | Usage |
-| ----------- | ------------------------------------------- | ------------------------------ | ----- |
-| `naga-dev`  | `https://naga-dev-auth-service.getlit.dev`  | `https://login.litgateway.com` | Use Lit's hosted endpoints while you prototype. Configure your SDK or environment variables with the URLs in this table. |
-| `naga-test` | `https://naga-test-auth-service.getlit.dev` | `https://login.litgateway.com` | Start with the hosted endpoints for staging, then switch to your own infrastructure as you scale. |
-| `naga`      | `Run your own (recommended)`                | `Run your own (recommended)`   | Lit does not operate public Auth Service or Login Server endpoints for `naga` |
+<Tabs>
+  <Tab title="Naga Dev">
+    - **Auth Service URL**
+    ```
+    https://naga-dev-auth-service.getlit.dev
+    ```
+    - **Login Server**
+    ```
+    https://login.litgateway.com
+    ```
+    - **Usage:** Use Lit's hosted endpoints while you prototype. Configure your SDK or environment variables with these URLs.
+  </Tab>
+
+  <Tab title="Naga Test">
+    - **Auth Service URL**
+    ```
+    https://naga-test-auth-service.getlit.dev
+    ```
+    - **Login Server**
+    ```
+    https://login.litgateway.com
+    ```
+    - **Usage:** Start with the hosted endpoints for staging, then switch to your own infrastructure as you scale.
+  </Tab>
+
+  <Tab title="Naga Mainnet">
+    Lit does not operate public Auth Service or Login Server endpoints for `naga`. You must deploy your own infrastructure for production.
+  </Tab>
+</Tabs>
 
 <Note>
   The hosted services are best suited for prototyping. Self-host the Auth
@@ -32,10 +56,29 @@ Lit hosts default Auth Service instances so you can build without deploying infr
   configuration.
 </Note>
 
+## Payment Delegation APIs
+
+The Auth Service also exposes lightweight endpoints that sponsor user requests on the network. These are the same APIs the Lit SDK calls when you use `litClient.authService.registerPayer` / `delegateUsers` from the Payment Manager guide.
+
+- `POST /register-payer`
+  - Headers: `x-api-key`.
+  - Behaviour: generates a random `payerSecretKey`, hashes it with the API key, and derives a child wallet from `LIT_DELEGATION_ROOT_MNEMONIC`.
+  - Response: `{ success, payerWalletAddress, payerSecretKey }`. The service **does not** persist the secret—you must store it securely (KMS, vault, etc.).
+  - Rotation: call the endpoint again with the same API key to rotate the secret and derive a new child wallet.
+- `POST /add-users`
+  - Headers: `x-api-key`, `payer-secret-key`; body is a JSON array of user addresses.
+  - Behaviour: recomputes the same child wallet on the fly and calls `PaymentManager.delegatePaymentsBatch` so the payer sponsors those users.
+
+<Tip>
+  Running the Auth Service yourself keeps the derivation mnemonic and payer secrets inside your infrastructure. The Lit-hosted instance is great for quick starts, but you remain responsible for storing the returned `payerSecretKey`.
+</Tip>
+
+If you prefer not to run an Auth Service at all, you can still sponsor users manually: create a payer wallet, fund it, and call `paymentManager.delegatePayments*` directly from your backend. See [Payment Manager Setup](/sdk/getting-started/payment-manager-setup#sponsoring-your-users-capacity-delegation-replacement) for sample code.
+
 
 ### Install the SDK
 
-Run the following command to install the SDK: (Only available using Bun to install at the moment.)
+Run the following command to install the SDK:
 
 <CodeGroup>
 
@@ -127,30 +170,28 @@ await startAuthServiceWorker();
     Setup the environment variables.
 
     ```bash
+    # Network configuration (supports naga-dev, naga-test, naga)
+    NETWORK=naga-dev
+    LOG_LEVEL=debug
 
-# Network configuration (supports naga-dev, naga-test, naga)
-NETWORK=naga-dev
-LOG_LEVEL=debug
+    # Lit transaction sender settings
+    LIT_TXSENDER_RPC_URL=https://yellowstone-rpc.litprotocol.com
+    LIT_TXSENDER_PRIVATE_KEY=your_private_key
+    LIT_DELEGATION_ROOT_MNEMONIC=
 
-# Lit transaction sender settings
-LIT_TXSENDER_RPC_URL=https://yellowstone-rpc.litprotocol.com
-LIT_TXSENDER_PRIVATE_KEY=your_private_key
-LIT_DELEGATION_ROOT_MNEMONIC=
+    # Redis settings for job queue and caching
+    REDIS_URL=redis://user:pass@redis-host.com:12345
+    PORT=6380
 
-# Redis settings for job queue and caching
-REDIS_URL=redis://user:pass@redis-host.com:12345
-PORT=6380
+    # Rate limiting configuration
+    ENABLE_API_KEY_GATE=true
+    MAX_REQUESTS_PER_WINDOW=10
+    WINDOW_MS=10000
 
-# Rate limiting configuration
-ENABLE_API_KEY_GATE=true
-MAX_REQUESTS_PER_WINDOW=10
-WINDOW_MS=10000
-
-# Stytch configuration (for OTP services)
-STYTCH_PUBLIC_TOKEN=your_stytch_public_token
-STYTCH_SECRET=your_stytch_secret
-
-````
+    # Stytch configuration (for OTP services)
+    STYTCH_PUBLIC_TOKEN=your_stytch_public_token
+    STYTCH_SECRET=your_stytch_secret
+    ```
 
   </Step>
 </Steps>
@@ -164,8 +205,9 @@ STYTCH_SECRET=your_stytch_secret
 
 <Note>
   You should set the callback/redirect URLs to the same domain as the Login
-  Server. eg. > - https://your-domain.com/auth/discord/callback > -
-  https://your-domain.com/auth/google/callback
+  Server e.g.
+  - https://your-domain.com/auth/discord/callback
+  - https://your-domain.com/auth/google/callback
 </Note>
 
 #### One-click Deploy (Railway)
@@ -238,4 +280,3 @@ DISCORD_CLIENT_SECRET=your_discord_client_secret
 <Note>
   When you run a custom Login Server, the `DISCORD_CLIENT_ID` is embedded into the `authMethodId` that Lit nodes use to locate the correct PKP. Make sure the value matches the client ID you used when minting the Discord auth method.
 </Note>
-```
