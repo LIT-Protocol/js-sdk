@@ -55,6 +55,16 @@ LOCAL_MASTER_ACCOUNT=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf
 NETWORK=<network-name> pnpm run test:e2e all
 ```
 
+### Target a specific spec
+
+Use `test:target` when you only need to exercise one file:
+
+```bash
+pnpm run test:target packages/e2e/src/tickets/delegation.spec.ts
+```
+
+Append additional Jest flags after the path if you need finer filtering.
+
 ## QA Starter Kit workflow
 
 When you need to validate SDK integrations against backend or node features, lean on the [QA Starter Kit](https://github.com/LIT-Protocol/QA-kit). That repo installs published packages, so it mirrors how downstream teams will consume the SDK.
