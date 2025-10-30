@@ -27,7 +27,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.0.4",
+  "version": "8.0.5",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts"
 }
