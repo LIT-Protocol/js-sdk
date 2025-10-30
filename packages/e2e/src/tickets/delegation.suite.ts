@@ -48,7 +48,7 @@ export function registerPaymentDelegationTicketSuite() {
           restrictions: {
             totalMaxPriceInWei: '1000000000000000000',
             requestsPerPeriod: '100',
-            periodSeconds: '60',
+            periodSeconds: '600',
           },
           userAddresses: [bobAccount.account.address],
         },
