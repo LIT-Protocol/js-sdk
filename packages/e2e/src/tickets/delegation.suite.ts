@@ -64,7 +64,7 @@ export function registerPaymentDelegationTicketSuite() {
         aliceBeforeBalance
       );
 
-      // 3. Now, Bob tries to sign with his PKP using Alice's sponsorship
+      // 4. Now, Bob tries to sign with his PKP using Alice's sponsorship
       await testEnv.litClient.chain.ethereum.pkpSign({
         authContext: bobAccount.eoaAuthContext!,
         pubKey: bobAccount.pkp?.pubkey!,
@@ -72,12 +72,12 @@ export function registerPaymentDelegationTicketSuite() {
         userMaxPrice: 1000000000000000000n, // 0.05 ETH in Wei
       });
 
-      // 4. Now, Alice removes Bob from her sponsorship
+      // 5. Now, Alice removes Bob from her sponsorship
       await alice.paymentManager!.undelegatePaymentsBatch({
         userAddresses: [bobAccount.account.address],
       });
 
-      // 5. Bob should now fail to sign with his PKP due to lack of sponsorship
+      // 6. Bob should now fail to sign with his PKP due to lack of sponsorship
       let didFail = false;
       try {
         await testEnv.litClient.chain.ethereum.pkpSign({
@@ -96,7 +96,9 @@ export function registerPaymentDelegationTicketSuite() {
 
       expect(didFail).toBe(true);
 
-      // 6. Finally, check that Alice's Ledger balance has decreased
+      // 7. Finally, check that Alice's Ledger balance has decreased
+      // let's wait a big longer for the payment to be processed
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance({
         userAddress: alice.account.address,
       });

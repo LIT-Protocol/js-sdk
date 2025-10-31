@@ -172,11 +172,12 @@ describe('all', () => {
 
       it('eoaNativeAuthFlow', () => createEoaNativeAuthFlowTest(ctx)());
     });
-
-    if (process.env['NETWORK'] !== 'naga-dev') {
-      describe('paid networks only', () => {
-        registerPaymentDelegationTicketSuite();
-      });
-    }
   });
 });
+
+// ====== These tests only run on paid networks ======
+if (process.env['NETWORK'] !== 'naga-dev') {
+  describe('Paid networks tests', () => {
+    registerPaymentDelegationTicketSuite();
+  });
+}
