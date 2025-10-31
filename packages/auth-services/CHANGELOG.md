@@ -1,5 +1,20 @@
 # @lit-protocol/auth-services
 
+## 2.0.7
+
+### Patch Changes
+
+- f109877: update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
+- Updated dependencies [f109877]
+  - @lit-protocol/contracts@0.8.1
+
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [761174a]
+  - @lit-protocol/contracts@0.8.0
+
 ## 2.0.5
 
 ### Patch Changes

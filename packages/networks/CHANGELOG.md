@@ -1,5 +1,24 @@
 # @lit-protocol/networks
 
+## 8.3.1
+
+### Patch Changes
+
+- f109877: update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
+- Updated dependencies [f109877]
+  - @lit-protocol/contracts@0.8.1
+
+## 8.3.0
+
+### Minor Changes
+
+- 761174a: Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before.
+
+### Patch Changes
+
+- Updated dependencies [761174a]
+  - @lit-protocol/contracts@0.8.0
+
 ## 8.2.2
 
 ### Patch Changes
