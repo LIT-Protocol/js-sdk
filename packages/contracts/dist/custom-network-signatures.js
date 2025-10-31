@@ -39,6 +39,7 @@ var METHODS_TO_EXTRACT = [
   "PubkeyRouter.ethAddressToPkpId",
   "PubkeyRouter.getPubkey",
   "PubkeyRouter.getEthAddress",
+  "PubkeyRouter.getDerivedPubkey",
   // Ledger:
   "Ledger.deposit",
   "Ledger.depositForUser",
@@ -5028,6 +5029,27 @@ function extractAbiMethods(networkCache, methodNames) {
 }
 
 // packages/contracts/src/custom-network-signatures.ts
+function getModulePathFromImportMeta() {
+  const moduleUrl = import.meta?.url;
+  if (typeof moduleUrl === "string") {
+    try {
+      return fileURLToPath(moduleUrl);
+    } catch (error) {
+      console.warn("Failed to resolve fileURLToPath from import.meta.url:", error);
+    }
+  }
+  return void 0;
+}
+function getCurrentModulePath() {
+  const modulePath = getModulePathFromImportMeta();
+  if (modulePath) {
+    return modulePath;
+  }
+  if (typeof __filename !== "undefined") {
+    return __filename;
+  }
+  return void 0;
+}
 function getBaseDirectory(useScriptDirectory = false, callerPath) {
   if (useScriptDirectory) {
     if (callerPath) {
@@ -5039,9 +5061,14 @@ function getBaseDirectory(useScriptDirectory = false, callerPath) {
       console.log("Using __dirname:", __dirname);
       return __dirname;
     }
-    const moduleDir = dirname(fileURLToPath(import.meta.url));
-    console.log("Using module directory:", moduleDir);
-    return moduleDir;
+    const modulePath = getCurrentModulePath();
+    if (modulePath) {
+      const moduleDir = dirname(modulePath);
+      console.log("Using module directory:", moduleDir);
+      return moduleDir;
+    }
+    console.log("Using current working directory:", process.cwd());
+    return process.cwd();
   }
   const cwd = process.cwd();
   console.log("Using current working directory:", cwd);
@@ -5086,6 +5113,14 @@ function generateAbiSignatures(networkData) {
     if (methodsByContract.has(contractName)) {
       const methods = methodsByContract.get(contractName);
       const contractMethods = extractAbiMethods(networkData, methods);
+      const missingMethods = methods.filter(
+        (methodName) => !contractMethods[methodName]
+      );
+      if (missingMethods.length > 0) {
+        throw new Error(
+          `Missing ABI definitions for ${contractName}: ${missingMethods.join(", ")}. Ensure your networkContext.json includes these functions.`
+        );
+      }
       if (Object.keys(contractMethods).length > 0) {
         const address = contractGroup.contracts[0].address_hash;
         const events = contractGroup.contracts[0].ABI.filter(
@@ -5194,8 +5229,9 @@ module.exports = {
   }
 }
 var mainScriptPath = path.resolve(process.argv[1] || "");
-var currentScriptPath = fileURLToPath(import.meta.url);
-if (mainScriptPath === currentScriptPath) {
+var modulePathFromMeta = getModulePathFromImportMeta();
+var resolvedModulePath = modulePathFromMeta ? path.resolve(modulePathFromMeta) : void 0;
+if (resolvedModulePath && mainScriptPath === resolvedModulePath) {
   const jsonFilePath = process.argv[2];
   const networkName = process.argv[3];
   if (!jsonFilePath) {

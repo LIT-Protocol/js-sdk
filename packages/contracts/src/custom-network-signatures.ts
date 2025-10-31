@@ -53,6 +53,44 @@ export interface BuildSignaturesFromContextResult {
 }
 
 /**
+ * Resolves the on-disk path of this module in both ESM and CJS bundles.
+ * Falls back to __filename when bundlers strip import.meta.url.
+ */
+function getModulePathFromImportMeta(): string | undefined {
+  const moduleUrl = (import.meta as unknown as { url?: string } | undefined)
+    ?.url;
+  if (typeof moduleUrl === 'string') {
+    try {
+      return fileURLToPath(moduleUrl);
+    } catch (error) {
+      console.warn(
+        'Failed to resolve fileURLToPath from import.meta.url:',
+        error
+      );
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolves the on-disk path of this module in both ESM and CJS bundles.
+ * Falls back to __filename when bundlers strip import.meta.url.
+ */
+function getCurrentModulePath(): string | undefined {
+  const modulePath = getModulePathFromImportMeta();
+  if (modulePath) {
+    return modulePath;
+  }
+
+  if (typeof __filename !== 'undefined') {
+    return __filename;
+  }
+
+  return undefined;
+}
+
+/**
  * Gets the base directory for resolving paths
  * @param useScriptDirectory - Whether to use script's directory or current working directory
  * @param callerPath - The import.meta.url of the calling script
@@ -75,9 +113,14 @@ function getBaseDirectory(
       return __dirname;
     }
     // When running as module without callerPath
-    const moduleDir = dirname(fileURLToPath(import.meta.url));
-    console.log('Using module directory:', moduleDir);
-    return moduleDir;
+    const modulePath = getCurrentModulePath();
+    if (modulePath) {
+      const moduleDir = dirname(modulePath);
+      console.log('Using module directory:', moduleDir);
+      return moduleDir;
+    }
+    console.log('Using current working directory:', process.cwd());
+    return process.cwd();
   }
   // Use current working directory
   const cwd = process.cwd();
@@ -165,6 +208,17 @@ function generateAbiSignatures(networkData: NetworkCache) {
     if (methodsByContract.has(contractName)) {
       const methods = methodsByContract.get(contractName)!;
       const contractMethods = extractAbiMethods(networkData, methods);
+      const missingMethods = methods.filter(
+        (methodName) => !contractMethods[methodName]
+      );
+
+      if (missingMethods.length > 0) {
+        throw new Error(
+          `Missing ABI definitions for ${contractName}: ${missingMethods.join(
+            ', '
+          )}. ` + 'Ensure your networkContext.json includes these functions.'
+        );
+      }
 
       if (Object.keys(contractMethods).length > 0) {
         const address = contractGroup.contracts[0].address_hash;
@@ -217,6 +271,8 @@ export function buildSignaturesFromContext(
 
   console.log('📊 Generating signatures...');
   const signatures = generateAbiSignatures(jsonData);
+
+  console.log('✅ Signatures generated successfully for network:', networkName);
 
   return {
     signatures,
@@ -308,9 +364,12 @@ module.exports = {
 // process.argv[0] is the bun executable
 // process.argv[1] is the script being run
 const mainScriptPath = path.resolve(process.argv[1] || '');
-const currentScriptPath = fileURLToPath(import.meta.url);
+const modulePathFromMeta = getModulePathFromImportMeta();
+const resolvedModulePath = modulePathFromMeta
+  ? path.resolve(modulePathFromMeta)
+  : undefined;
 
-if (mainScriptPath === currentScriptPath) {
+if (resolvedModulePath && mainScriptPath === resolvedModulePath) {
   // This means custom-network-signatures.ts was the script passed to `bun run`
   const jsonFilePath = process.argv[2];
   const networkName = process.argv[3];
