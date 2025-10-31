@@ -21,7 +21,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.2.2",
+  "version": "8.2.3",
   "main": "./index.js",
   "typings": "./index.d.ts",
   "types": "./index.d.ts",
