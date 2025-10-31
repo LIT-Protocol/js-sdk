@@ -6,6 +6,7 @@ import { importPrivateKey } from './import-private-key';
 import { listEncryptedKeyMetadata } from './list-encrypted-key-metadata';
 import { signMessageWithEncryptedKey } from './sign-message-with-encrypted-key';
 import { signTransactionWithEncryptedKey } from './sign-transaction-with-encrypted-key';
+import { signTypedDataWithEncryptedKey } from './sign-typed-data-with-encrypted-key';
 import { storeEncryptedKey } from './store-encrypted-key';
 import { storeEncryptedKeyBatch } from './store-encrypted-key-batch';
 
@@ -16,6 +17,7 @@ export {
   signTransactionWithEncryptedKey,
   exportPrivateKey,
   signMessageWithEncryptedKey,
+  signTypedDataWithEncryptedKey,
   storeEncryptedKey,
   storeEncryptedKeyBatch,
   getEncryptedKey,

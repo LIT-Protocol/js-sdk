@@ -56,6 +56,7 @@ module.exports = {
           './src/lib/self-executing-actions/solana/generateEncryptedSolanaPrivateKey.ts',
           './src/lib/self-executing-actions/ethereum/signTransactionWithEncryptedEthereumKey.ts',
           './src/lib/self-executing-actions/ethereum/signMessageWithEncryptedEthereumKey.ts',
+          './src/lib/self-executing-actions/ethereum/signTypedDataWithEncryptedEthereumKey.ts',
           './src/lib/self-executing-actions/ethereum/generateEncryptedEthereumPrivateKey.ts',
           './src/lib/self-executing-actions/common/exportPrivateKey.ts',
           './src/lib/self-executing-actions/common/batchGenerateEncryptedKeys.ts',

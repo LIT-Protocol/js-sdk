@@ -16,6 +16,10 @@ describe('wrapped keys lit action code repository', () => {
           evm: '',
           solana: '',
         },
+        signTypedData: {
+          evm: '',
+          solana: '',
+        },
         generateEncryptedKey: {
           evm: '',
           solana: '',
@@ -88,6 +92,10 @@ describe('wrapped keys lit action code repository', () => {
           evm: 'test',
           solana: 'test',
         },
+        signTypedData: {
+          evm: 'test',
+          solana: 'test',
+        },
         generateEncryptedKey: {
           evm: 'test',
           solana: 'test',
@@ -103,6 +111,10 @@ describe('wrapped keys lit action code repository', () => {
           solana: 'test',
         },
         signMessage: {
+          evm: 'test',
+          solana: 'test',
+        },
+        signTypedData: {
           evm: 'test',
           solana: 'test',
         },
@@ -127,6 +139,10 @@ describe('wrapped keys lit action code repository', () => {
           evm: 'test',
           solana: 'test',
         },
+        signTypedData: {
+          evm: 'test',
+          solana: 'test',
+        },
         generateEncryptedKey: {
           evm: 'test',
           solana: 'test',
@@ -151,6 +167,10 @@ describe('wrapped keys lit action code repository', () => {
           solana: 'test',
         },
         signMessage: {
+          evm: 'eth',
+          solana: 'test',
+        },
+        signTypedData: {
           evm: 'eth',
           solana: 'test',
         },

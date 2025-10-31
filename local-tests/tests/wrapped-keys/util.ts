@@ -26,6 +26,10 @@ const emptyLitActionRepository: LitActionCodeRepository = {
     evm: '',
     solana: '',
   },
+  signTypedData: {
+    evm: '',
+    solana: '',
+  },
   generateEncryptedKey: {
     evm: '',
     solana: '',
@@ -103,4 +107,21 @@ export function getBaseTransactionForNetwork({
       ethers.utils.toUtf8Bytes('Test transaction from Alice to bob')
     ),
   };
+}
+
+/**
+ * Derives an Ethereum address from a generated public key
+ * @param generatedPublicKey The public key string (with or without 0x prefix, with or without 0x04 prefix)
+ * @returns The derived Ethereum address
+ */
+export function deriveAddressFromGeneratedPublicKey(
+  generatedPublicKey: string
+): string {
+  const sanitizedPublicKey = generatedPublicKey.slice(
+    generatedPublicKey.startsWith('0x04') ? 4 : 2
+  );
+  const addressHash = ethers.utils.keccak256(`0x${sanitizedPublicKey}`);
+  return ethers.utils.getAddress(
+    `0x${addressHash.substring(addressHash.length - 40)}`
+  );
 }
