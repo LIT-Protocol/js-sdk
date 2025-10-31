@@ -1,5 +1,11 @@
 # @lit-protocol/lit-client
 
+## 8.2.3
+
+### Patch Changes
+
+- f109877: update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
+
 ## 8.2.2
 
 ### Patch Changes

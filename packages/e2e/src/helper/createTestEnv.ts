@@ -16,8 +16,8 @@ export const CONFIG = {
     ledgerDepositAmount: '2',
   },
   LIVE: {
-    nativeFundingAmount: '0.01',
-    ledgerDepositAmount: '0.01',
+    nativeFundingAmount: '0.1',
+    ledgerDepositAmount: '0.1',
   },
 };
 

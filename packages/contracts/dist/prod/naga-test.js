@@ -5,8 +5,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x28C626d92c5061AdeeDF59d483304b8d35613212",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0x9f3cE810695180C5f693a7cD2a0203A381fd57E1",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -712,6 +712,11 @@ export const nagaTest = {
             {
               "inputs": [],
               "name": "CannotModifyUnfrozen",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "CannotMoveToLockedValidatorStateBeforeEpochEnds",
               "type": "error"
             },
             {
@@ -1430,6 +1435,11 @@ export const nagaTest = {
                     {
                       "internalType": "uint256",
                       "name": "minThresholdToClampAt",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "voteToAdvanceTimeOut",
                       "type": "uint256"
                     }
                   ],
@@ -2634,6 +2644,132 @@ export const nagaTest = {
             {
               "inputs": [
                 {
+                  "internalType": "string",
+                  "name": "identifier",
+                  "type": "string"
+                }
+              ],
+              "name": "getKeySet",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint32",
+                      "name": "minimumThreshold",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "monetaryValue",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "completeIsolation",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "identifier",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "description",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "realms",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "curves",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "counts",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "address[]",
+                      "name": "recoveryPartyMembers",
+                      "type": "address[]"
+                    }
+                  ],
+                  "internalType": "struct LibStakingStorage.KeySetConfig",
+                  "name": "",
+                  "type": "tuple"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "keySets",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint32",
+                      "name": "minimumThreshold",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "monetaryValue",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "completeIsolation",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "identifier",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "description",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "realms",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "curves",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "counts",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "address[]",
+                      "name": "recoveryPartyMembers",
+                      "type": "address[]"
+                    }
+                  ],
+                  "internalType": "struct LibStakingStorage.KeySetConfig[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
                   "components": [
                     {
                       "internalType": "uint32",
@@ -2689,6 +2825,47 @@ export const nagaTest = {
               "name": "setKeySet",
               "outputs": [],
               "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "string",
+                  "name": "identifier",
+                  "type": "string"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "keyType",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct IPubkeyRouter.RootKey[]",
+                  "name": "newRootKeys",
+                  "type": "tuple[]"
+                }
+              ],
+              "name": "verifyKeySetCounts",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -3311,6 +3488,19 @@ export const nagaTest = {
               "anonymous": false,
               "inputs": [
                 {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "realmId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "VoteToAdvanceTimeOutElapsed",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
                   "indexed": true,
                   "internalType": "address",
                   "name": "reporter",
@@ -3369,25 +3559,6 @@ export const nagaTest = {
               "name": "exit",
               "outputs": [],
               "stateMutability": "pure",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "attestedAddress",
-                  "type": "address"
-                }
-              ],
-              "name": "getAttestedPubKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -4092,6 +4263,11 @@ export const nagaTest = {
                       "internalType": "uint256",
                       "name": "startTime",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "lastAdvanceVoteTime",
+                      "type": "uint256"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.Epoch",
@@ -4283,6 +4459,11 @@ export const nagaTest = {
                       "internalType": "uint256",
                       "name": "startTime",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "lastAdvanceVoteTime",
+                      "type": "uint256"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.Epoch",
@@ -4444,6 +4625,25 @@ export const nagaTest = {
               "inputs": [
                 {
                   "internalType": "address",
+                  "name": "attestedAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "getAttestedPubKey",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
                   "name": "validatorAddress",
                   "type": "address"
                 },
@@ -4483,72 +4683,6 @@ export const nagaTest = {
                   "internalType": "uint256",
                   "name": "",
                   "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "string",
-                  "name": "identifier",
-                  "type": "string"
-                }
-              ],
-              "name": "getKeySet",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "uint32",
-                      "name": "minimumThreshold",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "uint32",
-                      "name": "monetaryValue",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "completeIsolation",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "identifier",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "description",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "realms",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "curves",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "counts",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "recoveryPartyMembers",
-                      "type": "address[]"
-                    }
-                  ],
-                  "internalType": "struct LibStakingStorage.KeySetConfig",
-                  "name": "",
-                  "type": "tuple"
                 }
               ],
               "stateMutability": "view",
@@ -5960,6 +6094,11 @@ export const nagaTest = {
                       "internalType": "uint256",
                       "name": "minThresholdToClampAt",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "voteToAdvanceTimeOut",
+                      "type": "uint256"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.GlobalConfig",
@@ -6147,66 +6286,6 @@ export const nagaTest = {
                   "internalType": "bool",
                   "name": "",
                   "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "keySets",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "uint32",
-                      "name": "minimumThreshold",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "uint32",
-                      "name": "monetaryValue",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "completeIsolation",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "identifier",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "description",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "realms",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "curves",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "counts",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "recoveryPartyMembers",
-                      "type": "address[]"
-                    }
-                  ],
-                  "internalType": "struct LibStakingStorage.KeySetConfig[]",
-                  "name": "",
-                  "type": "tuple[]"
                 }
               ],
               "stateMutability": "view",
@@ -6782,47 +6861,6 @@ export const nagaTest = {
               ],
               "stateMutability": "view",
               "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "string",
-                  "name": "identifier",
-                  "type": "string"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "bytes",
-                      "name": "pubkey",
-                      "type": "bytes"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "keyType",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct IPubkeyRouter.RootKey[]",
-                  "name": "newRootKeys",
-                  "type": "tuple[]"
-                }
-              ],
-              "name": "verifyKeySetCounts",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
             }
           ]
         }
@@ -6833,8 +6871,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x729D481064fBFfB6E58C915A19eB77BDcc1f4d13",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0x077eFcaBFF62391b6fd438034fb21E2484C5B9FF",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "anonymous": false,
@@ -6972,7 +7010,7 @@ export const nagaTest = {
         {
           "network": "naga-test",
           "address_hash": "0x5E8db2E7af793f4095c4843C8cBD87C5D8604838",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -8025,8 +8063,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xcBF65D0d3a3Dc3a1E7BcAC4ef34128a52F51E600",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0x054Ddcfef7E9434413ad62A6F37946Bf6B6CFc1A",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -8780,6 +8818,78 @@ export const nagaTest = {
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "ethAddresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "getPkpInfoFromEthAddresses",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "tokenIds",
+                  "type": "uint256[]"
+                }
+              ],
+              "name": "getPkpInfoFromTokenIds",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "getPkpNftAddress",
               "outputs": [
@@ -9087,8 +9197,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xAf49B3Dd17F0D251E7E0ED510b22B7624c6878CA",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0xaf4Dddb07Cdde48042e93eb5bf266b49950bC5BD",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -9834,6 +9944,170 @@ export const nagaTest = {
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "ethAddresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "getPkpInfoFromEthAddresses",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageSize",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPkpInfoFromOwnerAddress",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageSize",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPkpInfoFromOwnerTokenId",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "tokenIds",
+                  "type": "uint256[]"
+                }
+              ],
+              "name": "getPkpInfoFromTokenIds",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "getPkpNftMetadataAddress",
               "outputs": [
@@ -10351,8 +10625,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x3229379bA31Bb916F73842409cdB909De9c8cD33",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0x13428A18C0b181344F97ceaC5596F31a9d182e5c",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -11366,8 +11640,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x093A9046766A67cC4b207fC782A53785267B9E45",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0x7255737630fCFb4914cF51552123eEe9abEc6120",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -12701,8 +12975,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x288204FB05F904BD28bB474Af51618271698943E",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0xE77d6EBD151c02e05a4d9645f816F68f55730733",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -12865,8 +13139,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xa9D639c6Bb52BD3B30EB46a9B5E5f2eE90977888",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0x934d3190ff3A92eB1Cfb6CbD3617629322897969",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [],
@@ -13102,8 +13376,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x1E383465eC19650D6a02a32105D4b0508B8712b0",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0xd1E59c174BcF85012c54086AB600Dd0aB032e88B",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -13738,8 +14012,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x9197a98E6E127B0540A73da4F06f548FbF66f75F",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0xbA0aEB6Bbf58F1B74E896416A20DB5be51C991f2",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -14794,8 +15068,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xD6228351719509393be4d0D97C293407Beadf56f",
-          "inserted_at": "2025-09-21T14:02:13Z",
+          "address_hash": "0x556955025dD0981Bac684fbDEcE14cDa897d0837",
+          "inserted_at": "2025-10-30T16:03:28Z",
           "ABI": [
             {
               "inputs": [
@@ -15191,11 +15465,6 @@ export const nagaTest = {
             {
               "inputs": [],
               "name": "CallerNotOwner",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "MustBeLessThan100",
               "type": "error"
             },
             {
