@@ -1,5 +1,11 @@
 # @lit-protocol/contracts
 
+## 0.8.2
+
+### Patch Changes
+
+- 1dac723: Provide a browser-only stub for `custom-network-signatures` so web builds skip the Node-specific implementation
+
 ## 0.8.1
 
 ### Patch Changes

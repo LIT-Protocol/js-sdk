@@ -1,5 +1,12 @@
 # @lit-protocol/constants
 
+## 8.0.8
+
+### Patch Changes
+
+- Updated dependencies [1dac723]
+  - @lit-protocol/contracts@0.8.2
+
 ## 8.0.7
 
 ### Patch Changes
