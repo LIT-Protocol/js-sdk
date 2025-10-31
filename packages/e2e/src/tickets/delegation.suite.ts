@@ -72,26 +72,12 @@ export function registerPaymentDelegationTicketSuite() {
         userMaxPrice: 1000000000000000000n, // 0.05 ETH in Wei
       });
 
-      // 4. Finally, check that Alice's Ledger balance has decreased
-      const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance({
-        userAddress: alice.account.address,
-      });
-
-      console.log(
-        "[AFTER] Alice's Ledger balance after Bob's request:",
-        aliceBalanceAfter
-      );
-
-      expect(BigInt(aliceBalanceAfter.raw.availableBalance)).toBeLessThan(
-        BigInt(aliceBeforeBalance.raw.availableBalance)
-      );
-
-      // 5. Now, Alice removes Bob from her sponsorship
+      // 4. Now, Alice removes Bob from her sponsorship
       await alice.paymentManager!.undelegatePaymentsBatch({
         userAddresses: [bobAccount.account.address],
       });
 
-      // 6. Bob should now fail to sign with his PKP due to lack of sponsorship
+      // 5. Bob should now fail to sign with his PKP due to lack of sponsorship
       let didFail = false;
       try {
         await testEnv.litClient.chain.ethereum.pkpSign({
@@ -109,6 +95,20 @@ export function registerPaymentDelegationTicketSuite() {
       }
 
       expect(didFail).toBe(true);
+
+      // 6. Finally, check that Alice's Ledger balance has decreased
+      const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance({
+        userAddress: alice.account.address,
+      });
+
+      console.log(
+        "[AFTER] Alice's Ledger balance after Bob's request:",
+        aliceBalanceAfter
+      );
+
+      expect(BigInt(aliceBalanceAfter.raw.availableBalance)).toBeLessThan(
+        BigInt(aliceBeforeBalance.raw.availableBalance)
+      );
     });
   });
 }

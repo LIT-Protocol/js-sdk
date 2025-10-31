@@ -172,11 +172,11 @@ describe('all', () => {
 
       it('eoaNativeAuthFlow', () => createEoaNativeAuthFlowTest(ctx)());
     });
-  });
 
-  if (process.env['NETWORK'] !== 'naga-dev') {
-    describe('paid networks only', () => {
-      registerPaymentDelegationTicketSuite();
-    });
-  }
+    if (process.env['NETWORK'] !== 'naga-dev') {
+      describe('paid networks only', () => {
+        registerPaymentDelegationTicketSuite();
+      });
+    }
+  });
 });
