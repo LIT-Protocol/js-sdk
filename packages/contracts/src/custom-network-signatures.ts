@@ -60,7 +60,7 @@ function getCurrentModulePath(): string | undefined {
   const moduleUrl = (import.meta as unknown as { url?: string } | undefined)
     ?.url;
 
-  if (moduleUrl) {
+  if (typeof moduleUrl === 'string') {
     try {
       return fileURLToPath(moduleUrl);
     } catch (error) {
