@@ -71,7 +71,7 @@ function getCurrentModulePath(): string | undefined {
     }
   }
 
-  if (typeof __filename === 'string') {
+  if (typeof __filename !== 'undefined') {
     return __filename;
   }
 
