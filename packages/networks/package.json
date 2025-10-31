@@ -37,7 +37,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.3.0",
+  "version": "8.3.1",
   "main": "./index.js",
   "typings": "./index.d.ts",
   "types": "./index.d.ts"
