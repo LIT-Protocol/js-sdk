@@ -2824,7 +2824,7 @@
   dependencies:
     ajv "^8.12.0"
 
-"@lit-protocol/contracts@^0.0.74":
+"@lit-protocol/contracts@0.0.74":
   version "0.0.74"
   resolved "https://registry.yarnpkg.com/@lit-protocol/contracts/-/contracts-0.0.74.tgz#e726a9190c86b10cc6df3a392cd04d19057be27d"
   integrity sha512-8uV038gzBp7ew7a4884SVt9Zhu8CtiTb+A8dKNnByxVoT1kFt4O4DmsaniV8p9AGjNR13IWfpU1NFChmPHVIpQ==
