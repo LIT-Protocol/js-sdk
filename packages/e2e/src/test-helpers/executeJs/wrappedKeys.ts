@@ -204,7 +204,7 @@ export const registerWrappedKeysExecuteJsTests = () => {
       ctx.resolvedNetwork.networkModule,
       {
         ifLessThan: '0.005',
-        thenFundWith: '0.01',
+        thenFund: '0.01',
       }
     );
 
@@ -384,7 +384,7 @@ export const registerWrappedKeysExecuteJsTests = () => {
           ctx.resolvedNetwork.networkModule,
           {
             ifLessThan: '0.005',
-            thenFundWith: '0.01',
+            thenFund: '0.01',
           }
         );
 
