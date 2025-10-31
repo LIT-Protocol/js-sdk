@@ -1,13 +1,18 @@
 ---
 title: 'Derive Lit Action Public Keys'
-description: 'How to deterministically derive and verify a Lit Action identity without executing it externally.'
+description: 'Deterministically derive and verify a Lit Action identity without executing it externally.'
 ---
+
+# Details
+
+`Lit.Actions.signAsAction` enables a Lit Action to generate signatures that authenticate data without needing external keys.
+Any system can later verify these signatures using `Lit.Actions.verifyActionSignature`, or retrieve the associated public key with `Lit.Actions.getActionPublicKey` and perform verification independently.
 
 # Derive a Lit Action Public Key Locally
 
 ## Question
 
-I want to call `Lit.Actions.signAsAction`. I know the action identity is derived from the Action's IPFS CID, but I cannot find a way to obtain the public key outside of the Action runtime. `Lit.Actions.getActionPublicKey` works within the Action, while `executeJs` only exposes `signatures.<name>.publicKey` after a signing operation. Is there a way to deterministically derive the Action's public key locally without running the Action?
+I want to call `Lit.Actions.signAsAction`. I know the action identity is derived from the Action's IPFS CID, but I cannot find a way to obtain the public key outside the Action runtime. `Lit.Actions.getActionPublicKey` works within the Action. However, `executeJs` only exposes `signatures.<name>.publicKey` after a signing operation. Is there a way to deterministically derive the Action's public key locally without running the Action?
 
 ## Answer
 
@@ -15,8 +20,9 @@ Yes. Inside the Lit Action you can deterministically derive the Action identity 
 
 1. Produce the 32-byte message hash the Lit nodes expect.
 2. Call `Lit.Actions.signAsAction` to sign that message with the Action identity.
-3. Derive the Action public key via `Lit.Actions.getActionPublicKey`, passing the Action CID and signing scheme.
+3. Optionally derive the action public key via `Lit.Actions.getActionPublicKey`, passing the Action IPFS CID and signing scheme.
 4. Optionally verify the signature with `Lit.Actions.verifyActionSignature`.
+5. NOTE: `Lit.Actions.getActionPublicKey` and `Lit.Actions.verifyActionSignature` can be called from any Lit Action to verify signatures, not just from the same Action that called `Lit.Actions.signAsAction`.
 
 ```js
 const { sigName, toSign } = jsParams; // 'publicKey' not required; derive it from the Action IPFS CID
@@ -72,7 +78,7 @@ This approach keeps the derivation entirely within the Lit Action context. Becau
 
 ## Derive the Same Public Key from Client Code
 
-If you prefer to resolve the Lit Action public key outside of the Action runtime - e.g., inside tests or other tooling—the SDK now exposes a helper that calls the on-chain PubkeyRouter contract.
+If you prefer to resolve the Lit Action public key outside the Action runtime - e.g., inside tests or other tooling—the SDK now exposes a helper that calls the on-chain PubkeyRouter contract.
 
 ```ts
 import { createLitClient } from "@lit-protocol/lit-client";
