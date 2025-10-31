@@ -56,10 +56,9 @@ export interface BuildSignaturesFromContextResult {
  * Resolves the on-disk path of this module in both ESM and CJS bundles.
  * Falls back to __filename when bundlers strip import.meta.url.
  */
-function getCurrentModulePath(): string | undefined {
+function getModulePathFromImportMeta(): string | undefined {
   const moduleUrl = (import.meta as unknown as { url?: string } | undefined)
     ?.url;
-
   if (typeof moduleUrl === 'string') {
     try {
       return fileURLToPath(moduleUrl);
@@ -69,6 +68,19 @@ function getCurrentModulePath(): string | undefined {
         error
       );
     }
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolves the on-disk path of this module in both ESM and CJS bundles.
+ * Falls back to __filename when bundlers strip import.meta.url.
+ */
+function getCurrentModulePath(): string | undefined {
+  const modulePath = getModulePathFromImportMeta();
+  if (modulePath) {
+    return modulePath;
   }
 
   if (typeof __filename !== 'undefined') {
@@ -339,9 +351,9 @@ module.exports = {
 // process.argv[0] is the bun executable
 // process.argv[1] is the script being run
 const mainScriptPath = path.resolve(process.argv[1] || '');
-const currentModulePath = getCurrentModulePath();
-const resolvedModulePath = currentModulePath
-  ? path.resolve(currentModulePath)
+const modulePathFromMeta = getModulePathFromImportMeta();
+const resolvedModulePath = modulePathFromMeta
+  ? path.resolve(modulePathFromMeta)
   : undefined;
 
 if (resolvedModulePath && mainScriptPath === resolvedModulePath) {

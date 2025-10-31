@@ -5064,7 +5064,7 @@ function extractAbiMethods(networkCache, methodNames) {
 }
 
 // packages/contracts/src/custom-network-signatures.ts
-function getCurrentModulePath() {
+function getModulePathFromImportMeta() {
   const moduleUrl = __import_meta__?.url;
   if (typeof moduleUrl === "string") {
     try {
@@ -5072,6 +5072,13 @@ function getCurrentModulePath() {
     } catch (error) {
       console.warn("Failed to resolve fileURLToPath from import.meta.url:", error);
     }
+  }
+  return void 0;
+}
+function getCurrentModulePath() {
+  const modulePath = getModulePathFromImportMeta();
+  if (modulePath) {
+    return modulePath;
   }
   if (typeof __filename !== "undefined") {
     return __filename;
@@ -5249,8 +5256,8 @@ module.exports = {
   }
 }
 var mainScriptPath = import_path.default.resolve(process.argv[1] || "");
-var currentModulePath = getCurrentModulePath();
-var resolvedModulePath = currentModulePath ? import_path.default.resolve(currentModulePath) : void 0;
+var modulePathFromMeta = getModulePathFromImportMeta();
+var resolvedModulePath = modulePathFromMeta ? import_path.default.resolve(modulePathFromMeta) : void 0;
 if (resolvedModulePath && mainScriptPath === resolvedModulePath) {
   const jsonFilePath = process.argv[2];
   const networkName = process.argv[3];
