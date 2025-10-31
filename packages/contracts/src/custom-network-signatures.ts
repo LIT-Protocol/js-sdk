@@ -57,15 +57,17 @@ export interface BuildSignaturesFromContextResult {
  * Falls back to __filename when bundlers strip import.meta.url.
  */
 function getCurrentModulePath(): string | undefined {
-  const moduleUrl = (
-    import.meta as unknown as { url?: string } | undefined
-  )?.url;
+  const moduleUrl = (import.meta as unknown as { url?: string } | undefined)
+    ?.url;
 
   if (moduleUrl) {
     try {
       return fileURLToPath(moduleUrl);
     } catch (error) {
-      console.warn('Failed to resolve fileURLToPath from import.meta.url:', error);
+      console.warn(
+        'Failed to resolve fileURLToPath from import.meta.url:',
+        error
+      );
     }
   }
 
