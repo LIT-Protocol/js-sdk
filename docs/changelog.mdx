@@ -6,90 +6,79 @@ rss: true
 
 | Package | Latest version | Summary |
 | ------- | -------------- | ------- |
-| [@lit-protocol/lit-client](#lit-client) | [8.2.0](https://www.npmjs.com/package/%40lit-protocol%2Flit-client) | LitClient now offers `getIpfsId` via `@lit-protocol/lit-client/ipfs`, letting apps compute CIDv0 hashes (e.g., `await getIpfsId('hello')`) while keeping bundles lean. |
-| [@lit-protocol/auth](#auth) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fauth) | Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually. |
-| [@lit-protocol/networks](#networks) | [8.2.0](https://www.npmjs.com/package/%40lit-protocol%2Fnetworks) | introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime |
-| [@lit-protocol/auth-services](#auth-services) | [2.0.4](https://www.npmjs.com/package/%40lit-protocol%2Fauth-services) | Updated dependencies |
+| [@lit-protocol/lit-client](#lit-client) | [8.2.3](https://www.npmjs.com/package/%40lit-protocol%2Flit-client) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
+| [@lit-protocol/auth](#auth) | [8.1.2](https://www.npmjs.com/package/%40lit-protocol%2Fauth) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
+| [@lit-protocol/networks](#networks) | [8.3.1](https://www.npmjs.com/package/%40lit-protocol%2Fnetworks) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
+| [@lit-protocol/auth-services](#auth-services) | [2.0.7](https://www.npmjs.com/package/%40lit-protocol%2Fauth-services) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
 | [@lit-protocol/access-control-conditions](#access-control-conditions) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions) | - |
 | [@lit-protocol/access-control-conditions-schemas](#access-control-conditions-schemas) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions-schemas) | - |
-| [@lit-protocol/artillery](#artillery) | [0.0.5](https://www.npmjs.com/package/%40lit-protocol%2Fartillery) | Updated dependencies |
-| [@lit-protocol/auth-helpers](#auth-helpers) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fauth-helpers) | Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually. |
-| [@lit-protocol/constants](#constants) | [8.0.4](https://www.npmjs.com/package/%40lit-protocol%2Fconstants) | Updated dependencies |
-| [@lit-protocol/contracts](#contracts) | [0.7.0](https://www.npmjs.com/package/%40lit-protocol%2Fcontracts) | introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime |
+| [@lit-protocol/artillery](#artillery) | [0.0.9](https://www.npmjs.com/package/%40lit-protocol%2Fartillery) | Updated dependencies |
+| [@lit-protocol/auth-helpers](#auth-helpers) | [8.1.1](https://www.npmjs.com/package/%40lit-protocol%2Fauth-helpers) | Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network. |
+| [@lit-protocol/constants](#constants) | [8.0.7](https://www.npmjs.com/package/%40lit-protocol%2Fconstants) | Updated dependencies |
+| [@lit-protocol/contracts](#contracts) | [0.8.1](https://www.npmjs.com/package/%40lit-protocol%2Fcontracts) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
 | [@lit-protocol/crypto](#crypto) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fcrypto) | - |
-| [@lit-protocol/e2e](#e2e) | [3.0.0](https://www.npmjs.com/package/%40lit-protocol%2Fe2e) | introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime |
+| [@lit-protocol/e2e](#e2e) | [4.0.1](https://www.npmjs.com/package/%40lit-protocol%2Fe2e) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
 | [@lit-protocol/logger](#logger) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Flogger) | - |
 | [@lit-protocol/schemas](#schemas) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fschemas) | - |
 | [@lit-protocol/types](#types) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Ftypes) | - |
-| [@lit-protocol/wasm](#wasm) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fwasm) | - |
+| [@lit-protocol/wasm](#wasm) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fwasm) | Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before. |
 | [@lit-protocol/wrapped-keys](#wrapped-keys) | [8.0.1](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys) | fix package metadata so bundlers load the CommonJS builds again |
 | [@lit-protocol/wrapped-keys-lit-actions](#wrapped-keys-lit-actions) | [8.0.1](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys-lit-actions) | fix package metadata so bundlers load the CommonJS builds again |
 
 <Update
   label="lit-client"
-  description="v8.2.0"
-  tags={["Minor Changes"]}
-  rss={{ title: "lit-client", description: "LitClient now offers `getIpfsId` via `@lit-protocol/lit-client/ipfs`, letting apps compute CIDv0 hashes (e.g., `await getIpfsId('hello')`) while keeping bundles lean." }}
+  description="v8.2.3"
+  tags={["Patch Changes"]}
+  rss={{ title: "lit-client", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
   id="lit-client"
 >
 
-  ## Minor Changes
+  ## Patch Changes
 
-  - LitClient now offers `getIpfsId` via `@lit-protocol/lit-client/ipfs`, letting apps compute CIDv0 hashes (e.g., `await getIpfsId('hello')`) while keeping bundles lean.
-  - ```ts
-  - import { getIpfsId } from '@lit-protocol/lit-client/ipfs';
-  - const cid = await getIpfsId('hello');
-  - ```
-  - introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime
+  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
 </Update>
 
 <Update
   label="auth"
-  description="v8.1.0"
-  tags={["Minor Changes", "Patch Changes"]}
-  rss={{ title: "auth", description: "Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually." }}
+  description="v8.1.2"
+  tags={["Patch Changes"]}
+  rss={{ title: "auth", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
   id="auth"
 >
 
-  ## Minor Changes
-
-  - Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
-
   ## Patch Changes
 
-  - Allows `WalletClientAuthenticator.authenticate` to build SIWE messages with user-specified fields (`domain`, `uri`, `statement`, etc.) while still managing the nonce internally.
+  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
 </Update>
 
 <Update
   label="networks"
-  description="v8.2.0"
-  tags={["Minor Changes", "Patch Changes"]}
-  rss={{ title: "networks", description: "introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime" }}
+  description="v8.3.1"
+  tags={["Patch Changes"]}
+  rss={{ title: "networks", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
   id="networks"
 >
 
-  ## Minor Changes
-
-  - introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime
-
   ## Patch Changes
 
+  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
   - Updated dependencies
-  - @lit-protocol/contracts@0.7.0
+  - @lit-protocol/contracts@0.8.1
 </Update>
 
 <Update
   label="auth-services"
-  description="v2.0.4"
+  description="v2.0.7"
   tags={["Patch Changes"]}
-  rss={{ title: "auth-services", description: "Updated dependencies" }}
+  rss={{ title: "auth-services", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
   id="auth-services"
 >
 
   ## Patch Changes
 
+  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
   - Updated dependencies
-  - @lit-protocol/contracts@0.7.0
+  - @lit-protocol/contracts@0.8.1
 </Update>
 
 <Update
@@ -116,7 +105,7 @@ rss: true
 
 <Update
   label="artillery"
-  description="v0.0.5"
+  description="v0.0.9"
   tags={["Patch Changes"]}
   rss={{ title: "artillery", description: "Updated dependencies" }}
   id="artillery"
@@ -125,25 +114,25 @@ rss: true
   ## Patch Changes
 
   - Updated dependencies
-  - @lit-protocol/e2e@3.0.0
+  - @lit-protocol/e2e@4.0.1
 </Update>
 
 <Update
   label="auth-helpers"
-  description="v8.1.0"
-  tags={["Minor Changes"]}
-  rss={{ title: "auth-helpers", description: "Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually." }}
+  description="v8.1.1"
+  tags={["Patch Changes"]}
+  rss={{ title: "auth-helpers", description: "Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network." }}
   id="auth-helpers"
 >
 
-  ## Minor Changes
+  ## Patch Changes
 
-  - Converted viem from a bundled dependency to a peer dependency to avoid build errors from version conflicts (e.g., missing exports like sendCallsSync) and improve compatibility by reducing dependency lock-in. Consumers must now install compatible versions manually.
+  - Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network.
 </Update>
 
 <Update
   label="constants"
-  description="v8.0.4"
+  description="v8.0.7"
   tags={["Patch Changes"]}
   rss={{ title: "constants", description: "Updated dependencies" }}
   id="constants"
@@ -152,20 +141,20 @@ rss: true
   ## Patch Changes
 
   - Updated dependencies
-  - @lit-protocol/contracts@0.7.0
+  - @lit-protocol/contracts@0.8.1
 </Update>
 
 <Update
   label="contracts"
-  description="v0.7.0"
-  tags={["Minor Changes"]}
-  rss={{ title: "contracts", description: "introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime" }}
+  description="v0.8.1"
+  tags={["Patch Changes"]}
+  rss={{ title: "contracts", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
   id="contracts"
 >
 
-  ## Minor Changes
+  ## Patch Changes
 
-  - introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime
+  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
 </Update>
 
 <Update
@@ -181,22 +170,21 @@ rss: true
 
 <Update
   label="e2e"
-  description="v3.0.0"
-  tags={["Minor Changes", "Patch Changes"]}
-  rss={{ title: "e2e", description: "introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime" }}
+  description="v4.0.1"
+  tags={["Patch Changes"]}
+  rss={{ title: "e2e", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
   id="e2e"
 >
 
-  ## Minor Changes
-
-  - introduce `litClient.utils.getDerivedKeyId` - a little helper to resolve the Lit Action public key outside of the Action runtime
-
   ## Patch Changes
 
+  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
   - Updated dependencies
-  - Updated dependencies
-  - @lit-protocol/lit-client@8.2.0
-  - @lit-protocol/networks@8.2.0
+  - @lit-protocol/contracts@0.8.1
+  - @lit-protocol/auth@8.1.2
+  - @lit-protocol/lit-client@8.2.3
+  - @lit-protocol/networks@8.3.1
+  - @lit-protocol/constants@8.0.7
 </Update>
 
 <Update
@@ -234,13 +222,15 @@ rss: true
 
 <Update
   label="wasm"
-  description="v8.0.2"
-  tags={["Release"]}
-  rss={{ title: "wasm", description: "No release notes provided yet." }}
+  description="v8.1.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "wasm", description: "Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before." }}
   id="wasm"
 >
 
-  No release notes available.
+  ## Minor Changes
+
+  - Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before.
 </Update>
 
 <Update
