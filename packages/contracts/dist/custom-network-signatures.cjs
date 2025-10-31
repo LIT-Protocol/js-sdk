@@ -5064,6 +5064,20 @@ function extractAbiMethods(networkCache, methodNames) {
 }
 
 // packages/contracts/src/custom-network-signatures.ts
+function getCurrentModulePath() {
+  const moduleUrl = __import_meta__?.url;
+  if (typeof moduleUrl === "string") {
+    try {
+      return (0, import_url.fileURLToPath)(moduleUrl);
+    } catch (error) {
+      console.warn("Failed to resolve fileURLToPath from import.meta.url:", error);
+    }
+  }
+  if (typeof __filename !== "undefined") {
+    return __filename;
+  }
+  return void 0;
+}
 function getBaseDirectory(useScriptDirectory = false, callerPath) {
   if (useScriptDirectory) {
     if (callerPath) {
@@ -5075,9 +5089,14 @@ function getBaseDirectory(useScriptDirectory = false, callerPath) {
       console.log("Using __dirname:", __dirname);
       return __dirname;
     }
-    const moduleDir = (0, import_path.dirname)((0, import_url.fileURLToPath)(__import_meta__.url));
-    console.log("Using module directory:", moduleDir);
-    return moduleDir;
+    const modulePath = getCurrentModulePath();
+    if (modulePath) {
+      const moduleDir = (0, import_path.dirname)(modulePath);
+      console.log("Using module directory:", moduleDir);
+      return moduleDir;
+    }
+    console.log("Using current working directory:", process.cwd());
+    return process.cwd();
   }
   const cwd = process.cwd();
   console.log("Using current working directory:", cwd);
@@ -5230,8 +5249,9 @@ module.exports = {
   }
 }
 var mainScriptPath = import_path.default.resolve(process.argv[1] || "");
-var currentScriptPath = (0, import_url.fileURLToPath)(__import_meta__.url);
-if (mainScriptPath === currentScriptPath) {
+var currentModulePath = getCurrentModulePath();
+var resolvedModulePath = currentModulePath ? import_path.default.resolve(currentModulePath) : void 0;
+if (resolvedModulePath && mainScriptPath === resolvedModulePath) {
   const jsonFilePath = process.argv[2];
   const networkName = process.argv[3];
   if (!jsonFilePath) {
