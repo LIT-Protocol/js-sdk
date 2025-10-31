@@ -1,5 +1,12 @@
 # @lit-protocol/networks
 
+## 8.3.2
+
+### Patch Changes
+
+- Updated dependencies [1dac723]
+  - @lit-protocol/contracts@0.8.2
+
 ## 8.3.1
 
 ### Patch Changes

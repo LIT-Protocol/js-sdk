@@ -1,5 +1,14 @@
 # @lit-protocol/e2e
 
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [1dac723]
+  - @lit-protocol/contracts@0.8.2
+  - @lit-protocol/constants@8.0.8
+  - @lit-protocol/networks@8.3.2
+
 ## 4.0.1
 
 ### Patch Changes
