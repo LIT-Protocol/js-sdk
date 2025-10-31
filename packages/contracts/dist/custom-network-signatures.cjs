@@ -75,6 +75,7 @@ var METHODS_TO_EXTRACT = [
   "PubkeyRouter.ethAddressToPkpId",
   "PubkeyRouter.getPubkey",
   "PubkeyRouter.getEthAddress",
+  "PubkeyRouter.getDerivedPubkey",
   // Ledger:
   "Ledger.deposit",
   "Ledger.depositForUser",
@@ -5148,6 +5149,14 @@ function generateAbiSignatures(networkData) {
     if (methodsByContract.has(contractName)) {
       const methods = methodsByContract.get(contractName);
       const contractMethods = extractAbiMethods(networkData, methods);
+      const missingMethods = methods.filter(
+        (methodName) => !contractMethods[methodName]
+      );
+      if (missingMethods.length > 0) {
+        throw new Error(
+          `Missing ABI definitions for ${contractName}: ${missingMethods.join(", ")}. Ensure your networkContext.json includes these functions.`
+        );
+      }
       if (Object.keys(contractMethods).length > 0) {
         const address = contractGroup.contracts[0].address_hash;
         const events = contractGroup.contracts[0].ABI.filter(
