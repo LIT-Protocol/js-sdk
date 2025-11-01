@@ -3,6 +3,7 @@ export * from './lib/generate-auth-sig';
 export * from './lib/models';
 export * from './lib/recap/recap-session-capability-object';
 export * from './lib/recap/resource-builder';
+export * from './lib/recap/utils';
 export * from './lib/resources';
 export * from './lib/session-capability-object';
 export * from './lib/siwe/create-siwe-message';

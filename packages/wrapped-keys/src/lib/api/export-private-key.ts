@@ -2,6 +2,7 @@ import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
 } from './utils';
 import { exportPrivateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
@@ -20,16 +21,17 @@ import { ExportPrivateKeyParams, ExportPrivateKeyResult } from '../types';
 export async function exportPrivateKey(
   params: ExportPrivateKeyParams
 ): Promise<ExportPrivateKeyResult> {
-  const { litNodeClient, network, pkpSessionSigs, id } = params;
+  const { litClient, network, pkpSessionSigs, id } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+  const litNetwork = getLitNetworkFromClient(litClient);
 
   const storedKeyMetadata = await fetchPrivateKey({
     pkpAddress,
     id,
     sessionSig,
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
   });
 
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(
@@ -43,6 +45,7 @@ export async function exportPrivateKey(
 
   return exportPrivateKeyWithLitAction({
     ...params,
+    litClient,
     litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
     litActionCode: litActionCode ? litActionCode : undefined,
     accessControlConditions: [allowPkpAddressToDecrypt],

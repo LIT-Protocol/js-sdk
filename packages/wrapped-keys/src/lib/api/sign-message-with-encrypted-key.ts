@@ -2,6 +2,7 @@ import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
 } from './utils';
 import { signMessageWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
@@ -20,16 +21,17 @@ import { SignMessageWithEncryptedKeyParams } from '../types';
 export async function signMessageWithEncryptedKey(
   params: SignMessageWithEncryptedKeyParams
 ): Promise<string> {
-  const { litNodeClient, network, pkpSessionSigs, id } = params;
+  const { litClient, network, pkpSessionSigs, id } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+  const litNetwork = getLitNetworkFromClient(litClient);
 
   const storedKeyMetadata = await fetchPrivateKey({
     pkpAddress,
     id,
     sessionSig,
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
   });
 
   const allowPkpAddressToDecrypt = getPkpAccessControlCondition(
@@ -43,6 +45,7 @@ export async function signMessageWithEncryptedKey(
 
   return signMessageWithLitAction({
     ...params,
+    litClient,
     litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
     litActionCode: litActionCode ? litActionCode : undefined,
     accessControlConditions: [allowPkpAddressToDecrypt],

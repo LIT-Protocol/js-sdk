@@ -1,5 +1,5 @@
+import type { Cluster } from '@solana/web3.js';
 import {
-  Cluster,
   clusterApiUrl,
   Connection,
   Keypair,

@@ -1,4 +1,4 @@
-import { getFirstSessionSig, getPkpAddressFromSessionSig } from './utils';
+import { getFirstSessionSig, getLitNetworkFromClient } from './utils';
 import { storePrivateKey } from '../service-client';
 import { StoreEncryptedKeyParams, StoreEncryptedKeyResult } from '../types';
 
@@ -10,8 +10,9 @@ import { StoreEncryptedKeyParams, StoreEncryptedKeyResult } from '../types';
 export async function storeEncryptedKey(
   params: StoreEncryptedKeyParams
 ): Promise<StoreEncryptedKeyResult> {
-  const { pkpSessionSigs, litNodeClient } = params;
+  const { pkpSessionSigs, litClient } = params;
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
+  const litNetwork = getLitNetworkFromClient(litClient);
 
   const { publicKey, keyType, dataToEncryptHash, ciphertext, memo } = params;
 
@@ -24,6 +25,6 @@ export async function storeEncryptedKey(
       memo,
     },
     sessionSig,
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
   });
 }

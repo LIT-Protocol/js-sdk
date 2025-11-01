@@ -1,0 +1,50 @@
+---
+title: Lit Resources & Abilities
+description: "Understand which resource prefixes the Lit network recognises, the abilities each unlocks, and how capability objects scope them."
+---
+
+# Overview
+
+Lit Resources describe **what** you want a delegated capability to touch. Lit Abilities describe **which operation** the holder may perform against that resource. Every delegation or session signature lists both so downstream nodes can enforce the scope before a request executes.
+
+This page summarises the resource prefixes supported by the Lit nodes today, the abilities each exposes, and how wildcard scoping works when building capability objects (e.g., SIWE + ReCap or `createAuthManager` flows).
+
+## Resource catalogue
+
+| Prefix | Shorthand | Description | Resource key format | Supported abilities |
+| ------ | --------- | ----------- | ------------------- | ------------------- |Ç
+| `lit-accesscontrolcondition` | `ACC` | Access control condition hashes. Used when decrypting or signing data gated by a condition. | `lit-accesscontrolcondition://<hash>` | `access-control-condition-decryption`, `access-control-condition-signing` |
+| `lit-pkp` | `PKP` | Programmable Key Pair NFT token IDs. Grants threshold signing with that PKP. | `lit-pkp://<tokenId>` | `pkp-signing` |
+| `lit-litaction` | `LA` | Lit Action IPFS content identifiers. Authorises deterministic JavaScript execution hosted by the network. | `lit-litaction://<cid>` | `lit-action-execution` |
+| `lit-paymentdelegation` | `PD` | Payment delegation tokens proving prepaid usage. Lets a delegate authenticate against the payment delegation balance. | `lit-paymentdelegation://<tokenId>` | `lit-payment-delegation` |
+
+<Note>
+The Lit nodes reserve an additional prefix, `lit-resolvedauthcontext`, for internal bookkeeping. End-user delegations should only target the four prefixes in the table above.
+</Note>
+
+### Wildcards
+
+- Use `prefix://*` to authorise every resource under a prefix (for example, `lit-pkp://*` allows PKP signing with any PKP controlled by the delegator).
+- Use `*/*` within a capability object to wildcard every ability for a resource entry. This is rarely necessary; prefer enumerating the specific ability (e.g., `Threshold/Decryption`) whenever possible.
+
+## Ability mapping
+
+Internally, each ability maps into a Recap namespace/action pair:
+
+| Lit ability | Recap namespace / ability | Typical operation |
+| ----------- | ------------------------ | ----------------- |
+| `access-control-condition-decryption` | `Threshold/Decryption` | Decrypting symmetric keys or JWT payloads behind an access control condition. |
+| `access-control-condition-signing` | `Threshold/Signing` | Threshold signing checks required by some access control conditions. |
+| `pkp-signing` | `Threshold/Signing` | Using a PKP NFT for message or transaction signing. |
+| `lit-action-execution` | `Threshold/Execution` | Running Lit Actions (`executeJs`) hosted on IPFS or supplied inline. |
+| `lit-payment-delegation` | `Auth/Auth` | Presenting a payment delegation token to prove prepaid execution quota. |
+
+The Lit SDK builds these mappings automatically when you call helpers such as `generatePkpDelegationAuthSig` or `createAuthManager`. When constructing capability objects manually (for example, via SIWE + ReCap), ensure you choose the namespace/action pair that matches the desired Lit ability.
+
+## Capability enforcement
+
+- Delegations are only honoured if the resource key and ability pair appear in the capability object obtained during authentication.
+- The node accepts either an exact resource key or a wildcard entry under the same prefix. If neither exists, the request is rejected before any signing, decryption, or execution occurs.
+- Mixing unrelated prefixes or abilities (for example, requesting `lit-action-execution` for a PKP resource) fails validation because the node cross-checks the allowed combinations at verification time.
+
+By scoping to precise resources and short expirations, you can safely hand session materials (like delegation auth signatures) to backend services without granting broader access than intended.

@@ -6,6 +6,12 @@ import {
 import { createLitClient, utils as litUtils } from '@lit-protocol/lit-client';
 import type { NagaLocalModule } from '@lit-protocol/networks';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import {
+  NetworkName,
+  NetworkNameSchema,
+  ResolvedNetwork,
+  resolveNetwork,
+} from './helper/network';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
 import { getOrCreatePkp } from './helper/pkp-utils';
@@ -19,15 +25,6 @@ import {
 
 // import { createPkpAuthContext } from './helper/auth-contexts';
 
-const SupportedNetworkSchema = z.enum([
-  'naga-dev',
-  'naga-test',
-  'naga-local',
-  'naga-staging',
-]);
-
-type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
-
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
@@ -39,27 +36,44 @@ const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
 const EVE_VALIDATION_IPFS_CID =
   'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
 
-export const init = async (
-  network?: SupportedNetwork,
-  logLevel?: LogLevel
-): Promise<{
+type BaseInitResult = {
   litClient: LitClientInstance;
   authManager: AuthManagerInstance;
   localMasterAccount: ViemAccount;
   aliceViemAccount: ViemAccount;
   aliceViemAccountAuthData: AuthData;
   aliceViemAccountPkp: PKPData;
+  aliceEoaAuthContext: AuthContext;
+  masterDepositForUser: (userAddress: string) => Promise<void>;
+  resolvedNetwork: ResolvedNetwork;
+};
+
+type FullInitResult = BaseInitResult & {
   bobViemAccount: ViemAccount;
   bobViemAccountAuthData: AuthData;
   bobViemAccountPkp: PKPData;
-  aliceEoaAuthContext: AuthContext;
   alicePkpAuthContext: AuthContext;
   eveViemAccount: ViemAccount;
   eveCustomAuthData: CustomAuthData;
   eveViemAccountPkp: PKPData;
   eveValidationIpfsCid: `Qm${string}`;
-  masterDepositForUser: (userAddress: string) => Promise<void>;
-}> => {
+};
+
+async function initInternal(
+  mode: 'fast',
+  network?: NetworkName,
+  logLevel?: LogLevel
+): Promise<BaseInitResult>;
+async function initInternal(
+  mode: 'full',
+  network?: NetworkName,
+  logLevel?: LogLevel
+): Promise<FullInitResult>;
+async function initInternal(
+  mode: 'fast' | 'full',
+  network?: NetworkName,
+  logLevel?: LogLevel
+): Promise<BaseInitResult | FullInitResult> {
   /**
    * ====================================
    * Prepare accounts for testing
@@ -76,32 +90,24 @@ export const init = async (
     aliceViemAccount
   );
 
-  const bobViemAccount = privateKeyToAccount(generatePrivateKey());
-  const bobViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
-    bobViemAccount
-  );
-
-  const eveViemAccount = privateKeyToAccount(generatePrivateKey());
-
   /**
    * ====================================
    * Environment settings
    * ====================================
    */
-  const _network = network || process.env['NETWORK'];
-  const _logLevel = logLevel || process.env['LOG_LEVEL'];
-  process.env['LOG_LEVEL'] = _logLevel;
+  const networkInput = network ?? process.env['NETWORK'];
+  const _logLevel = logLevel ?? process.env['LOG_LEVEL'];
+  if (_logLevel) {
+    process.env['LOG_LEVEL'] = _logLevel;
+  }
 
-  if (!_network) {
+  if (!networkInput) {
     throw new Error(
-      `❌ Network not specified. Please set the NETWORK environment variable or pass a network parameter. Available networks: ${SupportedNetworkSchema.options.join(
+      `❌ Network not specified. Please set the NETWORK environment variable or pass a network parameter. Available networks: ${NetworkNameSchema.options.join(
         ', '
       )}`
     );
   }
-
-  console.log('✅ Using network:', _network);
-  console.log('✅ Using log level:', _logLevel);
 
   /**
    * ====================================
@@ -110,61 +116,21 @@ export const init = async (
    * ❗️ If it's on live chain, we will fund it with the master account. (set in the .env file)
    * ====================================
    */
-
-  // Network configuration map
-  const networkConfig = {
-    'naga-dev': { importName: 'nagaDev', type: 'live' },
-    'naga-test': { importName: 'nagaTest', type: 'live' },
-    'naga-local': { importName: 'nagaLocal', type: 'local' },
-    'naga-staging': { importName: 'nagaStaging', type: 'live' },
-  } as const;
-
-  const config = networkConfig[_network as keyof typeof networkConfig];
-  if (!config) {
-    throw new Error(`❌ Invalid network: ${_network}`);
-  }
-
-  // Dynamic import of network module
-  const networksModule = await import('@lit-protocol/networks');
-  let _baseNetworkModule = networksModule[config.importName];
-
-  if (_network === 'naga-local') {
-    const localContextPath = process.env['NAGA_LOCAL_CONTEXT_PATH'];
-    if (localContextPath) {
-      // Type guard: verify the module exposes withLocalContext so TypeScript narrows it to NagaLocal.
-      const isNagaLocalModule = (module: unknown): module is NagaLocalModule =>
-        !!module &&
-        typeof (module as { withLocalContext?: unknown }).withLocalContext ===
-          'function';
-
-      if (isNagaLocalModule(_baseNetworkModule)) {
-        const localContextName = process.env['NETWORK'];
-
-        console.log(
-          '✅ Loading naga-local signatures from NAGA_LOCAL_CONTEXT_PATH:',
-          localContextPath
-        );
-
-        const nagaLocalModule: NagaLocalModule = _baseNetworkModule;
-
-        _baseNetworkModule = await nagaLocalModule.withLocalContext({
-          networkContextPath: localContextPath,
-          networkName: localContextName,
-        });
-      } else {
-        console.warn(
-          '⚠️ NAGA_LOCAL_CONTEXT_PATH is set but nagaLocal.withLocalContext is unavailable in the current networks build.'
-        );
-      }
-    }
-  }
-
   // Optional RPC override from env
   const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
-  const _networkModule =
-    rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
-      ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
-      : _baseNetworkModule;
+  const resolvedNetwork = await resolveNetwork({
+    network: networkInput,
+    rpcUrlOverride: rpcOverride,
+  });
+
+  const {
+    name: resolvedNetworkName,
+    type: networkType,
+    networkModule,
+  } = resolvedNetwork;
+
+  console.log('✅ Using network:', resolvedNetworkName);
+  console.log('✅ Using log level:', _logLevel);
 
   if (rpcOverride) {
     console.log(
@@ -173,39 +139,48 @@ export const init = async (
     );
   }
 
-  /**
-   * ====================================
-   * Initialise the LitClient
-   * ====================================
-   */
-  const litClient = await createLitClient({ network: _networkModule });
-
-  /**
-   * ====================================
-   * Fund accounts based on network type
-   * ====================================
-   */
-  const isLocal = config.type === 'local';
+  // Fund accounts based on network type
+  const isLocal = networkType === 'local';
   const masterAccount = isLocal ? localMasterAccount : liveMasterAccount;
   const fundingAmount = isLocal
     ? LOCAL_NETWORK_FUNDING_AMOUNT
     : LIVE_NETWORK_FUNDING_AMOUNT;
 
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
-  await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
+  await fundAccount(aliceViemAccount, masterAccount, networkModule, {
     ifLessThan: fundingAmount,
     thenFund: fundingAmount,
   });
 
-  await fundAccount(bobViemAccount, masterAccount, _networkModule, {
-    ifLessThan: fundingAmount,
-    thenFund: fundingAmount,
-  });
+  let bobViemAccount: ViemAccount | undefined;
+  let bobViemAccountAuthData: AuthData | undefined;
+  let eveViemAccount: ViemAccount | undefined;
 
-  await fundAccount(eveViemAccount, masterAccount, _networkModule, {
-    ifLessThan: fundingAmount,
-    thenFund: fundingAmount,
-  });
+  if (mode === 'full') {
+    bobViemAccount = privateKeyToAccount(generatePrivateKey());
+    bobViemAccountAuthData = await ViemAccountAuthenticator.authenticate(
+      bobViemAccount
+    );
+
+    eveViemAccount = privateKeyToAccount(generatePrivateKey());
+
+    await fundAccount(bobViemAccount, masterAccount, networkModule, {
+      ifLessThan: fundingAmount,
+      thenFund: fundingAmount,
+    });
+
+    await fundAccount(eveViemAccount, masterAccount, networkModule, {
+      ifLessThan: fundingAmount,
+      thenFund: fundingAmount,
+    });
+  }
+
+  /**
+   * ====================================
+   * Initialise the LitClient
+   * ====================================
+   */
+  const litClient = await createLitClient({ network: networkModule });
 
   /**
    * ====================================
@@ -240,20 +215,73 @@ export const init = async (
   const authManager = createAuthManager({
     storage: storagePlugins.localStorageNode({
       appName: 'my-local-testing-app',
-      networkName: _network,
+      networkName: resolvedNetworkName,
       storagePath: './.e2e/lit-auth-local',
     }),
   });
+
+  const createAliceEoaAuthContext = () =>
+    authManager.createEoaAuthContext({
+      config: {
+        account: aliceViemAccount,
+      },
+      authConfig: {
+        statement: 'I authorize the Lit Protocol to execute this Lit Action.',
+        domain: 'example.com',
+        resources: [
+          ['lit-action-execution', '*'],
+          ['pkp-signing', '*'],
+          ['access-control-condition-decryption', '*'],
+        ],
+        capabilityAuthSigs: [],
+        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+      },
+      litClient: litClient,
+    });
+
+  const aliceViemAccountPkp = await getOrCreatePkp(
+    litClient,
+    aliceViemAccountAuthData,
+    aliceViemAccount
+  );
+
+  if (mode === 'fast') {
+    await masterDepositForUser(aliceViemAccount.address);
+    await masterDepositForUser(aliceViemAccountPkp.ethAddress);
+
+    const aliceEoaAuthContext = await createAliceEoaAuthContext();
+
+    console.log('✅ Initialised components (fast)');
+
+    const baseResult: BaseInitResult = {
+      litClient,
+      authManager,
+      localMasterAccount,
+      aliceViemAccount,
+      aliceViemAccountAuthData,
+      aliceViemAccountPkp,
+      aliceEoaAuthContext,
+      masterDepositForUser,
+      resolvedNetwork,
+    };
+
+    return baseResult;
+  }
+
+  if (!bobViemAccount || !bobViemAccountAuthData || !eveViemAccount) {
+    throw new Error('❌ Failed to prepare accounts for full init');
+  }
 
   /**
    * ====================================
    * Get or create PKPs for Alice and Bob
    * ====================================
    */
-  const [aliceViemAccountPkp, bobViemAccountPkp] = await Promise.all([
-    getOrCreatePkp(litClient, aliceViemAccountAuthData, aliceViemAccount),
-    getOrCreatePkp(litClient, bobViemAccountAuthData, bobViemAccount),
-  ]);
+  const bobViemAccountPkp = await getOrCreatePkp(
+    litClient,
+    bobViemAccountAuthData,
+    bobViemAccount
+  );
 
   // Use custom auth to create a PKP for Eve
   const uniqueDappName = 'e2e-test-dapp';
@@ -293,23 +321,7 @@ export const init = async (
    * Create the auth context
    * ====================================
    */
-  const aliceEoaAuthContext = await authManager.createEoaAuthContext({
-    config: {
-      account: aliceViemAccount,
-    },
-    authConfig: {
-      statement: 'I authorize the Lit Protocol to execute this Lit Action.',
-      domain: 'example.com',
-      resources: [
-        ['lit-action-execution', '*'],
-        ['pkp-signing', '*'],
-        ['access-control-condition-decryption', '*'],
-      ],
-      capabilityAuthSigs: [],
-      expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-    },
-    litClient: litClient,
-  });
+  const aliceEoaAuthContext = await createAliceEoaAuthContext();
 
   console.log('✅ Initialised components');
 
@@ -336,52 +348,58 @@ export const init = async (
   const alicePkpViemAccount = await litClient.getPkpViemAccount({
     pkpPublicKey: aliceViemAccountPkp.pubkey,
     authContext: alicePkpAuthContext,
-    chainConfig: _networkModule.getChainConfig(),
+    chainConfig: networkModule.getChainConfig(),
   });
 
-  await fundAccount(alicePkpViemAccount, masterAccount, _networkModule, {
+  await fundAccount(alicePkpViemAccount, masterAccount, networkModule, {
     ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
     thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
   });
 
   /**
    * ====================================
-   * Depositing to Lit Ledger for differen
+   * Depositing to Lit Ledger for different accounts
    * ====================================
    */
-
-  // Deposit to the PKP Viem account Ledger
   await masterDepositForUser(alicePkpViemAccount.address);
 
-  // const alicePkpViemAccountPermissionsManager = await litClient.getPKPPermissionsManager({
-  //   pkpIdentifier: {
-  //     tokenId: aliceViemAccountPkp.tokenId,
-  //   },
-  //   account: alicePkpViemAccount,
-  // });
-
-  /**
-   * ====================================
-   * Return the initialised components
-   * ====================================
-   */
-  return {
+  const baseResult: BaseInitResult = {
     litClient,
     authManager,
     localMasterAccount,
     aliceViemAccount,
     aliceViemAccountAuthData,
     aliceViemAccountPkp,
+    aliceEoaAuthContext,
+    masterDepositForUser,
+    resolvedNetwork,
+  };
+
+  const fullResult: FullInitResult = {
+    ...baseResult,
     bobViemAccount,
     bobViemAccountAuthData,
     bobViemAccountPkp,
+    alicePkpAuthContext,
     eveViemAccount,
     eveCustomAuthData,
     eveViemAccountPkp,
     eveValidationIpfsCid: EVE_VALIDATION_IPFS_CID,
-    aliceEoaAuthContext,
-    alicePkpAuthContext,
-    masterDepositForUser,
-    // alicePkpViemAccountPermissionsManager
   };
+
+  return fullResult;
+}
+
+export const init = async (
+  network?: NetworkName,
+  logLevel?: LogLevel
+): Promise<FullInitResult> => {
+  return initInternal('full', network, logLevel);
+};
+
+export const initFast = async (
+  network?: NetworkName,
+  logLevel?: LogLevel
+): Promise<BaseInitResult> => {
+  return initInternal('fast', network, logLevel);
 };

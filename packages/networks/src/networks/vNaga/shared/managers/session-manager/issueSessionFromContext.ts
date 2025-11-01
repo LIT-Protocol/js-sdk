@@ -5,6 +5,7 @@ import {
   AuthConfigSchema,
 } from '@lit-protocol/schemas';
 import {
+  AuthSig,
   LitResourceAbilityRequest,
   SessionSigningTemplate,
   SessionSigsMap,
@@ -59,9 +60,11 @@ export const issueSessionFromContext = async (params: {
     typeof PKPAuthContextSchema | typeof EoaAuthContextSchema
   >;
   pricingContext: PricingContext;
+  delegationAuthSig?: AuthSig;
   // latestBlockhash: string;
 }): Promise<SessionSigsMap> => {
-  const authSig = await params.authContext.authNeededCallback();
+  const authSig =
+    params.delegationAuthSig || (await params.authContext.authNeededCallback());
   const _authConfig = AuthConfigSchema.parse(params.authContext.authConfig);
 
   const capabilities = [

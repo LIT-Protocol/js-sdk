@@ -21,6 +21,16 @@
 
 import { initHealthCheck } from './health-init';
 import { createAccBuilder } from '@lit-protocol/access-control-conditions';
+import { generateSessionKeyPair } from '@lit-protocol/auth';
+import {
+  api as wrappedKeysApi,
+  config as wrappedKeysConfig,
+} from '@lit-protocol/wrapped-keys';
+import {
+  litActionRepository,
+  litActionRepositoryCommon,
+} from '@lit-protocol/wrapped-keys-lit-actions';
+import { Wallet } from 'ethers';
 
 type HealthCheckContext = Awaited<ReturnType<typeof initHealthCheck>>;
 
@@ -241,6 +251,83 @@ export class NagaHealthManager {
       console.log('✅ Decrypt test passed');
     } catch (e) {
       console.error('❌ Decrypt test failed:', e);
+      throw e;
+    }
+  };
+
+  /**
+   * Test 6: Wrapped Keys Service Test
+   *
+   * Validates the wrapped keys service by importing an externally generated key
+   * and immediately exporting it to confirm correct round-trip encryption.
+   */
+  wrappedKeysTest = async (): Promise<void> => {
+    try {
+      wrappedKeysConfig.setLitActionsCode(litActionRepository);
+      wrappedKeysConfig.setLitActionsCodeCommon(litActionRepositoryCommon);
+
+      const sessionKeyPair = generateSessionKeyPair();
+
+      const delegationAuthSig =
+        await this.ctx.authManager.generatePkpDelegationAuthSig({
+          pkpPublicKey: this.ctx.aliceViemAccountPkp.pubkey,
+          authData: this.ctx.aliceViemAccountAuthData,
+          sessionKeyPair,
+          authConfig: {
+            resources: [
+              ['pkp-signing', '*'],
+              ['lit-action-execution', '*'],
+              ['access-control-condition-decryption', '*'],
+            ],
+            expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+          },
+          litClient: this.ctx.litClient,
+        });
+
+      const pkpSessionSigs = await this.ctx.authManager.createPkpSessionSigs({
+        pkpPublicKey: this.ctx.aliceViemAccountPkp.pubkey,
+        sessionKeyPair,
+        delegationAuthSig,
+        litClient: this.ctx.litClient,
+      });
+
+      const wallet = Wallet.createRandom();
+      const memo = `health-check-import-${Date.now()}`;
+
+      const importResult = await wrappedKeysApi.importPrivateKey({
+        pkpSessionSigs,
+        litClient: this.ctx.litClient,
+        privateKey: wallet.privateKey,
+        publicKey: wallet.publicKey,
+        keyType: 'K256',
+        memo,
+      });
+
+      if (!importResult.id) {
+        throw new Error('Wrapped key import failed - no key id returned');
+      }
+
+      const exportResult = await wrappedKeysApi.exportPrivateKey({
+        pkpSessionSigs,
+        litClient: this.ctx.litClient,
+        id: importResult.id,
+        network: 'evm',
+      });
+
+      if (!exportResult.decryptedPrivateKey) {
+        throw new Error('Wrapped key export failed - missing private key');
+      }
+
+      if (
+        exportResult.decryptedPrivateKey.toLowerCase() !==
+        wallet.privateKey.toLowerCase()
+      ) {
+        throw new Error('Wrapped key export mismatch');
+      }
+
+      console.log('✅ Wrapped Keys test passed');
+    } catch (e) {
+      console.error('❌ Wrapped Keys test failed:', e);
       throw e;
     }
   };

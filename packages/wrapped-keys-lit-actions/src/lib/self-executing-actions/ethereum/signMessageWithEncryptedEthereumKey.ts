@@ -3,18 +3,14 @@ import { signMessageWithEncryptedEthereumKey } from '../../raw-action-functions/
 
 import type { SignMessageWithEncryptedEthereumKeyParams } from '../../raw-action-functions/ethereum/signMessageWithEncryptedEthereumKey';
 
-// Using local declarations to avoid _every file_ thinking these are always in scope
-declare const accessControlConditions: SignMessageWithEncryptedEthereumKeyParams['accessControlConditions'];
-declare const ciphertext: SignMessageWithEncryptedEthereumKeyParams['ciphertext'];
-declare const dataToEncryptHash: SignMessageWithEncryptedEthereumKeyParams['dataToEncryptHash'];
-declare const messageToSign: SignMessageWithEncryptedEthereumKeyParams['messageToSign'];
+declare const jsParams: SignMessageWithEncryptedEthereumKeyParams;
 
 (async () =>
   litActionHandler(async () =>
     signMessageWithEncryptedEthereumKey({
-      accessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-      messageToSign,
+      accessControlConditions: jsParams.accessControlConditions,
+      ciphertext: jsParams.ciphertext,
+      dataToEncryptHash: jsParams.dataToEncryptHash,
+      messageToSign: jsParams.messageToSign,
     })
   ))();

@@ -3,11 +3,7 @@ import { batchGenerateEncryptedKeys } from '../../raw-action-functions/common/ba
 
 import type { BatchGenerateEncryptedKeysParams } from '../../raw-action-functions/common/batchGenerateEncryptedKeys';
 
-// Using local declarations to avoid _every file_ thinking these are always in scope
-declare const actions: BatchGenerateEncryptedKeysParams['actions'];
-declare const accessControlConditions: BatchGenerateEncryptedKeysParams['accessControlConditions'];
+declare const jsParams: BatchGenerateEncryptedKeysParams;
 
 (async () =>
-  litActionHandler(async () =>
-    batchGenerateEncryptedKeys({ actions, accessControlConditions })
-  ))();
+  litActionHandler(async () => batchGenerateEncryptedKeys(jsParams)))();

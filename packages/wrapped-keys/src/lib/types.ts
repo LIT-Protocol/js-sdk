@@ -1,8 +1,5 @@
-import {
-  ILitNodeClient,
-  LIT_NETWORKS_KEYS,
-  SessionSigsMap,
-} from '@lit-protocol/types';
+import type { createLitClient } from '@lit-protocol/lit-client';
+import { LIT_NETWORKS_KEYS, SessionSigsMap } from '@lit-protocol/types';
 
 /** @typedef Network
  * The network type that the wrapped key will be used on.
@@ -10,15 +7,22 @@ import {
 export type Network = 'evm' | 'solana';
 export type KeyType = 'K256' | 'ed25519';
 
+export type LitClient = Awaited<ReturnType<typeof createLitClient>> & {
+  config?: {
+    litNetwork?: string;
+  };
+};
+
 /** All API calls for the wrapped keys service require these arguments.
  *
  * @typedef BaseApiParams
  * @property {SessionSigsMap} pkpSessionSigs - The PKP sessionSigs used to associate the PKP with the generated private key and authenticate with the wrapped keys backend service.
- * @property {ILitNodeClient} litNodeClient - The Lit Node Client used for executing the Lit Action and identifying which wrapped keys backend service to communicate with.
+ * @property {LitClient} litClient - The Lit Client used for executing Lit Actions and identifying which wrapped keys backend service to communicate with.
  */
 export interface BaseApiParams {
   pkpSessionSigs: SessionSigsMap;
-  litNodeClient: ILitNodeClient;
+  litClient: LitClient;
+  userMaxPrice?: bigint;
 }
 
 export interface ApiParamsSupportedNetworks {
@@ -151,7 +155,7 @@ export type ExportPrivateKeyParams = BaseApiParams &
  */
 export interface ExportPrivateKeyResult {
   pkpAddress: string;
-  decryptedPrivateKey: string;
+  decryptedPrivateKey: string | `0x${string}`;
   publicKey: string;
   litNetwork: LIT_NETWORKS_KEYS;
   keyType: KeyType;

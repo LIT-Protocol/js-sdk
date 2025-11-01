@@ -1,4 +1,3 @@
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
@@ -9,6 +8,7 @@ interface BatchGeneratePrivateKeysWithLitActionParams
   accessControlConditions: AccessControlConditions;
   litActionIpfsCid?: string;
   litActionCode?: string;
+  userMaxPrice?: bigint;
 }
 
 interface GeneratePrivateKeyLitActionResult {
@@ -29,25 +29,23 @@ export async function batchGenerateKeysWithLitAction(
 ): Promise<BatchGeneratePrivateKeysWithLitActionResult[]> {
   const {
     accessControlConditions,
-    litNodeClient,
+    litClient,
     actions,
     pkpSessionSigs,
     litActionIpfsCid,
     litActionCode,
+    userMaxPrice,
   } = args;
 
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     useSingleNode: true,
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
+    userMaxPrice,
     jsParams: {
       actions,
       accessControlConditions,
-    },
-    ipfsOptions: {
-      overwriteCode:
-        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
     },
   });
 

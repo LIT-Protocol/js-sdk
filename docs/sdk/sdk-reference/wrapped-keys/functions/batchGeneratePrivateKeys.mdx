@@ -1,0 +1,41 @@
+---
+title: batchGeneratePrivateKeys
+---
+
+# Function
+
+> **batchGeneratePrivateKeys**(`params`)
+
+Runs multiple wrapped-key actions in one request, optionally signing messages as part of the batch.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required />
+<ParamField path="params.litClient" type="LitClient" required />
+<ParamField path="params.actions" type="GeneratePrivateKeyAction[]" required>
+  Each action may specify `network`, `generateKeyParams.memo`, and optional `signMessageParams.messageToSign`.
+</ParamField>
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional `executeJs` price cap (applies to the whole batch).
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="BatchGeneratePrivateKeysResult">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="pkpAddress" type="string" required />
+    <ResponseField name="results" type="BatchGeneratePrivateKeysActionResult[]" required />
+  </Expandable>
+</ResponseField>
+
+## Example
+
+```ts
+const { results } = await wrappedKeysApi.batchGeneratePrivateKeys({
+  pkpSessionSigs,
+  litClient,
+  actions: [
+    { network: 'evm', generateKeyParams: { memo: 'key-0' } },
+  ],
+});
+```

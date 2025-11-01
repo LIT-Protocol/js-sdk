@@ -9,7 +9,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "yarn --cwd ./packages/wrapped-keys-lit-actions generate-lit-actions"
+          "pnpm --dir ./packages/wrapped-keys-lit-actions run generate-lit-actions"
         ],
         "cwd": "."
       }

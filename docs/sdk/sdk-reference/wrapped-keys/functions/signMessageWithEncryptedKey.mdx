@@ -1,0 +1,38 @@
+---
+title: signMessageWithEncryptedKey
+---
+
+# Function
+
+> **signMessageWithEncryptedKey**(`params`)
+
+Decrypts a stored wrapped key inside a Lit Action and signs an arbitrary message.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required />
+<ParamField path="params.litClient" type="LitClient" required />
+<ParamField path="params.network" type="'evm' | 'solana'" required />
+<ParamField path="params.id" type="string" required />
+<ParamField path="params.messageToSign" type="string | Uint8Array" required />
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional `executeJs` price cap.
+</ParamField>
+
+## Returns
+
+<ResponseField name="signature" type="string">
+  Raw signature string (`0x` hex for EVM, base58 for Solana).
+</ResponseField>
+
+## Example
+
+```ts
+const signature = await wrappedKeysApi.signMessageWithEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  id,
+  messageToSign: 'hello from wrapped keys',
+});
+```

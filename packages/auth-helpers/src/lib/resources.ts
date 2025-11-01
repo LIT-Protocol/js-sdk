@@ -9,8 +9,13 @@ import {
 import { AccessControlConditions, ILitResource } from '@lit-protocol/types';
 import { formatPKPResource } from './utils';
 
+const RESOLVED_AUTH_CONTEXT_PREFIX = 'lit-resolvedauthcontext';
+type InternalResourcePrefix =
+  | LIT_RESOURCE_PREFIX_VALUES
+  | typeof RESOLVED_AUTH_CONTEXT_PREFIX;
+
 abstract class LitResourceBase {
-  abstract resourcePrefix: LIT_RESOURCE_PREFIX_VALUES;
+  abstract resourcePrefix: InternalResourcePrefix;
   public readonly resource: string;
 
   constructor(resource: string) {
@@ -158,6 +163,18 @@ export function parseLitResource(resourceKey: string): ILitResource {
     return new LitActionResource(
       resourceKey.substring(`${LIT_RESOURCE_PREFIX.LitAction}://`.length)
     );
+  } else if (resourceKey.startsWith(RESOLVED_AUTH_CONTEXT_PREFIX)) {
+    const resource = resourceKey.substring(
+      `${RESOLVED_AUTH_CONTEXT_PREFIX}://`.length
+    );
+
+    return {
+      resourcePrefix: RESOLVED_AUTH_CONTEXT_PREFIX,
+      resource,
+      getResourceKey: () => `${RESOLVED_AUTH_CONTEXT_PREFIX}://${resource}`,
+      toString: () => `${RESOLVED_AUTH_CONTEXT_PREFIX}://${resource}`,
+      isValidLitAbility: () => false,
+    } as unknown as ILitResource;
   }
   throw new InvalidArgumentException(
     {

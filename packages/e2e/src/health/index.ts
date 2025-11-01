@@ -103,6 +103,7 @@ async function runHealthCheck(): Promise<void> {
       'signSessionKey',
       'executeJs',
       'decrypt',
+      'wrappedKeys',
     ] as const,
   });
 
@@ -155,12 +156,20 @@ async function runHealthCheck(): Promise<void> {
   await statusClient.executeAndLog(txs.decrypt.id, healthManager.decryptTest);
   console.log('');
 
+  // Test 6: Wrapped Keys
+  console.log('6️⃣  Testing: Wrapped Keys Service');
+  await statusClient.executeAndLog(
+    txs.wrappedKeys.id,
+    healthManager.wrappedKeysTest
+  );
+  console.log('');
+
   console.log('═══════════════════════════════════════');
   console.log('✅ Health Check Completed Successfully');
   console.log('═══════════════════════════════════════');
   console.log(`Network: ${NETWORK}`);
   console.log(`Time: ${new Date().toISOString()}`);
-  console.log('All 5 endpoint tests passed ✨\n');
+  console.log('All 6 endpoint tests passed ✨\n');
 }
 
 /**

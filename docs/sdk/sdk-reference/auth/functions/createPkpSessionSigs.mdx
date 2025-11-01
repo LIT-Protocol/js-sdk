@@ -1,0 +1,49 @@
+---
+title: createPkpSessionSigs
+---
+
+# Function
+
+> **createPkpSessionSigs**(`params`)
+
+Issues fresh session signatures for a PKP based on pre-generated delegation materials. Pair this with `createPkpAuthContextFromPreGenerated` when a backend needs to sign or execute Lit Actions on demand.
+
+## Parameters
+
+<ParamField path="params.authContext" type="AuthContext" required>
+  Auth context obtained from `createPkpAuthContextFromPreGenerated` or `createPkpAuthContext`.
+</ParamField>
+
+<ParamField path="params.litClient" type="LitClient" required>
+  Lit client that will request session signatures from the network.
+</ParamField>
+
+<ParamField path="params.product" type="'DECRYPTION' | 'SIGN' | 'LIT_ACTION' | 'SIGN_SESSION_KEY'">
+  Optional override for the product type when you need signatures for a specific capability. Defaults to `LIT_ACTION`.
+</ParamField>
+
+## Returns
+
+<ResponseField name="sessionSigs" type="SessionSigsMap">
+  Session signatures scoped to the delegated resources.
+</ResponseField>
+
+## Example
+
+```ts
+import {
+  createPkpAuthContextFromPreGenerated,
+  createPkpSessionSigs,
+} from '@lit-protocol/auth';
+
+const authContext = await createPkpAuthContextFromPreGenerated({
+  pkpPublicKey,
+  sessionKeyPair,
+  delegationAuthSig,
+});
+
+const pkpSessionSigs = await createPkpSessionSigs({
+  authContext,
+  litClient,
+});
+```

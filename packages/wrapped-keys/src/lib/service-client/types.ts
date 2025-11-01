@@ -15,7 +15,10 @@ export type FetchKeyParams = BaseApiParams & {
 
 export type ListKeysParams = BaseApiParams & { pkpAddress: string };
 
-export type SupportedNetworks = Extract<LIT_NETWORK_VALUES, 'naga-dev'>;
+export type SupportedNetworks = Extract<
+  LIT_NETWORK_VALUES,
+  'naga-dev' | 'naga-test'
+>;
 
 export interface StoreKeyParams extends BaseApiParams {
   storedKeyMetadata: Pick<

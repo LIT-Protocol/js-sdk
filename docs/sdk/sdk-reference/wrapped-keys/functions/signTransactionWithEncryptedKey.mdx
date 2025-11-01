@@ -1,0 +1,52 @@
+---
+title: signTransactionWithEncryptedKey
+---
+
+# Function
+
+> **signTransactionWithEncryptedKey**(`params`)
+
+Signs an EVM or Solana transaction with a stored wrapped key. Optionally broadcasts when the Lit Action supports it.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required />
+<ParamField path="params.litClient" type="LitClient" required />
+<ParamField path="params.network" type="'evm' | 'solana'" required />
+<ParamField path="params.id" type="string" required />
+<ParamField path="params.unsignedTransaction" type="object" required>
+  Serialized transaction payload. For Solana include `chain`/`serializedTransaction`; for EVM include `chain`, `chainId`, and `toAddress`/`value`.
+</ParamField>
+<ParamField path="params.broadcast" type="boolean" defaultValue={false}>
+  When `true`, the Lit Action attempts to submit the signed transaction to the configured RPC endpoint and returns the transaction hash.
+</ParamField>
+<ParamField path="params.versionedTransaction" type="boolean">
+  Set to `true` when providing a Solana versioned transaction payload.
+</ParamField>
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional price ceiling for the Lit Action.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="string">
+  Signed transaction (or hash when broadcasting is enabled).
+</ResponseField>
+
+## Example
+
+```ts
+const signedTx = await wrappedKeysApi.signTransactionWithEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  id,
+  unsignedTransaction: {
+    chain: 'yellowstone',
+    chainId: 1337,
+    toAddress: ZERO_ADDRESS,
+    value: '0',
+  },
+  broadcast: false,
+});
+```

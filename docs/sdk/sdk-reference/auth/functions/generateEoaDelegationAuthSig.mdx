@@ -1,0 +1,49 @@
+---
+title: generateEoaDelegationAuthSig
+---
+
+# Function
+
+> **generateEoaDelegationAuthSig**(`params`)
+
+Creates a delegation signature for an EOA-based session. The EOA wallet signs the session delegation message directly, enabling pre-generated session materials for server-side reuse.
+
+## Parameters
+
+<ParamField path="params.account" type="Account | WalletClient | Signer" required>
+  EOA used to sign the delegation message.
+</ParamField>
+
+<ParamField path="params.sessionKeyPair" type="SessionKeyPair" required>
+  Session keypair generated with `generateSessionKeyPair`.
+</ParamField>
+
+<ParamField path="params.authConfig" type="AuthConfigV2" required>
+  Resources and expiration scoped to the delegated session.
+</ParamField>
+
+## Returns
+
+<ResponseField name="delegationAuthSig" type="AuthSig">
+  Delegation signature that can be paired with the session keypair.
+</ResponseField>
+
+## Example
+
+```ts
+import {
+  generateEoaDelegationAuthSig,
+  generateSessionKeyPair,
+} from '@lit-protocol/auth';
+
+const sessionKeyPair = generateSessionKeyPair();
+
+const delegationAuthSig = await generateEoaDelegationAuthSig({
+  account: myViemAccount,
+  sessionKeyPair,
+  authConfig: {
+    resources: [ ['lit-action-execution', '*'] ],
+    expiration: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+  },
+});
+```

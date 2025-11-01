@@ -1,0 +1,56 @@
+---
+title: generatePkpDelegationAuthSig
+---
+
+# Function
+
+> **generatePkpDelegationAuthSig**(`params`)
+
+Creates a delegation signature that authorises a session key to act on behalf of a PKP. Use this in server or pre-generation flows where you want to prepare session materials ahead of time.
+
+## Parameters
+
+<ParamField path="params.pkpPublicKey" type="string" required>
+  Hex-encoded PKP public key.
+</ParamField>
+
+<ParamField path="params.authData" type="AuthData" required>
+  Authentication data for the PKP owner (e.g., from `ViemAccountAuthenticator.authenticate`).
+</ParamField>
+
+<ParamField path="params.sessionKeyPair" type="SessionKeyPair" required>
+  Session keypair generated with `generateSessionKeyPair`.
+</ParamField>
+
+<ParamField path="params.authConfig" type="AuthConfigV2" required>
+  Configures resources and expiration scoped to the delegation.
+</ParamField>
+
+<ParamField path="params.litClient" type="LitClient" required>
+  Lit client used to reach the network and request the delegation signature.
+</ParamField>
+
+## Returns
+
+<ResponseField name="delegationAuthSig" type="AuthSig">
+  Signed delegation that can be shipped alongside the session keypair.
+</ResponseField>
+
+## Example
+
+```ts
+import { generatePkpDelegationAuthSig, generateSessionKeyPair } from '@lit-protocol/auth';
+
+const sessionKeyPair = generateSessionKeyPair();
+
+const delegationAuthSig = await generatePkpDelegationAuthSig({
+  pkpPublicKey,
+  authData,
+  sessionKeyPair,
+  authConfig: {
+    resources: [ ['pkp-signing', '*'], ['lit-action-execution', '*'] ],
+    expiration: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+  },
+  litClient,
+});
+```

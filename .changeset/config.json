@@ -7,8 +7,5 @@
   "access": "public",
   "baseBranch": "naga",
   "updateInternalDependencies": "minor",
-  "ignore": [
-    "@lit-protocol/wrapped-keys",
-    "@lit-protocol/wrapped-keys-lit-actions"
-  ]
+  "ignore": []
 }

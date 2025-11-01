@@ -11,6 +11,7 @@ import { ChainConfig } from 'viem';
  * Base interface shared by all Lit clients
  */
 export interface BaseLitClient<T> {
+  networkName: string;
   encrypt: (params: EncryptSdkParams) => Promise<EncryptResponse>;
   decrypt: (params: DecryptRequest) => Promise<DecryptResponse>;
   getContext: () => Promise<T>;
@@ -20,7 +21,7 @@ export interface BaseLitClient<T> {
   };
   disconnect: () => void;
   getDefault: {
-    authServiceUrl: string;
+    authServiceUrl?: string;
     loginUrl: string;
   };
 }

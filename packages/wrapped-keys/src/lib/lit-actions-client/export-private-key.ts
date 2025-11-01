@@ -1,4 +1,3 @@
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
@@ -9,6 +8,7 @@ interface SignMessageWithLitActionParams extends ExportPrivateKeyParams {
   storedKeyMetadata: StoredKeyData;
   litActionIpfsCid?: string;
   litActionCode?: string;
+  userMaxPrice?: bigint;
 }
 
 export async function exportPrivateKeyWithLitAction(
@@ -16,11 +16,12 @@ export async function exportPrivateKeyWithLitAction(
 ) {
   const {
     accessControlConditions,
-    litNodeClient,
+    litClient,
     pkpSessionSigs,
     litActionCode,
     litActionIpfsCid,
     storedKeyMetadata,
+    userMaxPrice,
   } = args;
 
   const {
@@ -29,19 +30,16 @@ export async function exportPrivateKeyWithLitAction(
     dataToEncryptHash,
     ...storeKeyMetadataMinusEncryptedAndPkp
   } = storedKeyMetadata;
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     sessionSigs: pkpSessionSigs,
     code: litActionCode,
     ipfsId: litActionIpfsCid,
+    userMaxPrice,
     jsParams: {
       pkpAddress,
       ciphertext,
       dataToEncryptHash,
       accessControlConditions,
-    },
-    ipfsOptions: {
-      overwriteCode:
-        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
     },
   });
 

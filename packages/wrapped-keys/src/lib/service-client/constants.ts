@@ -9,9 +9,8 @@ const SERVICE_URL_BY_NETWORKTYPE: Record<NETWORK_TYPES, string> = {
 };
 
 export const SERVICE_URL_BY_LIT_NETWORK: Record<SupportedNetworks, string> = {
-  [LIT_NETWORK.DatilDev]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
-  [LIT_NETWORK.DatilTest]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
-  [LIT_NETWORK.Datil]: SERVICE_URL_BY_NETWORKTYPE.Production,
+  [LIT_NETWORK.NagaDev]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
+  [LIT_NETWORK.NagaTest]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
 };
 
 export const LIT_SESSIONSIG_AUTHORIZATION_SCHEMA_PREFIX = 'LitSessionSig:';

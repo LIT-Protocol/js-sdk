@@ -2,16 +2,17 @@ import {
   PKPAuthContextSchema,
   EoaAuthContextSchema,
 } from '@lit-protocol/schemas';
-import { LitActionResponseStrategy, NagaJitContext } from '@lit-protocol/types';
+import {
+  AuthSig,
+  LitActionResponseStrategy,
+  NagaJitContext,
+} from '@lit-protocol/types';
 import { z } from 'zod';
 import { PricingContextSchema } from '../../pricing-manager/schema';
 import { ConnectionInfo } from '../../LitChainClient/types';
 
-export type ExecuteJsCreateRequestParams = {
+type ExecuteJsCreateRequestParamsBase = {
   pricingContext: z.input<typeof PricingContextSchema>;
-  authContext: z.input<
-    typeof PKPAuthContextSchema | typeof EoaAuthContextSchema
-  >;
   executionContext: {
     code?: string;
     ipfsId?: string;
@@ -23,3 +24,23 @@ export type ExecuteJsCreateRequestParams = {
   responseStrategy?: LitActionResponseStrategy;
   jitContext: NagaJitContext;
 };
+
+export type ExecuteJsCreateRequestParamsWithAuthContext =
+  ExecuteJsCreateRequestParamsBase & {
+    authContext: z.input<
+      typeof PKPAuthContextSchema | typeof EoaAuthContextSchema
+    >;
+    sessionSigs?: never;
+    delegationAuthSig?: AuthSig;
+  };
+
+export type ExecuteJsCreateRequestParamsWithSessionSigs =
+  ExecuteJsCreateRequestParamsBase & {
+    sessionSigs: Record<string, AuthSig>;
+    authContext?: undefined;
+    delegationAuthSig?: AuthSig;
+  };
+
+export type ExecuteJsCreateRequestParams =
+  | ExecuteJsCreateRequestParamsWithAuthContext
+  | ExecuteJsCreateRequestParamsWithSessionSigs;

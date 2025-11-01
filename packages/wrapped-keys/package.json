@@ -25,5 +25,13 @@
   },
   "version": "8.0.1",
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "dependencies": {
+    "@lit-protocol/auth": "workspace:*",
+    "@lit-protocol/constants": "workspace:*",
+    "@lit-protocol/lit-client": "workspace:*",
+    "@lit-protocol/networks": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*",
+    "@lit-protocol/types": "workspace:*"
+  }
 }

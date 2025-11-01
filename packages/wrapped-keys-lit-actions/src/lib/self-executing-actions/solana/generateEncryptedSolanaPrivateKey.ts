@@ -3,12 +3,7 @@ import { generateEncryptedSolanaPrivateKey } from '../../raw-action-functions/so
 
 import type { GenerateEncryptedSolanaPrivateKeyParams } from '../../raw-action-functions/solana/generateEncryptedSolanaPrivateKey';
 
-// Using local declarations to avoid _every file_ thinking these are always in scope
-declare const accessControlConditions: GenerateEncryptedSolanaPrivateKeyParams['accessControlConditions'];
+declare const jsParams: GenerateEncryptedSolanaPrivateKeyParams;
 
 (async () =>
-  litActionHandler(async () =>
-    generateEncryptedSolanaPrivateKey({
-      accessControlConditions,
-    })
-  ))();
+  litActionHandler(async () => generateEncryptedSolanaPrivateKey(jsParams)))();

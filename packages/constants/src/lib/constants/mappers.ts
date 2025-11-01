@@ -1,35 +1,4 @@
-import { nagaDev } from '@lit-protocol/contracts';
-
-import {
-  LIT_NETWORK,
-  LIT_NETWORK_VALUES,
-  ConstantKeys,
-  ConstantValues,
-} from './constants';
-
-/**
- * Mapping of network context by network value.
- */
-export const NETWORK_CONTEXT_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
-  typeof nagaDev | undefined
-> = {
-  [LIT_NETWORK.NagaDev]: nagaDev,
-  [LIT_NETWORK.Custom]: undefined,
-} as const;
-
-/**
- * Whether to overwrite the IPFS code for a given network.
- * This is useful when the nodes are not able to connect to the IPFS gateway,
- * so the sdk can fallback to these gateways.
- */
-export const GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
-  boolean
-> = {
-  [LIT_NETWORK.NagaDev]: false,
-  [LIT_NETWORK.Custom]: false,
-} as const;
+import { ConstantKeys, ConstantValues } from './constants';
 
 /**
  * Product IDs used for price feed and node selection

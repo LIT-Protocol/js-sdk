@@ -1,0 +1,32 @@
+---
+title: listEncryptedKeyMetadata
+---
+
+# Function
+
+> **listEncryptedKeyMetadata**(`params`)
+
+Returns metadata for all wrapped keys owned by the PKP without downloading ciphertext.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required />
+<ParamField path="params.litClient" type="LitClient" required />
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional price ceiling for the Lit Action.
+</ParamField>
+
+## Returns
+
+<ResponseField name="metadata" type="StoredKeyMetadata[]">
+  Array of stored keys (id, memo, key type, public key, PKP address, network).
+</ResponseField>
+
+## Example
+
+```ts
+const metadata = await wrappedKeysApi.listEncryptedKeyMetadata({
+  pkpSessionSigs,
+  litClient,
+});
+```

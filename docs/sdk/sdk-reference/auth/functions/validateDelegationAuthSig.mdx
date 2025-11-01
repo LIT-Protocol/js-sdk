@@ -1,0 +1,33 @@
+---
+title: validateDelegationAuthSig
+---
+
+# Function
+
+> **validateDelegationAuthSig**(`params`)
+
+Ensures a delegation signature is valid for the supplied session key. Run this on the server before trusting materials received over the wire.
+
+## Parameters
+
+<ParamField path="params.delegationAuthSig" type="AuthSig" required />
+<ParamField path="params.sessionKeyUri" type="string" required>
+  The public component (`sessionKeyPair.publicKey`).
+</ParamField>
+
+## Returns
+
+<ResponseField name="void" type="void">
+  Throws if validation fails.
+</ResponseField>
+
+## Example
+
+```ts
+import { validateDelegationAuthSig } from '@lit-protocol/auth';
+
+validateDelegationAuthSig({
+  delegationAuthSig,
+  sessionKeyUri: sessionKeyPair.publicKey,
+});
+```

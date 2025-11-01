@@ -1,0 +1,61 @@
+---
+title: importPrivateKey
+---
+
+# Function
+
+> **importPrivateKey**(`params`)
+
+Encrypts an existing private key with Lit and stores it as wrapped key metadata.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required>
+  Session signatures tying the wrapped key to the PKP.
+</ParamField>
+
+<ParamField path="params.litClient" type="LitClient" required>
+  Lit client instance for executing the Lit Action and accessing storage services.
+</ParamField>
+
+<ParamField path="params.privateKey" type="string" required>
+  Hex-encoded private key to wrap (a `0x` prefixed string for EVM keys).
+</ParamField>
+
+<ParamField path="params.publicKey" type="string" required>
+  Public key corresponding to the private key being wrapped.
+</ParamField>
+
+<ParamField path="params.keyType" type="'K256' | 'ed25519'" required>
+  Identifies the algorithm so the service can store the key correctly.
+</ParamField>
+
+<ParamField path="params.memo" type="string" required>
+  Description stored with the wrapped key.
+</ParamField>
+
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional `executeJs` price cap.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="ImportPrivateKeyResult">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="pkpAddress" type="string" required />
+    <ResponseField name="id" type="string" required />
+  </Expandable>
+</ResponseField>
+
+## Example
+
+```ts
+const { id } = await wrappedKeysApi.importPrivateKey({
+  pkpSessionSigs,
+  litClient,
+  privateKey: wallet.privateKey,
+  publicKey: wallet.publicKey,
+  keyType: 'K256',
+  memo: 'imported relayer key',
+});
+```

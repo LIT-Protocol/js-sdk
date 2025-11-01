@@ -5,7 +5,7 @@ import {
   PKPAuthContextSchema,
   SigningChainSchema,
 } from '@lit-protocol/schemas';
-import { NagaJitContext } from '@lit-protocol/types';
+import { NagaJitContext, AuthSig, SessionSigsMap } from '@lit-protocol/types';
 import { z } from 'zod';
 import { ConnectionInfo } from '../../LitChainClient/types';
 import { PricingContextSchema } from '../../pricing-manager/schema';
@@ -30,4 +30,6 @@ export type PKPSignCreateRequestParams = {
   version: string;
   chain: z.infer<typeof SigningChainSchema>;
   jitContext: NagaJitContext;
+  sessionSigs?: SessionSigsMap;
+  delegationAuthSig?: AuthSig;
 };

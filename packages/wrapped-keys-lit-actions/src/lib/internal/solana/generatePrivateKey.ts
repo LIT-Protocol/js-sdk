@@ -1,5 +1,4 @@
 import { Keypair } from '@solana/web3.js';
-
 export function generateSolanaPrivateKey() {
   const solanaKeypair = Keypair.generate();
 
