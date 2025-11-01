@@ -18,8 +18,8 @@
     "directory": "../../dist/packages/schemas"
   },
   "dependencies": {
-    "ethers": "^5.7.1",
-    "siwe": "^2.3.2",
+    "ethers": "5.7.2",
+    "siwe": "2.3.2",
     "zod": "3.24.3",
     "zod-validation-error": "3.4.0"
   },

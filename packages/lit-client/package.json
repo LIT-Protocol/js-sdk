@@ -46,11 +46,11 @@
   },
   "dependencies": {
     "@lit-protocol/uint8arrays": "7.1.1",
-    "bs58": "^6.0.0",
+    "bs58": "6.0.0",
     "typestub-ipfs-only-hash": "^4.0.0",
     "zod": "3.24.3"
   },
   "peerDependencies": {
-    "viem": "2.38.x"
+    "viem": "2.38.3"
   }
 }
