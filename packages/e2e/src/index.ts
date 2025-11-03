@@ -15,3 +15,4 @@ export { createEnvVars } from './helper/createEnvVars';
 export { createTestAccount } from './helper/createTestAccount';
 export { createTestEnv } from './helper/createTestEnv';
 export type { CreateTestAccountResult } from './helper/createTestAccount';
+export { registerPaymentDelegationTicketSuite } from './tickets/delegation.suite';
