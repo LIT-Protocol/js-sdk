@@ -15,11 +15,11 @@ type TestNetCreateRequest = {
 };
 
 type TestNetResponse<T> = {
-  testnet_id: string;
+  testnetId: string;
   command: string;
-  was_canceled: boolean;
+  wasCanceled: boolean;
   body: T | null;
-  last_state_observed: string | null;
+  lastStateObserved: string | null;
   messages: string[] | null;
   errors: string[] | null;
 };
@@ -43,14 +43,14 @@ type FetchOptions = {
 /**
  * Snapshot returned from {@link ShivaClient.inspectEpoch} and {@link ShivaClient.waitForEpochChange}.
  */
-type EpochSnapshot = {
-  epoch: number | undefined;
-  nodeEpochs: Array<{ url: string; epoch: number | undefined }>;
-  threshold: number | undefined;
-  connectedCount: number | undefined;
-  latestBlockhash: string | undefined;
-  rawContext: any;
-};
+// type EpochSnapshot = {
+//   epoch: number | undefined;
+//   nodeEpochs: Array<{ url: string; epoch: number | undefined }>;
+//   threshold: number | undefined;
+//   connectedCount: number | undefined;
+//   latestBlockhash: string | undefined;
+//   rawContext: any;
+// };
 
 /**
  * Options for {@link ShivaClient.waitForEpochChange}.
@@ -86,8 +86,8 @@ export type ShivaClient = {
   deleteTestnet: () => Promise<boolean>;
 };
 
-const DEFAULT_POLL_INTERVAL = 2000;
-const DEFAULT_TIMEOUT = 60_000;
+// const DEFAULT_POLL_INTERVAL = 2000;
+// const DEFAULT_TIMEOUT = 60_000;
 
 const normaliseBaseUrl = (baseUrl: string) => {
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
@@ -176,14 +176,14 @@ const getOrCreateTestnetId = async (
     body: createRequest,
   });
 
-  if (!response.testnet_id) {
+  if (!response.testnetId) {
     throw new Error(
-      'Shiva create testnet response did not include testnet_id. Received: ' +
+      'Shiva create testnet response did not include testnetId. Received: ' +
         JSON.stringify(response)
     );
   }
 
-  return response.testnet_id;
+  return response.testnetId;
 };
 
 // const buildEpochSnapshot = (ctx: any): EpochSnapshot => {
