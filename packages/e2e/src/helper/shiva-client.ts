@@ -1,5 +1,3 @@
-import type { LitClientInstance } from '../types';
-
 /**
  * Options used when Shiva spins up a brand-new testnet instance.
  * Values mirror the Rust manager contract; all fields are optional for our wrapper.
@@ -70,12 +68,12 @@ export type ShivaClient = {
   baseUrl: string;
   testnetId: string;
   /** Fetch a one-off snapshot of the Lit context and per-node epochs. */
-  inspectEpoch: () => Promise<EpochSnapshot>;
+  // inspectEpoch: () => Promise<EpochSnapshot>;
   /**
    * Poll the Lit client until it reports an epoch different from {@link WaitForEpochOptions.baselineEpoch}.
    * Useful immediately after triggering an epoch change via Shiva.
    */
-  waitForEpochChange: (options: WaitForEpochOptions) => Promise<EpochSnapshot>;
+  // waitForEpochChange: (options: WaitForEpochOptions) => Promise<EpochSnapshot>;
   /** Invoke Shiva's `/test/action/transition/epoch/wait/<id>` and wait for completion. */
   transitionEpochAndWait: () => Promise<boolean>;
   /** Stop a random node and wait for the subsequent epoch change. */
@@ -153,7 +151,7 @@ const getTestnetIds = async (baseUrl: string): Promise<string[]> => {
   return (await response.json()) as string[];
 };
 
-const ensureTestnetId = async (
+const getOrCreateTestnetId = async (
   baseUrl: string,
   providedId?: string,
   createRequest?: TestNetCreateRequest
@@ -179,38 +177,41 @@ const ensureTestnetId = async (
   });
 
   if (!response.testnet_id) {
-    throw new Error('Shiva create testnet response did not include testnet_id');
+    throw new Error(
+      'Shiva create testnet response did not include testnet_id. Received: ' +
+        JSON.stringify(response)
+    );
   }
 
   return response.testnet_id;
 };
 
-const buildEpochSnapshot = (ctx: any): EpochSnapshot => {
-  const nodeEpochEntries = Object.entries(
-    ctx?.handshakeResult?.serverKeys ?? {}
-  );
-  const nodeEpochs = nodeEpochEntries.map(([url, data]: [string, any]) => ({
-    url,
-    epoch: data?.epoch,
-  }));
+// const buildEpochSnapshot = (ctx: any): EpochSnapshot => {
+//   const nodeEpochEntries = Object.entries(
+//     ctx?.handshakeResult?.serverKeys ?? {}
+//   );
+//   const nodeEpochs = nodeEpochEntries.map(([url, data]: [string, any]) => ({
+//     url,
+//     epoch: data?.epoch,
+//   }));
 
-  const connected = ctx?.handshakeResult?.connectedNodes;
-  const connectedCount =
-    typeof connected?.size === 'number'
-      ? connected.size
-      : Array.isArray(connected)
-      ? connected.length
-      : undefined;
+//   const connected = ctx?.handshakeResult?.connectedNodes;
+//   const connectedCount =
+//     typeof connected?.size === 'number'
+//       ? connected.size
+//       : Array.isArray(connected)
+//       ? connected.length
+//       : undefined;
 
-  return {
-    epoch: ctx?.latestConnectionInfo?.epochInfo?.number,
-    nodeEpochs,
-    threshold: ctx?.handshakeResult?.threshold,
-    connectedCount,
-    latestBlockhash: ctx?.latestBlockhash,
-    rawContext: ctx,
-  };
-};
+//   return {
+//     epoch: ctx?.latestConnectionInfo?.epochInfo?.number,
+//     nodeEpochs,
+//     threshold: ctx?.handshakeResult?.threshold,
+//     connectedCount,
+//     latestBlockhash: ctx?.latestBlockhash,
+//     rawContext: ctx,
+//   };
+// };
 
 /**
  * Creates a Shiva client wrapper for the provided Lit client instance.
@@ -218,40 +219,39 @@ const buildEpochSnapshot = (ctx: any): EpochSnapshot => {
  * and exposes helpers for triggering and validating epoch transitions.
  */
 export const createShivaClient = async (
-  litClient: LitClientInstance,
   options: CreateShivaClientOptions
 ): Promise<ShivaClient> => {
   const baseUrl = normaliseBaseUrl(options.baseUrl);
-  const testnetId = await ensureTestnetId(
+  const testnetId = await getOrCreateTestnetId(
     baseUrl,
     options.testnetId,
     options.createRequest
   );
 
-  const inspectEpoch = async () => {
-    const ctx = await litClient.getContext();
-    return buildEpochSnapshot(ctx);
-  };
+  // const inspectEpoch = async () => {
+  //   const ctx = await litClient.getContext();
+  //   return buildEpochSnapshot(ctx);
+  // };
 
-  const waitForEpochChange = async ({
-    baselineEpoch,
-    timeoutMs = DEFAULT_TIMEOUT,
-    intervalMs = DEFAULT_POLL_INTERVAL,
-  }: WaitForEpochOptions) => {
-    const deadline = Date.now() + timeoutMs;
+  // const waitForEpochChange = async ({
+  //   baselineEpoch,
+  //   timeoutMs = DEFAULT_TIMEOUT,
+  //   intervalMs = DEFAULT_POLL_INTERVAL,
+  // }: WaitForEpochOptions) => {
+  //   const deadline = Date.now() + timeoutMs;
 
-    while (Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, intervalMs));
-      const snapshot = await inspectEpoch();
-      if (snapshot.epoch !== baselineEpoch) {
-        return snapshot;
-      }
-    }
+  //   while (Date.now() < deadline) {
+  //     await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  //     const snapshot = await inspectEpoch();
+  //     if (snapshot.epoch !== baselineEpoch) {
+  //       return snapshot;
+  //     }
+  //   }
 
-    throw new Error(
-      `Epoch did not change from ${baselineEpoch} within ${timeoutMs}ms`
-    );
-  };
+  //   throw new Error(
+  //     `Epoch did not change from ${baselineEpoch} within ${timeoutMs}ms`
+  //   );
+  // };
 
   const transitionEpochAndWait = async () => {
     const response = await fetchShiva<boolean>(
@@ -296,8 +296,8 @@ export const createShivaClient = async (
   return {
     baseUrl,
     testnetId,
-    inspectEpoch,
-    waitForEpochChange,
+    // inspectEpoch,
+    // waitForEpochChange,
     transitionEpochAndWait,
     stopRandomNodeAndWait,
     pollTestnetState,
