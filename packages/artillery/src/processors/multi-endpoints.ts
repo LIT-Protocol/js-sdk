@@ -140,7 +140,7 @@ export async function runPkpSignTest() {
     // Perform pkpSign operation
     const result = await litClient.chain.ethereum.pkpSign({
       authContext: authContext,
-      pubKey: state.masterAccount.pkp.publicKey,
+      pubKey: state.masterAccount.pkp.pubkey,
       toSign: `Hello from Artillery! ${Date.now()}`, // Unique message per request
       // userMaxPrice: 1000000000000000000n,
     });
@@ -280,7 +280,7 @@ export async function runExecuteJSTest() {
         message: 'Test message from e2e executeJs',
         sigName: 'e2e-test-sig',
         toSign: 'Test message from e2e executeJs',
-        publicKey: state.masterAccount.pkp.publicKey,
+        publicKey: state.masterAccount.pkp.pubkey,
       },
     });
 
