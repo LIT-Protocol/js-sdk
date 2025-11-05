@@ -6,8 +6,11 @@ import {
 } from '@lit-protocol/auth';
 import * as StateManager from './StateManager';
 import { createLitClient } from '@lit-protocol/lit-client';
-import { getOrCreatePkp } from '@lit-protocol/e2e/src/helper/pkp-utils';
-import * as NetworkManager from '@lit-protocol/e2e/src/helper/NetworkManager';
+import {
+  getOrCreatePkp,
+  getLitNetworkModule,
+  getViemPublicClient,
+} from '@lit-protocol/e2e';
 import * as AccountManager from '../src/AccountManager';
 
 const _network = process.env['NETWORK'];

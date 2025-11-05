@@ -99,6 +99,50 @@ DIRECTORY_NAME=naga-local
 NETWORK=naga-local pnpm run test:e2e all
 ```
 
+# Artillery Load Testing
+
+Use the standalone Artillery project under `packages/artillery` to exercise Lit endpoints with realistic workloads.
+
+## Preparation
+
+```bash
+# from the repo root
+pnpm install
+
+# pick your target network: naga-dev | naga-staging | naga-test | naga-local
+export NETWORK=naga-staging
+export LOG_LEVEL=info           # optional: debug | debug2 | silent
+```
+
+If you want Artillery Cloud reports, set `ARTILLERY_KEY=<your-key>` in `.env` before running a scenario.
+
+## One-time initialisation
+
+Master account, auth data and PKP info are written to this file:
+`packages/artillery/artillery-state.json`.
+
+```bash
+pnpm nx run artillery:init
+```
+
+(optional) Check master balances before blasting a load test:
+
+```bash
+pnpm nx run artillery:balance-status
+```
+
+## Run a workload
+
+Each scenario is exposed as an Nx target. Use the `run:` prefixed name:
+
+```bash
+pnpm nx run artillery:run:pkp-sign          # PKP signing focus
+pnpm nx run artillery:run:encrypt-decrypt   # Encryption/decryption focus
+pnpm nx run artillery:run:execute           # Lit Action execution
+pnpm nx run artillery:run:mix               # Mixed workload
+pnpm nx run artillery:run:sign-session-key  # Session key signing
+```
+
 # Manual Publishing
 
 ```bash
