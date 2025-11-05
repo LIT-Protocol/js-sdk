@@ -101,7 +101,7 @@ NETWORK=naga-local pnpm run test:e2e all
 
 # Artillery Load Testing
 
-Use the standalone Artillery project under `packages/artillery` to exercise Lit endpoints with realistic workloads.
+Use the standalone Artillery project under `packages/artillery`
 
 ## Preparation
 
@@ -125,7 +125,8 @@ Testing a custom local network? Point the runner at your generated `networkConte
 ```ts
 const networkModule = nagaLocal
   .withLocalContext({
-    networkContextPath: '/Users/<username>/Projects/lit-assets/blockchain/contracts/networkContext.json',
+    networkContextPath:
+      '/Users/<username>/Projects/lit-assets/blockchain/contracts/networkContext.json',
     networkName: 'naga-local',
   })
   .withOverrides({ rpcUrl: process.env.LOCAL_RPC_URL });
