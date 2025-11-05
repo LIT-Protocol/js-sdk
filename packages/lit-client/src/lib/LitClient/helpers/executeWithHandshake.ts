@@ -145,21 +145,9 @@ export const executeWithHandshake = async <ReturnType>(
       const reason = retryMetadata.reason || RETRY_REASONS.generic;
       const refreshLabel = `${operation}-${reason}`.replace(/-+/g, '-');
 
-      if (
-        reason === 'no-valid-shares' ||
-        reason === 'network-fetch-error'
-      ) {
+      if (reason === 'no-valid-shares' || reason === 'network-fetch-error') {
         await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));
       }
-
-      console.log(
-        '[executeWithHandshake] retrying operation',
-        operation,
-        'reason:',
-        reason,
-        'refreshLabel:',
-        refreshLabel
-      );
 
       _logger.warn(
         {
