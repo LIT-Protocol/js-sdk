@@ -7,8 +7,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x781C6d227dA4D058890208B68DDA1da8f6EBbE54",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0x9b8Ed3FD964Bc38dDc32CF637439e230CD50e3Dd",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -714,6 +714,11 @@ module.exports = {
             {
               "inputs": [],
               "name": "CannotModifyUnfrozen",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "CannotMoveToLockedValidatorStateBeforeEpochEnds",
               "type": "error"
             },
             {
@@ -1432,6 +1437,11 @@ module.exports = {
                     {
                       "internalType": "uint256",
                       "name": "minThresholdToClampAt",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "voteToAdvanceTimeOut",
                       "type": "uint256"
                     }
                   ],
@@ -2636,6 +2646,132 @@ module.exports = {
             {
               "inputs": [
                 {
+                  "internalType": "string",
+                  "name": "identifier",
+                  "type": "string"
+                }
+              ],
+              "name": "getKeySet",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint32",
+                      "name": "minimumThreshold",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "monetaryValue",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "completeIsolation",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "identifier",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "description",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "realms",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "curves",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "counts",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "address[]",
+                      "name": "recoveryPartyMembers",
+                      "type": "address[]"
+                    }
+                  ],
+                  "internalType": "struct LibStakingStorage.KeySetConfig",
+                  "name": "",
+                  "type": "tuple"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "keySets",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint32",
+                      "name": "minimumThreshold",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "monetaryValue",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "completeIsolation",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "identifier",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "description",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "realms",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "curves",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "counts",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "address[]",
+                      "name": "recoveryPartyMembers",
+                      "type": "address[]"
+                    }
+                  ],
+                  "internalType": "struct LibStakingStorage.KeySetConfig[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
                   "components": [
                     {
                       "internalType": "uint32",
@@ -2691,6 +2827,47 @@ module.exports = {
               "name": "setKeySet",
               "outputs": [],
               "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "string",
+                  "name": "identifier",
+                  "type": "string"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "keyType",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct IPubkeyRouter.RootKey[]",
+                  "name": "newRootKeys",
+                  "type": "tuple[]"
+                }
+              ],
+              "name": "verifyKeySetCounts",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -3313,6 +3490,19 @@ module.exports = {
               "anonymous": false,
               "inputs": [
                 {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "realmId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "VoteToAdvanceTimeOutElapsed",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
                   "indexed": true,
                   "internalType": "address",
                   "name": "reporter",
@@ -3371,25 +3561,6 @@ module.exports = {
               "name": "exit",
               "outputs": [],
               "stateMutability": "pure",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "attestedAddress",
-                  "type": "address"
-                }
-              ],
-              "name": "getAttestedPubKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -4094,6 +4265,11 @@ module.exports = {
                       "internalType": "uint256",
                       "name": "startTime",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "lastAdvanceVoteTime",
+                      "type": "uint256"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.Epoch",
@@ -4285,6 +4461,11 @@ module.exports = {
                       "internalType": "uint256",
                       "name": "startTime",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "lastAdvanceVoteTime",
+                      "type": "uint256"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.Epoch",
@@ -4446,6 +4627,25 @@ module.exports = {
               "inputs": [
                 {
                   "internalType": "address",
+                  "name": "attestedAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "getAttestedPubKey",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
                   "name": "validatorAddress",
                   "type": "address"
                 },
@@ -4485,72 +4685,6 @@ module.exports = {
                   "internalType": "uint256",
                   "name": "",
                   "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "string",
-                  "name": "identifier",
-                  "type": "string"
-                }
-              ],
-              "name": "getKeySet",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "uint32",
-                      "name": "minimumThreshold",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "uint32",
-                      "name": "monetaryValue",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "completeIsolation",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "identifier",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "description",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "realms",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "curves",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "counts",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "recoveryPartyMembers",
-                      "type": "address[]"
-                    }
-                  ],
-                  "internalType": "struct LibStakingStorage.KeySetConfig",
-                  "name": "",
-                  "type": "tuple"
                 }
               ],
               "stateMutability": "view",
@@ -5962,6 +6096,11 @@ module.exports = {
                       "internalType": "uint256",
                       "name": "minThresholdToClampAt",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "voteToAdvanceTimeOut",
+                      "type": "uint256"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.GlobalConfig",
@@ -6149,66 +6288,6 @@ module.exports = {
                   "internalType": "bool",
                   "name": "",
                   "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "keySets",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "uint32",
-                      "name": "minimumThreshold",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "uint32",
-                      "name": "monetaryValue",
-                      "type": "uint32"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "completeIsolation",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "identifier",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "string",
-                      "name": "description",
-                      "type": "string"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "realms",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "curves",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "counts",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "recoveryPartyMembers",
-                      "type": "address[]"
-                    }
-                  ],
-                  "internalType": "struct LibStakingStorage.KeySetConfig[]",
-                  "name": "",
-                  "type": "tuple[]"
                 }
               ],
               "stateMutability": "view",
@@ -6784,47 +6863,6 @@ module.exports = {
               ],
               "stateMutability": "view",
               "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "string",
-                  "name": "identifier",
-                  "type": "string"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "bytes",
-                      "name": "pubkey",
-                      "type": "bytes"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "keyType",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct IPubkeyRouter.RootKey[]",
-                  "name": "newRootKeys",
-                  "type": "tuple[]"
-                }
-              ],
-              "name": "verifyKeySetCounts",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
             }
           ]
         }
@@ -6835,8 +6873,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x2001821a222713becB50B5976691AD723D6b640c",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0xbD866A743E52825E6FeEF341fc857ad5A1d28ed2",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "anonymous": false,
@@ -6974,7 +7012,7 @@ module.exports = {
         {
           "network": "naga-staging",
           "address_hash": "0x5E8db2E7af793f4095c4843C8cBD87C5D8604838",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -8027,8 +8065,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x280E5c534629FBdD4dC61c85695143B6ACc4790b",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0xE37847746012c756d5D91d37B311eeB8e59684e9",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -8782,6 +8820,78 @@ module.exports = {
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "ethAddresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "getPkpInfoFromEthAddresses",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "tokenIds",
+                  "type": "uint256[]"
+                }
+              ],
+              "name": "getPkpInfoFromTokenIds",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "getPkpNftAddress",
               "outputs": [
@@ -9089,8 +9199,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x991d56EdC98a0DAeb93E91F70588598f79875701",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0x92d2a4Acb70E498a486E0523AD42fF3F6d3D3642",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -9836,6 +9946,170 @@ module.exports = {
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "ethAddresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "getPkpInfoFromEthAddresses",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageSize",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPkpInfoFromOwnerAddress",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageSize",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "pageIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPkpInfoFromOwnerTokenId",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256[]",
+                  "name": "tokenIds",
+                  "type": "uint256[]"
+                }
+              ],
+              "name": "getPkpInfoFromTokenIds",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "ethAddress",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "getPkpNftMetadataAddress",
               "outputs": [
@@ -10353,8 +10627,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0xe51357Cc58E8a718423CBa09b87879Ff7B18d279",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0xe97fFbc4eDa5CdF70375D4b8f87e476D40b628EC",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -11368,8 +11642,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x5632B35374DD73205B5aeBBcA3ecB02B3dc8B5fe",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0x1E382ef3957218423C6e1a992a4cE6294861cC93",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -12703,8 +12977,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x3346125bdaE8FDda08aaf14A67A7DdE465e8b7A6",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0xA5c9163C3E127b5F956CE3e1b1D7429988aF2248",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -12867,8 +13141,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0xab292EC22a0b596F115725607Ada3F28980eAB36",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0x7a286929c167e6FA0298C05Dec2433F4723Eb86C",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [],
@@ -13104,8 +13378,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x700DB831292541C640c5Dbb9AaE1697faE188513",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0x13fC0864A37B38D3C2A7d5E9C08D5124B9Cec4bF",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -13740,8 +14014,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0x658F5ED32aE5EFBf79F7Ba36A9FA770FeA7662c8",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0x23Be686cAFCe69C5Fb075E2be7a4505598E338E8",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -14796,8 +15070,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-staging",
-          "address_hash": "0xB76744dC73AFC416e8cDbB7023ca89C862B86F05",
-          "inserted_at": "2025-09-17T01:07:56Z",
+          "address_hash": "0x651d3282E1F083036Bb136dBbe7df17aCC39A330",
+          "inserted_at": "2025-11-04T01:39:03Z",
           "ABI": [
             {
               "inputs": [
@@ -15193,11 +15467,6 @@ module.exports = {
             {
               "inputs": [],
               "name": "CallerNotOwner",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "MustBeLessThan100",
               "type": "error"
             },
             {
