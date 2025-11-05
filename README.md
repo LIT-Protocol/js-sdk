@@ -114,6 +114,23 @@ export NETWORK=naga-staging
 export LOG_LEVEL=info           # optional: debug | debug2 | silent
 ```
 
+For live networks that read ABI data from the `networks` repo (for example `naga-staging`), run the sync script before firing Artillery so the contracts and addresses are up to date:
+
+```bash
+pnpm run sync:contracts  # requires GH_API_KEY in your environment
+```
+
+Testing a custom local network? Point the runner at your generated `networkContext.json` and RPC URL. (/lit-assets/blockchain/contracts/networkContext.json)
+
+```ts
+const networkModule = nagaLocal
+  .withLocalContext({
+    networkContextPath: '/Users/<username>/Projects/lit-assets/blockchain/contracts/networkContext.json',
+    networkName: 'naga-local',
+  })
+  .withOverrides({ rpcUrl: process.env.LOCAL_RPC_URL });
+```
+
 If you want Artillery Cloud reports, set `ARTILLERY_KEY=<your-key>` in `.env` before running a scenario.
 
 ## One-time initialisation
