@@ -23,6 +23,16 @@ type RetryMetadata = {
   reason: string;
 };
 
+// Pause briefly before retrying so dropped nodes have time to deregister and surviving owners rebroadcast shares.
+const RETRY_BACKOFF_MS = 1_000;
+
+export const RETRY_REASONS = {
+  missingVerificationKey: 'missing-verification-key',
+  networkFetch: 'network-fetch-error',
+  noValidShares: 'no-valid-shares',
+  generic: 'retry',
+} as const;
+
 export namespace EdgeCase {
   export const isMissingVerificationKeyError = (error: unknown): boolean => {
     if (!error || typeof error !== 'object') {
@@ -102,15 +112,18 @@ export namespace EdgeCase {
 
 const deriveRetryMetadata = (error: unknown): RetryMetadata => {
   if (EdgeCase.isMissingVerificationKeyError(error)) {
-    return { shouldRetry: true, reason: 'missing-verification-key' };
+    return {
+      shouldRetry: true,
+      reason: RETRY_REASONS.missingVerificationKey,
+    };
   }
 
   if (EdgeCase.isNetworkFetchError(error)) {
-    return { shouldRetry: true, reason: 'network-fetch-error' };
+    return { shouldRetry: true, reason: RETRY_REASONS.networkFetch };
   }
 
   if (EdgeCase.isNoValidSharesError(error)) {
-    return { shouldRetry: true, reason: 'no-valid-shares' };
+    return { shouldRetry: true, reason: RETRY_REASONS.noValidShares };
   }
 
   return { shouldRetry: false, reason: '' };
@@ -129,8 +142,24 @@ export const executeWithHandshake = async <ReturnType>(
     const retryMetadata = deriveRetryMetadata(error);
 
     if (retryMetadata.shouldRetry) {
-      const reason = retryMetadata.reason || 'retry';
+      const reason = retryMetadata.reason || RETRY_REASONS.generic;
       const refreshLabel = `${operation}-${reason}`.replace(/-+/g, '-');
+
+      if (
+        reason === 'no-valid-shares' ||
+        reason === 'network-fetch-error'
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));
+      }
+
+      console.log(
+        '[executeWithHandshake] retrying operation',
+        operation,
+        'reason:',
+        reason,
+        'refreshLabel:',
+        refreshLabel
+      );
 
       _logger.warn(
         {
