@@ -1,4 +1,9 @@
-const supportedNetworks = ['naga-local', 'naga-test', 'naga-dev'] as const;
+const supportedNetworks = [
+  'naga-local',
+  'naga-test',
+  'naga-staging',
+  'naga-dev',
+] as const;
 type EnvName = 'local' | 'live';
 
 export type EnvVars = {
@@ -71,7 +76,11 @@ export function createEnvVars(): EnvVars {
   }
 
   // -- live networks
-  if (network === 'naga-dev' || network === 'naga-test') {
+  if (
+    network === 'naga-dev' ||
+    network === 'naga-test' ||
+    network === 'naga-staging'
+  ) {
     const liveRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 
     if (liveRpcUrl) {
