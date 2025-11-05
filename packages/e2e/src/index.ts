@@ -5,7 +5,6 @@ export * from './helper/tests';
 export { init } from './init';
 
 export { getOrCreatePkp } from './helper/pkp-utils';
-export { createShivaClient } from './helper/shiva-client';
 export { printAligned } from './helper/utils';
 export type { AuthContext } from './types';
 
@@ -16,3 +15,6 @@ export { createTestAccount } from './helper/createTestAccount';
 export { createTestEnv } from './helper/createTestEnv';
 export type { CreateTestAccountResult } from './helper/createTestAccount';
 export { registerPaymentDelegationTicketSuite } from './tickets/delegation.suite';
+
+// -- Shiva
+export { createShivaClient } from './helper/ShivaClient/createShivaClient';
