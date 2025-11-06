@@ -22,35 +22,35 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/pkp-sign.yml"
+        "command": "dotenvx run --env-file=../../.env -- bash -lc 'if [ -n \"$ARTILLERY_KEY\" ]; then artillery run --record --key \"$ARTILLERY_KEY\" configs/pkp-sign.yml; else artillery run configs/pkp-sign.yml; fi'"
       }
     },
     "run:encrypt-decrypt": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/encrypt-decrypt.yml"
+        "command": "dotenvx run --env-file=../../.env -- bash -lc 'if [ -n \"$ARTILLERY_KEY\" ]; then artillery run --record --key \"$ARTILLERY_KEY\" configs/encrypt-decrypt.yml; else artillery run configs/encrypt-decrypt.yml; fi'"
       }
     },
     "run:execute": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/execute.yml"
+        "command": "dotenvx run --env-file=../../.env -- bash -lc 'if [ -n \"$ARTILLERY_KEY\" ]; then artillery run --record --key \"$ARTILLERY_KEY\" configs/execute.yml; else artillery run configs/execute.yml; fi'"
       }
     },
     "run:mix": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/mix.yml"
+        "command": "dotenvx run --env-file=../../.env -- bash -lc 'if [ -n \"$ARTILLERY_KEY\" ]; then artillery run --record --key \"$ARTILLERY_KEY\" configs/mix.yml; else artillery run configs/mix.yml; fi'"
       }
     },
     "run:sign-session-key": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/sign-session-key.yml"
+        "command": "dotenvx run --env-file=../../.env -- bash -lc 'if [ -n \"$ARTILLERY_KEY\" ]; then artillery run --record --key \"$ARTILLERY_KEY\" configs/sign-session-key.yml; else artillery run configs/sign-session-key.yml; fi'"
       }
     }
   },
