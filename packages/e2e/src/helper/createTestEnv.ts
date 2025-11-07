@@ -2,6 +2,7 @@ import {
   LitNetworkModule,
   nagaDev,
   nagaLocal,
+  nagaStaging,
   nagaTest,
   PaymentManager,
 } from '@lit-protocol/networks';
@@ -46,36 +47,45 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
     ledgerDepositAmount: '',
   };
 
-  if (envVars.network === 'naga-local') {
-    networkModule = nagaLocal
-      .withLocalContext({
-        networkContextPath: envVars.localContextPath,
-        networkName: 'naga-local',
-      })
-      .withOverrides({
-        rpcUrl: envVars.rpcUrl,
-      });
-    config = CONFIG.LOCAL;
-  } else if (
-    envVars.network === 'naga-dev' ||
-    envVars.network === 'naga-test'
-  ) {
-    if (envVars.network === 'naga-dev') {
-      networkModule = nagaDev;
-    } else if (envVars.network === 'naga-test') {
-      networkModule = nagaTest;
+  switch (envVars.network) {
+    case 'naga-local': {
+      networkModule = nagaLocal
+        .withLocalContext({
+          networkContextPath: envVars.localContextPath,
+          networkName: 'naga-local',
+        })
+        .withOverrides({
+          rpcUrl: envVars.rpcUrl,
+        });
+      config = CONFIG.LOCAL;
+      break;
     }
+    case 'naga-dev':
+    case 'naga-test':
+    case 'naga-staging': {
+      if (envVars.network === 'naga-dev') {
+        networkModule = nagaDev;
+      } else if (envVars.network === 'naga-test') {
+        networkModule = nagaTest;
+      } else {
+        networkModule = nagaStaging;
+      }
 
-    if (envVars.rpcUrl) {
-      console.log(
-        `🔧 Overriding RPC URL for ${envVars.network} to ${envVars.rpcUrl}`
-      );
-      networkModule = networkModule.withOverrides({
-        rpcUrl: envVars.rpcUrl,
-      });
+      if (envVars.rpcUrl) {
+        console.log(
+          `🔧 Overriding RPC URL for ${envVars.network} to ${envVars.rpcUrl}`
+        );
+        networkModule = networkModule.withOverrides({
+          rpcUrl: envVars.rpcUrl,
+        });
+      }
+
+      config = CONFIG.LIVE;
+      break;
     }
-
-    config = CONFIG.LIVE;
+    default: {
+      throw new Error(`Unsupported network: ${envVars.network}`);
+    }
   }
 
   // 2. Create Lit Client

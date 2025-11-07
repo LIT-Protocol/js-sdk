@@ -1,8 +1,14 @@
-const supportedNetworks = ['naga-local', 'naga-test', 'naga-dev'] as const;
+export const SUPPORTED_NETWORKS = [
+  'naga-local',
+  'naga-test',
+  'naga-dev',
+  'naga-staging',
+] as const;
+export type SupportedNetwork = (typeof SUPPORTED_NETWORKS)[number];
 type EnvName = 'local' | 'live';
 
 export type EnvVars = {
-  network: string;
+  network: SupportedNetwork;
   privateKey: `0x${string}`;
   rpcUrl?: string | undefined;
   localContextPath?: string;
@@ -19,13 +25,18 @@ const testEnv: Record<
 
 export function createEnvVars(): EnvVars {
   // 1. Get network string
-  const network = process.env['NETWORK']!!;
+  const networkEnv = process.env['NETWORK'];
 
-  if (!network || !supportedNetworks.includes(network as any)) {
+  if (
+    !networkEnv ||
+    !SUPPORTED_NETWORKS.includes(networkEnv as SupportedNetwork)
+  ) {
     throw new Error(
-      `❌ NETWORK env var is not set or not supported. Found. ${network}`
+      `❌ NETWORK env var is not set or not supported. Found. ${networkEnv}`
     );
   }
+
+  const network = networkEnv as SupportedNetwork;
 
   const selectedNetwork = network.includes('local') ? 'local' : 'live';
 
@@ -71,7 +82,11 @@ export function createEnvVars(): EnvVars {
   }
 
   // -- live networks
-  if (network === 'naga-dev' || network === 'naga-test') {
+  if (
+    network === 'naga-dev' ||
+    network === 'naga-test' ||
+    network === 'naga-staging'
+  ) {
     const liveRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
 
     if (liveRpcUrl) {

@@ -94,7 +94,10 @@ export const createStateManager = async <T>(params: {
 
   const refreshState = async (reason?: string) => {
     try {
-      _logger.info({ reason }, 'Refreshing connection info and handshake callback');
+      _logger.info(
+        { reason },
+        'Refreshing connection info and handshake callback'
+      );
       const newConnectionInfo =
         await readOnlyChainManager.api.connection.getConnectionInfo();
       const newBootstrapUrls = newConnectionInfo.bootstrapUrls;

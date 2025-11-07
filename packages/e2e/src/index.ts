@@ -10,7 +10,8 @@ export type { AuthContext } from './types';
 
 // re-export new helpers that should be used to refactor the `init.ts` proces
 // see packages/e2e/src/tickets/delegation.suite.ts for usage examples
-export { createEnvVars } from './helper/createEnvVars';
+export { createEnvVars, SUPPORTED_NETWORKS } from './helper/createEnvVars';
+export type { SupportedNetwork } from './helper/createEnvVars';
 export { createTestAccount } from './helper/createTestAccount';
 export { createTestEnv } from './helper/createTestEnv';
 export type { CreateTestAccountResult } from './helper/createTestAccount';
@@ -18,3 +19,6 @@ export { registerPaymentDelegationTicketSuite } from './tickets/delegation.suite
 
 // -- Shiva
 export { createShivaClient } from './helper/ShivaClient/createShivaClient';
+export { createShivaEnvVars } from './helper/ShivaClient/createShivaEnv';
+export type { ShivaTestnetInfo } from './helper/ShivaClient/createShivaClient';
+export type { ShivaEnvVars } from './helper/ShivaClient/createShivaEnv';

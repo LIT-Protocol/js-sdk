@@ -3,8 +3,10 @@ import { SigResponse } from '@lit-protocol/types';
 import {
   concatHex,
   createPublicClient,
+  hashMessage,
   hashTypedData,
   Hex,
+  hexToBytes,
   http,
   keccak256,
   recoverAddress,
@@ -59,15 +61,21 @@ export async function createPKPViemAccount({
    */
   const signAndRecover = async (
     bytesToSign: Uint8Array,
-    expectedAddress: `0x${string}`
+    expectedAddress: `0x${string}`,
+    options?: {
+      bypassAutoHashing?: boolean;
+      hashForRecovery?: Hex;
+    }
   ): Promise<{
     r: Hex;
     s: Hex;
     recoveryId: number;
     signature: Hex;
   }> => {
-    // Pass raw bytes to PKP - PKP will apply keccak256 internally
-    const signature = await sign(bytesToSign);
+    const signature = await sign(
+      bytesToSign,
+      options?.bypassAutoHashing ? { bypassAutoHashing: true } : undefined
+    );
     _logger.info({ signature }, '🔍 Raw signature from PKP:');
 
     // Parse signature components
@@ -79,8 +87,7 @@ export async function createPKPViemAccount({
     let recovered: string | undefined;
     let recoveryId: number | undefined;
 
-    // PKP applies keccak256 to raw bytes, so we recover using the same hash
-    const hashForRecovery = keccak256(bytesToSign);
+    const hashForRecovery = options?.hashForRecovery ?? keccak256(bytesToSign);
     _logger.info(
       { hashForRecovery },
       '🔍 Hash for recovery (keccak256 of bytes):'
@@ -203,24 +210,28 @@ export async function createPKPViemAccount({
   return toAccount({
     address,
     async signMessage({ message }) {
-      // Pass raw message bytes to PKP - let the LitMessageSchema handle keccak256 hashing
-      let messageBytes: Uint8Array;
+      let normalizedMessage: string | Uint8Array;
       if (typeof message === 'string') {
-        messageBytes = new TextEncoder().encode(message);
+        normalizedMessage = message;
       } else {
-        // For non-string messages, convert to bytes
-        const messageStr =
+        normalizedMessage =
           typeof message === 'object' && 'raw' in message
-            ? message.raw
-            : message;
-        messageBytes = toBytes(messageStr as any);
+            ? (message.raw as string | Uint8Array)
+            : (message as string | Uint8Array);
       }
+
+      const digestHex = hashMessage(normalizedMessage as any);
+      const digestBytes = hexToBytes(digestHex);
 
       const expectedAddress = publicKeyToAddress(uncompressedPubKey);
 
       const { r, s, recoveryId, signature } = await signAndRecover(
-        messageBytes,
-        expectedAddress
+        digestBytes,
+        expectedAddress,
+        {
+          bypassAutoHashing: true,
+          hashForRecovery: digestHex,
+        }
       );
 
       // Construct SigResponse object
@@ -230,7 +241,7 @@ export async function createPKPViemAccount({
         recid: recoveryId,
         signature: signature,
         publicKey: uncompressedPubKey.slice(2), // Remove 0x prefix
-        dataSigned: toHex(messageBytes), // Raw message bytes that were signed
+        dataSigned: digestHex,
       };
 
       return formatSignature(sigResponse);

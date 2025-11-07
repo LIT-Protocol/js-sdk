@@ -61,6 +61,16 @@ type PollTestnetStateOptions = {
   intervalMs?: number;
 };
 
+type WaitForTestnetInfoOptions = {
+  timeoutMs?: number;
+  intervalMs?: number;
+};
+
+export type ShivaTestnetInfo = {
+  rpc_url?: string;
+  [key: string]: unknown;
+};
+
 /**
  * High-level interface surfaced by {@link createShivaClient}.
  */
@@ -90,7 +100,11 @@ export type ShivaClient = {
     options?: PollTestnetStateOptions
   ) => Promise<TestNetState>;
   /** Retrieve the full testnet configuration (contract ABIs, RPC URL, etc.). */
-  getTestnetInfo: () => Promise<unknown>;
+  getTestnetInfo: () => Promise<ShivaTestnetInfo | null>;
+  /** Poll the manager until `/test/get/info/testnet/<id>` returns a payload. */
+  waitForTestnetInfo: (
+    options?: WaitForTestnetInfoOptions
+  ) => Promise<ShivaTestnetInfo>;
   /** Shut down the underlying testnet through the Shiva manager. */
   deleteTestnet: () => Promise<boolean>;
 
@@ -321,11 +335,47 @@ export const createShivaClient = async (
   };
 
   const getTestnetInfo = async () => {
-    const response = await fetchShiva<unknown>(
+    const response = await fetchShiva<ShivaTestnetInfo>(
       baseUrl,
       `/test/get/info/testnet/${testnetId}`
     );
-    return response.body;
+    return response.body ?? null;
+  };
+
+  const waitForTestnetInfo = async (
+    options: WaitForTestnetInfoOptions = {}
+  ): Promise<ShivaTestnetInfo> => {
+    const {
+      timeoutMs = DEFAULT_STATE_POLL_TIMEOUT,
+      intervalMs = DEFAULT_STATE_POLL_INTERVAL,
+    } = options;
+    const deadline = Date.now() + timeoutMs;
+    let lastError: unknown;
+
+    for (;;) {
+      try {
+        const info = await getTestnetInfo();
+        if (info) {
+          return info;
+        }
+      } catch (error) {
+        lastError = error;
+      }
+
+      if (Date.now() >= deadline) {
+        const lastErrorMessage =
+          lastError instanceof Error
+            ? lastError.message
+            : lastError
+            ? String(lastError)
+            : 'No response body received.';
+        throw new Error(
+          `Timed out after ${timeoutMs}ms waiting for testnet info for ${testnetId}. Last error: ${lastErrorMessage}`
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
   };
 
   const deleteTestnet = async () => {
@@ -344,6 +394,7 @@ export const createShivaClient = async (
     stopRandomNodeAndWait,
     pollTestnetState,
     getTestnetInfo,
+    waitForTestnetInfo,
     deleteTestnet,
 
     // utils
