@@ -15,6 +15,29 @@ Each Lit Protocol node participates in a Distributed Key Generation (DKG) proces
 
 The Lit network supports multiple cryptographic curves, signing schemes, and key types. Additional curves and schemes can be added as desired to enable additional interoperability with a wide variety of protocols and standards.
 
+Today this includes:
+
+| Scheme | Curve |
+|--------|-------|
+| `Bls12381` | BLS12-381 |
+| `Bls12381G1ProofOfPossession` | BLS12-381 |
+| `EcdsaK256Sha256` | secp256k1 |
+| `EcdsaP256Sha256` | NIST P-256 |
+| `EcdsaP384Sha384` | NIST P-384 |
+| `SchnorrEd25519Sha512` | ed25519 |
+| `SchnorrEd448Shake256` | ed448 |
+| `SchnorrK256Taproot` | secp256k1 |
+| `SchnorrK256Sha256` | secp256k1 |
+| `SchnorrP256Sha256` | NIST P-256 |
+| `SchnorrP384Sha384` | NIST P-384 |
+| `SchnorrRistretto25519Sha512` | Ristretto25519 |
+| `SchnorrRedJubjubBlake2b512` | Jubjub |
+| `SchnorrRedDecaf377Blake2b512` | Decaf377 |
+| `SchnorrkelSubstrate` | sr25519 |
+
+
+Refer to the [PKP Sign guide](/sdk/auth-context-consumption/pkp-sign#available-signing-schemes) for the full scheme-by-curve matrix that SDK users call directly.
+
 ## Policy Enforcement and Data Orchestration – Lit Actions
 
 Each Lit node contains a JavaScript execution environment which allows developers to write arbitrary code that dictates how the secrets and keys managed by the network are used. These programs are called Lit Actions, immutable JS serverless functions that govern signing and encryption / decryption operations. Lit Actions can natively fetch and process data from any on or off-chain source, be used to create complex transaction automations (e.g. dollar-cost-averaging), define rules for usage and access, create spending policies, trigger signature generation, and more.
