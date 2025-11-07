@@ -401,6 +401,7 @@ function getLitActionCodeAndJsParams(
       return {
         litActionCode: `
         (async () => {
+          const { accessControlConditions } = jsParams;
           const resp = await Lit.Actions.checkConditions({
             conditions: accessControlConditions,
             chain: 'ethereum',
