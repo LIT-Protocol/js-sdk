@@ -21,6 +21,7 @@ export const PKPSignInputSchema = z.object({
   toSign: z.any(),
   authContext: z.union([PKPAuthContextSchema, EoaAuthContextSchema]),
   userMaxPrice: z.bigint().optional(),
+  bypassAutoHashing: z.boolean().optional(),
 });
 
 export const EthereumPKPSignInputSchema = PKPSignInputSchema.omit({
