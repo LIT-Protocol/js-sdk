@@ -1,6 +1,5 @@
 import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { createLitClient, LitClientType } from '@lit-protocol/lit-client';
-import { AuthSig } from '@lit-protocol/types';
 import { z } from 'zod';
 import * as StateManager from '../StateManager';
 import { getLitNetworkModule } from '@lit-protocol/e2e';
@@ -118,7 +117,6 @@ const createAuthContextFromState = async () => {
       litClient: litClient,
     });
   }
-
 
   return masterAccountAuthContext;
 };
