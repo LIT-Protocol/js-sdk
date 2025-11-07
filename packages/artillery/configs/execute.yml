@@ -35,7 +35,7 @@ scenarios:
   - name: 'Execute JS Stress Test - Check Conditions with Auth Sig'
     weight: 0
     variables:
-      variant: 'checkConditionsWithAuthSig'
+      variant: 'checkConditionsWithoutAuthSig'
     flow:
       - function: 'runExecuteJSTest'
       - think: 0.1
