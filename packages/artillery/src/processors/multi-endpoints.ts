@@ -1,5 +1,6 @@
 import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { createLitClient, LitClientType } from '@lit-protocol/lit-client';
+import { AuthSig } from '@lit-protocol/types';
 import { z } from 'zod';
 import * as StateManager from '../StateManager';
 import { getLitNetworkModule } from '@lit-protocol/e2e';
@@ -117,6 +118,7 @@ const createAuthContextFromState = async () => {
       litClient: litClient,
     });
   }
+
 
   return masterAccountAuthContext;
 };
@@ -263,14 +265,14 @@ export async function runExecuteJSTest(context: any, _events: any) {
     // Set up access control conditions requiring wallet ownership
     const builder = createAccBuilder();
     const accs = builder
-      .requireWalletOwnership(state.masterAccount.pkp.ethAddress)
+      .requireWalletOwnership(authContext.account.address)
       .on('ethereum')
       .build();
 
     let encryptedData: any;
-    if (variant === 'decryptToSingleNodeWithoutAuthSig') {
+    if (variant === 'decryptToSingleNode') {
       // Encrypt data with the access control conditions
-      const dataToEncrypt = 'Hello from PKP encrypt-decrypt test!';
+      const dataToEncrypt = 'Hello from encrypt-decrypt test!';
       encryptedData = await litClient.encrypt({
         dataToEncrypt,
         unifiedAccessControlConditions: accs,
@@ -284,7 +286,7 @@ export async function runExecuteJSTest(context: any, _events: any) {
       state,
       encryptedData,
       accs,
-      await authContext.authNeededCallback()
+      null
     );
 
     const result = await litClient.executeJs({
