@@ -1,0 +1,34 @@
+/* Fix wide mode layout to allow content to expand into TOC area */
+
+/* Override the xl:w-[calc(100%-19rem)] constraint on content area */
+@media (min-width: 1280px) {
+  html[data-page-mode="wide"] #content-area {
+    width: 100% !important;
+    max-width: 96rem !important; /* 6xl = 1536px */
+    min-width: 100% !important;
+  }
+}
+
+/* Ensure the main content container uses full width in wide mode */
+html[data-page-mode="wide"] #content-container {
+  max-width: 100% !important;
+}
+
+html[data-page-mode="wide"] .mdx-content {
+  max-width: 100% !important;
+}
+
+/* Allow tables in wide mode to use full available width */
+html[data-page-mode="wide"] [data-table-wrapper="true"] {
+  max-width: none !important;
+}
+
+html[data-page-mode="wide"] [data-table-wrapper="true"] > div {
+  max-width: none !important;
+}
+
+html[data-page-mode="wide"] [data-table-wrapper="true"] table {
+  width: 100% !important;
+  max-width: none !important;
+}
+
