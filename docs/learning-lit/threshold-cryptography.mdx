@@ -6,19 +6,23 @@ Lit Protocol supports a wide range of elliptic curves and signing schemes, all s
 
 ## Supported Elliptic Curves and Signing Schemes
 
-| Curve | Algorithms (TSS) | Crates (Rust) | Lit enums |
-|---|---|---|---|
-| secp256k1 | ECDSA ([Damgård et al.](https://eprint.iacr.org/2020/501.pdf)), Schnorr (FROST, Taproot) | [`k256`](https://crates.io/crates/k256) | `CurveType::K256`; `SigningScheme::{EcdsaK256Sha256,SchnorrK256Sha256,SchnorrK256Taproot}` |
-| P-256 (secp256r1) | ECDSA ([Damgård et al.](https://eprint.iacr.org/2020/501.pdf)), Schnorr (FROST) | [`p256`](https://crates.io/crates/p256) | `CurveType::P256`; `SigningScheme::{EcdsaP256Sha256,SchnorrP256Sha256}` |
-| P-384 (secp384r1) | ECDSA ([Damgård et al.](https://eprint.iacr.org/2020/501.pdf)), Schnorr (FROST) | [`p384`](https://crates.io/crates/p384) | `CurveType::P384`; `SigningScheme::{EcdsaP384Sha384,SchnorrP384Sha384}` |
-| Ed25519 | Schnorr (FROST/EdDSA) | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek), [`ed25519-dalek`](https://crates.io/crates/ed25519-dalek) | `CurveType::Ed25519`; `SigningScheme::SchnorrEd25519Sha512` |
-| Ristretto25519 | Schnorr (FROST, Schnorrkel/Substrate) | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek) | `CurveType::Ristretto25519`; `SigningScheme::{SchnorrRistretto25519Sha512,SchnorrkelSubstrate}` |
-| Ed448 | Schnorr (FROST) | [`ed448-goldilocks`](https://crates.io/crates/ed448-goldilocks) | `CurveType::Ed448`; `SigningScheme::SchnorrEd448Shake256` |
-| RedJubjub | Schnorr (FROST) | [`jubjub`](https://crates.io/crates/jubjub) | `CurveType::RedJubjub`; `SigningScheme::SchnorrRedJubjubBlake2b512` |
-| RedDecaf377 | Schnorr (FROST) | [`decaf377`](https://crates.io/crates/decaf377) | `CurveType::RedDecaf377`; `SigningScheme::SchnorrRedDecaf377Blake2b512` |
-| BLS12-381 (G1/G2) | BLS (Basic, MsgAug, PoP) | [`blstrs-plus`](https://crates.io/crates/blstrs-plus), `blsful` | `CurveType::{BLS,BLS12381G1}`; `SigningScheme::{Bls12381,Bls12381G1ProofOfPossession}` |
-
-<Note>BLS supports multiple schemes including Proof of Possession.</Note>
+| Signing Scheme | Curves | Crates (Rust) | `CurveType` | `SigningScheme` |
+|---|---|---|---|---|
+| **ECDSA** ([Damgård et al.](https://eprint.iacr.org/2020/501.pdf)) | secp256k1 | [`k256`](https://crates.io/crates/k256) | `K256` | `EcdsaK256Sha256` |
+| | P-256 (secp256r1) | [`p256`](https://crates.io/crates/p256) | `P256` | `EcdsaP256Sha256` |
+| | P-384 (secp384r1) | [`p384`](https://crates.io/crates/p384) | `P384` | `EcdsaP384Sha384` |
+| **Schnorr** (FROST) | secp256k1 | [`k256`](https://crates.io/crates/k256) | `K256` | `SchnorrK256Sha256` |
+| | secp256k1 (Taproot) | [`k256`](https://crates.io/crates/k256) | `K256` | `SchnorrK256Taproot` |
+| | P-256 (secp256r1) | [`p256`](https://crates.io/crates/p256) | `P256` | `SchnorrP256Sha256` |
+| | P-384 (secp384r1) | [`p384`](https://crates.io/crates/p384) | `P384` | `SchnorrP384Sha384` |
+| | Ed25519 | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek), [`ed25519-dalek`](https://crates.io/crates/ed25519-dalek) | `Ed25519` | `SchnorrEd25519Sha512` |
+| | Ristretto25519 | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek) | `Ristretto25519` | `SchnorrRistretto25519Sha512` |
+| | Ristretto25519 (sr25519) | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek) | `Ristretto25519` | `SchnorrkelSubstrate` |
+| | Ed448 | [`ed448-goldilocks`](https://crates.io/crates/ed448-goldilocks) | `Ed448` | `SchnorrEd448Shake256` |
+| | RedJubjub | [`jubjub`](https://crates.io/crates/jubjub) | `RedJubjub` | `SchnorrRedJubjubBlake2b512` |
+| | RedDecaf377 | [`decaf377`](https://crates.io/crates/decaf377) | `RedDecaf377` | `SchnorrRedDecaf377Blake2b512` |
+| **BLS** (Basic, MsgAug, PoP) | BLS12-381 (G2) | [`blstrs-plus`](https://crates.io/crates/blstrs-plus), `blsful` | `BLS` | `Bls12381` |
+| | BLS12-381 (G1) | [`blstrs-plus`](https://crates.io/crates/blstrs-plus), `blsful` | `BLS12381G1` | `Bls12381G1ProofOfPossession` |
 
 ## Supported Chains
 
