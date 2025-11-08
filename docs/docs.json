@@ -8,7 +8,6 @@
     "dark": "#EA580C"
   },
   "favicon": "/favicon.svg",
-  "css": "/custom.css",
   "navigation": {
     "tabs": [
       {
