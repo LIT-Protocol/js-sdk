@@ -223,7 +223,7 @@
     }
   },
   "styling": {
-    "codeblocks": "system"
-  },
-  "customCSS": "/custom.css"
+    "codeblocks": "system",
+    "custom": "/custom.css"
+  }
 }
