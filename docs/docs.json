@@ -221,9 +221,5 @@
       "x": "https://twitter.com/litprotocol",
       "discord": "https://litgateway.com/discord"
     }
-  },
-  "styling": {
-    "codeblocks": "system",
-    "custom": "/custom.css"
   }
 }
