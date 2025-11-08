@@ -1,0 +1,24 @@
+---
+title: "Threshold Cryptography"
+---
+
+Lit Protocol supports a wide range of elliptic curves and signing schemes, all securely implemented using threshold cryptography and threshold consensus.
+
+## Supported Elliptic Curves and Signing Schemes
+
+| Curve | Algorithms (TSS) | Crates (Rust) | Lit enums | Example chains |
+|---|---|---|---|---|
+| secp256k1 | ECDSA (DamFast), Schnorr (FROST, Taproot) | [`k256`](https://crates.io/crates/k256) | `CurveType::K256`; `SigningScheme::{EcdsaK256Sha256,SchnorrK256Sha256,SchnorrK256Taproot}` | Bitcoin, Ethereum |
+| P-256 (secp256r1) | ECDSA (DamFast), Schnorr (FROST) | [`p256`](https://crates.io/crates/p256) | `CurveType::P256`; `SigningScheme::{EcdsaP256Sha256,SchnorrP256Sha256}` | Flow, Hyperledger Fabric |
+| P-384 (secp384r1) | ECDSA (DamFast), Schnorr (FROST) | [`p384`](https://crates.io/crates/p384) | `CurveType::P384`; `SigningScheme::{EcdsaP384Sha384,SchnorrP384Sha384}` | Enterprise/PKI contexts |
+| Ed25519 | Schnorr (FROST/EdDSA) | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek), [`ed25519-dalek`](https://crates.io/crates/ed25519-dalek) | `CurveType::Ed25519`; `SigningScheme::SchnorrEd25519Sha512` | Solana, Stellar |
+| Ristretto25519 | Schnorr (FROST, Schnorrkel/Substrate) | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek) | `CurveType::Ristretto25519`; `SigningScheme::{SchnorrRistretto25519Sha512,SchnorrkelSubstrate}` | Polkadot/Substrate (sr25519) |
+| Ed448 | Schnorr (FROST) | [`ed448-goldilocks`](https://crates.io/crates/ed448-goldilocks) | `CurveType::Ed448`; `SigningScheme::SchnorrEd448Shake256` | Research/interop |
+| RedJubjub | Schnorr (FROST) | [`jubjub`](https://crates.io/crates/jubjub) | `CurveType::RedJubjub`; `SigningScheme::SchnorrRedJubjubBlake2b512` | Zcash (Sapling/RedJubjub) |
+| RedDecaf377 | Schnorr (FROST) | [`decaf377`](https://crates.io/crates/decaf377) | `CurveType::RedDecaf377`; `SigningScheme::SchnorrRedDecaf377Blake2b512` | Penumbra (RedDSA) |
+| BLS12-381 (G1/G2) | BLS (Basic, MsgAug, PoP) | [`blstrs-plus`](https://crates.io/crates/blstrs-plus), `blsful` | `CurveType::{BLS,BLS12381G1}`; `SigningScheme::{Bls12381,Bls12381G1ProofOfPossession}` | Ethereum consensus, Filecoin |
+
+Notes
+- ECDSA TSS uses Damgård et al. “Fast Threshold ECDSA with Honest Majority” (ePrint 2020/501). See `rust/lit-core/lit-fast-ecdsa/README.md`.
+- Schnorr TSS uses FROST across curves; helpers via `lit-frost` and `frost-dkg`.
+- BLS supports multiple schemes including Proof of Possession.
