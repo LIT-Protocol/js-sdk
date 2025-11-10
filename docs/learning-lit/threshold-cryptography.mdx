@@ -1,0 +1,133 @@
+---
+title: "Threshold Cryptography"
+---
+
+Lit Protocol supports a wide range of elliptic curves and signing schemes, all securely implemented using threshold cryptography and threshold consensus within a trusted execution environment (TEE).
+
+## Supported Elliptic Curves and Signing Schemes
+
+| Signing Scheme | Curves | Crates (Rust) | `CurveType` | `SigningScheme` |
+|---|---|---|---|---|
+| **ECDSA** ([Damgård et al.](https://eprint.iacr.org/2020/501.pdf)) | secp256k1 | [`k256`](https://crates.io/crates/k256) | `K256` | `EcdsaK256Sha256` |
+| | P-256 (secp256r1) | [`p256`](https://crates.io/crates/p256) | `P256` | `EcdsaP256Sha256` |
+| | P-384 (secp384r1) | [`p384`](https://crates.io/crates/p384) | `P384` | `EcdsaP384Sha384` |
+| **Schnorr** (FROST) | secp256k1 | [`k256`](https://crates.io/crates/k256) | `K256` | `SchnorrK256Sha256` |
+| | secp256k1 (Taproot) | [`k256`](https://crates.io/crates/k256) | `K256` | `SchnorrK256Taproot` |
+| | P-256 (secp256r1) | [`p256`](https://crates.io/crates/p256) | `P256` | `SchnorrP256Sha256` |
+| | P-384 (secp384r1) | [`p384`](https://crates.io/crates/p384) | `P384` | `SchnorrP384Sha384` |
+| | Ed25519 | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek), [`ed25519-dalek`](https://crates.io/crates/ed25519-dalek) | `Ed25519` | `SchnorrEd25519Sha512` |
+| | Ristretto25519 | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek) | `Ristretto25519` | `SchnorrRistretto25519Sha512` |
+| | Ristretto25519 (sr25519) | [`curve25519-dalek`](https://crates.io/crates/curve25519-dalek) | `Ristretto25519` | `SchnorrkelSubstrate` |
+| | Ed448 | [`ed448-goldilocks`](https://crates.io/crates/ed448-goldilocks) | `Ed448` | `SchnorrEd448Shake256` |
+| | RedJubjub | [`jubjub`](https://crates.io/crates/jubjub) | `RedJubjub` | `SchnorrRedJubjubBlake2b512` |
+| | RedDecaf377 | [`decaf377`](https://crates.io/crates/decaf377) | `RedDecaf377` | `SchnorrRedDecaf377Blake2b512` |
+| **BLS** (Basic, MsgAug, PoP) | BLS12-381 (G2) | [`blstrs-plus`](https://crates.io/crates/blstrs-plus), `blsful` | `BLS` | `Bls12381` |
+| | BLS12-381 (G1) | [`blstrs-plus`](https://crates.io/crates/blstrs-plus), `blsful` | `BLS12381G1` | `Bls12381G1ProofOfPossession` |
+
+## Supported Chains
+
+### secp256k1 (K256) with ECDSA
+
+**Bitcoin Ecosystem:**
+- Bitcoin (BTC) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Bitcoin Cash (BCH) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Bitcoin SV (BSV) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Litecoin (LTC) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Dogecoin (DOGE) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Zcash (ZEC) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Dash (DASH) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Decred (DCR) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+
+**Ethereum Ecosystem:**
+- Ethereum (ETH) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Ethereum Classic (ETC) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Polygon (MATIC) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Binance Smart Chain (BNB) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Avalanche (AVAX) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Fantom (FTM) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Arbitrum - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Optimism - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Base - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- zkSync - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Linea - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Scroll - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Gnosis Chain (xDai) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+
+**Cosmos Ecosystem:**
+- Cosmos (ATOM) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+
+**Other secp256k1 Chains:**
+- Tron (TRX) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- VeChain (VET) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- EOS - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Theta Network (THETA) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Qtum (QTUM) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Zilliqa (ZIL) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- ICON (ICX) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- DigiByte (DGB) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Komodo (KMD) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Verge (XVG) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Ravencoin (RVN) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+- Horizen (ZEN) - `CurveType::K256`, `SigningScheme::EcdsaK256Sha256`
+
+### secp256k1 (K256) with Schnorr
+
+- Bitcoin (Taproot) - `CurveType::K256`, `SigningScheme::SchnorrK256Taproot`
+
+### P-256 (secp256r1) with ECDSA
+
+- Flow - `CurveType::P256`, `SigningScheme::EcdsaP256Sha256`
+- NEO - `CurveType::P256`, `SigningScheme::EcdsaP256Sha256`
+- Ontology (ONT) - `CurveType::P256`, `SigningScheme::EcdsaP256Sha256`
+- Hyperledger Fabric - `CurveType::P256`, `SigningScheme::EcdsaP256Sha256`
+- Tezos (optional) - `CurveType::P256`, `SigningScheme::EcdsaP256Sha256`
+- WebAuthn / Passkeys - `CurveType::P256`, `SigningScheme::EcdsaP256Sha256`
+
+### P-384 (secp384r1) with ECDSA
+
+- Enterprise PKI systems - `CurveType::P384`, `SigningScheme::EcdsaP384Sha384`
+- Government and high-security applications - `CurveType::P384`, `SigningScheme::EcdsaP384Sha384`
+
+### Ed25519 with EdDSA (Schnorr)
+
+- Solana (SOL) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Stellar (XLM) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Cardano (ADA) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Algorand (ALGO) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Hedera Hashgraph (HBAR) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Elrond (EGLD) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Tezos (optional) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Ripple (XRP, optional) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- NEM (XEM) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Waves (WAVES) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Lisk (LSK) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Nano (NANO) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Siacoin (SC) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+- Monero (XMR, variant) - `CurveType::Ed25519`, `SigningScheme::SchnorrEd25519Sha512`
+
+### Ristretto25519 with Schnorr/Schnorrkel
+
+- Polkadot (DOT, sr25519) - `CurveType::Ristretto25519`, `SigningScheme::SchnorrkelSubstrate`
+- Kusama (KSM, sr25519) - `CurveType::Ristretto25519`, `SigningScheme::SchnorrkelSubstrate`
+- All Polkadot Parachains (sr25519) - `CurveType::Ristretto25519`, `SigningScheme::SchnorrkelSubstrate`
+- All Substrate-based chains (sr25519) - `CurveType::Ristretto25519`, `SigningScheme::SchnorrkelSubstrate`
+
+### Ed448 with Schnorr
+
+- Research and experimental protocols - `CurveType::Ed448`, `SigningScheme::SchnorrEd448Shake256`
+- High-security government applications - `CurveType::Ed448`, `SigningScheme::SchnorrEd448Shake256`
+
+### RedJubjub with Schnorr
+
+- Zcash (Sapling shielded transactions) - `CurveType::RedJubjub`, `SigningScheme::SchnorrRedJubjubBlake2b512`
+
+### RedDecaf377 with Schnorr (RedDSA)
+
+- Penumbra - `CurveType::RedDecaf377`, `SigningScheme::SchnorrRedDecaf377Blake2b512`
+
+### BLS12-381 with BLS Signatures
+
+- Ethereum (Consensus Layer / Beacon Chain) - `CurveType::BLS`, `SigningScheme::Bls12381`
+- Filecoin (FIL) - `CurveType::BLS`, `SigningScheme::Bls12381`
+- Chia (XCH) - `CurveType::BLS`, `SigningScheme::Bls12381`
+- Dfinity (ICP) - `CurveType::BLS`, `SigningScheme::Bls12381`

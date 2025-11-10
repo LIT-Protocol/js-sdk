@@ -24,7 +24,8 @@
               "learning-lit/on-chain-coordination-mechanisms",
               "learning-lit/communicating-with-lit-nodes",
               "learning-lit/cryptoeconomic-security",
-              "learning-lit/backup-and-recovery"
+              "learning-lit/backup-and-recovery",
+              "learning-lit/threshold-cryptography"
             ]
           }
         ]
