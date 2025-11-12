@@ -264,6 +264,7 @@ export async function runExecuteJSTest(context: any, _events: any) {
     const builder = createAccBuilder();
     let accs: any;
     let encryptedData: any;
+    let dataToEncrypt: string;
     if (variant === 'decryptToSingleNode') {
       accs = builder
         .requireWalletOwnership(authContext.account.address)
@@ -271,7 +272,7 @@ export async function runExecuteJSTest(context: any, _events: any) {
         .build();
 
       // Encrypt data with the access control conditions
-      const dataToEncrypt = 'Hello from encrypt-decrypt test!';
+      dataToEncrypt = 'Hello from encrypt-decrypt test!';
       encryptedData = await litClient.encrypt({
         dataToEncrypt,
         unifiedAccessControlConditions: accs,
@@ -305,9 +306,19 @@ export async function runExecuteJSTest(context: any, _events: any) {
     const endTime = Date.now();
     const duration = endTime - startTime;
 
+    if (
+      variant === 'decryptToSingleNode' &&
+      // Strip quote marks at the ends
+      validatedResult.response.substring(
+        1,
+        validatedResult.response.length - 1
+      ) !== dataToEncrypt!
+    ) {
+      throw new Error('❌ Decrypted data does not match the original data');
+    }
+
     console.log(`✅ executeJs successful in ${duration}ms`);
     console.log('✅ executeJs result:', validatedResult);
-
     // For Artillery, just return - no need to call next()
     return;
   } catch (error) {
