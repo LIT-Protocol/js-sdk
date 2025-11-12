@@ -262,13 +262,14 @@ export async function runExecuteJSTest(context: any, _events: any) {
 
     // Set up access control conditions requiring wallet ownership
     const builder = createAccBuilder();
-    const accs = builder
-      .requireWalletOwnership(authContext.account.address)
-      .on('ethereum')
-      .build();
-
+    let accs: any;
     let encryptedData: any;
     if (variant === 'decryptToSingleNode') {
+      accs = builder
+        .requireWalletOwnership(authContext.account.address)
+        .on('ethereum')
+        .build();
+
       // Encrypt data with the access control conditions
       const dataToEncrypt = 'Hello from encrypt-decrypt test!';
       encryptedData = await litClient.encrypt({
@@ -276,6 +277,11 @@ export async function runExecuteJSTest(context: any, _events: any) {
         unifiedAccessControlConditions: accs,
         chain: 'ethereum',
       });
+    } else {
+      accs = builder
+        .requireWalletOwnership(state.masterAccount.pkp.ethAddress)
+        .on('ethereum')
+        .build();
     }
 
     // Perform executeJs operation
@@ -284,7 +290,7 @@ export async function runExecuteJSTest(context: any, _events: any) {
       state,
       encryptedData,
       accs,
-      null
+      await authContext.authNeededCallback()
     );
 
     const result = await litClient.executeJs({
@@ -435,12 +441,12 @@ function getLitActionCodeAndJsParams(
       return {
         litActionCode: `
         (async () => {
-          const { accessControlConditions, authSig, ciphertext, dataToEncryptHash } = jsParams;
-          const resp = await Lit.Actions.decryptAndCombine({
+          const { accessControlConditions, ciphertext, dataToEncryptHash } = jsParams;
+          const resp = await Lit.Actions.decryptToSingleNode({
             accessControlConditions,
             ciphertext,
             dataToEncryptHash,
-            authSig,
+            authSig: null,
             chain: 'ethereum',
           });
           Lit.Actions.setResponse({ response: JSON.stringify(resp) });
@@ -448,7 +454,6 @@ function getLitActionCodeAndJsParams(
         jsParams: {
           accessControlConditions:
             accs || state.masterAccount.pkp.accessControlConditions,
-          authSig,
           ciphertext: encryptedData?.ciphertext,
           dataToEncryptHash: encryptedData?.dataToEncryptHash,
         },
