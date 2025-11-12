@@ -351,7 +351,7 @@ export async function runSignSessionKeyTest() {
 
     const masterAccountPkpAuthContext = await authManager.createPkpAuthContext({
       authData: state.masterAccount.authData,
-      pkpPublicKey: state.masterAccount.pkp.publicKey,
+      pkpPublicKey: state.masterAccount.pkp.pubkey,
       authConfig: {
         resources: [
           ['pkp-signing', '*'],
@@ -367,7 +367,10 @@ export async function runSignSessionKeyTest() {
       },
     });
 
-    // console.log('✅ Master Account PKP Auth Context:', masterAccountPkpAuthContext);
+    console.log(
+      '✅ Sign Session Key successful. Master Account PKP Auth Context:',
+      masterAccountPkpAuthContext
+    );
   } catch (error) {
     const endTime = Date.now();
     const duration = endTime - startTime;
