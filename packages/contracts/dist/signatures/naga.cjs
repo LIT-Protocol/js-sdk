@@ -1,11 +1,11 @@
 /**
- * Generated Contract Method Signatures for naga-staging
+ * Generated Contract Method Signatures for naga
  * This file is auto-generated. DO NOT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING.
  */
 
 const signatures = {
   "Staking": {
-    "address": "0x9b8Ed3FD964Bc38dDc32CF637439e230CD50e3Dd",
+    "address": "0x8a861B3640c1ff058CCB109ba11CA3224d228159",
     "methods": {
       "getActiveUnkickedValidatorStructsAndCounts": {
         "inputs": [
@@ -1050,7 +1050,7 @@ const signatures = {
     ]
   },
   "PubkeyRouter": {
-    "address": "0xE37847746012c756d5D91d37B311eeB8e59684e9",
+    "address": "0x5655D71832f6f2AFD72c3012a60144f5572897F1",
     "methods": {
       "deriveEthAddressFromPubkey": {
         "inputs": [
@@ -1361,7 +1361,7 @@ const signatures = {
     ]
   },
   "PKPNFT": {
-    "address": "0x92d2a4Acb70E498a486E0523AD42fF3F6d3D3642",
+    "address": "0x11eBfFeab32f6cb5775BeF83E09124B9322E4026",
     "methods": {
       "claimAndMint": {
         "inputs": [
@@ -1751,7 +1751,7 @@ const signatures = {
     ]
   },
   "PKPHelper": {
-    "address": "0xe97fFbc4eDa5CdF70375D4b8f87e476D40b628EC",
+    "address": "0xAe666c3080AA5Dd935574099c18E1eD779FFB231",
     "methods": {
       "claimAndMintNextAndAddAuthMethodsWithTypes": {
         "inputs": [
@@ -2034,7 +2034,7 @@ const signatures = {
     ]
   },
   "PKPPermissions": {
-    "address": "0x1E382ef3957218423C6e1a992a4cE6294861cC93",
+    "address": "0xEB1F9A8567bC01b8cfa9d6e7078bEf587D908342",
     "methods": {
       "addPermittedAction": {
         "inputs": [
@@ -2652,7 +2652,7 @@ const signatures = {
     ]
   },
   "PaymentDelegation": {
-    "address": "0x13fC0864A37B38D3C2A7d5E9C08D5124B9Cec4bF",
+    "address": "0x5EF658cB6ab3C3BfB75C8293B9a6C8ccb0b96C3c",
     "methods": {
       "delegatePayments": {
         "inputs": [
@@ -2953,7 +2953,7 @@ const signatures = {
     ]
   },
   "Ledger": {
-    "address": "0x23Be686cAFCe69C5Fb075E2be7a4505598E338E8",
+    "address": "0x9BD023448d2D3b2D73fe61E4d7859007F6dA372c",
     "methods": {
       "withdraw": {
         "inputs": [
@@ -3372,7 +3372,7 @@ const signatures = {
     ]
   },
   "PriceFeed": {
-    "address": "0x651d3282E1F083036Bb136dBbe7df17aCC39A330",
+    "address": "0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C",
     "methods": {
       "getNodesForRequest": {
         "inputs": [

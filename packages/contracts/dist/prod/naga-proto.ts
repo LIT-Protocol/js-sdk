@@ -1,12 +1,12 @@
-{
+export const nagaProto = {
   "data": [
     {
       "name": "Staking",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0x9b8Ed3FD964Bc38dDc32CF637439e230CD50e3Dd",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x43b64F416cac52a7E60099E29F6477183bA172CB",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -6870,9 +6870,9 @@
       "name": "Multisender",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0xbD866A743E52825E6FeEF341fc857ad5A1d28ed2",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0xC73DCD75AE2c17A0BbAF28c47b1725B0284A5F31",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "anonymous": false,
@@ -7008,9 +7008,9 @@
       "name": "LITToken",
       "contracts": [
         {
-          "network": "naga-staging",
+          "network": "naga-proto",
           "address_hash": "0x5E8db2E7af793f4095c4843C8cBD87C5D8604838",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -8062,9 +8062,9 @@
       "name": "PubkeyRouter",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0xE37847746012c756d5D91d37B311eeB8e59684e9",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0xFdC09086E184Cb812D37566B09751CcbCA6a2205",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -9196,9 +9196,9 @@
       "name": "PKPNFT",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0x92d2a4Acb70E498a486E0523AD42fF3F6d3D3642",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x9bB7c5504E12aBBCec35DF786769BBA292Cc4C0B",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -10624,9 +10624,9 @@
       "name": "PKPHelper",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0xe97fFbc4eDa5CdF70375D4b8f87e476D40b628EC",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x835585944fB37d14C317cc6cd4864570cFcFab9E",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -11639,9 +11639,9 @@
       "name": "PKPPermissions",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0x1E382ef3957218423C6e1a992a4cE6294861cC93",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x23A1aAB688EEe1d66FB45719ac527c2A0B036ed6",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -12974,9 +12974,9 @@
       "name": "PKPNFTMetadata",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0xA5c9163C3E127b5F956CE3e1b1D7429988aF2248",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x7866b6379Cb2B7e68Bb942dF3A3ACe9C25773874",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -13138,9 +13138,9 @@
       "name": "Allowlist",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0x7a286929c167e6FA0298C05Dec2433F4723Eb86C",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x111F4990037333512d6F04e4ed30463fe7235dE0",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [],
@@ -13375,9 +13375,9 @@
       "name": "PaymentDelegation",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0x13fC0864A37B38D3C2A7d5E9C08D5124B9Cec4bF",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x58bA8Eb59E5A88ED690E47a8D37DCdB7d3aea490",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -14011,9 +14011,9 @@
       "name": "Ledger",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0x23Be686cAFCe69C5Fb075E2be7a4505598E338E8",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0xf69e2D0Fa6a7F24d65De4F972c1a3000d55CA175",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -15067,9 +15067,9 @@
       "name": "PriceFeed",
       "contracts": [
         {
-          "network": "naga-staging",
-          "address_hash": "0x651d3282E1F083036Bb136dBbe7df17aCC39A330",
-          "inserted_at": "2025-11-04T01:39:03Z",
+          "network": "naga-proto",
+          "address_hash": "0x7cD9b8A17733bcb85683009f6Fcaf5B920c249EE",
+          "inserted_at": "2025-11-13T21:55:15Z",
           "ABI": [
             {
               "inputs": [
@@ -16116,4 +16116,4 @@
     "litNodePort": 7470,
     "rocketPort": 7470
   }
-}
+} as const;

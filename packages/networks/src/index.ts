@@ -3,6 +3,8 @@ import type { NagaLocalModule } from './networks/vNaga';
 import type { NagaDevModule } from './networks/vNaga';
 import type { NagaTestModule } from './networks/vNaga';
 import type { NagaStagingModule } from './networks/vNaga';
+import type { NagaProductionModule } from './networks/vNaga';
+import type { NagaProtoModule } from './networks/vNaga';
 
 // Network modules
 export {
@@ -12,6 +14,8 @@ export {
   nagaLocal,
   nagaDev,
   nagaTest,
+  nagaProduction,
+  nagaProto,
 } from './networks/vNaga';
 
 // Network module types
@@ -19,13 +23,17 @@ export type { NagaLocalModule } from './networks/vNaga';
 export type { NagaDevModule } from './networks/vNaga';
 export type { NagaTestModule } from './networks/vNaga';
 export type { NagaStagingModule } from './networks/vNaga';
+export type { NagaProductionModule } from './networks/vNaga';
+export type { NagaProtoModule } from './networks/vNaga';
 
 // All Network modules
 export type LitNetworkModule =
   | NagaLocalModule
   | NagaDevModule
   | NagaTestModule
-  | NagaStagingModule;
+  | NagaStagingModule
+  | NagaProductionModule
+  | NagaProtoModule;
 // | NagaProdModule
 // | NagaLocalModule
 // | DatilDevModule

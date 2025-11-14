@@ -1,11 +1,11 @@
 /**
- * Generated Contract Method Signatures for naga-staging
+ * Generated Contract Method Signatures for naga-proto
  * This file is auto-generated. DO NOT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING.
  */
 
-const signatures = {
+export const signatures = {
   "Staking": {
-    "address": "0x9b8Ed3FD964Bc38dDc32CF637439e230CD50e3Dd",
+    "address": "0x43b64F416cac52a7E60099E29F6477183bA172CB",
     "methods": {
       "getActiveUnkickedValidatorStructsAndCounts": {
         "inputs": [
@@ -1050,7 +1050,7 @@ const signatures = {
     ]
   },
   "PubkeyRouter": {
-    "address": "0xE37847746012c756d5D91d37B311eeB8e59684e9",
+    "address": "0xFdC09086E184Cb812D37566B09751CcbCA6a2205",
     "methods": {
       "deriveEthAddressFromPubkey": {
         "inputs": [
@@ -1361,7 +1361,7 @@ const signatures = {
     ]
   },
   "PKPNFT": {
-    "address": "0x92d2a4Acb70E498a486E0523AD42fF3F6d3D3642",
+    "address": "0x9bB7c5504E12aBBCec35DF786769BBA292Cc4C0B",
     "methods": {
       "claimAndMint": {
         "inputs": [
@@ -1751,7 +1751,7 @@ const signatures = {
     ]
   },
   "PKPHelper": {
-    "address": "0xe97fFbc4eDa5CdF70375D4b8f87e476D40b628EC",
+    "address": "0x835585944fB37d14C317cc6cd4864570cFcFab9E",
     "methods": {
       "claimAndMintNextAndAddAuthMethodsWithTypes": {
         "inputs": [
@@ -2034,7 +2034,7 @@ const signatures = {
     ]
   },
   "PKPPermissions": {
-    "address": "0x1E382ef3957218423C6e1a992a4cE6294861cC93",
+    "address": "0x23A1aAB688EEe1d66FB45719ac527c2A0B036ed6",
     "methods": {
       "addPermittedAction": {
         "inputs": [
@@ -2652,7 +2652,7 @@ const signatures = {
     ]
   },
   "PaymentDelegation": {
-    "address": "0x13fC0864A37B38D3C2A7d5E9C08D5124B9Cec4bF",
+    "address": "0x58bA8Eb59E5A88ED690E47a8D37DCdB7d3aea490",
     "methods": {
       "delegatePayments": {
         "inputs": [
@@ -2953,7 +2953,7 @@ const signatures = {
     ]
   },
   "Ledger": {
-    "address": "0x23Be686cAFCe69C5Fb075E2be7a4505598E338E8",
+    "address": "0xf69e2D0Fa6a7F24d65De4F972c1a3000d55CA175",
     "methods": {
       "withdraw": {
         "inputs": [
@@ -3372,7 +3372,7 @@ const signatures = {
     ]
   },
   "PriceFeed": {
-    "address": "0x651d3282E1F083036Bb136dBbe7df17aCC39A330",
+    "address": "0x7cD9b8A17733bcb85683009f6Fcaf5B920c249EE",
     "methods": {
       "getNodesForRequest": {
         "inputs": [
@@ -3641,8 +3641,5 @@ const signatures = {
       }
     ]
   }
-};
-
-module.exports = {
-  signatures
-};
+} as const;
+export type Signatures = typeof signatures;

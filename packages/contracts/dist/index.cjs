@@ -9,6 +9,8 @@ const datilTest = require("./prod/datil-test.cjs");
 const nagaDev = require("./prod/naga-dev.cjs");
 const nagaTest = require("./prod/naga-test.cjs");
 const nagaStaging = require("./prod/naga-staging.cjs");
+const nagaProto = require("./prod/naga-proto.cjs");
+const naga = require("./prod/naga.cjs");
 const develop = require("./dev/develop.cjs");
 
 const datilSignatures = require("./signatures/datil.cjs").signatures;
@@ -17,6 +19,8 @@ const datilTestSignatures = require("./signatures/datil-test.cjs").signatures;
 const nagaDevSignatures = require("./signatures/naga-dev.cjs").signatures;
 const nagaTestSignatures = require("./signatures/naga-test.cjs").signatures;
 const nagaStagingSignatures = require("./signatures/naga-staging.cjs").signatures;
+const nagaProtoSignatures = require("./signatures/naga-proto.cjs").signatures;
+const nagaSignatures = require("./signatures/naga.cjs").signatures;
 const developSignatures = require("./signatures/develop.cjs").signatures;
 
 module.exports = {
@@ -26,6 +30,8 @@ module.exports = {
   nagaDev,
   nagaTest,
   nagaStaging,
+  nagaProto,
+  naga,
   develop,
   datilSignatures,
   datilDevSignatures,
@@ -33,5 +39,7 @@ module.exports = {
   nagaDevSignatures,
   nagaTestSignatures,
   nagaStagingSignatures,
+  nagaProtoSignatures,
+  nagaSignatures,
   developSignatures,
 };

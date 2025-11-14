@@ -9,6 +9,8 @@ export { datilTest } from "./prod/datil-test";
 export { nagaDev } from "./prod/naga-dev";
 export { nagaTest } from "./prod/naga-test";
 export { nagaStaging } from "./prod/naga-staging";
+export { nagaProto } from "./prod/naga-proto";
+export { naga } from "./prod/naga";
 export { develop } from "./dev/develop";
 
 export { signatures as datilSignatures } from "./signatures/datil";
@@ -17,4 +19,6 @@ export { signatures as datilTestSignatures } from "./signatures/datil-test";
 export { signatures as nagaDevSignatures } from "./signatures/naga-dev";
 export { signatures as nagaTestSignatures } from "./signatures/naga-test";
 export { signatures as nagaStagingSignatures } from "./signatures/naga-staging";
+export { signatures as nagaProtoSignatures } from "./signatures/naga-proto";
+export { signatures as nagaSignatures } from "./signatures/naga";
 export { signatures as developSignatures } from "./signatures/develop";
