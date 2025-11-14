@@ -21,6 +21,10 @@ export type { NagaStaging as NagaStagingModule } from './envs/naga-staging/naga-
 export { nagaProduction } from './envs/naga-production';
 export type { NagaProduction as NagaProductionModule } from './envs/naga-production/naga-production.module';
 
+// Naga (alias for production)
+export { nagaProduction as naga } from './envs/naga-production';
+export type { NagaProduction as NagaModule } from './envs/naga-production/naga-production.module';
+
 // Naga Proto
 export { nagaProto } from './envs/naga-proto';
 export type { NagaProto as NagaProtoModule } from './envs/naga-proto/naga-proto.module';

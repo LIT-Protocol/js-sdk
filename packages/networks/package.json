@@ -40,5 +40,73 @@
   "version": "8.3.2",
   "main": "./index.js",
   "typings": "./index.d.ts",
-  "types": "./index.d.ts"
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./index.js",
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json",
+    "./naga": {
+      "types": "./entries/naga.d.ts",
+      "require": "./entries/naga.js",
+      "import": "./entries/naga.js"
+    },
+    "./naga-production": {
+      "types": "./entries/naga-production.d.ts",
+      "require": "./entries/naga-production.js",
+      "import": "./entries/naga-production.js"
+    },
+    "./naga-proto": {
+      "types": "./entries/naga-proto.d.ts",
+      "require": "./entries/naga-proto.js",
+      "import": "./entries/naga-proto.js"
+    },
+    "./naga-staging": {
+      "types": "./entries/naga-staging.d.ts",
+      "require": "./entries/naga-staging.js",
+      "import": "./entries/naga-staging.js"
+    },
+    "./naga-test": {
+      "types": "./entries/naga-test.d.ts",
+      "require": "./entries/naga-test.js",
+      "import": "./entries/naga-test.js"
+    },
+    "./naga-dev": {
+      "types": "./entries/naga-dev.d.ts",
+      "require": "./entries/naga-dev.js",
+      "import": "./entries/naga-dev.js"
+    },
+    "./naga-local": {
+      "types": "./entries/naga-local.d.ts",
+      "require": "./entries/naga-local.js",
+      "import": "./entries/naga-local.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "naga": [
+        "entries/naga.d.ts"
+      ],
+      "naga-production": [
+        "entries/naga-production.d.ts"
+      ],
+      "naga-proto": [
+        "entries/naga-proto.d.ts"
+      ],
+      "naga-staging": [
+        "entries/naga-staging.d.ts"
+      ],
+      "naga-test": [
+        "entries/naga-test.d.ts"
+      ],
+      "naga-dev": [
+        "entries/naga-dev.d.ts"
+      ],
+      "naga-local": [
+        "entries/naga-local.d.ts"
+      ]
+    }
+  }
 }
