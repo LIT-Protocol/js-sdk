@@ -18,7 +18,7 @@ export const PROD_PATH_BY_NETWORK = {
   'naga-test': 'naga-test',
   'naga-staging': 'naga-staging',
   'naga-proto': 'naga-proto',
-  'naga': 'naga-prod',
+  naga: 'naga-prod',
 } as const;
 
 export const DEV_PATH_BY_NETWORK = {
@@ -97,8 +97,7 @@ export const NETWORKS = {
         'https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-test/deployed-lit-node-contracts-temp.json',
       'naga-proto':
         'https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-proto/deployed-lit-node-contracts-temp.json',
-      'naga':
-        'https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-prod/deployed-lit-node-contracts-temp.json',
+      naga: 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/naga-prod/deployed-lit-node-contracts-temp.json',
     },
   },
   dev: {

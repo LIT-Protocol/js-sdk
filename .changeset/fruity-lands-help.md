@@ -3,4 +3,4 @@
 '@lit-protocol/networks': minor
 ---
 
-Interanl devs can now run pnpm sync:contracts and import nagaProto from @lit-protocol/networks to target the new ChronYellowstone-based naga-proto realm, ensuring contract addresses/ABIs and SDK tooling stay in sync with the latest Lit deployment.
+Add `naga` and `naga-proto` networks. Create per-network entrypoints and subpath exports (naga, naga-production, naga-proto, naga-staging, naga-test, naga-dev, naga-local) for better tree-shaking
