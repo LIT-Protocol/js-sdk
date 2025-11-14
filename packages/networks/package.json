@@ -53,10 +53,10 @@
       "require": "./entries/naga.js",
       "import": "./entries/naga.js"
     },
-    "./naga-production": {
-      "types": "./entries/naga-production.d.ts",
-      "require": "./entries/naga-production.js",
-      "import": "./entries/naga-production.js"
+    "./naga-mainnet": {
+      "types": "./entries/naga-mainnet.d.ts",
+      "require": "./entries/naga-mainnet.js",
+      "import": "./entries/naga-mainnet.js"
     },
     "./naga-proto": {
       "types": "./entries/naga-proto.d.ts",
@@ -89,8 +89,8 @@
       "naga": [
         "entries/naga.d.ts"
       ],
-      "naga-production": [
-        "entries/naga-production.d.ts"
+      "naga-mainnet": [
+        "entries/naga-mainnet.d.ts"
       ],
       "naga-proto": [
         "entries/naga-proto.d.ts"

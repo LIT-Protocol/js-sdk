@@ -1,6 +1,6 @@
 import { nagaProtoSignatures } from '@lit-protocol/contracts';
 import { Chain } from 'viem';
-import * as chainInfo from '../../../../chains/ChronicleYellowstone';
+import * as chainInfo from '../../../../chains/LitChain';
 import { NAGA_ENDPOINT } from '../../shared/managers/endpoints-manager/endpoints';
 import type { NagaEndpointsType } from '../../shared/managers/endpoints-manager/endpoints';
 import { BaseNetworkEnvironment } from '../base/BaseNetworkEnvironment';
@@ -28,7 +28,7 @@ export class NagaProtoEnvironment extends BaseNetworkEnvironment<
         realmId: DEFAULT_REALM_ID,
       },
       services: {
-        loginServiceBaseUrl: 'https://login.litgateway.com',
+        loginServiceBaseUrl: '', // production/proto uses self-hosted login
       },
       minimumThreshold: MINIMUM_THRESHOLD,
       httpProtocol: PROTOCOL,

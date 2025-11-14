@@ -10,15 +10,15 @@ const PROTOCOL = 'https://';
 const MINIMUM_THRESHOLD = 3;
 const DEFAULT_REALM_ID = 1n;
 
-export interface NagaProductionSpecificConfigs {
+export interface NagaMainnetSpecificConfigs {
   realmId?: bigint;
 }
 
-export type NagaProductionSignatures = typeof nagaSignatures;
+export type NagaMainnetSignatures = typeof nagaSignatures;
 
-export class NagaProductionEnvironment extends BaseNetworkEnvironment<
-  NagaProductionSignatures,
-  NagaProductionSpecificConfigs
+export class NagaMainnetEnvironment extends BaseNetworkEnvironment<
+  NagaMainnetSignatures,
+  NagaMainnetSpecificConfigs
 > {
   constructor(options?: { rpcUrlOverride?: string }) {
     super({
@@ -55,4 +55,4 @@ export class NagaProductionEnvironment extends BaseNetworkEnvironment<
 }
 
 // Create singleton instance
-export const nagaProductionEnvironment = new NagaProductionEnvironment();
+export const nagaMainnetEnvironment = new NagaMainnetEnvironment();

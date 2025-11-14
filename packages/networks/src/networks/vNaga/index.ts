@@ -17,13 +17,13 @@ export type { NagaTest as NagaTestModule } from './envs/naga-test/naga-test.modu
 export { nagaStaging } from './envs/naga-staging';
 export type { NagaStaging as NagaStagingModule } from './envs/naga-staging/naga-staging.module';
 
-// Naga Production
-export { nagaProduction } from './envs/naga-production';
-export type { NagaProduction as NagaProductionModule } from './envs/naga-production/naga-production.module';
+// Naga Mainnet
+export { nagaMainnet } from './envs/naga-mainnet';
+export type { NagaMainnet as NagaMainnetModule } from './envs/naga-mainnet/naga-mainnet.module';
 
-// Naga (alias for production)
-export { nagaProduction as naga } from './envs/naga-production';
-export type { NagaProduction as NagaModule } from './envs/naga-production/naga-production.module';
+// Naga (alias for mainnet)
+export { nagaMainnet as naga } from './envs/naga-mainnet';
+export type { NagaMainnet as NagaModule } from './envs/naga-mainnet/naga-mainnet.module';
 
 // Naga Proto
 export { nagaProto } from './envs/naga-proto';
