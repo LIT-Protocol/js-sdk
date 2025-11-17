@@ -5,7 +5,7 @@
 
 const signatures = {
   "Staking": {
-    "address": "0x43b64F416cac52a7E60099E29F6477183bA172CB",
+    "address": "0x28759afC5989B961D0A8EB236C9074c4141Baea1",
     "methods": {
       "getActiveUnkickedValidatorStructsAndCounts": {
         "inputs": [
@@ -1050,7 +1050,7 @@ const signatures = {
     ]
   },
   "PubkeyRouter": {
-    "address": "0xFdC09086E184Cb812D37566B09751CcbCA6a2205",
+    "address": "0xB0c6B245B25F2e542c3570b53439825615371231",
     "methods": {
       "deriveEthAddressFromPubkey": {
         "inputs": [
@@ -1361,7 +1361,7 @@ const signatures = {
     ]
   },
   "PKPNFT": {
-    "address": "0x9bB7c5504E12aBBCec35DF786769BBA292Cc4C0B",
+    "address": "0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168",
     "methods": {
       "claimAndMint": {
         "inputs": [
@@ -1751,7 +1751,7 @@ const signatures = {
     ]
   },
   "PKPHelper": {
-    "address": "0x835585944fB37d14C317cc6cd4864570cFcFab9E",
+    "address": "0xCCb4A87731B3eFd6732e257381486912eEde24C5",
     "methods": {
       "claimAndMintNextAndAddAuthMethodsWithTypes": {
         "inputs": [
@@ -2034,7 +2034,7 @@ const signatures = {
     ]
   },
   "PKPPermissions": {
-    "address": "0x23A1aAB688EEe1d66FB45719ac527c2A0B036ed6",
+    "address": "0x3894cae120A6ca08150e6e51cBcBdD5c16115F9c",
     "methods": {
       "addPermittedAction": {
         "inputs": [
@@ -2652,7 +2652,7 @@ const signatures = {
     ]
   },
   "PaymentDelegation": {
-    "address": "0x58bA8Eb59E5A88ED690E47a8D37DCdB7d3aea490",
+    "address": "0x5033b79388EBBAf466B4CF82c0b72Abd9bB940d6",
     "methods": {
       "delegatePayments": {
         "inputs": [
@@ -2953,7 +2953,7 @@ const signatures = {
     ]
   },
   "Ledger": {
-    "address": "0xf69e2D0Fa6a7F24d65De4F972c1a3000d55CA175",
+    "address": "0x25be72246358491Ac7a1eF138C39Ff3b240E50b5",
     "methods": {
       "withdraw": {
         "inputs": [
@@ -3372,7 +3372,7 @@ const signatures = {
     ]
   },
   "PriceFeed": {
-    "address": "0x7cD9b8A17733bcb85683009f6Fcaf5B920c249EE",
+    "address": "0xFF4ceEC38572fEd4a48f6D3DF2bed7ccadD115a6",
     "methods": {
       "getNodesForRequest": {
         "inputs": [

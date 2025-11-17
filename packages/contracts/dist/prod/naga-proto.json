@@ -5,8 +5,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x43b64F416cac52a7E60099E29F6477183bA172CB",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0x28759afC5989B961D0A8EB236C9074c4141Baea1",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -6871,8 +6871,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xC73DCD75AE2c17A0BbAF28c47b1725B0284A5F31",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0xb6AAAd38f552DAd153090Cdd591DeB6a0f346161",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "anonymous": false,
@@ -7009,8 +7009,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x5E8db2E7af793f4095c4843C8cBD87C5D8604838",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0x0996A48f8cc3c7c52Caf10d34c804eF5C9E7748B",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -8063,8 +8063,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xFdC09086E184Cb812D37566B09751CcbCA6a2205",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0xB0c6B245B25F2e542c3570b53439825615371231",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -9197,8 +9197,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x9bB7c5504E12aBBCec35DF786769BBA292Cc4C0B",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -10625,8 +10625,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x835585944fB37d14C317cc6cd4864570cFcFab9E",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0xCCb4A87731B3eFd6732e257381486912eEde24C5",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -11640,8 +11640,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x23A1aAB688EEe1d66FB45719ac527c2A0B036ed6",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0x3894cae120A6ca08150e6e51cBcBdD5c16115F9c",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -12975,8 +12975,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x7866b6379Cb2B7e68Bb942dF3A3ACe9C25773874",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0x0d49661778415Cd456805AC68d53bAB27C9E9Af6",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -13139,8 +13139,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x111F4990037333512d6F04e4ed30463fe7235dE0",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0xa6c009FD21F9AB44163F6753F57862699B2956CE",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [],
@@ -13376,8 +13376,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x58bA8Eb59E5A88ED690E47a8D37DCdB7d3aea490",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0x5033b79388EBBAf466B4CF82c0b72Abd9bB940d6",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -14012,8 +14012,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xf69e2D0Fa6a7F24d65De4F972c1a3000d55CA175",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0x25be72246358491Ac7a1eF138C39Ff3b240E50b5",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -15068,8 +15068,8 @@
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x7cD9b8A17733bcb85683009f6Fcaf5B920c249EE",
-          "inserted_at": "2025-11-13T21:55:15Z",
+          "address_hash": "0xFF4ceEC38572fEd4a48f6D3DF2bed7ccadD115a6",
+          "inserted_at": "2025-11-14T17:22:15Z",
           "ABI": [
             {
               "inputs": [
@@ -16109,9 +16109,9 @@
     }
   ],
   "config": {
-    "chainId": "175188",
-    "rpcUrl": "https://yellowstone-rpc.litprotocol.com",
-    "chainName": "yellowstone",
+    "chainId": "175200",
+    "rpcUrl": "https://lit-chain-rpc.litprotocol.com",
+    "chainName": "litMainnet",
     "litNodeDomainName": "127.0.0.1",
     "litNodePort": 7470,
     "rocketPort": 7470
