@@ -26,9 +26,12 @@ LOG_LEVEL=info
 # Optional local overrides
 NAGA_LOCAL_CONTEXT_PATH=./lit-assets/blockchain/contracts/networkContext.json
 LIT_YELLOWSTONE_PRIVATE_RPC_URL=http://127.0.0.1:8545
+LIT_MAINNET_RPC_URL=https://mainnet-rpc.example
 ```
 
 Make sure the referenced network (local Naga cluster, Shiva-managed testnet, or live subnet) is running and reachable from your test machine.
+
+> Heads up: when targeting `naga-proto` or `naga`, the helpers only fund generated accounts with `0.01` LIT and deposit `0.01` LIT into the Lit Ledger so we don't strand real mainnet balance.
 
 ## Run the Canonical Suite
 
@@ -113,6 +116,6 @@ Refer to the source under `packages/e2e/src/helper` for additional exported func
 
 - **Jest not found** – install it locally (`pnpm add -D jest`). The CLI wrapper will exit with a helpful message if the dependency is missing.
 - **Missing signatures on naga-local** – provide `NAGA_LOCAL_CONTEXT_PATH` so the init routine calls `nagaLocal.withLocalContext`.
-- **RPC connectivity** – when pointing at a private RPC, set `LIT_YELLOWSTONE_PRIVATE_RPC_URL` so the Lit Client bypasses defaults.
+- **RPC connectivity** – when pointing at a private RPC, set `LIT_YELLOWSTONE_PRIVATE_RPC_URL` (dev/test/staging) or `LIT_MAINNET_RPC_URL` (naga-proto/naga) so the Lit Client bypasses defaults.
 
 With these additions, QA can stay in sync with the canonical Lit Protocol E2E coverage while extending it with custom assertions tailored to fast-epoch or failure scenarios.

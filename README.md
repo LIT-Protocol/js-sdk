@@ -40,6 +40,8 @@ pnpm install && pnpm build
 # (Optional) Request a private rpc url from
 # https://hub.conduit.xyz/chronicle-yellowstone-testnet-9qgmzfcohk
 LIT_YELLOWSTONE_PRIVATE_RPC_URL=<private-rpc-url>
+# (Optional) Mainnet RPC override for naga-proto / naga
+LIT_MAINNET_RPC_URL=<mainnet-rpc-url>
 
 # For live networks (naga-dev, naga-staging)
 LIVE_MASTER_ACCOUNT=<master-account-private-key>
@@ -47,6 +49,8 @@ LIVE_MASTER_ACCOUNT=<master-account-private-key>
 # For local network (naga-local) (default Anvil account)
 LOCAL_MASTER_ACCOUNT=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
+
+When `NETWORK` is set to `naga-proto` or `naga`, the test helpers only top up generated accounts with `0.01` LIT and deposit `0.01` LIT into the Lit Ledger to avoid locking up excess mainnet funds.
 
 ## Command
 

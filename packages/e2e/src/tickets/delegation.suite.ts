@@ -46,7 +46,7 @@ export function registerPaymentDelegationTicketSuite() {
         fundPKPLedger: true,
         sponsor: {
           restrictions: {
-            totalMaxPriceInWei: '1000000000000000000',
+            totalMaxPriceInWei: testEnv.config.sponsorshipLimits.totalMaxPriceInWei,
             requestsPerPeriod: '100',
             periodSeconds: '600',
           },
@@ -69,7 +69,7 @@ export function registerPaymentDelegationTicketSuite() {
         authContext: bobAccount.eoaAuthContext!,
         pubKey: bobAccount.pkp?.pubkey!,
         toSign: 'Hello, world!',
-        userMaxPrice: 1000000000000000000n, // 0.05 ETH in Wei
+        userMaxPrice: testEnv.config.sponsorshipLimits.userMaxPrice,
       });
 
       // 5. Now, Alice removes Bob from her sponsorship
@@ -84,7 +84,7 @@ export function registerPaymentDelegationTicketSuite() {
           authContext: bobAccount.eoaAuthContext!,
           pubKey: bobAccount.pkp?.pubkey!,
           toSign: 'Hello again, world!',
-          userMaxPrice: 1000000000000000000n, // 0.05 ETH in Wei
+          userMaxPrice: testEnv.config.sponsorshipLimits.userMaxPrice,
         });
       } catch (e) {
         didFail = true;

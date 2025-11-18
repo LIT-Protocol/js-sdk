@@ -3,6 +3,8 @@ import {
   nagaDev,
   nagaLocal,
   nagaTest,
+  nagaProto,
+  naga,
   PaymentManager,
 } from '@lit-protocol/networks';
 import { EnvVars } from './createEnvVars';
@@ -14,10 +16,26 @@ export const CONFIG = {
   LOCAL: {
     nativeFundingAmount: '1',
     ledgerDepositAmount: '2',
+    sponsorshipLimits: {
+      totalMaxPriceInWei: '50000000000000000',
+      userMaxPrice: 50000000000000000n,
+    },
   },
   LIVE: {
     nativeFundingAmount: '0.1',
     ledgerDepositAmount: '0.1',
+    sponsorshipLimits: {
+      totalMaxPriceInWei: '50000000000000000',
+      userMaxPrice: 50000000000000000n,
+    },
+  },
+  MAINNET: {
+    nativeFundingAmount: '0.01',
+    ledgerDepositAmount: '0.01',
+    sponsorshipLimits: {
+      totalMaxPriceInWei: '10000000000000000',
+      userMaxPrice: 10000000000000000n,
+    },
   },
 };
 
@@ -35,6 +53,10 @@ export type TestEnv = {
   config: {
     nativeFundingAmount: string;
     ledgerDepositAmount: string;
+    sponsorshipLimits: {
+      totalMaxPriceInWei: string;
+      userMaxPrice: bigint;
+    };
   };
 };
 
@@ -44,6 +66,10 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
   let config = {
     nativeFundingAmount: '',
     ledgerDepositAmount: '',
+    sponsorshipLimits: {
+      totalMaxPriceInWei: '0',
+      userMaxPrice: 0n,
+    },
   };
 
   if (envVars.network === 'naga-local') {
@@ -58,12 +84,18 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
     config = CONFIG.LOCAL;
   } else if (
     envVars.network === 'naga-dev' ||
-    envVars.network === 'naga-test'
+    envVars.network === 'naga-test' ||
+    envVars.network === 'naga-proto' ||
+    envVars.network === 'naga'
   ) {
     if (envVars.network === 'naga-dev') {
       networkModule = nagaDev;
     } else if (envVars.network === 'naga-test') {
       networkModule = nagaTest;
+    } else if (envVars.network === 'naga-proto') {
+      networkModule = nagaProto;
+    } else {
+      networkModule = naga;
     }
 
     if (envVars.rpcUrl) {
@@ -75,7 +107,12 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
       });
     }
 
-    config = CONFIG.LIVE;
+    config =
+      envVars.network === 'naga-proto' || envVars.network === 'naga'
+        ? CONFIG.MAINNET
+        : CONFIG.LIVE;
+  } else {
+    throw new Error(`Unsupported network configuration: ${envVars.network}`);
   }
 
   // 2. Create Lit Client

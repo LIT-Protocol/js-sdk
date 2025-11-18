@@ -75,6 +75,18 @@ const litClient = await createLitClient({
 
 </CodeGroup>
 
+<Note>
+For smaller bundles you can import only the network you need via the tree-shakeable
+subpaths, for example:
+
+```ts
+import { naga } from "@lit-protocol/networks/naga";
+// or import { nagaTest } from "@lit-protocol/networks/naga-test";
+```
+
+This avoids pulling every network module into your application.
+</Note>
+
   </Step>
 </Steps>
 

@@ -1,5 +1,22 @@
-const supportedNetworks = ['naga-local', 'naga-test', 'naga-dev'] as const;
+const supportedNetworks = [
+  'naga-local',
+  'naga-test',
+  'naga-dev',
+  'naga-proto',
+  'naga',
+] as const;
 type EnvName = 'local' | 'live';
+
+const LIVE_RPC_ENV_VARS: Record<
+  (typeof supportedNetworks)[number],
+  string | undefined
+> = {
+  'naga-local': undefined,
+  'naga-dev': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
+  'naga-test': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
+  'naga-proto': 'LIT_MAINNET_RPC_URL',
+  naga: 'LIT_MAINNET_RPC_URL',
+} as const;
 
 export type EnvVars = {
   network: string;
@@ -71,12 +88,10 @@ export function createEnvVars(): EnvVars {
   }
 
   // -- live networks
-  if (network === 'naga-dev' || network === 'naga-test') {
-    const liveRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
-
-    if (liveRpcUrl) {
-      rpcUrl = liveRpcUrl;
-    }
+  const rpcEnvKey = LIVE_RPC_ENV_VARS[network as (typeof supportedNetworks)[number]];
+  if (rpcEnvKey) {
+    const liveRpcUrl = process.env[rpcEnvKey];
+    if (liveRpcUrl) rpcUrl = liveRpcUrl;
   }
 
   const result = {

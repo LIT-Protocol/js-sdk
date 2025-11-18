@@ -1,25 +1,31 @@
 describe('rpc override', () => {
-  const TEST_RPC = process.env.LIT_YELLOWSTONE_PRIVATE_RPC_URL;
+  const network = process.env.NETWORK || 'naga-dev';
+  const rpcEnvVar =
+    network === 'naga' || network === 'naga-proto'
+      ? 'LIT_MAINNET_RPC_URL'
+      : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL';
+  const TEST_RPC = process.env[rpcEnvVar];
   // const TEST_RPC = 'https://yellowstone-override.example';
 
   // beforeAll(() => {
-  //   process.env.LIT_YELLOWSTONE_PRIVATE_RPC_URL = TEST_RPC;
+  //   process.env[rpcEnvVar] = TEST_RPC;
   // });
 
   // afterAll(() => {
-  //   process.env.LIT_YELLOWSTONE_PRIVATE_RPC_URL = ORIGINAL_RPC;
+  //   process.env[rpcEnvVar] = ORIGINAL_RPC;
   // });
 
   it('applies env rpc override to module and client', async () => {
     const networks = await import('@lit-protocol/networks');
 
     // choose module by NETWORK env (same way init.ts does)
-    const network = process.env.NETWORK || 'naga-dev';
     const importNameMap: Record<string, string> = {
       'naga-dev': 'nagaDev',
       'naga-test': 'nagaTest',
       'naga-local': 'nagaLocal',
       'naga-staging': 'nagaStaging',
+      'naga-proto': 'nagaProto',
+      naga: 'naga',
     };
     const importName = importNameMap[network];
     const baseModule: any = (networks as any)[importName];
