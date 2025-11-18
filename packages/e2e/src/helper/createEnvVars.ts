@@ -88,7 +88,8 @@ export function createEnvVars(): EnvVars {
   }
 
   // -- live networks
-  const rpcEnvKey = LIVE_RPC_ENV_VARS[network as (typeof supportedNetworks)[number]];
+  const rpcEnvKey =
+    LIVE_RPC_ENV_VARS[network as (typeof supportedNetworks)[number]];
   if (rpcEnvKey) {
     const liveRpcUrl = process.env[rpcEnvKey];
     if (liveRpcUrl) rpcUrl = liveRpcUrl;

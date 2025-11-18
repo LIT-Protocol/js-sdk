@@ -177,10 +177,7 @@ export const init = async (
       : _baseNetworkModule;
 
   if (rpcOverride) {
-    console.log(
-      `✅ Using RPC override (${rpcOverrideEnvVar}):`,
-      rpcOverride
-    );
+    console.log(`✅ Using RPC override (${rpcOverrideEnvVar}):`, rpcOverride);
   }
 
   /**

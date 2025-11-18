@@ -46,7 +46,8 @@ export function registerPaymentDelegationTicketSuite() {
         fundPKPLedger: true,
         sponsor: {
           restrictions: {
-            totalMaxPriceInWei: testEnv.config.sponsorshipLimits.totalMaxPriceInWei,
+            totalMaxPriceInWei:
+              testEnv.config.sponsorshipLimits.totalMaxPriceInWei,
             requestsPerPeriod: '100',
             periodSeconds: '600',
           },
