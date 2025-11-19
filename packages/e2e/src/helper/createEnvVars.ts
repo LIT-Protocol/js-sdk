@@ -7,7 +7,7 @@ const supportedNetworks = [
 ] as const;
 type EnvName = 'local' | 'live';
 
-const LIVE_RPC_ENV_VARS: Record<
+const RPC_ENV_KEY_BY_NETWORK: Record<
   (typeof supportedNetworks)[number],
   string | undefined
 > = {
@@ -89,10 +89,21 @@ export function createEnvVars(): EnvVars {
 
   // -- live networks
   const rpcEnvKey =
-    LIVE_RPC_ENV_VARS[network as (typeof supportedNetworks)[number]];
+    RPC_ENV_KEY_BY_NETWORK[network as (typeof supportedNetworks)[number]];
+
   if (rpcEnvKey) {
+    console.log(
+      `ℹ️ Checking override env var ${rpcEnvKey} for network ${network}`
+    );
     const liveRpcUrl = process.env[rpcEnvKey];
-    if (liveRpcUrl) rpcUrl = liveRpcUrl;
+    if (liveRpcUrl) {
+      rpcUrl = liveRpcUrl;
+      console.log(`🔧 Using RPC override (${rpcEnvKey}) for ${network}`);
+    } else {
+      console.log(
+        `ℹ️ No RPC override provided via ${rpcEnvKey}; using module default for ${network}`
+      );
+    }
   }
 
   const result = {
