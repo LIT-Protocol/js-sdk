@@ -9,6 +9,10 @@ import { APP_INFO } from "@/_config";
 import { PaymentManagementDashboard } from "../lit-logged-page/protectedApp/components/PaymentManagement/PaymentManagementDashboard";
 import { useLedgerRefresh } from "../lit-logged-page/protectedApp/utils/ledgerRefresh";
 import { SUPPORTED_CHAINS } from "@/domain/lit/chains";
+import {
+  getDefaultChainForNetwork,
+  isTestnetNetwork,
+} from "@/domain/lit/networkDefaults";
 
 // Read-only viem account for PaymentManager (view-only operations)
 const READ_ONLY_PRIVATE_KEY =
@@ -62,6 +66,10 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
   const [loggingInTokenId, setLoggingInTokenId] = useState<string | null>(null);
 
   const isNagaDevNetwork = currentNetworkName?.toLowerCase() === "naga-dev";
+  const networkChainKey = getDefaultChainForNetwork(currentNetworkName);
+  const ledgerTokenSymbol = isTestnetNetwork(currentNetworkName)
+    ? "tstLPX"
+    : "LITKEY";
 
   // Debug logging
   useEffect(() => {
@@ -101,7 +109,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
       setPkps([]);
       loadExistingPkps(currentPage);
     }
-  }, [currentPage, mode, services, authData]);
+  }, [currentPage, mode, services, authData, networkChainKey]);
 
   // Reset to page 1 when switching to existing mode
   useEffect(() => {
@@ -188,7 +196,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
 
     // Fetch balances in parallel
     const balancePromises = pkpsToLoad.map(async (pkp, index) => {
-      const balanceInfo = await fetchPkpBalance(pkp);
+      const balanceInfo = await fetchPkpBalance(pkp, networkChainKey);
       return { index, balanceInfo };
     });
 
@@ -204,7 +212,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
         // console.log(`💰 [BALANCE_BATCH] ✅ PKP ${updatedPkps[idx].tokenId?.toString().slice(-8)} balance updated: ${balance} ${symbol}`);
       } else {
         updatedPkps[idx].balance = "N/A";
-        updatedPkps[idx].balanceSymbol = "LPX";
+        updatedPkps[idx].balanceSymbol = ledgerTokenSymbol;
         // console.log(`💰 [BALANCE_BATCH] ❌ PKP ${updatedPkps[idx].tokenId?.toString().slice(-8)} balance failed, set to N/A`);
       }
       updatedPkps[idx].isLoadingBalance = false;
@@ -802,7 +810,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
                                 }`}
                               >
                                 {pkp.balance || "N/A"}{" "}
-                                {pkp.balanceSymbol || "LPX"}
+                                {pkp.balanceSymbol || ledgerTokenSymbol}
                               </span>
                             )}
                           </div>
@@ -832,9 +840,9 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
                                   }`}
                                 >
                                   {isLedgerFunded
-                                    ? `${
-                                        (pkp as any).ledgerBalance || "0"
-                                      } tstLPX`
+                                    ? `${(pkp as any).ledgerBalance || "0"} ${
+                                        ledgerTokenSymbol || "LITKEY"
+                                      }`
                                     : "Not funded"}
                                 </span>
                               )}

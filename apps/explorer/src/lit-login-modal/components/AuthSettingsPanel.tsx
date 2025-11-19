@@ -40,6 +40,19 @@ export const AuthSettingsPanel: React.FC<AuthSettingsPanelProps> = ({
   networkDefaultAuthUrl,
   isAuthUrlCustom,
 }) => {
+  const networkMeta: Record<
+    SupportedNetworkName,
+    { label: string; dotClass: string }
+  > = {
+    "naga-dev": { label: "Testnet", dotClass: "bg-indigo-500" },
+    "naga-test": { label: "Testnet", dotClass: "bg-green-500" },
+    "naga-proto": { label: "Mainnet", dotClass: "bg-amber-500" },
+    naga: { label: "Mainnet", dotClass: "bg-red-500" },
+  };
+  const activeMeta =
+    networkMeta[localNetworkName as SupportedNetworkName] ||
+    networkMeta["naga-dev"];
+
   const handleNetworkSelect = (net: SupportedNetworkName) => {
     const selected = networkModules[net] || fallbackNetworkModule;
     setLocalNetworkName(net);
@@ -118,11 +131,12 @@ export const AuthSettingsPanel: React.FC<AuthSettingsPanelProps> = ({
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-800">
             <span
-              className={`inline-block h-1.5 w-1.5 rounded-full ${
-                localNetworkName === "naga-test" ? "bg-green-500" : "bg-indigo-500"
-              }`}
+              className={`inline-block h-1.5 w-1.5 rounded-full ${activeMeta.dotClass}`}
             />
             <span className="font-mono">{localNetworkName}</span>
+            <span className="text-[10px] uppercase tracking-wide text-gray-500">
+              {activeMeta.label}
+            </span>
           </span>
         </div>
         <div className="flex items-center gap-1 text-[11px] text-gray-500">
@@ -141,20 +155,16 @@ export const AuthSettingsPanel: React.FC<AuthSettingsPanelProps> = ({
         <div className="flex gap-2 border-b border-gray-200">
           {supportedNetworks.map((net) => {
             const isActive = localNetworkName === net;
-            const isDisabled = net === "naga";
             return (
               <button
                 key={net}
-                onClick={() => {
-                  if (isDisabled) return;
-                  handleNetworkSelect(net);
-                }}
+                onClick={() => handleNetworkSelect(net)}
                 className={`-mb-px px-3 py-1.5 text-sm ${
                   isActive
                     ? "border-b-2 border-indigo-600 font-semibold text-indigo-700"
                     : "border-b-2 border-transparent text-gray-600 hover:text-gray-800"
-                } ${isDisabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
-                title={isDisabled ? "Coming soon" : undefined}
+                } cursor-pointer`}
+                title={networkMeta[net]?.label}
               >
                 {net}
               </button>

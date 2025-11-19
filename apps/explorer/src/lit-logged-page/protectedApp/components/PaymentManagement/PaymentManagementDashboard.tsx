@@ -6,6 +6,7 @@ import { triggerLedgerRefresh } from "../../utils/ledgerRefresh";
 import { usePaymentManagerInstance } from "../../hooks/usePaymentManagerInstance";
 import { useLedgerBalance } from "../../hooks/useLedgerBalance";
 import { useWithdrawStatus } from "../../hooks/useWithdrawStatus";
+import { getAllChains } from "@/domain/lit/chains";
 
 interface PaymentManagementDashboardProps {
   selectedPkp: UIPKP | null;
@@ -101,9 +102,13 @@ export const PaymentManagementDashboard: React.FC<
   const [error, setError] = useState<string>("");
   const resolvedAccountAddress =
     targetUserAddress || account?.address || account?.account?.address;
-  const activeChainLabel = selectedChain
-    ? selectedChain.replace(/-/g, " ")
-    : "unknown";
+  const allChains = getAllChains();
+  const selectedChainInfo = selectedChain
+    ? allChains[selectedChain as keyof typeof allChains]
+    : undefined;
+  const activeChainLabel =
+    selectedChainInfo?.name ||
+    (selectedChain ? selectedChain.replace(/-/g, " ") : "unknown");
 
   // Success feedback helper
   const showSuccess = (actionId: string) => {

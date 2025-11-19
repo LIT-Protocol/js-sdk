@@ -27,6 +27,7 @@ import { getAddress } from "viem";
 import { formatPublicKey } from "./protectedApp/utils";
 import { PKPData } from "@lit-protocol/schemas";
 import { APP_INFO } from "@/_config";
+import { getDefaultChainForNetwork } from "@/domain/lit/networkDefaults";
 
 enum LOGIN_STYLE {
   button = "button",
@@ -124,6 +125,10 @@ export default function LoggedInDashboard() {
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [selectedChain, setSelectedChain] = useState<string>("yellowstone");
   const [, setStatus] = useState<string>("");
+
+  useEffect(() => {
+    setSelectedChain(getDefaultChainForNetwork(currentNetworkName));
+  }, [currentNetworkName]);
 
   // Transaction toast state
   const [transactionToasts, setTransactionToasts] = useState<

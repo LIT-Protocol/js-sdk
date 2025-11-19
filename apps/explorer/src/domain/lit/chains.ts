@@ -1,3 +1,11 @@
+import {
+  LIT_CHAIN_EXPLORER_URL,
+  LIT_CHAIN_ID,
+  LIT_CHAIN_NAME,
+  LIT_CHAIN_RPC_URL,
+  LIT_CHAIN_SYMBOL,
+} from "./litChainConfig";
+
 export interface LitChainConfig {
   id: number;
   name: string;
@@ -11,6 +19,16 @@ export interface LitChainConfig {
 export const SUPPORTED_CHAIN_ID = 2888;
 const CUSTOM_CHAINS_STORAGE_KEY = "chains.custom.v1";
 
+const LIT_CHAIN_BASE_CONFIG: LitChainConfig = {
+  id: LIT_CHAIN_ID,
+  name: LIT_CHAIN_NAME,
+  symbol: LIT_CHAIN_SYMBOL,
+  rpcUrl: LIT_CHAIN_RPC_URL,
+  explorerUrl: LIT_CHAIN_EXPLORER_URL,
+  litIdentifier: "lit-chain",
+  testnet: false,
+};
+
 export const DEFAULT_CHAINS: Record<string, LitChainConfig> = {
   yellowstone: {
     id: 175188,
@@ -20,6 +38,16 @@ export const DEFAULT_CHAINS: Record<string, LitChainConfig> = {
     explorerUrl: "https://yellowstone-explorer.litprotocol.com/",
     litIdentifier: "yellowstone",
     testnet: true,
+  },
+  "naga-proto": {
+    ...LIT_CHAIN_BASE_CONFIG,
+    name: "Lit Chain (naga-proto)",
+    litIdentifier: "naga-proto",
+  },
+  naga: {
+    ...LIT_CHAIN_BASE_CONFIG,
+    name: "Lit Chain (naga)",
+    litIdentifier: "naga",
   },
   ethereum: {
     id: 1,

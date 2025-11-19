@@ -14,11 +14,11 @@
     "update:lit": "pnpm update --latest --filter '@lit-protocol/*'"
   },
   "dependencies": {
-    "@lit-protocol/access-control-conditions": "8.0.2",
-    "@lit-protocol/auth": "8.1.2",
-    "@lit-protocol/lit-client": "8.2.3",
-    "@lit-protocol/naga-la-types": "^0.1.0",
-    "@lit-protocol/networks": "8.3.2",
+    "@lit-protocol/access-control-conditions": "workspace:*",
+    "@lit-protocol/auth": "workspace:*",
+    "@lit-protocol/lit-client": "workspace:*",
+    "@lit-protocol/naga-la-types": "0.1.0",
+    "@lit-protocol/networks": "workspace:*",
     "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-hover-card": "^1.1.15",

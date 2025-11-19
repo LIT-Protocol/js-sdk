@@ -5,6 +5,10 @@ import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 // import inject from "@rollup/plugin-inject";
 
+// Rollup's CommonJS plugin only processes node_modules by default. Include our
+// locally-built workspace packages so named exports from CommonJS bundles work.
+const workspaceDistPackagesPattern = /dist[\\/]packages[\\/]/;
+
 /**
  * Custom Vite plugin to generate version.html with @lit-protocol package versions
  */
@@ -153,4 +157,9 @@ export default defineConfig({
     dedupe: ["wagmi", "@wagmi/core", "viem"],
   },
   optimizeDeps: { include: ["buffer"] },
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/, workspaceDistPackagesPattern],
+    },
+  },
 });

@@ -2,7 +2,11 @@ import type { ReactNode } from "react";
 import type { LitServices } from "../hooks/useLitServiceSetup";
 import type { PKPData } from "@lit-protocol/schemas";
 
-export type SupportedNetworkName = "naga" | "naga-dev" | "naga-test";
+export type SupportedNetworkName =
+  | "naga-dev"
+  | "naga-test"
+  | "naga-proto"
+  | "naga";
 
 export type AuthMethod =
   | "google"

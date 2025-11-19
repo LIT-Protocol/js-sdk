@@ -249,20 +249,20 @@ importers:
   apps/explorer:
     dependencies:
       '@lit-protocol/access-control-conditions':
-        specifier: 8.0.2
-        version: 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+        specifier: workspace:*
+        version: link:../../dist/packages/access-control-conditions
       '@lit-protocol/auth':
-        specifier: 8.1.2
-        version: 8.1.2(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(tslib@2.8.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
+        specifier: workspace:*
+        version: link:../../dist/packages/auth
       '@lit-protocol/lit-client':
-        specifier: 8.2.3
-        version: 8.2.3(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
+        specifier: workspace:*
+        version: link:../../dist/packages/lit-client
       '@lit-protocol/naga-la-types':
-        specifier: ^0.1.0
+        specifier: 0.1.0
         version: 0.1.0
       '@lit-protocol/networks':
-        specifier: 8.3.2
-        version: 8.3.2(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
+        specifier: workspace:*
+        version: link:../../dist/packages/networks
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.54.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4326,69 +4326,16 @@ packages:
         integrity: sha512-ficsEARKnmmW5njugNYKipTm4SFnbik7CXtoencDZzmzo/dQ+2Q0bgkzJuoJP20Aj0F+izzJjOqsnkd6F/o1bw==,
       }
 
-  '@lit-protocol/access-control-conditions-schemas@8.0.2':
-    resolution:
-      {
-        integrity: sha512-aMElsRHLfjOM/S5cEwta6G2+OblSnIve51lv9HGjpb5Lamru4qqVTA8yQwlh7Wh5Sk4/1vZyZc1Mwp3fLxK+Aw==,
-      }
-
-  '@lit-protocol/access-control-conditions@8.0.2':
-    resolution:
-      {
-        integrity: sha512-5F5fA6QZL4+hYmF0knePoPzyfZLvEudKdf/4Sn3ioHn5jivgnr9QoYL//eHwry7G9kdgeFSJz8rbxdj/d6WjeQ==,
-      }
-
   '@lit-protocol/accs-schemas@0.0.24':
     resolution:
       {
         integrity: sha512-sjUfMAc8kj/Tj/GAFnlrbvs9PzoSK5wR3L1hK4kFI6lifq31LsDGqNLWmIEDXRubE/YusK5QaY30h+WPgk8RFQ==,
       }
 
-  '@lit-protocol/auth-helpers@8.1.1':
-    resolution:
-      {
-        integrity: sha512-npRoN5xBk+n523ImV77x2T7s1iwp4hQbz8cRD3nzSIiryCFJaglD+llQyOCtgI5fpcb0kLPeOTbre0+8xt4yAQ==,
-      }
-    peerDependencies:
-      viem: 2.38.x
-
-  '@lit-protocol/auth@8.1.2':
-    resolution:
-      {
-        integrity: sha512-OPT+KvNN6r0Srqwl1l/ov8F4EhNJPcepoHLG0YwSEGjXaQVo5t26OfW9ZYWxl0UW6w2c6r/dw8XMr6xQCs2oMQ==,
-      }
-    peerDependencies:
-      tslib: ^2.3.0
-      viem: 2.38.x
-
   '@lit-protocol/constants@7.1.1':
     resolution:
       {
         integrity: sha512-wJY5r8D0FdvtkQtcjx5JfPC3Qeb5SZ1m72HTcvJdqaJaBgaPP4eg2JSUg9uNJ+knOCyfdiBPl47XlWTGqe1X4Q==,
-      }
-
-  '@lit-protocol/constants@8.0.2':
-    resolution:
-      {
-        integrity: sha512-2jw9PNmU2w/DVRn86+hQmoiW5uCl9bNCPZv/4eS13fiPhi4VERys5lC9zxn4uUyLeCUivDlPnuP1LO0ElyfXxA==,
-      }
-
-  '@lit-protocol/constants@8.0.5':
-    resolution:
-      {
-        integrity: sha512-1pWsyrURwTiPUjg06hOWnS2MUplllIWtOGpOQzgkCSGWMqQoygyuOzDh0Nz0LfAl5lmuuVffyRjWI8mfN+/Asw==,
-      }
-
-  '@lit-protocol/constants@8.0.7':
-    resolution:
-      {
-        integrity: sha512-oJkOKbevkFF6yz/ZbEY8rTf1hs57nt/LMbwHx0jX/pMjQgfd6lbhumGVVK2/8ZXO7jXyJB+W9/5NeDzfOYP94w==,
-      }
-
-  '@lit-protocol/constants@8.0.8':
-    resolution:
-      {
-        integrity: sha512-ifCQI5lBHr4X74a+vYHsAmUOp3k4QMcRUZDxb0kwxixZbQA7jj7g6c/su+HW3xfMXutCGLGrEey3QSN8vBhl5Q==,
       }
 
   '@lit-protocol/contracts@0.0.74':
@@ -4399,52 +4346,6 @@ packages:
     peerDependencies:
       typescript: ^5.0.0
 
-  '@lit-protocol/contracts@0.5.3':
-    resolution:
-      {
-        integrity: sha512-s5q/X0iGLdJYY8dGUJi8EmVkfVJRxMfsVXAb4t/8YEWvOC1oQHuO069nqTPmCqkJO8OcDUknaSSkuxuDIvp2oQ==,
-      }
-    peerDependencies:
-      typescript: ^5.0.0
-
-  '@lit-protocol/contracts@0.7.1':
-    resolution:
-      {
-        integrity: sha512-XbNJlDNvr2fcvD3wqTQYaTlWoaKQqyeG08VniaRadm3HuneCj66X+hTDf5liQ/RbLLqGzXMaQ7qPaM8VckrTiQ==,
-      }
-    peerDependencies:
-      typescript: ^5.0.0
-
-  '@lit-protocol/contracts@0.8.1':
-    resolution:
-      {
-        integrity: sha512-wV5RahnmgDJirIU75chPDOwF4VgzPxezSACsIkGgaxzx8IzZ4jQ3NxRDcxTTUqq8i2B/bPEqpLw3oK+eQy74oA==,
-      }
-    peerDependencies:
-      typescript: ^5.0.0
-
-  '@lit-protocol/contracts@0.8.2':
-    resolution:
-      {
-        integrity: sha512-MUt+t4/RQOoj8lLyfVffmQfFEmJ5w8JnK/Ouokpv6Z+JzmnG0WVJX0ovUnMQgcUA6Ns99vYBBQKy3AZ4X01FFQ==,
-      }
-    peerDependencies:
-      typescript: ^5.0.0
-
-  '@lit-protocol/crypto@8.0.2':
-    resolution:
-      {
-        integrity: sha512-9TinSyTZE2DLUThUcV/8aXkIOvraHnV/keBtoOYy5TkBv4zGX9vfGAA9djGqP6lCXnBHQLUOQtBvLYQxi44L2g==,
-      }
-
-  '@lit-protocol/lit-client@8.2.3':
-    resolution:
-      {
-        integrity: sha512-c1/rw/OSFx6dTPEvsEzY7cQkaFctHpVIeMrmnG2LsyUt10iuG1F49MF29QJl9f19B0fH+Bv2NQE5h16BaXGq2A==,
-      }
-    peerDependencies:
-      viem: 2.38.x
-
   '@lit-protocol/lit-status-sdk@0.1.8':
     resolution:
       {
@@ -4452,12 +4353,6 @@ packages:
       }
     peerDependencies:
       typescript: ^5
-
-  '@lit-protocol/logger@8.0.2':
-    resolution:
-      {
-        integrity: sha512-261xUbpHs3UbCRnaardxn4IKe49fT5U1XeNkFWxyQqwF5XM6L/ldH+a3C3hM/Jr/Mm84vyqFsMqKFCQajjMEOQ==,
-      }
 
   '@lit-protocol/nacl@7.1.1':
     resolution:
@@ -4471,56 +4366,16 @@ packages:
         integrity: sha512-6RYP6aQ25C8GunoDUdyZTSlCJuZqcbeJD2BuUaVp+EDKJ5LF6Z8bnKHjnF9XljtXWPdR9OSOJ7sc5SsQF7If2g==,
       }
 
-  '@lit-protocol/networks@8.3.1':
-    resolution:
-      {
-        integrity: sha512-tOlFdW9aJLPLEkQeY/k+51Pp2Rxf2lA3J2ZiRXSdXeUrcEWqp3N5krHRejPxIHFRttAFeqcHJpeKLqlu2DrWwQ==,
-      }
-    peerDependencies:
-      viem: 2.38.x
-
-  '@lit-protocol/networks@8.3.2':
-    resolution:
-      {
-        integrity: sha512-WK02Ff11cvY7wr6s9XkOtHSFfa6Vcu66Td+1DZgZykgdjCXYN4LJTSrz6jgFFIuvoAXGxNICbt/i15e08X+9pQ==,
-      }
-    peerDependencies:
-      viem: 2.38.x
-
-  '@lit-protocol/schemas@8.0.2':
-    resolution:
-      {
-        integrity: sha512-SdbYcm8nGg7HDyIgp/LK3d9wDZ9jpzZdPiRJeBHfoKfVq5qf44hugy/BO3IJXROVb+6TqrsEbsUS1rlqbqi/0A==,
-      }
-
   '@lit-protocol/types@7.1.1':
     resolution:
       {
         integrity: sha512-oOtUOEA+5o6vb6xOx7x0vDG5IDsHANbWgB1nc23Ah7SctbITQM7F8VZNaCwRsSj8UxKjWD13eGsMHvMPxoFXdg==,
       }
 
-  '@lit-protocol/types@8.0.2':
-    resolution:
-      {
-        integrity: sha512-IDppgwcAPiIBmzVhfgK5h/5WLhJPFnlEhKqq/6X24M+sD8JL/rfac9P99+lHYMienki8rj4L9+zIUDIotFZCLw==,
-      }
-
   '@lit-protocol/uint8arrays@7.1.1':
     resolution:
       {
         integrity: sha512-9EycDdx3WQSH97DwIXUVhJXblVR1iJZCSa7watNzt+j2Au7CikO/DiBpIHfBe7ULVLkCI7li5hAnVB9vDfDEtQ==,
-      }
-
-  '@lit-protocol/wasm@8.0.2':
-    resolution:
-      {
-        integrity: sha512-r3r0slPSNjnyWW9OEqLCu5+gZq+MfBd+0oFDRcwuvoHbi0AtOajIz2q0lmC1Y7ksxbCt4fGk15VVeBdhH5MboQ==,
-      }
-
-  '@lit-protocol/wasm@8.1.0':
-    resolution:
-      {
-        integrity: sha512-V1EIJHdwoTdxdFoq6N9msatXBNBWZ8cIoa1RvnmerO2QcwAZmq+dYntVK9+F6lFN9p9YL6AI1PW5349WTxg1Zg==,
       }
 
   '@lit/reactive-element@2.1.1':
@@ -4820,13 +4675,6 @@ packages:
     resolution:
       {
         integrity: sha512-warwspo+UYUPep0Q+vtdVB4Ugn8GGQj8iyB3gnRWsztmUHTI3S1nhdiWNsPUGL0vud7JlRRk1XEu7Lq1KGTnMQ==,
-      }
-    engines: { node: ^14.21.3 || >=16 }
-
-  '@noble/curves@1.8.2':
-    resolution:
-      {
-        integrity: sha512-vnI7V6lFNe0tLAuJMu+2sX+FcL14TaCWy1qiczg1VwRmPrpQCdq5ESXQMqUc2tluRNf6irBXrWbl1mGN8uaU/g==,
       }
     engines: { node: ^14.21.3 || >=16 }
 
@@ -17904,17 +17752,6 @@ packages:
       typescript:
         optional: true
 
-  viem@2.29.4:
-    resolution:
-      {
-        integrity: sha512-Dhyae+w1LKKpYVXypGjBnZ3WU5EHl/Uip5RtVwVRYSVxD5VvHzqKzIfbFU1KP4vnnh3++ZNgLjBY/kVT/tPrrg==,
-      }
-    peerDependencies:
-      typescript: '>=5.0.4'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
   viem@2.38.4:
     resolution:
       {
@@ -18246,21 +18083,6 @@ packages:
     resolution:
       {
         integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==,
-      }
-    engines: { node: '>=10.0.0' }
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@8.18.1:
-    resolution:
-      {
-        integrity: sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==,
       }
     engines: { node: '>=10.0.0' }
     peerDependencies:
@@ -22205,151 +22027,9 @@ snapshots:
 
   '@lit-labs/ssr-dom-shim@1.4.0': {}
 
-  '@lit-protocol/access-control-conditions-schemas@8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@lit-protocol/constants': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.5.3(typescript@5.8.3)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.29.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/access-control-conditions@8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@ethersproject/contracts': 5.8.0
-      '@ethersproject/providers': 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/constants': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.5.3(typescript@5.8.3)
-      '@lit-protocol/logger': 8.0.2
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/types': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      pino: 9.14.0
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.29.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
-
   '@lit-protocol/accs-schemas@0.0.24':
     dependencies:
       ajv: 8.17.1
-
-  '@lit-protocol/auth-helpers@8.1.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))':
-    dependencies:
-      '@ethersproject/contracts': 5.8.0
-      '@ethersproject/providers': 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@ethersproject/transactions': 5.7.0
-      '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/constants': 8.0.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.7.1(typescript@5.8.3)
-      '@lit-protocol/logger': 8.0.2
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/types': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      pino: 9.14.0
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      siwe-recap: 0.0.2-alpha.0(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - '@tanstack/query-core'
-      - '@types/react'
-      - arktype
-      - bufferutil
-      - immer
-      - react
-      - supports-color
-      - typescript
-      - use-sync-external-store
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/auth@8.1.2(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(tslib@2.8.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))':
-    dependencies:
-      '@ethersproject/contracts': 5.8.0
-      '@ethersproject/providers': 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@ethersproject/transactions': 5.7.0
-      '@jest/globals': 30.2.0
-      '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/auth-helpers': 8.1.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      '@lit-protocol/constants': 8.0.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.8.1(typescript@5.8.3)
-      '@lit-protocol/crypto': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/logger': 8.0.2
-      '@lit-protocol/nacl': 7.1.1
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/types': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/uint8arrays': 7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/wasm': 8.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.8.0
-      '@openagenda/verror': 3.1.4
-      '@simplewebauthn/browser': 7.4.0
-      '@simplewebauthn/typescript-types': 7.4.0
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      ajv: 8.17.1
-      base64url: 3.0.1
-      cbor-web: 9.0.2
-      depd: 2.0.0
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      jose: 4.15.9
-      pako: 2.1.0
-      pino: 9.14.0
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      siwe-recap: 0.0.2-alpha.0(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      stytch: 12.42.1
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - '@tanstack/query-core'
-      - '@types/react'
-      - arktype
-      - bufferutil
-      - immer
-      - react
-      - supports-color
-      - typescript
-      - use-sync-external-store
-      - utf-8-validate
-      - valibot
 
   '@lit-protocol/constants@7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
@@ -22367,187 +22047,9 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@lit-protocol/constants@8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@lit-protocol/contracts': 0.5.3(typescript@5.8.3)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.29.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/constants@8.0.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@lit-protocol/contracts': 0.7.1(typescript@5.8.3)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/constants@8.0.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@lit-protocol/contracts': 0.8.1(typescript@5.8.3)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/constants@8.0.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@lit-protocol/contracts': 0.8.2(typescript@5.8.3)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
-
   '@lit-protocol/contracts@0.0.74(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
-
-  '@lit-protocol/contracts@0.5.3(typescript@5.8.3)':
-    dependencies:
-      typescript: 5.8.3
-
-  '@lit-protocol/contracts@0.7.1(typescript@5.8.3)':
-    dependencies:
-      typescript: 5.8.3
-
-  '@lit-protocol/contracts@0.8.1(typescript@5.8.3)':
-    dependencies:
-      typescript: 5.8.3
-
-  '@lit-protocol/contracts@0.8.2(typescript@5.8.3)':
-    dependencies:
-      typescript: 5.8.3
-
-  '@lit-protocol/crypto@8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@jest/globals': 29.7.0
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/constants': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.5.3(typescript@5.8.3)
-      '@lit-protocol/nacl': 7.1.1
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/types': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/uint8arrays': 7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/wasm': 8.0.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.8.0
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ajv: 8.17.1
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      pako: 2.1.0
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.29.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/lit-client@8.2.3(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))':
-    dependencies:
-      '@ethersproject/contracts': 5.8.0
-      '@ethersproject/providers': 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@ethersproject/transactions': 5.7.0
-      '@jest/globals': 30.2.0
-      '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/auth-helpers': 8.1.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      '@lit-protocol/constants': 8.0.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.8.1(typescript@5.8.3)
-      '@lit-protocol/crypto': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/logger': 8.0.2
-      '@lit-protocol/nacl': 7.1.1
-      '@lit-protocol/networks': 8.3.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/types': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/uint8arrays': 7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/wasm': 8.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.8.0
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      ajv: 8.17.1
-      bs58: 6.0.0
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      pako: 2.1.0
-      pino: 9.14.0
-      pino-caller: 4.0.0
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      siwe-recap: 0.0.2-alpha.0(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      typestub-ipfs-only-hash: 4.0.0
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - '@tanstack/query-core'
-      - '@types/react'
-      - arktype
-      - bufferutil
-      - encoding
-      - immer
-      - react
-      - supports-color
-      - typescript
-      - use-sync-external-store
-      - utf-8-validate
-      - valibot
 
   '@lit-protocol/lit-status-sdk@0.1.8(typescript@5.8.3)':
     dependencies:
@@ -22562,141 +22064,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lit-protocol/logger@8.0.2':
-    dependencies:
-      pino: 9.14.0
-      tslib: 1.14.1
-
   '@lit-protocol/nacl@7.1.1':
     dependencies:
       tslib: 1.14.1
 
   '@lit-protocol/naga-la-types@0.1.0': {}
-
-  '@lit-protocol/networks@8.3.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))':
-    dependencies:
-      '@ethersproject/contracts': 5.8.0
-      '@ethersproject/providers': 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@ethersproject/transactions': 5.7.0
-      '@jest/globals': 30.2.0
-      '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/auth-helpers': 8.1.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      '@lit-protocol/constants': 8.0.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.8.1(typescript@5.8.3)
-      '@lit-protocol/crypto': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/logger': 8.0.2
-      '@lit-protocol/nacl': 7.1.1
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/types': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/uint8arrays': 7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/wasm': 8.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.8.0
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      ajv: 8.17.1
-      bs58: 6.0.0
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      node-localstorage: 3.0.5
-      pako: 2.1.0
-      pino: 9.14.0
-      pino-caller: 4.0.0
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      siwe-recap: 0.0.2-alpha.0(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - '@tanstack/query-core'
-      - '@types/react'
-      - arktype
-      - bufferutil
-      - immer
-      - react
-      - supports-color
-      - typescript
-      - use-sync-external-store
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/networks@8.3.2(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))':
-    dependencies:
-      '@ethersproject/contracts': 5.8.0
-      '@ethersproject/providers': 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@ethersproject/transactions': 5.7.0
-      '@jest/globals': 30.2.0
-      '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/auth-helpers': 8.1.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      '@lit-protocol/constants': 8.0.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.8.2(typescript@5.8.3)
-      '@lit-protocol/crypto': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/logger': 8.0.2
-      '@lit-protocol/nacl': 7.1.1
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/types': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/uint8arrays': 7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/wasm': 8.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.8.0
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
-      ajv: 8.17.1
-      bs58: 6.0.0
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      node-localstorage: 3.0.5
-      pako: 2.1.0
-      pino: 9.14.0
-      pino-caller: 4.0.0
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      siwe-recap: 0.0.2-alpha.0(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - '@tanstack/query-core'
-      - '@types/react'
-      - arktype
-      - bufferutil
-      - immer
-      - react
-      - supports-color
-      - typescript
-      - use-sync-external-store
-      - utf-8-validate
-      - valibot
-
-  '@lit-protocol/schemas@8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/constants': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.5.3(typescript@5.8.3)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.29.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
 
   '@lit-protocol/types@7.1.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
@@ -22709,30 +22081,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-
-  '@lit-protocol/types@8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@lit-protocol/access-control-conditions-schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/constants': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@lit-protocol/contracts': 0.5.3(typescript@5.8.3)
-      '@lit-protocol/schemas': 8.0.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@openagenda/verror': 3.1.4
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.24.3)
-      '@typechain/ethers-v6': 0.5.1(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typechain@8.3.2(typescript@5.8.3))(typescript@5.8.3)
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      siwe: 2.3.2(ethers@5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      tslib: 2.8.1
-      typechain: 8.3.2(typescript@5.8.3)
-      viem: 2.29.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3)
-      zod: 3.24.3
-      zod-validation-error: 3.4.0(zod@3.24.3)
-    transitivePeerDependencies:
-      - arktype
-      - bufferutil
-      - supports-color
-      - typescript
-      - utf-8-validate
-      - valibot
 
   '@lit-protocol/uint8arrays@7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
@@ -22749,28 +22097,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - typescript
-      - utf-8-validate
-
-  '@lit-protocol/wasm@8.0.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@jest/globals': 29.7.0
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      pako: 2.1.0
-      tslib: 1.14.1
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
-  '@lit-protocol/wasm@8.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@jest/globals': 30.2.0
-      ethers: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      pako: 2.1.0
-      tslib: 1.14.1
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
       - utf-8-validate
 
   '@lit/reactive-element@2.1.1':
@@ -23060,10 +22386,6 @@ snapshots:
   '@noble/curves@1.8.1':
     dependencies:
       '@noble/hashes': 1.7.1
-
-  '@noble/curves@1.8.2':
-    dependencies:
-      '@noble/hashes': 1.7.2
 
   '@noble/curves@1.9.1':
     dependencies:
@@ -29638,10 +28960,6 @@ snapshots:
     dependencies:
       ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
-  isows@1.0.7(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
-    dependencies:
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-
   isows@1.0.7(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -33150,23 +32468,6 @@ snapshots:
       - utf-8-validate
       - zod
 
-  viem@2.29.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3):
-    dependencies:
-      '@noble/curves': 1.8.2
-      '@noble/hashes': 1.7.2
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.3)
-      isows: 1.0.7(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      ox: 0.6.9(typescript@5.8.3)(zod@3.24.3)
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-    optionalDependencies:
-      typescript: 5.8.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - zod
-
   viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.22.4):
     dependencies:
       '@noble/curves': 1.9.1
@@ -33413,11 +32714,6 @@ snapshots:
       utf-8-validate: 5.0.10
 
   ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10):
-    optionalDependencies:
-      bufferutil: 4.0.9
-      utf-8-validate: 5.0.10
-
-  ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10

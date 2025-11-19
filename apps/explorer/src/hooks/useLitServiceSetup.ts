@@ -8,14 +8,20 @@
 import React, { useState, useCallback, useRef } from "react";
 import { createLitClient } from "@lit-protocol/lit-client";
 import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
-import { nagaDev, nagaTest } from "@lit-protocol/networks";
+import { nagaDev, nagaTest, nagaProto, naga } from "@lit-protocol/networks";
 
 // Configuration constants at the top
 const DEFAULT_APP_NAME = "lit-auth-app";
-type NetworkModule = typeof nagaDev | typeof nagaTest;
+type NetworkModule =
+  | typeof nagaDev
+  | typeof nagaTest
+  | typeof nagaProto
+  | typeof naga;
 const NETWORK_MODULES: Record<string, NetworkModule> = {
   "naga-dev": nagaDev,
   "naga-test": nagaTest,
+  "naga-proto": nagaProto,
+  naga,
 };
 
 interface LitServiceSetupConfig {

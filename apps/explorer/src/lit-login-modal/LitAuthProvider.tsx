@@ -19,7 +19,7 @@ import PKPSelectionSection from "./PKPSelectionSection";
 import { LedgerFundingPanel } from "./components/LedgerFundingPanel";
 import { AuthSettingsPanel } from "./components/AuthSettingsPanel";
 import { APP_INFO } from "../_config";
-import { nagaDev, nagaTest } from "@lit-protocol/networks";
+import { nagaDev, nagaTest, nagaProto, naga } from "@lit-protocol/networks";
 import { PKPData } from "@lit-protocol/schemas";
 import {
   AuthMethod,
@@ -29,11 +29,14 @@ import {
   SupportedNetworkName,
 } from "./types";
 import { LitAuthContext } from "./context/LitAuthContext";
+import { isTestnetNetwork } from "@/domain/lit/networkDefaults";
 export { useLitAuth, useOptionalLitAuth } from "./context/LitAuthContext";
 
 const NETWORK_MODULES: Partial<Record<SupportedNetworkName, any>> = {
   "naga-dev": nagaDev,
   "naga-test": nagaTest,
+  "naga-proto": nagaProto,
+  naga,
 };
 
 // Configuration constants
@@ -67,7 +70,7 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
   persistUser = false,
   closeOnBackdropClick = true,
   networkModule,
-  supportedNetworks = ["naga-dev", "naga-test", "naga"],
+  supportedNetworks = ["naga-dev", "naga-test", "naga-proto", "naga"],
   defaultNetwork,
   showSettingsButton = true,
   showNetworkMessage = false,
@@ -231,6 +234,8 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
     return {
       "naga-dev": authServiceBaseUrlProp || DEFAULT_AUTH_SERVICE_URLS["naga-dev"],
       "naga-test": authServiceBaseUrlProp || DEFAULT_AUTH_SERVICE_URLS["naga-test"],
+      "naga-proto":
+        authServiceBaseUrlProp || DEFAULT_AUTH_SERVICE_URLS["naga-proto"],
       naga: authServiceBaseUrlProp || DEFAULT_AUTH_SERVICE_URLS["naga"],
     } as Record<string, string>;
   });
@@ -246,7 +251,9 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
   };
   
   // Compute per-network default for comparison
-  const networkDefaultAuthUrl = DEFAULT_AUTH_SERVICE_URLS[localNetworkName as SupportedNetworkName] || DEFAULT_AUTH_SERVICE_URLS["naga-dev"];
+  const networkDefaultAuthUrl =
+    DEFAULT_AUTH_SERVICE_URLS[localNetworkName as SupportedNetworkName] ||
+    DEFAULT_AUTH_SERVICE_URLS["naga-dev"];
   const isAuthUrlCustom = (authServiceBaseUrl: string) =>
     (authServiceBaseUrl || "") !== (networkDefaultAuthUrl || "");
 
@@ -1505,7 +1512,7 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
     },
     currentNetworkName: localNetworkName,
     shouldDisplayNetworkMessage:
-      showNetworkMessage && localNetworkName !== "naga",
+      showNetworkMessage && isTestnetNetwork(localNetworkName),
     authServiceBaseUrl,
     setAuthServiceBaseUrl,
     loginServiceBaseUrl,

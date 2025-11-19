@@ -28,6 +28,9 @@ export const APP_INFO = {
     "naga-test":
       import.meta.env.VITE_AUTH_SERVICE_URL_NAGA_TEST ||
       "https://auth-api.litprotocol.com",
+    "naga-proto":
+      import.meta.env.VITE_AUTH_SERVICE_URL_NAGA_PROTO ||
+      "https://auth-api.litprotocol.com",
     naga:
       import.meta.env.VITE_AUTH_SERVICE_URL_NAGA ||
       "https://auth-api.litprotocol.com",

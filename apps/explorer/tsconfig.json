@@ -25,6 +25,9 @@
     /* ShadCn */
     "baseUrl": ".",
     "paths": {
+      "@lit-protocol/*": ["../../packages/*/src"],
+      "@lit-protocol/contracts": ["../../packages/contracts/dist/index"],
+      "@lit-protocol/contracts/*": ["../../packages/contracts/dist/*"],
       "@/*": ["./src/*"],
       "@layout/*": ["./src/layout/*"],
       "@layout": ["./src/layout", "./src/layout/index.ts"]

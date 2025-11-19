@@ -22,6 +22,7 @@ import { Settings } from "lucide-react";
 import { useOptionalLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
 import { privateKeyToAccount } from "viem/accounts";
 import { setCurrentBalance, useLedgerRefresh } from "../../utils/ledgerRefresh";
+import { isTestnetNetwork } from "@/domain/lit/networkDefaults";
 // Replaced hover behaviour with a click-triggered menu
 const account = privateKeyToAccount(
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
@@ -67,8 +68,8 @@ export const PKPInfoCard: React.FC<PKPInfoCardProps> = ({
   const currentNetworkName = (optionalAuth as any)?.currentNetworkName as
     | string
     | undefined;
-  const isTestnet = currentNetworkName === "naga-dev" || currentNetworkName === "naga-test";
-  const ledgerUnit = isTestnet ? "tstLPX" : "LPX";
+  const isTestnet = isTestnetNetwork(currentNetworkName);
+  const ledgerUnit = isTestnet ? "tstLPX" : "LITKEY";
 
   // PKP Lit Ledger balance state
   const [ledgerError, setLedgerError] = useState<string>("");
