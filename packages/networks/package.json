@@ -28,7 +28,8 @@
     "pino": "^9.6.0",
     "pino-caller": "^4.0.0",
     "zod": "3.24.3",
-    "@noble/hashes": "^1.8.0"
+    "@noble/hashes": "^1.8.0",
+    "tslib": "^2.8.1"
   },
   "peerDependencies": {
     "viem": "2.38.x"
