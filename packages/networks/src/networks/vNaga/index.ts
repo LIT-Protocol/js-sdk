@@ -16,3 +16,15 @@ export type { NagaTest as NagaTestModule } from './envs/naga-test/naga-test.modu
 // Naga Staging
 export { nagaStaging } from './envs/naga-staging';
 export type { NagaStaging as NagaStagingModule } from './envs/naga-staging/naga-staging.module';
+
+// Naga Mainnet
+export { nagaMainnet } from './envs/naga-mainnet';
+export type { NagaMainnet as NagaMainnetModule } from './envs/naga-mainnet/naga-mainnet.module';
+
+// Naga (alias for mainnet)
+export { nagaMainnet as naga } from './envs/naga-mainnet';
+export type { NagaMainnet as NagaModule } from './envs/naga-mainnet/naga-mainnet.module';
+
+// Naga Proto
+export { nagaProto } from './envs/naga-proto';
+export type { NagaProto as NagaProtoModule } from './envs/naga-proto/naga-proto.module';

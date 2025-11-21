@@ -24,6 +24,8 @@ const SupportedNetworkSchema = z.enum([
   'naga-test',
   'naga-local',
   'naga-staging',
+  'naga-proto',
+  'naga',
 ]);
 
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
@@ -35,6 +37,8 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
+const MAINNET_NETWORK_FUNDING_AMOUNT = '0.01';
+const MAINNET_LEDGER_DEPOSIT_AMOUNT = '0.01';
 
 const EVE_VALIDATION_IPFS_CID =
   'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
@@ -117,6 +121,8 @@ export const init = async (
     'naga-test': { importName: 'nagaTest', type: 'live' },
     'naga-local': { importName: 'nagaLocal', type: 'local' },
     'naga-staging': { importName: 'nagaStaging', type: 'live' },
+    'naga-proto': { importName: 'nagaProto', type: 'live' },
+    naga: { importName: 'naga', type: 'live' },
   } as const;
 
   const config = networkConfig[_network as keyof typeof networkConfig];
@@ -160,17 +166,18 @@ export const init = async (
   }
 
   // Optional RPC override from env
-  const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  const rpcOverrideEnvVar =
+    _network === 'naga' || _network === 'naga-proto'
+      ? 'LIT_MAINNET_RPC_URL'
+      : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL';
+  const rpcOverride = process.env[rpcOverrideEnvVar];
   const _networkModule =
     rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
       ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
       : _baseNetworkModule;
 
   if (rpcOverride) {
-    console.log(
-      '✅ Using RPC override (LIT_YELLOWSTONE_PRIVATE_RPC_URL):',
-      rpcOverride
-    );
+    console.log(`✅ Using RPC override (${rpcOverrideEnvVar}):`, rpcOverride);
   }
 
   /**
@@ -186,10 +193,16 @@ export const init = async (
    * ====================================
    */
   const isLocal = config.type === 'local';
+  const isMainnet = _network === 'naga' || _network === 'naga-proto';
   const masterAccount = isLocal ? localMasterAccount : liveMasterAccount;
   const fundingAmount = isLocal
     ? LOCAL_NETWORK_FUNDING_AMOUNT
+    : isMainnet
+    ? MAINNET_NETWORK_FUNDING_AMOUNT
     : LIVE_NETWORK_FUNDING_AMOUNT;
+  const ledgerDepositAmount = isMainnet
+    ? MAINNET_LEDGER_DEPOSIT_AMOUNT
+    : LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT;
 
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
   await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
@@ -224,7 +237,7 @@ export const init = async (
   async function masterDepositForUser(userAddress: string) {
     await masterPaymentManager.depositForUser({
       userAddress: userAddress,
-      amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+      amountInEth: ledgerDepositAmount,
     });
     console.log(
       `✅ New ${userAddress} Ledger Balance:`,
@@ -340,8 +353,8 @@ export const init = async (
   });
 
   await fundAccount(alicePkpViemAccount, masterAccount, _networkModule, {
-    ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-    thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
+    ifLessThan: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   /**

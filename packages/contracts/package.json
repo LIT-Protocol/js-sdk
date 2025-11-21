@@ -83,6 +83,26 @@
       "require": "./dist/signatures/naga-staging.cjs",
       "types": "./dist/signatures/naga-staging.d.ts"
     },
+    "./prod/naga-proto": {
+      "import": "./dist/prod/naga-proto.js",
+      "require": "./dist/prod/naga-proto.cjs",
+      "types": "./dist/prod/naga-proto.d.ts"
+    },
+    "./signatures/naga-proto": {
+      "import": "./dist/signatures/naga-proto.js",
+      "require": "./dist/signatures/naga-proto.cjs",
+      "types": "./dist/signatures/naga-proto.d.ts"
+    },
+    "./prod/naga": {
+      "import": "./dist/prod/naga.js",
+      "require": "./dist/prod/naga.cjs",
+      "types": "./dist/prod/naga.d.ts"
+    },
+    "./signatures/naga": {
+      "import": "./dist/signatures/naga.js",
+      "require": "./dist/signatures/naga.cjs",
+      "types": "./dist/signatures/naga.d.ts"
+    },
     "./dev/develop": {
       "import": "./dist/dev/develop.js",
       "require": "./dist/dev/develop.cjs",
@@ -140,6 +160,18 @@
       ],
       "signatures/naga-staging": [
         "dist/signatures/naga-staging.d.ts"
+      ],
+      "prod/naga-proto": [
+        "dist/prod/naga-proto.d.ts"
+      ],
+      "signatures/naga-proto": [
+        "dist/signatures/naga-proto.d.ts"
+      ],
+      "prod/naga": [
+        "dist/prod/naga.d.ts"
+      ],
+      "signatures/naga": [
+        "dist/signatures/naga.d.ts"
       ],
       "dev/develop": [
         "dist/dev/develop.d.ts"
