@@ -4,17 +4,15 @@ config:
     # Over 60s, ramp up to creating 50 vusers per second
     - duration: 60
       arrivalRate: 5
-      # rampTo: 50
-      rampTo: 10
+      rampTo: 150
       name: 'Ramp Up'
     # Over 300s, create 50 vusers per second
     - duration: 300
-      # arrivalRate: 50
-      arrivalRate: 10
+      arrivalRate: 150
       name: 'Sustained Sign Session Key'
     # Over 60s, ramp down to creating 5 vusers per second
     - duration: 60
-      arrivalRate: 5
+      arrivalRate: 20
       name: 'Ramp Down'
   processor: '../src/processors/multi-endpoints.ts'
 

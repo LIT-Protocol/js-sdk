@@ -22,35 +22,35 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/pkp-sign.yml"
+        "command": "artillery run configs/pkp-sign.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
     "run:encrypt-decrypt": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/encrypt-decrypt.yml"
+        "command": "artillery run configs/encrypt-decrypt.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
     "run:execute": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/execute.yml"
+        "command": "artillery run configs/execute.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
     "run:mix": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/mix.yml"
+        "command": "artillery run configs/mix.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
     "run:sign-session-key": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "artillery run configs/sign-session-key.yml"
+        "command": "artillery run configs/sign-session-key.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     }
   },
