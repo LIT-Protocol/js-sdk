@@ -73,6 +73,8 @@ nx run artillery:sign-session-key
 
 Generating a report required an API key, you can add that to the root `.env` file. You can find your key at [https://app.artillery.io/](https://app.artillery.io/oivpr8dw4i00f)
 
-```jsx
-ARTILLERY_KEY = xxx;
+```bash
+ARTILLERY_KEY=xxx
 ```
+
+> ℹ️ The Nx run targets pass `ARTILLERY_KEY` to `artillery run` via `--key`, so no extra flags are needed when running the scripts.
