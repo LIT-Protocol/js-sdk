@@ -4,6 +4,7 @@ const supportedNetworks = [
   'naga-dev',
   'naga-proto',
   'naga',
+  'naga-staging',
 ] as const;
 type EnvName = 'local' | 'live';
 
@@ -14,6 +15,7 @@ const LIVE_RPC_ENV_VARS: Record<
   'naga-local': undefined,
   'naga-dev': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
   'naga-test': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
+  'naga-staging': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
   'naga-proto': 'LIT_MAINNET_RPC_URL',
   naga: 'LIT_MAINNET_RPC_URL',
 } as const;
