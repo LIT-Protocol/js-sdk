@@ -5,7 +5,7 @@
 
 export const signatures = {
   "Staking": {
-    "address": "0x781C6d227dA4D058890208B68DDA1da8f6EBbE54",
+    "address": "0x9b8Ed3FD964Bc38dDc32CF637439e230CD50e3Dd",
     "methods": {
       "getActiveUnkickedValidatorStructsAndCounts": {
         "inputs": [
@@ -57,6 +57,11 @@ export const signatures = {
               {
                 "internalType": "uint256",
                 "name": "startTime",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lastAdvanceVoteTime",
                 "type": "uint256"
               }
             ],
@@ -960,6 +965,19 @@ export const signatures = {
         "anonymous": false,
         "inputs": [
           {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "realmId",
+            "type": "uint256"
+          }
+        ],
+        "name": "VoteToAdvanceTimeOutElapsed",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
             "indexed": true,
             "internalType": "address",
             "name": "reporter",
@@ -1032,7 +1050,7 @@ export const signatures = {
     ]
   },
   "PubkeyRouter": {
-    "address": "0x280E5c534629FBdD4dC61c85695143B6ACc4790b",
+    "address": "0xE37847746012c756d5D91d37B311eeB8e59684e9",
     "methods": {
       "deriveEthAddressFromPubkey": {
         "inputs": [
@@ -1343,7 +1361,7 @@ export const signatures = {
     ]
   },
   "PKPNFT": {
-    "address": "0x991d56EdC98a0DAeb93E91F70588598f79875701",
+    "address": "0x92d2a4Acb70E498a486E0523AD42fF3F6d3D3642",
     "methods": {
       "claimAndMint": {
         "inputs": [
@@ -1733,7 +1751,7 @@ export const signatures = {
     ]
   },
   "PKPHelper": {
-    "address": "0xe51357Cc58E8a718423CBa09b87879Ff7B18d279",
+    "address": "0xe97fFbc4eDa5CdF70375D4b8f87e476D40b628EC",
     "methods": {
       "claimAndMintNextAndAddAuthMethodsWithTypes": {
         "inputs": [
@@ -2016,7 +2034,7 @@ export const signatures = {
     ]
   },
   "PKPPermissions": {
-    "address": "0x5632B35374DD73205B5aeBBcA3ecB02B3dc8B5fe",
+    "address": "0x1E382ef3957218423C6e1a992a4cE6294861cC93",
     "methods": {
       "addPermittedAction": {
         "inputs": [
@@ -2634,7 +2652,7 @@ export const signatures = {
     ]
   },
   "PaymentDelegation": {
-    "address": "0x700DB831292541C640c5Dbb9AaE1697faE188513",
+    "address": "0x13fC0864A37B38D3C2A7d5E9C08D5124B9Cec4bF",
     "methods": {
       "delegatePayments": {
         "inputs": [
@@ -2935,7 +2953,7 @@ export const signatures = {
     ]
   },
   "Ledger": {
-    "address": "0x658F5ED32aE5EFBf79F7Ba36A9FA770FeA7662c8",
+    "address": "0x23Be686cAFCe69C5Fb075E2be7a4505598E338E8",
     "methods": {
       "withdraw": {
         "inputs": [
@@ -3354,7 +3372,7 @@ export const signatures = {
     ]
   },
   "PriceFeed": {
-    "address": "0xB76744dC73AFC416e8cDbB7023ca89C862B86F05",
+    "address": "0x651d3282E1F083036Bb136dBbe7df17aCC39A330",
     "methods": {
       "getNodesForRequest": {
         "inputs": [
