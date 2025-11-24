@@ -1,0 +1,377 @@
+@import "tailwindcss";
+
+/**
+ * NOTE: Many of these values are now configured in src/_config.ts
+ * For customization, please update the values in that file.
+ * This allows for programmatic access to these values in components.
+ */
+
+/* a{
+  color: #2C2825;
+  837F7E
+  575250
+  orange: #EA580D
+} */
+/* WebKit-based browsers */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  transition: background-color 0.3s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+:root {
+  /* Lit Protocol brand colors in HSL format */
+  --background: 255 28% 18%;
+  --foreground: 255 28% 95%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 255 28% 18%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 255 28% 18%;
+
+  --primary: 264 54% 44%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 270 53% 47%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215 16% 47%;
+
+  --accent: 264 54% 44%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 264 54% 44%;
+
+  --radius: 0.5rem;
+
+  /* Lit Protocol specific colors (for backward compatibility) */
+  --lit-dark-purple: hsl(255 28% 18%);
+  --lit-purple: hsl(264 54% 44%);
+  --lit-bright-purple: hsl(270 53% 47%);
+  --lit-green: hsl(142 69% 45%);
+  --lit-white: hsl(0 0% 100%);
+  --lit-light-gray: hsl(0 0% 96%);
+  --lit-border-color: hsl(0 0% 88%);
+
+  /* Lit Docs colors */
+  --lit-docs-bg: #fafafa;
+
+  /* Gradients */
+  --lit-primary-gradient: linear-gradient(
+    to right,
+    hsl(264 54% 44%),
+    hsl(259 53% 36%)
+  );
+  --lit-active-gradient: linear-gradient(
+    -200deg,
+    hsl(254 45% 35%),
+    hsl(270 53% 47%)
+  );
+}
+
+/* Custom max-width utilities */
+.max-w-8xl {
+  max-width: 92rem; /* 1408px - larger than max-w-7xl (80rem/1280px) */
+}
+
+.w-8xl {
+  width: 92rem; /* 1408px - larger than max-w-7xl (80rem/1280px) */
+}
+body {
+  font-family: "Inter", "Inter Fallback", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
+  line-height: 1.6;
+  color: var(--lit-docs-bg);
+  background-color: var(--lit-docs-bg);
+}
+
+/* Global button styles - scope to avoid clashing with Rainbow Kit */
+.app-container button:not([class*="rainbow"]),
+.test-section button:not([class*="rainbow"]),
+.product-card button:not([class*="rainbow"]) {
+  cursor: pointer;
+  background: var(--lit-active-gradient);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  margin-right: 8px;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.app-container button:not([class*="rainbow"]):hover,
+.test-section button:not([class*="rainbow"]):hover,
+.product-card button:not([class*="rainbow"]):hover {
+  opacity: 0.9;
+  filter: brightness(1.1);
+}
+
+.app-container button:not([class*="rainbow"]):disabled,
+.test-section button:not([class*="rainbow"]):disabled,
+.product-card button:not([class*="rainbow"]):disabled {
+  background: hsl(259 40% 85%);
+  cursor: not-allowed;
+}
+
+/* Layout styles */
+.main-layout {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: var(--lit-docs-bg);
+  border-bottom: 1px solid var(--lit-purple);
+  color: var(--lit-white);
+  width: 100%;
+  max-height: 72px;
+}
+
+.header nav {
+  display: flex;
+  align-items: center;
+} */
+
+.logo {
+  font-weight: bold;
+  font-size: 20px;
+  margin-right: 32px;
+  color: var(--lit-white);
+  height: 2.5em;
+  padding: 0.5em;
+  will-change: filter;
+  transition: filter 300ms;
+  display: flex;
+  align-items: center;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 0.75em hsl(264 54% 70% / 0.6));
+}
+
+.flame-icon {
+  margin-right: 8px;
+  font-size: 24px;
+  animation: flame-flicker 3s infinite alternate;
+}
+
+@keyframes flame-flicker {
+  0%,
+  100% {
+    filter: brightness(1);
+    text-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
+  }
+  50% {
+    filter: brightness(1.2);
+    text-shadow: 0 0 15px rgba(255, 165, 0, 0.8);
+  }
+}
+
+.nav-links a:hover {
+  color: var(--lit-white);
+  opacity: 0.8;
+}
+
+.auth-section {
+  display: flex;
+  align-items: center;
+}
+
+.address {
+  margin-right: 8px;
+  font-family: monospace;
+}
+
+.footer {
+  padding: 16px 24px;
+  background-color: var(--lit-docs-bg);
+  color: var(--lit-white);
+  text-align: center;
+  width: 100%;
+}
+
+/* Page-specific styles */
+.home-page,
+.about-page,
+.products-page,
+.product-detail,
+.product-not-found {
+  margin-bottom: 32px;
+}
+
+h1 {
+  margin-bottom: 16px;
+  color: var(--lit-docs-bg);
+}
+
+p {
+  margin-bottom: 16px;
+}
+
+.products-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.product-card {
+  border: 1px solid var(--lit-border-color);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: box-shadow 0.3s ease;
+  background-color: var(--lit-white);
+}
+
+.product-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.buy-button {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin-bottom: 16px;
+  background: var(--lit-active-gradient);
+}
+
+.auth-required-message {
+  color: var(--lit-purple);
+  font-weight: bold;
+}
+
+/* WalletButton styles - simplified to avoid interfering with Rainbow Kit styles */
+.wallet-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Remove all specific wallet button styling to avoid conflicts with Rainbow Kit */
+
+/* Root container */
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.app-container {
+  padding: 24px;
+  max-width: 48rem; /* max-w-3xl */
+  margin: 0 auto; /* mx-auto */
+}
+
+.test-section {
+  margin-bottom: 32px;
+  padding: 16px;
+  background-color: var(--lit-white);
+  border-radius: var(--radius);
+  border: 1px solid var(--lit-border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* shadow */
+}
+
+.account-section {
+  padding: 24px;
+  background-color: var(--lit-white);
+  border-radius: var(--radius);
+  border: 1px solid var(--lit-border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* shadow */
+}
+
+.account-section h2 {
+  color: var(--lit-docs-bg);
+  margin-bottom: 16px;
+}
+
+.wallet-connection {
+  margin-top: 24px;
+}
+
+/* Success alerts */
+.success-alert {
+  background-color: var(--lit-green);
+  color: white;
+  padding: 12px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+/* Card component */
+.card {
+  padding: 2em;
+  background-color: var(--lit-white);
+  border-radius: var(--radius);
+  border: 1px solid var(--lit-border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Explorer Specific Styles --- */
+.header-logo {
+  height: 28px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.header {
+  border-bottom: none !important;
+}
+
+@layer utilities {
+  @keyframes slide-in-from-right {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .animate-slide-in {
+    animation: slide-in-from-right 0.3s ease-out both;
+  }
+
+  @keyframes pulse-shadow {
+    0%, 100% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+    50% { box-shadow: 0 8px 25px rgba(229, 62, 62, 0.3); }
+  }
+  .animate-pulse-shadow {
+    animation: pulse-shadow 2s ease-in-out infinite;
+  }
+}
