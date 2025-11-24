@@ -2,6 +2,7 @@ import {
   LitNetworkModule,
   nagaDev,
   nagaLocal,
+  nagaStaging,
   nagaTest,
   nagaProto,
   naga,
@@ -62,57 +63,68 @@ export type TestEnv = {
 
 export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
   // -- 1. Create network module
-  let networkModule: LitNetworkModule;
-  let config = {
-    nativeFundingAmount: '',
-    ledgerDepositAmount: '',
-    sponsorshipLimits: {
-      totalMaxPriceInWei: '0',
-      userMaxPrice: 0n,
-    },
+  const applyRpcOverride = (networkModule: LitNetworkModule) => {
+    if (!envVars.rpcUrl) {
+      return networkModule;
+    }
+
+    console.log(
+      `🔧 Overriding RPC URL for ${envVars.network} to ${envVars.rpcUrl}`
+    );
+
+    return networkModule.withOverrides({
+      rpcUrl: envVars.rpcUrl,
+    });
   };
 
-  if (envVars.network === 'naga-local') {
-    networkModule = nagaLocal
-      .withLocalContext({
-        networkContextPath: envVars.localContextPath,
-        networkName: 'naga-local',
-      })
-      .withOverrides({
-        rpcUrl: envVars.rpcUrl,
-      });
-    config = CONFIG.LOCAL;
-  } else if (
-    envVars.network === 'naga-dev' ||
-    envVars.network === 'naga-test' ||
-    envVars.network === 'naga-proto' ||
-    envVars.network === 'naga'
-  ) {
-    if (envVars.network === 'naga-dev') {
-      networkModule = nagaDev;
-    } else if (envVars.network === 'naga-test') {
-      networkModule = nagaTest;
-    } else if (envVars.network === 'naga-proto') {
-      networkModule = nagaProto;
-    } else {
-      networkModule = naga;
-    }
+  let networkModule: LitNetworkModule;
+  let config: TestEnv['config'];
 
-    if (envVars.rpcUrl) {
-      console.log(
-        `🔧 Overriding RPC URL for ${envVars.network} to ${envVars.rpcUrl}`
+  switch (envVars.network) {
+    case 'naga-local': {
+      if (!envVars.localContextPath) {
+        throw new Error(
+          'naga-local requires a valid local context path to be configured'
+        );
+      }
+
+      networkModule = applyRpcOverride(
+        nagaLocal.withLocalContext({
+          networkContextPath: envVars.localContextPath,
+          networkName: 'naga-local',
+        })
       );
-      networkModule = networkModule.withOverrides({
-        rpcUrl: envVars.rpcUrl,
-      });
-    }
 
-    config =
-      envVars.network === 'naga-proto' || envVars.network === 'naga'
-        ? CONFIG.MAINNET
-        : CONFIG.LIVE;
-  } else {
-    throw new Error(`Unsupported network configuration: ${envVars.network}`);
+      config = CONFIG.LOCAL;
+      break;
+    }
+    case 'naga-dev':
+    case 'naga-test':
+    case 'naga-staging': {
+      if (envVars.network === 'naga-dev') {
+        networkModule = nagaDev;
+      } else if (envVars.network === 'naga-test') {
+        networkModule = nagaTest;
+      } else {
+        networkModule = nagaStaging;
+      }
+
+      networkModule = applyRpcOverride(networkModule);
+      config = CONFIG.LIVE;
+      break;
+    }
+    case 'naga-proto':
+    case 'naga': {
+      networkModule = applyRpcOverride(
+        envVars.network === 'naga-proto' ? nagaProto : naga
+      );
+      config = CONFIG.MAINNET;
+      break;
+    }
+    default: {
+      const exhaustiveCheck: never = envVars.network;
+      throw new Error(`Unsupported network: ${exhaustiveCheck}`);
+    }
   }
 
   // 2. Create Lit Client
@@ -138,7 +150,7 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
   });
 
   return {
-    masterAccount: privateKeyToAccount(envVars.privateKey),
+    masterAccount,
     masterPaymentManager,
     networkModule,
     litClient,

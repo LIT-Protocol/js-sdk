@@ -1,4 +1,8 @@
-import type { LitClientInstance } from '../types';
+import { createLitClient } from '@lit-protocol/lit-client';
+import {
+  createEpochSnapshot,
+  EpochSnapshot,
+} from './helpers/createEpochSnapshot';
 
 /**
  * Options used when Shiva spins up a brand-new testnet instance.
@@ -17,11 +21,11 @@ type TestNetCreateRequest = {
 };
 
 type TestNetResponse<T> = {
-  testnet_id: string;
+  testnetId: string;
   command: string;
-  was_canceled: boolean;
+  wasCanceled: boolean;
   body: T | null;
-  last_state_observed: string | null;
+  lastStateObserved: string | null;
   messages: string[] | null;
   errors: string[] | null;
 };
@@ -43,24 +47,28 @@ type FetchOptions = {
 };
 
 /**
- * Snapshot returned from {@link ShivaClient.inspectEpoch} and {@link ShivaClient.waitForEpochChange}.
- */
-type EpochSnapshot = {
-  epoch: number | undefined;
-  nodeEpochs: Array<{ url: string; epoch: number | undefined }>;
-  threshold: number | undefined;
-  connectedCount: number | undefined;
-  latestBlockhash: string | undefined;
-  rawContext: any;
-};
-
-/**
  * Options for {@link ShivaClient.waitForEpochChange}.
  */
 type WaitForEpochOptions = {
-  baselineEpoch: number | undefined;
+  expectedEpoch: number | undefined;
   timeoutMs?: number;
   intervalMs?: number;
+};
+
+type PollTestnetStateOptions = {
+  waitFor?: TestNetState | TestNetState[];
+  timeoutMs?: number;
+  intervalMs?: number;
+};
+
+type WaitForTestnetInfoOptions = {
+  timeoutMs?: number;
+  intervalMs?: number;
+};
+
+export type ShivaTestnetInfo = {
+  rpc_url?: string;
+  [key: string]: unknown;
 };
 
 /**
@@ -81,15 +89,35 @@ export type ShivaClient = {
   /** Stop a random node and wait for the subsequent epoch change. */
   stopRandomNodeAndWait: () => Promise<boolean>;
   /** Query the current state of the managed testnet (Busy, Active, etc.). */
-  pollTestnetState: () => Promise<TestNetState>;
+  /**
+   * @example
+   * ```ts
+   * // Wait up to two minutes for the testnet to become active.
+   * await client.pollTestnetState({ waitFor: 'Active', timeoutMs: 120_000 });
+   * ```
+   */
+  pollTestnetState: (
+    options?: PollTestnetStateOptions
+  ) => Promise<TestNetState>;
   /** Retrieve the full testnet configuration (contract ABIs, RPC URL, etc.). */
-  getTestnetInfo: () => Promise<unknown>;
+  getTestnetInfo: () => Promise<ShivaTestnetInfo | null>;
+  /** Poll the manager until `/test/get/info/testnet/<id>` returns a payload. */
+  waitForTestnetInfo: (
+    options?: WaitForTestnetInfoOptions
+  ) => Promise<ShivaTestnetInfo>;
   /** Shut down the underlying testnet through the Shiva manager. */
   deleteTestnet: () => Promise<boolean>;
+
+  // Setters
+  setLitClient: (
+    litClient: Awaited<ReturnType<typeof createLitClient>>
+  ) => void;
 };
 
 const DEFAULT_POLL_INTERVAL = 2000;
 const DEFAULT_TIMEOUT = 60_000;
+const DEFAULT_STATE_POLL_INTERVAL = 2000;
+const DEFAULT_STATE_POLL_TIMEOUT = 60_000;
 
 const normaliseBaseUrl = (baseUrl: string) => {
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
@@ -153,7 +181,7 @@ const getTestnetIds = async (baseUrl: string): Promise<string[]> => {
   return (await response.json()) as string[];
 };
 
-const ensureTestnetId = async (
+const getOrCreateTestnetId = async (
   baseUrl: string,
   providedId?: string,
   createRequest?: TestNetCreateRequest
@@ -178,38 +206,14 @@ const ensureTestnetId = async (
     body: createRequest,
   });
 
-  if (!response.testnet_id) {
-    throw new Error('Shiva create testnet response did not include testnet_id');
+  if (!response.testnetId) {
+    throw new Error(
+      'Shiva create testnet response did not include testnetId. Received: ' +
+        JSON.stringify(response)
+    );
   }
 
-  return response.testnet_id;
-};
-
-const buildEpochSnapshot = (ctx: any): EpochSnapshot => {
-  const nodeEpochEntries = Object.entries(
-    ctx?.handshakeResult?.serverKeys ?? {}
-  );
-  const nodeEpochs = nodeEpochEntries.map(([url, data]: [string, any]) => ({
-    url,
-    epoch: data?.epoch,
-  }));
-
-  const connected = ctx?.handshakeResult?.connectedNodes;
-  const connectedCount =
-    typeof connected?.size === 'number'
-      ? connected.size
-      : Array.isArray(connected)
-      ? connected.length
-      : undefined;
-
-  return {
-    epoch: ctx?.latestConnectionInfo?.epochInfo?.number,
-    nodeEpochs,
-    threshold: ctx?.handshakeResult?.threshold,
-    connectedCount,
-    latestBlockhash: ctx?.latestBlockhash,
-    rawContext: ctx,
-  };
+  return response.testnetId;
 };
 
 /**
@@ -218,23 +222,37 @@ const buildEpochSnapshot = (ctx: any): EpochSnapshot => {
  * and exposes helpers for triggering and validating epoch transitions.
  */
 export const createShivaClient = async (
-  litClient: LitClientInstance,
   options: CreateShivaClientOptions
 ): Promise<ShivaClient> => {
   const baseUrl = normaliseBaseUrl(options.baseUrl);
-  const testnetId = await ensureTestnetId(
+  const testnetId = await getOrCreateTestnetId(
     baseUrl,
     options.testnetId,
     options.createRequest
   );
 
+  let litClientInstance:
+    | Awaited<ReturnType<typeof createLitClient>>
+    | undefined;
+
+  const setLitClient = (
+    client: Awaited<ReturnType<typeof createLitClient>>
+  ) => {
+    litClientInstance = client;
+  };
+
   const inspectEpoch = async () => {
-    const ctx = await litClient.getContext();
-    return buildEpochSnapshot(ctx);
+    if (!litClientInstance) {
+      throw new Error(
+        `Lit client not set. Please call setLitClient() before using inspectEpoch().`
+      );
+    }
+
+    return createEpochSnapshot(litClientInstance);
   };
 
   const waitForEpochChange = async ({
-    baselineEpoch,
+    expectedEpoch,
     timeoutMs = DEFAULT_TIMEOUT,
     intervalMs = DEFAULT_POLL_INTERVAL,
   }: WaitForEpochOptions) => {
@@ -243,13 +261,15 @@ export const createShivaClient = async (
     while (Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, intervalMs));
       const snapshot = await inspectEpoch();
-      if (snapshot.epoch !== baselineEpoch) {
+      if (
+        snapshot.latestConnectionInfo.epochState.currentNumber !== expectedEpoch
+      ) {
         return snapshot;
       }
     }
 
     throw new Error(
-      `Epoch did not change from ${baselineEpoch} within ${timeoutMs}ms`
+      `Epoch did not change from ${expectedEpoch} within ${timeoutMs}ms`
     );
   };
 
@@ -266,23 +286,96 @@ export const createShivaClient = async (
       baseUrl,
       `/test/action/stop/random/wait/${testnetId}`
     );
+
+    // wait briefly to allow the node to drop from the network
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
     return Boolean(response.body);
   };
 
-  const pollTestnetState = async () => {
-    const response = await fetchShiva<string>(
-      baseUrl,
-      `/test/poll/testnet/${testnetId}`
-    );
-    return (response.body ?? 'UNKNOWN') as TestNetState;
+  const pollTestnetState = async (
+    options: PollTestnetStateOptions = {}
+  ): Promise<TestNetState> => {
+    const {
+      waitFor,
+      timeoutMs = DEFAULT_STATE_POLL_TIMEOUT,
+      intervalMs = DEFAULT_STATE_POLL_INTERVAL,
+    } = options;
+
+    const desiredStates = Array.isArray(waitFor)
+      ? waitFor
+      : waitFor
+      ? [waitFor]
+      : undefined;
+    const deadline = Date.now() + timeoutMs;
+
+    // Continue polling until we hit a desired state or timeout.
+    // If no desired state is provided, return the first observation .
+    for (;;) {
+      const response = await fetchShiva<string>(
+        baseUrl,
+        `/test/poll/testnet/${testnetId}`
+      );
+      const state = (response.body ?? 'UNKNOWN') as TestNetState;
+
+      if (!desiredStates || desiredStates.includes(state)) {
+        return state;
+      }
+
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `Timed out after ${timeoutMs}ms waiting for testnet ${testnetId} to reach state ${desiredStates.join(
+            ', '
+          )}. Last observed state: ${state}.`
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
   };
 
   const getTestnetInfo = async () => {
-    const response = await fetchShiva<unknown>(
+    const response = await fetchShiva<ShivaTestnetInfo>(
       baseUrl,
       `/test/get/info/testnet/${testnetId}`
     );
-    return response.body;
+    return response.body ?? null;
+  };
+
+  const waitForTestnetInfo = async (
+    options: WaitForTestnetInfoOptions = {}
+  ): Promise<ShivaTestnetInfo> => {
+    const {
+      timeoutMs = DEFAULT_STATE_POLL_TIMEOUT,
+      intervalMs = DEFAULT_STATE_POLL_INTERVAL,
+    } = options;
+    const deadline = Date.now() + timeoutMs;
+    let lastError: unknown;
+
+    for (;;) {
+      try {
+        const info = await getTestnetInfo();
+        if (info) {
+          return info;
+        }
+      } catch (error) {
+        lastError = error;
+      }
+
+      if (Date.now() >= deadline) {
+        const lastErrorMessage =
+          lastError instanceof Error
+            ? lastError.message
+            : lastError
+            ? String(lastError)
+            : 'No response body received.';
+        throw new Error(
+          `Timed out after ${timeoutMs}ms waiting for testnet info for ${testnetId}. Last error: ${lastErrorMessage}`
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
   };
 
   const deleteTestnet = async () => {
@@ -296,12 +389,16 @@ export const createShivaClient = async (
   return {
     baseUrl,
     testnetId,
-    inspectEpoch,
-    waitForEpochChange,
+    setLitClient,
     transitionEpochAndWait,
     stopRandomNodeAndWait,
     pollTestnetState,
     getTestnetInfo,
+    waitForTestnetInfo,
     deleteTestnet,
+
+    // utils
+    inspectEpoch,
+    waitForEpochChange,
   };
 };
