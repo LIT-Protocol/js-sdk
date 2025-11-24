@@ -24,7 +24,7 @@ export const readFile = async (): Promise<State> => {
 
     // If content is empty object, write base state
     if (Object.keys(content).length === 0) {
-      await fs.writeFile(FILE_NAME, JSON.stringify(StateObject, null, 2));
+      await fs.writeFile(FILE_NAME, stringify(StateObject));
       return StateObject;
     }
 
@@ -42,7 +42,7 @@ export const readFile = async (): Promise<State> => {
 
 // create the file if it doesn't exist
 export const createFile = async () => {
-  await fs.writeFile(FILE_NAME, JSON.stringify(StateObject, null, 2));
+  await fs.writeFile(FILE_NAME, stringify(StateObject));
 };
 
 // Type-safe field paths - dynamically derived from State type
@@ -93,7 +93,7 @@ export const updateField = async <T extends StatePaths>(
     state[rootKey] !== null
   ) {
     (state[rootKey] as any)[nestedKey] = value;
-    await fs.writeFile(FILE_NAME, JSON.stringify(state, null, 2));
+    await fs.writeFile(FILE_NAME, stringify(state));
   } else {
     throw new Error(`Invalid path: ${path}`);
   }
@@ -123,7 +123,7 @@ export const getOrUpdate = async <T extends StatePaths>(
 
     // Otherwise, update with default value and return it
     (state as any)[path] = defaultValue;
-    await fs.writeFile(FILE_NAME, JSON.stringify(state, null, 2));
+    await fs.writeFile(FILE_NAME, stringify(state));
     return defaultValue;
   } else {
     // Nested property
@@ -144,10 +144,17 @@ export const getOrUpdate = async <T extends StatePaths>(
 
       // Otherwise, update with default value and return it
       (state[rootKey] as any)[nestedKey] = defaultValue;
-      await fs.writeFile(FILE_NAME, JSON.stringify(state, null, 2));
+      await fs.writeFile(FILE_NAME, stringify(state));
       return defaultValue;
     } else {
       throw new Error(`Invalid path: ${path}`);
     }
   }
 };
+
+const stringify = (value: unknown) =>
+  JSON.stringify(
+    value,
+    (_, val) => (typeof val === 'bigint' ? val.toString() : val),
+    2
+  );

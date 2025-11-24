@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "rewrites": [
+    {
+      "source": "/version",
+      "destination": "/version.html"
+    },
+    {
+      "source": "/version.html",
+      "destination": "/version.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+} 

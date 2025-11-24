@@ -31,6 +31,23 @@ const signatures = await litClient.chain.raw.pkpSign({
 });
 ```
 
+### Hashing defaults and bypass
+
+By default the SDK hashes ECDSA payloads for you using the canonical function for each chain (Ethereum → keccak256, Bitcoin/Cosmos → SHA-256/SHA-384) before sending to the nodes for signing. Schnorr/EdDSA schemes receive the raw bytes exactly as you provided them. If you already computed a digest (for example when signing EIP-712 typed data) you can pass it directly and opt out of the SDK hashing step by setting `bypassAutoHashing: true`:
+
+```ts
+const digestBytes = hexToBytes(hashTypedData(typedData));
+
+const signature = await litClient.chain.raw.pkpSign({
+  chain: 'ethereum',
+  signingScheme: 'EcdsaK256Sha256',
+  pubKey: pkpInfo.pubkey,
+  authContext,
+  toSign: digestBytes,
+  bypassAutoHashing: true,
+});
+```
+
 ---
 
 # Available signing schemes

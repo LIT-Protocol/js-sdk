@@ -18,10 +18,15 @@ import {
 } from '@lit-protocol/e2e';
 import type { AuthContext } from '@lit-protocol/e2e';
 
-const RPC_OVERRIDE = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+const SELECTED_NETWORK = process.env['NETWORK'];
+const RPC_OVERRIDE_ENV_VAR =
+  SELECTED_NETWORK === 'naga' || SELECTED_NETWORK === 'naga-proto'
+    ? 'LIT_MAINNET_RPC_URL'
+    : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL';
+const RPC_OVERRIDE = process.env[RPC_OVERRIDE_ENV_VAR];
 if (RPC_OVERRIDE) {
   console.log(
-    '🧪 E2E: Using RPC override (LIT_YELLOWSTONE_PRIVATE_RPC_URL):',
+    `🧪 E2E: Using RPC override (${RPC_OVERRIDE_ENV_VAR}):`,
     RPC_OVERRIDE
   );
 }
