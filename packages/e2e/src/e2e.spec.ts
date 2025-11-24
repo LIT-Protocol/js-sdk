@@ -14,9 +14,9 @@ import {
   createViewPKPsByAddressTest,
   createViewPKPsByAuthDataTest,
   init,
+  registerPaymentDelegationTicketSuite,
 } from '@lit-protocol/e2e';
 import type { AuthContext } from '@lit-protocol/e2e';
-import { registerPaymentDelegationTicketSuite } from './tickets/delegation.suite';
 
 const SELECTED_NETWORK = process.env['NETWORK'];
 const RPC_OVERRIDE_ENV_VAR =

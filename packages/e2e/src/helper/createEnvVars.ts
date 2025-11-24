@@ -1,17 +1,15 @@
-const supportedNetworks = [
+export const SUPPORTED_NETWORKS = [
   'naga-local',
   'naga-test',
   'naga-dev',
+  'naga-staging',
   'naga-proto',
   'naga',
-  'naga-staging',
 ] as const;
+export type SupportedNetwork = (typeof SUPPORTED_NETWORKS)[number];
 type EnvName = 'local' | 'live';
 
-const RPC_ENV_KEY_BY_NETWORK: Record<
-  (typeof supportedNetworks)[number],
-  string | undefined
-> = {
+const RPC_ENV_KEY_BY_NETWORK: Record<SupportedNetwork, string | undefined> = {
   'naga-local': undefined,
   'naga-dev': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
   'naga-test': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
@@ -21,7 +19,7 @@ const RPC_ENV_KEY_BY_NETWORK: Record<
 } as const;
 
 export type EnvVars = {
-  network: string;
+  network: SupportedNetwork;
   privateKey: `0x${string}`;
   rpcUrl?: string | undefined;
   localContextPath?: string;
@@ -38,13 +36,18 @@ const testEnv: Record<
 
 export function createEnvVars(): EnvVars {
   // 1. Get network string
-  const network = process.env['NETWORK']!!;
+  const networkEnv = process.env['NETWORK'];
 
-  if (!network || !supportedNetworks.includes(network as any)) {
+  if (
+    !networkEnv ||
+    !SUPPORTED_NETWORKS.includes(networkEnv as SupportedNetwork)
+  ) {
     throw new Error(
-      `❌ NETWORK env var is not set or not supported. Found. ${network}`
+      `❌ NETWORK env var is not set or not supported. Found. ${networkEnv}`
     );
   }
+
+  const network = networkEnv as SupportedNetwork;
 
   const selectedNetwork = network.includes('local') ? 'local' : 'live';
 
@@ -90,8 +93,7 @@ export function createEnvVars(): EnvVars {
   }
 
   // -- live networks
-  const rpcEnvKey =
-    RPC_ENV_KEY_BY_NETWORK[network as (typeof supportedNetworks)[number]];
+  const rpcEnvKey = RPC_ENV_KEY_BY_NETWORK[network];
 
   if (rpcEnvKey) {
     console.log(

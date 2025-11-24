@@ -134,26 +134,100 @@ export const combineExecuteJSSignatures = async (params: {
         }
       }
 
-      if (preparedShares.length < threshold) {
-        throw new NoValidShares(
-          {
-            info: {
-              requestId,
-              signatureKey,
-              preparedSharesCount: preparedShares.length,
-              threshold,
+      /**
+       * Recursively attempt to combine signature shares while tolerating a limited number
+       * of faulty entries. If the crypto combine call throws (usually due to a corrupted
+       * share), the helper drops one share at a time—up to `dropBudget` times—until the
+       * combine step succeeds or the threshold can no longer be met.
+       *
+       * @param shares Prepared signature shares grouped for a single sig key.
+       * @param dropBudget How many shares we are allowed to discard before giving up.
+       * @returns The combined signature along with the final set of shares that produced it.
+       */
+      const attemptCombine = async (
+        shares: typeof preparedShares,
+        dropBudget: number
+      ): Promise<{
+        combined: Awaited<ReturnType<typeof combineExecuteJsNodeShares>>;
+        remainingShares: typeof preparedShares;
+      }> => {
+        if (shares.length < threshold) {
+          throw new NoValidShares(
+            {
+              info: {
+                requestId,
+                signatureKey,
+                preparedSharesCount: shares.length,
+                threshold,
+              },
             },
-          },
-          `Not enough valid signature shares for ${signatureKey}: ${preparedShares.length} (expected ${threshold})`
-        );
-      }
+            `Not enough valid signature shares for ${signatureKey}: ${shares.length} (expected ${threshold})`
+          );
+        }
 
-      // Get most common public key and sig type
+        try {
+          const sharesForCryptoLib: LitActionSignedData[] = shares.map(
+            (ps) => ({
+              publicKey: ps.publicKey!,
+              signatureShare:
+                typeof ps.originalShare.signatureShare === 'string'
+                  ? ps.originalShare.signatureShare
+                  : JSON.stringify(ps.originalShare.signatureShare),
+              sigName: ps.originalShare.sigName,
+              sigType: ps.sigType! as any,
+            })
+          );
+
+          const combinedSignature = await combineExecuteJsNodeShares(
+            sharesForCryptoLib
+          );
+
+          return {
+            combined: combinedSignature,
+            remainingShares: shares,
+          };
+        } catch (error) {
+          if (dropBudget <= 0) {
+            throw error;
+          }
+
+          let lastError: unknown = error;
+
+          for (let index = 0; index < shares.length; index += 1) {
+            const filteredShares = shares.filter((_, i) => i !== index);
+            if (filteredShares.length < threshold) {
+              continue;
+            }
+
+            console.log(
+              `[executeJs] dropping signature share ${index + 1}/${
+                shares.length
+              } for ${signatureKey}; drops left ${dropBudget - 1}`
+            );
+
+            try {
+              return await attemptCombine(filteredShares, dropBudget - 1);
+            } catch (nested) {
+              lastError = nested;
+            }
+          }
+
+          throw lastError;
+        }
+      };
+
+      // We can only drop as many faulty shares as we have "spares" beyond the threshold.
+      // e.g. 6 prepared shares with a threshold of 4 => maxDrops = 2; with exactly 4 shares => 0.
+      const maxDrops = Math.max(0, preparedShares.length - threshold);
+
+      const { combined: combinedSignature, remainingShares } =
+        await attemptCombine(preparedShares, maxDrops);
+
       const publicKey = mostCommonString(
-        preparedShares.map((s) => s.publicKey).filter(Boolean) as string[]
+        remainingShares.map((s) => s.publicKey).filter(Boolean) as string[]
       );
       const sigType = mostCommonString(
-        preparedShares.map((s) => s.sigType).filter(Boolean) as string[]
+        remainingShares.map((s) => s.sigType).filter(Boolean) as string[]
       );
 
       if (!publicKey || !sigType) {
@@ -164,30 +238,12 @@ export const combineExecuteJSSignatures = async (params: {
               signatureKey,
               publicKey,
               sigType,
-              shares: preparedShares,
+              shares: remainingShares,
             },
           },
           `Could not get public key or sig type from lit action shares for ${signatureKey}`
         );
       }
-
-      // Prepare shares for crypto library (similar to PKP sign process)
-      const sharesForCryptoLib: LitActionSignedData[] = preparedShares.map(
-        (ps) => ({
-          publicKey: ps.publicKey!,
-          signatureShare:
-            typeof ps.originalShare.signatureShare === 'string'
-              ? ps.originalShare.signatureShare
-              : JSON.stringify(ps.originalShare.signatureShare),
-          sigName: ps.originalShare.sigName,
-          sigType: ps.sigType! as any, // Cast to match EcdsaSigType
-        })
-      );
-
-      // Combine the signature shares using the crypto library
-      const combinedSignature = await combineExecuteJsNodeShares(
-        sharesForCryptoLib
-      );
 
       const sigResponse = applyTransformations(
         {
