@@ -17,8 +17,46 @@ config:
   processor: '../src/processors/multi-endpoints.ts'
 
 scenarios:
-  - name: 'Execute JS Stress Test'
+  - name: 'Execute JS Stress Test - Sign'
     weight: 100
+    variables:
+      # Access in the script via context.scenario.variables.variant
+      variant: 'sign'
+    flow:
+      - function: 'runExecuteJSTest'
+      - think: 0.1
+  - name: 'Execute JS Stress Test - Broadcast and Collect'
+    weight: 0
+    variables:
+      variant: 'broadcastAndCollect'
+    flow:
+      - function: 'runExecuteJSTest'
+      - think: 0.1
+  - name: 'Execute JS Stress Test - Check Conditions with Auth Sig'
+    weight: 0
+    variables:
+      variant: 'checkConditionsWithoutAuthSig'
+    flow:
+      - function: 'runExecuteJSTest'
+      - think: 0.1
+  - name: 'Execute JS Stress Test - Sign Child Lit Action'
+    weight: 0
+    variables:
+      variant: 'signChildLitAction'
+    flow:
+      - function: 'runExecuteJSTest'
+      - think: 0.1
+  - name: 'Execute JS Stress Test - Decrypt to Single Node without Auth Sig'
+    weight: 0
+    variables:
+      variant: 'decryptToSingleNode'
+    flow:
+      - function: 'runExecuteJSTest'
+      - think: 0.1
+  - name: 'Execute JS Stress Test - Run Once'
+    weight: 0
+    variables:
+      variant: 'runOnce'
     flow:
       - function: 'runExecuteJSTest'
       - think: 0.1

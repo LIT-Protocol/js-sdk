@@ -63,191 +63,154 @@ export const orchestrateHandshake = async (params: {
       }),
 
       // Use Promise.all for fail-fast behavior - if any node fails quickly, we know immediately
-      Promise.all(
-        params.bootstrapUrls.map(async (url: string) => {
-          try {
-            const fullPath = composeLitUrl({
-              url: url,
-              endpoint: params.endpoints.HANDSHAKE,
-            });
+      (async () => {
+        const handshakeResults = await Promise.all(
+          params.bootstrapUrls.map(async (url: string) => {
+            try {
+              const fullPath = composeLitUrl({
+                url: url,
+                endpoint: params.endpoints.HANDSHAKE,
+              });
 
-            // Create the challenge once and use it for both handshake request and attestation verification
-            const challenge = createRandomHexString(64);
+              // Create the challenge once and use it for both handshake request and attestation verification
+              const challenge = createRandomHexString(64);
 
-            const _data = {
-              fullPath: fullPath,
-              data: {
-                clientPublicKey: 'test',
-                challenge: challenge,
-              },
-              requestId: requestId,
-              epoch: params.currentEpoch,
-              version: params.version,
-              networkModule: params.networkModule,
-            };
+              const _data = {
+                fullPath: fullPath,
+                data: {
+                  clientPublicKey: 'test',
+                  challenge: challenge,
+                },
+                requestId: requestId,
+                epoch: params.currentEpoch,
+                version: params.version,
+                networkModule: params.networkModule,
+              };
 
-            // Debug logging before handshake
-            _logger.info({}, `🔍 About to make handshake request to: ${url}`);
-            _logger.info({ _data }, `🔍 Handshake request data:`);
-            _logger.info(
-              {
-                version: params.networkModule?.version,
-                hasApiHandshakeSchemas:
-                  !!params.networkModule?.api?.handshake?.schemas,
-                endpointHandshake: params.endpoints.HANDSHAKE,
-              },
-              `🔍 Network module details:`
-            );
+              // Debug logging before handshake
+              _logger.info({}, `🔍 About to make handshake request to: ${url}`);
+              _logger.info({ _data }, `🔍 Handshake request data:`);
+              _logger.info(
+                {
+                  version: params.networkModule?.version,
+                  hasApiHandshakeSchemas:
+                    !!params.networkModule?.api?.handshake?.schemas,
+                  endpointHandshake: params.endpoints.HANDSHAKE,
+                },
+                `🔍 Network module details:`
+              );
 
-            // 1. Call the thin API
-            const retrievedServerKeys = await LitNodeApi.handshake(_data);
+              // 1. Call the thin API
+              const retrievedServerKeys = await LitNodeApi.handshake(_data);
 
-            _logger.info(
-              { retrievedServerKeys },
-              '🔍 Retrieved server keys from handshake:'
-            );
-            _logger.info(
-              { type: typeof retrievedServerKeys },
-              '🔍 Type of retrieved server keys:'
-            );
-            _logger.info(
-              { keys: Object.keys(retrievedServerKeys || {}) },
-              '🔍 Keys in retrieved server keys:'
-            );
+              _logger.info(
+                { retrievedServerKeys },
+                '🔍 Retrieved server keys from handshake:'
+              );
+              _logger.info(
+                { type: typeof retrievedServerKeys },
+                '🔍 Type of retrieved server keys:'
+              );
+              _logger.info(
+                { keys: Object.keys(retrievedServerKeys || {}) },
+                '🔍 Keys in retrieved server keys:'
+              );
 
-            // 2. Process the response (verify attestation etc.)
-            if (params.requiredAttestation) {
-              if (!retrievedServerKeys.attestation) {
-                throw new InvalidNodeAttestation(
-                  {},
-                  `Missing attestation in handshake response from ${url}, received ${JSON.stringify(
-                    retrievedServerKeys,
-                    null,
-                    2
-                  )}. "attestation" field should not be null.`
-                );
-              }
+              // 2. Process the response (verify attestation etc.)
+              if (params.requiredAttestation) {
+                if (!retrievedServerKeys.attestation) {
+                  throw new InvalidNodeAttestation(
+                    {},
+                    `Missing attestation in handshake response from ${url}, received ${JSON.stringify(
+                      retrievedServerKeys,
+                      null,
+                      2
+                    )}. "attestation" field should not be null.`
+                  );
+                }
 
-              // Verify the attestation by checking the signature against AMD certs
-              // Use the same challenge that was sent to the node
-              try {
-                const releaseVerificationFn =
-                  params.networkModule?.getVerifyReleaseId?.();
-                await checkSevSnpAttestation(
-                  retrievedServerKeys.attestation,
-                  challenge,
-                  url,
-                  params.releaseVerificationConfig,
-                  releaseVerificationFn
-                );
-                // 3. Store results if successful
+                // Verify the attestation by checking the signature against AMD certs
+                // Use the same challenge that was sent to the node
+                try {
+                  const releaseVerificationFn =
+                    params.networkModule?.getVerifyReleaseId?.();
+                  await checkSevSnpAttestation(
+                    retrievedServerKeys.attestation,
+                    challenge,
+                    url,
+                    params.releaseVerificationConfig,
+                    releaseVerificationFn
+                  );
+                  // 3. Store results if successful
+                  serverKeys[url] = retrievedServerKeys;
+                  connectedNodes.add(url);
+                  _logger.info(`✅ 1 Handshake successful for node: ${url}`);
+                } catch (error: any) {
+                  throw new InvalidNodeAttestation(
+                    {
+                      cause: error,
+                    },
+                    `Lit Node Attestation failed verification for ${url} - ${error.message}`
+                  );
+                }
+              } else {
                 serverKeys[url] = retrievedServerKeys;
                 connectedNodes.add(url);
-                _logger.info(`✅ 1 Handshake successful for node: ${url}`);
-              } catch (error: any) {
-                throw new InvalidNodeAttestation(
-                  {
-                    cause: error,
-                  },
-                  `Lit Node Attestation failed verification for ${url} - ${error.message}`
-                );
+                _logger.info(`✅ 2 Handshake successful for node: ${url}`);
               }
-            } else {
-              serverKeys[url] = retrievedServerKeys;
-              connectedNodes.add(url);
-              _logger.info(`✅ 2 Handshake successful for node: ${url}`);
-            }
 
-            return { url, success: true };
-          } catch (error: any) {
-            _logger.error(
-              {
-                error: error.message,
-                stack: error.stack,
-                url,
-              },
-              `❌ Handshake failed for node: ${url}`
-            );
-
-            // With Promise.all, any failure will cause immediate rejection
-            // But we still want to check if we have enough successful connections so far
-            const currentSuccessful = connectedNodes.size;
-            const minimumRequired = Math.max(
-              params.minimumThreshold,
-              Math.floor((params.bootstrapUrls.length * 2) / 3)
-            );
-
-            if (currentSuccessful >= minimumRequired) {
-              _logger.warn(
-                `⚠️ Node ${url} failed, but we already have ${currentSuccessful} successful connections (threshold: ${minimumRequired}). Continuing...`
+              return { url, success: true as const };
+            } catch (error: any) {
+              _logger.error(
+                {
+                  error: error.message,
+                  stack: error.stack,
+                  url,
+                },
+                `❌ Handshake failed for node: ${url}`
               );
-              // Return success to not fail the Promise.all if we already have enough
+
               return {
                 url,
-                success: false,
+                success: false as const,
                 error,
-                ignoredDueToThreshold: true,
               };
             }
+          })
+        );
 
-            // If we don't have enough successful connections yet, let this failure propagate
-            throw error;
-          }
-        })
-      )
-        .then((results) => {
-          // Process results - this will only run if Promise.all succeeds
-          const successful = results.filter((r) => r.success).map((r) => r.url);
-          const failed = results.filter((r) => !r.success);
+        const successful = handshakeResults
+          .filter((result) => result.success)
+          .map((result) => result.url);
+        const failed = handshakeResults.filter((result) => !result.success);
 
-          _logger.info(
-            `📊 Handshake results: ${successful.length} successful, ${failed.length} failed out of ${params.bootstrapUrls.length} total nodes`
+        _logger.info(
+          `📊 Handshake results: ${successful.length} successful, ${failed.length} failed out of ${params.bootstrapUrls.length} total nodes`
+        );
+        _logger.info(`✅ Successful nodes: ${successful.join(', ')}`);
+
+        if (failed.length > 0) {
+          _logger.warn(
+            `❌ Failed nodes (ignored due to threshold): ${failed
+              .map((entry) => entry.url)
+              .join(', ')}`
           );
-          _logger.info(`✅ Successful nodes: ${successful.join(', ')}`);
+        }
 
-          if (failed.length > 0) {
-            _logger.warn(
-              `❌ Failed nodes (ignored due to threshold): ${failed
-                .map((f) => f.url)
-                .join(', ')}`
-            );
-          }
+        const minimumRequired = Math.max(
+          params.minimumThreshold,
+          Math.floor((params.bootstrapUrls.length * 2) / 3)
+        );
 
-          const minimumRequired = Math.max(
-            params.minimumThreshold,
-            Math.floor((params.bootstrapUrls.length * 2) / 3)
-          );
+        if (successful.length < minimumRequired) {
+          const msg = `Error: Insufficient successful handshakes. Got ${successful.length} successful connections but need at least ${minimumRequired}.`;
+          throw new InitError({ info: { requestId, successful, failed } }, msg);
+        }
 
-          if (successful.length < minimumRequired) {
-            const msg = `Error: Insufficient successful handshakes. Got ${successful.length} successful connections but need at least ${minimumRequired}.`;
-            throw new InitError(
-              { info: { requestId, successful, failed } },
-              msg
-            );
-          }
-
-          _logger.info(
-            `🎉 Handshake completed successfully with ${successful.length}/${params.bootstrapUrls.length} nodes (threshold: ${minimumRequired})`
-          );
-        })
-        .catch((error) => {
-          // If Promise.all fails, we need to check what we've collected so far
-          const currentSuccessful = connectedNodes.size;
-          const minimumRequired = Math.max(
-            params.minimumThreshold,
-            Math.floor((params.bootstrapUrls.length * 2) / 3)
-          );
-
-          if (currentSuccessful >= minimumRequired) {
-            _logger.warn(
-              `⚠️ Promise.all failed, but we have ${currentSuccessful} successful connections (threshold: ${minimumRequired}). Proceeding with partial results.`
-            );
-            return; // Continue execution
-          }
-
-          // If we don't have enough, rethrow the error
-          throw error;
-        }),
+        _logger.info(
+          `🎉 Handshake completed successfully with ${successful.length}/${params.bootstrapUrls.length} nodes (threshold: ${minimumRequired})`
+        );
+      })(),
     ]).finally(() => {
       clearTimeout(timeoutHandle);
     });

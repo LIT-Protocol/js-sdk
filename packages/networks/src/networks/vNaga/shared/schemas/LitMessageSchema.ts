@@ -70,10 +70,15 @@ export const chainHashMapper: ChainHashMapper = {
     EcdsaP384Sha384: sha384,
   },
 
-  // @ts-ignore TODO: add support for this
-  cosmos: undefined,
+  cosmos: {
+    EcdsaK256Sha256: sha256,
+    EcdsaP256Sha256: sha256,
+    EcdsaP384Sha384: sha384,
+  },
 
-  // @ts-ignore TODO: add support for this
+  // Solana signatures use Ed25519 (handled by the FROST branch),
+  // so we intentionally omit it from the ECDSA mapper.
+  // @ts-ignore
   solana: undefined,
 };
 
@@ -89,9 +94,23 @@ export const LitMessageSchema = z
     }
 
     if (CURVE_GROUP_BY_CURVE_TYPE[signingScheme] === 'ECDSA') {
-      const hashedMessage = chainHashMapper[chain][
-        signingScheme as DesiredEcdsaSchemes
-      ](new Uint8Array(toSign));
+      const chainHasher = chainHashMapper[chain];
+
+      if (!chainHasher) {
+        throw new Error(
+          `Chain "${chain}" does not support ECDSA signing with Lit yet.`
+        );
+      }
+
+      const hashFn = chainHasher[signingScheme as DesiredEcdsaSchemes];
+
+      if (!hashFn) {
+        throw new Error(
+          `Signing scheme "${signingScheme}" is not enabled for chain "${chain}".`
+        );
+      }
+
+      const hashedMessage = hashFn(new Uint8Array(toSign));
       return BytesArraySchema.parse(hashedMessage);
     }
 

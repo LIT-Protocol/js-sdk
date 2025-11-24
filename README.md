@@ -40,6 +40,8 @@ pnpm install && pnpm build
 # (Optional) Request a private rpc url from
 # https://hub.conduit.xyz/chronicle-yellowstone-testnet-9qgmzfcohk
 LIT_YELLOWSTONE_PRIVATE_RPC_URL=<private-rpc-url>
+# (Optional) Mainnet RPC override for naga-proto / naga
+LIT_MAINNET_RPC_URL=<mainnet-rpc-url>
 
 # For live networks (naga-dev, naga-staging)
 LIVE_MASTER_ACCOUNT=<master-account-private-key>
@@ -47,6 +49,8 @@ LIVE_MASTER_ACCOUNT=<master-account-private-key>
 # For local network (naga-local) (default Anvil account)
 LOCAL_MASTER_ACCOUNT=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
+
+When `NETWORK` is set to `naga-proto` or `naga`, the test helpers only top up generated accounts with `0.01` LIT and deposit `0.01` LIT into the Lit Ledger to avoid locking up excess mainnet funds.
 
 ## Command
 
@@ -97,6 +101,68 @@ DIRECTORY_NAME=naga-local
 
 ```bash
 NETWORK=naga-local pnpm run test:e2e all
+```
+
+# Artillery Load Testing
+
+Use the standalone Artillery project under `packages/artillery`
+
+## Preparation
+
+```bash
+# from the repo root
+pnpm install
+
+# pick your target network: naga-dev | naga-staging | naga-test | naga-local
+export NETWORK=naga-staging
+export LOG_LEVEL=info           # optional: debug | debug2 | silent
+```
+
+For live networks that read ABI data from the `networks` repo (for example `naga-staging`), run the sync script before firing Artillery so the contracts and addresses are up to date:
+
+```bash
+pnpm run sync:contracts  # requires GH_API_KEY in your environment
+```
+
+Testing a custom local network? Point the runner at your generated `networkContext.json` and RPC URL. (/lit-assets/blockchain/contracts/networkContext.json)
+
+```ts
+const networkModule = nagaLocal
+  .withLocalContext({
+    networkContextPath:
+      '/Users/<username>/Projects/lit-assets/blockchain/contracts/networkContext.json',
+    networkName: 'naga-local',
+  })
+  .withOverrides({ rpcUrl: process.env.LOCAL_RPC_URL });
+```
+
+If you want Artillery Cloud reports, set `ARTILLERY_KEY=<your-key>` in `.env` before running a scenario.
+
+## One-time initialisation
+
+Master account, auth data and PKP info are written to this file:
+`packages/artillery/artillery-state.json`.
+
+```bash
+pnpm nx run artillery:init
+```
+
+(optional) Check master balances before blasting a load test:
+
+```bash
+pnpm nx run artillery:balance-status
+```
+
+## Run a workload
+
+Each scenario is exposed as an Nx target. Use the `run:` prefixed name:
+
+```bash
+pnpm nx run artillery:run:pkp-sign          # PKP signing focus
+pnpm nx run artillery:run:encrypt-decrypt   # Encryption/decryption focus
+pnpm nx run artillery:run:execute           # Lit Action execution
+pnpm nx run artillery:run:mix               # Mixed workload
+pnpm nx run artillery:run:sign-session-key  # Session key signing
 ```
 
 # Manual Publishing

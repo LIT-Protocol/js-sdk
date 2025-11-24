@@ -92,6 +92,78 @@ export const createStateManager = async <T>(params: {
     throw err;
   }
 
+  const refreshState = async (reason?: string) => {
+    try {
+      _logger.info(
+        { reason },
+        'Refreshing connection info and handshake callback'
+      );
+      const newConnectionInfo =
+        await readOnlyChainManager.api.connection.getConnectionInfo();
+      const newBootstrapUrls = newConnectionInfo.bootstrapUrls;
+      const newEpochInfo = newConnectionInfo.epochInfo;
+
+      latestConnectionInfo = newConnectionInfo;
+
+      const bootstrapUrlsChanged = areStringArraysDifferent(
+        latestBootstrapUrls,
+        newBootstrapUrls
+      );
+
+      if (bootstrapUrlsChanged) {
+        _logger.warn(
+          {
+            reason,
+            oldUrls: latestBootstrapUrls,
+            newUrls: newBootstrapUrls,
+          },
+          'Bootstrap URLs changed. Updating internal state.'
+        );
+        latestBootstrapUrls = newBootstrapUrls;
+      } else {
+        _logger.info(
+          { reason },
+          'Bootstrap URLs remain unchanged during refresh.'
+        );
+      }
+
+      if (!latestEpochInfo || latestEpochInfo.number !== newEpochInfo.number) {
+        _logger.info(
+          {
+            reason,
+            previousEpoch: latestEpochInfo?.number,
+            newEpoch: newEpochInfo.number,
+          },
+          'Epoch number updated during refresh.'
+        );
+        latestEpochInfo = newEpochInfo;
+      } else {
+        _logger.info(
+          { reason, epoch: newEpochInfo.number },
+          'Epoch number unchanged during refresh.'
+        );
+      }
+
+      callbackResult = await params.callback({
+        bootstrapUrls: latestBootstrapUrls,
+        currentEpoch: latestEpochInfo?.number || 0,
+        version: params.networkModule.version,
+        requiredAttestation: params.networkModule.config.requiredAttestation,
+        minimumThreshold: params.networkModule.config.minimumThreshold,
+        abortTimeout: params.networkModule.config.abortTimeout,
+        endpoints: params.networkModule.getEndpoints(),
+        releaseVerificationConfig: null,
+        networkModule: params.networkModule,
+      });
+    } catch (error) {
+      _logger.error(
+        { error, reason },
+        'Failed to refresh connection info for state manager'
+      );
+      throw error;
+    }
+  };
+
   // --- Setup Staking Event Listener ---
   const stakingContract = new ethers.Contract(
     contractManager.stakingContract.address,
@@ -116,58 +188,7 @@ export const createStateManager = async <T>(params: {
         // 2. If state is Active, refresh connection info
         if (newState === (STAKING_STATES.Active as STAKING_STATES_VALUES)) {
           try {
-            _logger.info(
-              '🖐 Staking state is Active. Fetching latest connection info...'
-            );
-            const newConnectionInfo =
-              await readOnlyChainManager.api.connection.getConnectionInfo();
-            const newBootstrapUrls = newConnectionInfo.bootstrapUrls;
-            const newEpochInfo = newConnectionInfo.epochInfo; // Get new epoch info
-            latestConnectionInfo = newConnectionInfo; // Update internal state for connection info
-
-            const bootstrapUrlsChanged = areStringArraysDifferent(
-              latestBootstrapUrls,
-              newBootstrapUrls
-            );
-
-            if (bootstrapUrlsChanged) {
-              _logger.warn(
-                {
-                  oldUrls: latestBootstrapUrls,
-                  newUrls: newBootstrapUrls,
-                },
-                'Bootstrap URLs changed. Updating internal state.'
-              );
-              latestBootstrapUrls = newBootstrapUrls; // Update internal state
-            } else {
-              _logger.info('BootstrapUrls remain unchanged.');
-            }
-
-            // Always update epoch info when Active state is processed
-            if (latestEpochInfo?.number !== newEpochInfo.number) {
-              _logger.info(
-                `Epoch number updated from ${latestEpochInfo?.number} to ${newEpochInfo.number}`
-              );
-              latestEpochInfo = newEpochInfo;
-            } else {
-              _logger.info(
-                `Epoch number ${newEpochInfo.number} remains the same.`
-              );
-            }
-
-            // -- callback
-            callbackResult = await params.callback({
-              bootstrapUrls: latestBootstrapUrls,
-              currentEpoch: latestEpochInfo!.number,
-              version: params.networkModule.version,
-              requiredAttestation:
-                params.networkModule.config.requiredAttestation,
-              minimumThreshold: params.networkModule.config.minimumThreshold,
-              abortTimeout: params.networkModule.config.abortTimeout,
-              endpoints: params.networkModule.getEndpoints(),
-              releaseVerificationConfig: null,
-              networkModule: params.networkModule,
-            });
+            await refreshState('staking-state-change');
           } catch (error) {
             _logger.error(
               { error },
@@ -224,6 +245,10 @@ export const createStateManager = async <T>(params: {
     getLatestConnectionInfo: (): ConnectionInfo | null => {
       // Return a deep copy if ConnectionInfo is mutable, otherwise direct return is fine
       return latestConnectionInfo ? { ...latestConnectionInfo } : null;
+    },
+
+    refreshHandshake: async (reason?: string) => {
+      await refreshState(reason);
     },
 
     /**
