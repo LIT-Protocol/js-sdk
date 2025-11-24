@@ -9,10 +9,7 @@ export const SUPPORTED_NETWORKS = [
 export type SupportedNetwork = (typeof SUPPORTED_NETWORKS)[number];
 type EnvName = 'local' | 'live';
 
-const RPC_ENV_KEY_BY_NETWORK: Record<
-  SupportedNetwork,
-  string | undefined
-> = {
+const RPC_ENV_KEY_BY_NETWORK: Record<SupportedNetwork, string | undefined> = {
   'naga-local': undefined,
   'naga-dev': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
   'naga-test': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
