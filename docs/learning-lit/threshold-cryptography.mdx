@@ -131,3 +131,6 @@ Lit Protocol supports a wide range of elliptic curves and signing schemes, all s
 - Filecoin (FIL) - `CurveType::BLS`, `SigningScheme::Bls12381`
 - Chia (XCH) - `CurveType::BLS`, `SigningScheme::Bls12381`
 - Dfinity (ICP) - `CurveType::BLS`, `SigningScheme::Bls12381`
+
+## Key Derivation
+Key derivation is done additively and uses all 10 root keys per curve to derive child keys, based on [this paper](https://eprint.iacr.org/2021/1330.pdf).
