@@ -38,6 +38,14 @@ const ProductId = {
   SignSessionKey: 3,
 };
 
+// Product IDs array used for fetching prices
+const PRODUCT_IDS = [
+  ProductId.PkpSign,
+  ProductId.EncSign,
+  ProductId.LitAction,
+  ProductId.SignSessionKey,
+];
+
 // LitActionPriceComponent enum values
 const LitActionPriceComponent = {
   baseAmount: 0,
@@ -247,20 +255,12 @@ export function CurrentPricesTable() {
         const priceUSD = await getLitKeyPrice();
         setLitKeyPriceUSD(priceUSD);
 
-        // Get product IDs
-        const productIds = [
-          ProductId.PkpSign,
-          ProductId.EncSign,
-          ProductId.LitAction,
-          ProductId.SignSessionKey,
-        ];
-
         // Fetch base prices
         const basePricesResult = await publicClient.readContract({
           address: NAGA_PROD_PRICE_FEED_ADDRESS,
           abi: PRICE_FEED_ABI,
           functionName: 'baseNetworkPrices',
-          args: [productIds],
+          args: [PRODUCT_IDS],
         });
 
         // Fetch max prices
@@ -268,7 +268,7 @@ export function CurrentPricesTable() {
           address: NAGA_PROD_PRICE_FEED_ADDRESS,
           abi: PRICE_FEED_ABI,
           functionName: 'maxNetworkPrices',
-          args: [productIds],
+          args: [PRODUCT_IDS],
         });
 
         // Fetch current prices (we'll estimate at 50% usage for now)
@@ -279,7 +279,7 @@ export function CurrentPricesTable() {
           address: NAGA_PROD_PRICE_FEED_ADDRESS,
           abi: PRICE_FEED_ABI,
           functionName: 'usagePercentToPrices',
-          args: [estimatedUsage, productIds],
+          args: [estimatedUsage, PRODUCT_IDS],
         });
 
         // Fetch LitAction price configs
@@ -317,18 +317,11 @@ export function CurrentPricesTable() {
       <div style={{ padding: '20px', color: 'red' }}>
         <p>Error loading prices: {error}</p>
         <p style={{ fontSize: '0.9em', marginTop: '10px' }}>
-          Please ensure you have an internet connection and try refreshing the page.
+          Unable to fetch pricing data. Please check your connection or try again later.
         </p>
       </div>
     );
   }
-
-  const productIds = [
-    ProductId.PkpSign,
-    ProductId.EncSign,
-    ProductId.LitAction,
-    ProductId.SignSessionKey,
-  ];
 
   return (
     <div style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -392,7 +385,7 @@ export function CurrentPricesTable() {
             </tr>
           </thead>
           <tbody>
-            {productIds.map((productId, index) => {
+            {PRODUCT_IDS.map((productId, index) => {
               const basePriceInTokens = weiToTokens(basePrices[index]);
               const maxPriceInTokens = weiToTokens(maxPrices[index]);
               const currentPriceInTokens = weiToTokens(currentPrices[index]);
@@ -535,4 +528,3 @@ export function CurrentPricesTable() {
     </div>
   );
 }
-
