@@ -293,7 +293,7 @@ export const CurrentPricesTable = () => {
         setError(null);
 
         const { ethers } = window;
-        const rpcUrl = LIT_CHAIN.rpcUrls.default.http[0];
+        const rpcUrl = 'https://lit-chain-rpc.litprotocol.com/';
         const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
         const contract = new ethers.Contract(NAGA_PROD_PRICE_FEED_ADDRESS, PRICE_FEED_ABI, provider);
 
