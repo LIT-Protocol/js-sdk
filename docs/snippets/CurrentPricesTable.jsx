@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { createPublicClient, http, formatUnits } from 'viem';
 
 // Naga Prod PriceFeed contract address
 const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
@@ -215,8 +214,12 @@ async function getLitKeyPrice() {
 /**
  * Convert wei to LITKEY tokens (18 decimals)
  */
-function weiToTokens(wei) {
-  return Number(formatUnits(wei, 18));
+function weiToTokens(wei, viem) {
+  if (!viem || !viem.formatUnits) {
+    // Fallback if viem isn't loaded yet
+    return Number(wei) / 1e18;
+  }
+  return Number(viem.formatUnits(wei, 18));
 }
 
 /**
@@ -238,12 +241,39 @@ export const CurrentPricesTable = () => {
   const [litActionConfigs, setLitActionConfigs] = useState([]);
   const [litKeyPriceUSD, setLitKeyPriceUSD] = useState(null);
   const [usagePercent, setUsagePercent] = useState(null);
+  const [viemLoaded, setViemLoaded] = useState(false);
+
+  // Load viem from CDN
+  useEffect(() => {
+    // Check if viem is already loaded
+    if (window.viem) {
+      setViemLoaded(true);
+      return;
+    }
+
+    // Load viem from esm.sh CDN (supports ES modules)
+    import('https://esm.sh/viem@2.38.3').then((viemModule) => {
+      window.viem = viemModule;
+      setViemLoaded(true);
+    }).catch((err) => {
+      console.error('Error loading viem:', err);
+      setError('Failed to load viem library from CDN');
+      setLoading(false);
+    });
+  }, []);
 
   useEffect(() => {
+    if (!viemLoaded || !window.viem) {
+      return;
+    }
+
     async function fetchPrices() {
       try {
         setLoading(true);
         setError(null);
+
+        const viem = window.viem;
+        const { createPublicClient, http } = viem;
 
         // Create public client
         const publicClient = createPublicClient({
@@ -302,7 +332,7 @@ export const CurrentPricesTable = () => {
     }
 
     fetchPrices();
-  }, []);
+  }, [viemLoaded]);
 
   if (loading) {
     return (
@@ -386,9 +416,9 @@ export const CurrentPricesTable = () => {
           </thead>
           <tbody>
             {PRODUCT_IDS.map((productId, index) => {
-              const basePriceInTokens = weiToTokens(basePrices[index]);
-              const maxPriceInTokens = weiToTokens(maxPrices[index]);
-              const currentPriceInTokens = weiToTokens(currentPrices[index]);
+              const basePriceInTokens = weiToTokens(basePrices[index], window.viem);
+              const maxPriceInTokens = weiToTokens(maxPrices[index], window.viem);
+              const currentPriceInTokens = weiToTokens(currentPrices[index], window.viem);
               const basePriceInUSD = litKeyPriceUSD
                 ? basePriceInTokens * litKeyPriceUSD
                 : null;
@@ -489,7 +519,7 @@ export const CurrentPricesTable = () => {
                 `Component ${priceComponentNum}`;
               const measurementName =
                 MEASUREMENT_NAMES[priceMeasurementNum] || '';
-              const priceInTokens = weiToTokens(config.price);
+              const priceInTokens = weiToTokens(config.price, window.viem);
               const priceInUSD = litKeyPriceUSD
                 ? priceInTokens * litKeyPriceUSD
                 : null;
