@@ -157,6 +157,10 @@ function updatePackageJsonExports(networks: {
   // Add custom network signatures
   const customNetworkSignaturesPath = 'custom-network-signatures';
   exports[`./${customNetworkSignaturesPath}`] = {
+    browser: {
+      import: `./dist/${customNetworkSignaturesPath}.browser.js`,
+      require: `./dist/${customNetworkSignaturesPath}.browser.cjs`,
+    },
     import: `./dist/${customNetworkSignaturesPath}.js`,
     require: `./dist/${customNetworkSignaturesPath}.cjs`,
     types: `./dist/${customNetworkSignaturesPath}.d.ts`,

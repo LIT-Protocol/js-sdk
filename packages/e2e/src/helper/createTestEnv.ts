@@ -2,7 +2,10 @@ import {
   LitNetworkModule,
   nagaDev,
   nagaLocal,
+  nagaStaging,
   nagaTest,
+  nagaProto,
+  naga,
   PaymentManager,
 } from '@lit-protocol/networks';
 import { EnvVars } from './createEnvVars';
@@ -14,10 +17,26 @@ export const CONFIG = {
   LOCAL: {
     nativeFundingAmount: '1',
     ledgerDepositAmount: '2',
+    sponsorshipLimits: {
+      totalMaxPriceInWei: '50000000000000000',
+      userMaxPrice: 50000000000000000n,
+    },
   },
   LIVE: {
     nativeFundingAmount: '0.1',
     ledgerDepositAmount: '0.1',
+    sponsorshipLimits: {
+      totalMaxPriceInWei: '50000000000000000',
+      userMaxPrice: 50000000000000000n,
+    },
+  },
+  MAINNET: {
+    nativeFundingAmount: '0.01',
+    ledgerDepositAmount: '0.01',
+    sponsorshipLimits: {
+      totalMaxPriceInWei: '10000000000000000',
+      userMaxPrice: 10000000000000000n,
+    },
   },
 };
 
@@ -35,47 +54,77 @@ export type TestEnv = {
   config: {
     nativeFundingAmount: string;
     ledgerDepositAmount: string;
+    sponsorshipLimits: {
+      totalMaxPriceInWei: string;
+      userMaxPrice: bigint;
+    };
   };
 };
 
 export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
   // -- 1. Create network module
-  let networkModule: LitNetworkModule;
-  let config = {
-    nativeFundingAmount: '',
-    ledgerDepositAmount: '',
+  const applyRpcOverride = (networkModule: LitNetworkModule) => {
+    if (!envVars.rpcUrl) {
+      return networkModule;
+    }
+
+    console.log(
+      `🔧 Overriding RPC URL for ${envVars.network} to ${envVars.rpcUrl}`
+    );
+
+    return networkModule.withOverrides({
+      rpcUrl: envVars.rpcUrl,
+    });
   };
 
-  if (envVars.network === 'naga-local') {
-    networkModule = nagaLocal
-      .withLocalContext({
-        networkContextPath: envVars.localContextPath,
-        networkName: 'naga-local',
-      })
-      .withOverrides({
-        rpcUrl: envVars.rpcUrl,
-      });
-    config = CONFIG.LOCAL;
-  } else if (
-    envVars.network === 'naga-dev' ||
-    envVars.network === 'naga-test'
-  ) {
-    if (envVars.network === 'naga-dev') {
-      networkModule = nagaDev;
-    } else if (envVars.network === 'naga-test') {
-      networkModule = nagaTest;
-    }
+  let networkModule: LitNetworkModule;
+  let config: TestEnv['config'];
 
-    if (envVars.rpcUrl) {
-      console.log(
-        `🔧 Overriding RPC URL for ${envVars.network} to ${envVars.rpcUrl}`
+  switch (envVars.network) {
+    case 'naga-local': {
+      if (!envVars.localContextPath) {
+        throw new Error(
+          'naga-local requires a valid local context path to be configured'
+        );
+      }
+
+      networkModule = applyRpcOverride(
+        nagaLocal.withLocalContext({
+          networkContextPath: envVars.localContextPath,
+          networkName: 'naga-local',
+        })
       );
-      networkModule = networkModule.withOverrides({
-        rpcUrl: envVars.rpcUrl,
-      });
-    }
 
-    config = CONFIG.LIVE;
+      config = CONFIG.LOCAL;
+      break;
+    }
+    case 'naga-dev':
+    case 'naga-test':
+    case 'naga-staging': {
+      if (envVars.network === 'naga-dev') {
+        networkModule = nagaDev;
+      } else if (envVars.network === 'naga-test') {
+        networkModule = nagaTest;
+      } else {
+        networkModule = nagaStaging;
+      }
+
+      networkModule = applyRpcOverride(networkModule);
+      config = CONFIG.LIVE;
+      break;
+    }
+    case 'naga-proto':
+    case 'naga': {
+      networkModule = applyRpcOverride(
+        envVars.network === 'naga-proto' ? nagaProto : naga
+      );
+      config = CONFIG.MAINNET;
+      break;
+    }
+    default: {
+      const exhaustiveCheck: never = envVars.network;
+      throw new Error(`Unsupported network: ${exhaustiveCheck}`);
+    }
   }
 
   // 2. Create Lit Client
@@ -101,7 +150,7 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
   });
 
   return {
-    masterAccount: privateKeyToAccount(envVars.privateKey),
+    masterAccount,
     masterPaymentManager,
     networkModule,
     litClient,

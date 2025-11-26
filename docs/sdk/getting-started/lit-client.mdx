@@ -65,15 +65,27 @@ const litClient = await createLitClient({
 
 ```typescript Naga Mainnet
 // ❗️ Currently in development. Coming soon...
-import { nagaProduction } from "@lit-protocol/networks";
+import { naga } from "@lit-protocol/networks";
 import { createLitClient } from "@lit-protocol/lit-client";
 
 const litClient = await createLitClient({
-  network: nagaProduction,
+  network: naga,
 });
 ```
 
 </CodeGroup>
+
+<Note>
+For smaller bundles you can import only the network you need via the tree-shakeable
+subpaths, for example:
+
+```ts
+import { naga } from "@lit-protocol/networks/naga";
+// or import { nagaTest } from "@lit-protocol/networks/naga-test";
+```
+
+This avoids pulling every network module into your application.
+</Note>
 
   </Step>
 </Steps>

@@ -27,3 +27,7 @@ out
 # allow lit-login-server build output for docker image
 !dist/apps/lit-login-server/**
 !dist/apps/lit-login-server
+
+# allow explorer build output for docker image
+!apps/explorer/dist/**
+!apps/explorer/dist

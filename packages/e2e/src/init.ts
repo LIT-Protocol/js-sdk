@@ -25,6 +25,17 @@ import {
 
 // import { createPkpAuthContext } from './helper/auth-contexts';
 
+const SupportedNetworkSchema = z.enum([
+  'naga-dev',
+  'naga-test',
+  'naga-local',
+  'naga-staging',
+  'naga-proto',
+  'naga',
+]);
+
+type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
+
 const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
@@ -32,6 +43,8 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
+const MAINNET_NETWORK_FUNDING_AMOUNT = '0.01';
+const MAINNET_LEDGER_DEPOSIT_AMOUNT = '0.01';
 
 const EVE_VALIDATION_IPFS_CID =
   'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
@@ -116,35 +129,75 @@ async function initInternal(
    * ❗️ If it's on live chain, we will fund it with the master account. (set in the .env file)
    * ====================================
    */
-  // Optional RPC override from env
-  const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
-  const resolvedNetwork = await resolveNetwork({
-    network: networkInput,
+  const parsedNetwork = NetworkNameSchema.parse(networkInput);
+  const rpcOverrideEnvVar =
+    parsedNetwork === 'naga' || parsedNetwork === 'naga-proto'
+      ? 'LIT_MAINNET_RPC_URL'
+      : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL';
+  const rpcOverride = process.env[rpcOverrideEnvVar];
+
+  const resolvedNetworkBase = await resolveNetwork({
+    network: parsedNetwork,
     rpcUrlOverride: rpcOverride,
   });
 
-  const {
-    name: resolvedNetworkName,
-    type: networkType,
+  let { name: resolvedNetworkName, type: networkType } = resolvedNetworkBase;
+  let networkModule = resolvedNetworkBase.networkModule;
+
+  if (resolvedNetworkName === 'naga-local') {
+    const localContextPath = process.env['NAGA_LOCAL_CONTEXT_PATH'];
+    if (localContextPath) {
+      const supportsLocalContext = (
+        module: unknown
+      ): module is NagaLocalModule =>
+        !!module &&
+        typeof (module as { withLocalContext?: unknown }).withLocalContext ===
+          'function';
+
+      if (supportsLocalContext(networkModule)) {
+        const localContextName = process.env['NETWORK'];
+
+        console.log(
+          '✅ Loading naga-local signatures from NAGA_LOCAL_CONTEXT_PATH:',
+          localContextPath
+        );
+
+        networkModule = await networkModule.withLocalContext({
+          networkContextPath: localContextPath,
+          networkName: localContextName,
+        });
+      } else {
+        console.warn(
+          '⚠️ NAGA_LOCAL_CONTEXT_PATH is set but nagaLocal.withLocalContext is unavailable in the current networks build.'
+        );
+      }
+    }
+  }
+
+  const resolvedNetwork: ResolvedNetwork = {
+    ...resolvedNetworkBase,
     networkModule,
-  } = resolvedNetwork;
+  };
 
   console.log('✅ Using network:', resolvedNetworkName);
   console.log('✅ Using log level:', _logLevel);
 
   if (rpcOverride) {
-    console.log(
-      '✅ Using RPC override (LIT_YELLOWSTONE_PRIVATE_RPC_URL):',
-      rpcOverride
-    );
+    console.log(`✅ Using RPC override (${rpcOverrideEnvVar}):`, rpcOverride);
   }
 
-  // Fund accounts based on network type
   const isLocal = networkType === 'local';
+  const isMainnet =
+    resolvedNetworkName === 'naga' || resolvedNetworkName === 'naga-proto';
   const masterAccount = isLocal ? localMasterAccount : liveMasterAccount;
   const fundingAmount = isLocal
     ? LOCAL_NETWORK_FUNDING_AMOUNT
+    : isMainnet
+    ? MAINNET_NETWORK_FUNDING_AMOUNT
     : LIVE_NETWORK_FUNDING_AMOUNT;
+  const ledgerDepositAmount = isMainnet
+    ? MAINNET_LEDGER_DEPOSIT_AMOUNT
+    : LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT;
 
   // Fund accounts sequentially to avoid nonce conflicts with same sponsor
   await fundAccount(aliceViemAccount, masterAccount, networkModule, {
@@ -199,7 +252,7 @@ async function initInternal(
   async function masterDepositForUser(userAddress: string) {
     await masterPaymentManager.depositForUser({
       userAddress: userAddress,
-      amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+      amountInEth: ledgerDepositAmount,
     });
     console.log(
       `✅ New ${userAddress} Ledger Balance:`,
@@ -352,8 +405,8 @@ async function initInternal(
   });
 
   await fundAccount(alicePkpViemAccount, masterAccount, networkModule, {
-    ifLessThan: LOCAL_NETWORK_FUNDING_AMOUNT,
-    thenFund: LOCAL_NETWORK_FUNDING_AMOUNT,
+    ifLessThan: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   /**

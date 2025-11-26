@@ -37,7 +37,7 @@ const ExecuteJsResultSchema = z.object({
     })
   ),
   response: z.string(),
-  logs: z.string(),
+  logs: z.string().optional(),
 });
 
 // Global variables to cache expensive operations
@@ -112,7 +112,7 @@ const createAuthContextFromState = async () => {
           ['access-control-condition-decryption', '*'],
         ],
         capabilityAuthSigs: [],
-        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+        expiration: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
       },
       litClient: litClient,
     });
@@ -140,7 +140,7 @@ export async function runPkpSignTest() {
     // Perform pkpSign operation
     const result = await litClient.chain.ethereum.pkpSign({
       authContext: authContext,
-      pubKey: state.masterAccount.pkp.publicKey,
+      pubKey: state.masterAccount.pkp.pubkey,
       toSign: `Hello from Artillery! ${Date.now()}`, // Unique message per request
       // userMaxPrice: 1000000000000000000n,
     });
@@ -166,7 +166,15 @@ export async function runPkpSignTest() {
     );
 
     // Throw the error to let Artillery handle it
-    throw error;
+    // Handle specific errors to aggregate them
+    if (
+      error instanceof Error &&
+      error.message.includes('unable to get signature share')
+    ) {
+      throw new Error('"PKP Sign" failed. unable to get signature share.');
+    } else {
+      throw error;
+    }
   }
 }
 
@@ -235,7 +243,11 @@ export async function runEncryptDecryptTest() {
 }
 
 // test '/web/execute/v2' endpoint
-export async function runExecuteJSTest() {
+export async function runExecuteJSTest(context: any, _events: any) {
+  const variant = context.scenario.variables.variant;
+
+  console.log('🔍 variant:', variant);
+
   const startTime = Date.now();
 
   try {
@@ -248,32 +260,44 @@ export async function runExecuteJSTest() {
     // Create auth context
     const authContext = await createAuthContextFromState();
 
+    // Set up access control conditions requiring wallet ownership
+    const builder = createAccBuilder();
+    let accs: any;
+    let encryptedData: any;
+    let dataToEncrypt: string;
+    if (variant === 'decryptToSingleNode') {
+      accs = builder
+        .requireWalletOwnership(authContext.account.address)
+        .on('ethereum')
+        .build();
+
+      // Encrypt data with the access control conditions
+      dataToEncrypt = 'Hello from encrypt-decrypt test!';
+      encryptedData = await litClient.encrypt({
+        dataToEncrypt,
+        unifiedAccessControlConditions: accs,
+        chain: 'ethereum',
+      });
+    } else {
+      accs = builder
+        .requireWalletOwnership(state.masterAccount.pkp.ethAddress)
+        .on('ethereum')
+        .build();
+    }
+
     // Perform executeJs operation
-    const litActionCode = `
-    (async () => {
-      const { sigName, toSign, publicKey } = jsParams;
-      const { keccak256, arrayify } = ethers.utils;
-      
-      const toSignBytes = new TextEncoder().encode(toSign);
-      const toSignBytes32 = keccak256(toSignBytes);
-      const toSignBytes32Array = arrayify(toSignBytes32);
-      
-      const sigShare = await Lit.Actions.signEcdsa({
-        toSign: toSignBytes32Array,
-        publicKey,
-        sigName,
-      });  
-    })();`;
+    const { litActionCode, jsParams } = getLitActionCodeAndJsParams(
+      variant,
+      state,
+      encryptedData,
+      accs,
+      await authContext.authNeededCallback()
+    );
 
     const result = await litClient.executeJs({
       code: litActionCode,
       authContext,
-      jsParams: {
-        message: 'Test message from e2e executeJs',
-        sigName: 'e2e-test-sig',
-        toSign: 'Test message from e2e executeJs',
-        publicKey: state.masterAccount.pkp.publicKey,
-      },
+      jsParams,
     });
 
     // Validate the result using Zod schema
@@ -282,9 +306,19 @@ export async function runExecuteJSTest() {
     const endTime = Date.now();
     const duration = endTime - startTime;
 
+    if (
+      variant === 'decryptToSingleNode' &&
+      // Strip quote marks at the ends
+      validatedResult.response.substring(
+        1,
+        validatedResult.response.length - 1
+      ) !== dataToEncrypt!
+    ) {
+      throw new Error('❌ Decrypted data does not match the original data');
+    }
+
     console.log(`✅ executeJs successful in ${duration}ms`);
     console.log('✅ executeJs result:', validatedResult);
-
     // For Artillery, just return - no need to call next()
     return;
   } catch (error) {
@@ -317,7 +351,7 @@ export async function runSignSessionKeyTest() {
 
     const masterAccountPkpAuthContext = await authManager.createPkpAuthContext({
       authData: state.masterAccount.authData,
-      pkpPublicKey: state.masterAccount.pkp.publicKey,
+      pkpPublicKey: state.masterAccount.pkp.pubkey,
       authConfig: {
         resources: [
           ['pkp-signing', '*'],
@@ -333,7 +367,10 @@ export async function runSignSessionKeyTest() {
       },
     });
 
-    // console.log('✅ Master Account PKP Auth Context:', masterAccountPkpAuthContext);
+    console.log(
+      '✅ Sign Session Key successful. Master Account PKP Auth Context:',
+      masterAccountPkpAuthContext
+    );
   } catch (error) {
     const endTime = Date.now();
     const duration = endTime - startTime;
@@ -345,5 +382,139 @@ export async function runSignSessionKeyTest() {
 
     // Throw the error to let Artillery handle it
     throw error;
+  }
+}
+
+// String enum for the variant
+type Variant =
+  | 'sign'
+  | 'broadcastAndCollect'
+  | 'checkConditionsWithoutAuthSig'
+  | 'signChildLitAction'
+  | 'decryptToSingleNode'
+  | 'runOnce';
+
+function getLitActionCodeAndJsParams(
+  variant: Variant,
+  state: any,
+  encryptedData?: any,
+  accs?: any,
+  authSig?: any
+): {
+  litActionCode: string;
+  jsParams: any;
+} {
+  switch (variant) {
+    case 'broadcastAndCollect':
+      return {
+        litActionCode: `
+        (async () => {
+          const resp = await Lit.Actions.broadcastAndCollect({
+            name: 'some-name',
+            value: 'some-value',
+          });
+          Lit.Actions.setResponse({ response: JSON.stringify(resp) });
+        })();`,
+        jsParams: undefined,
+      };
+    case 'checkConditionsWithoutAuthSig':
+      return {
+        litActionCode: `
+        (async () => {
+          const { accessControlConditions } = jsParams;
+          const resp = await Lit.Actions.checkConditions({
+            conditions: accessControlConditions,
+            chain: 'ethereum',
+          });
+          Lit.Actions.setResponse({ response: JSON.stringify(resp.toString()) });
+        })();`,
+        jsParams: {
+          accessControlConditions:
+            accs || state.masterAccount.pkp.accessControlConditions,
+        },
+      };
+    case 'signChildLitAction':
+      return {
+        litActionCode: `
+        (async () => {
+          const { sigName, publicKey } = jsParams;
+          let utf8Encode = new TextEncoder();
+          const toSign = utf8Encode.encode('This message is exactly 32 bytes');
+          const _ = await Lit.Actions.call({ ipfsId: 'QmRwN9GKHvCn4Vk7biqtr6adjXMs7PzzYPCzNCRjPFiDjm', params: {
+              toSign: Array.from(toSign),
+              publicKey,
+              sigName
+          }});
+        })();`,
+        jsParams: {
+          sigName: 'e2e-test-sig',
+          publicKey: state.masterAccount.pkp.pubkey,
+        },
+      };
+    case 'decryptToSingleNode':
+      return {
+        litActionCode: `
+        (async () => {
+          const { accessControlConditions, ciphertext, dataToEncryptHash } = jsParams;
+          const resp = await Lit.Actions.decryptToSingleNode({
+            accessControlConditions,
+            ciphertext,
+            dataToEncryptHash,
+            authSig: null,
+            chain: 'ethereum',
+          });
+          Lit.Actions.setResponse({ response: JSON.stringify(resp) });
+        })();`,
+        jsParams: {
+          accessControlConditions:
+            accs || state.masterAccount.pkp.accessControlConditions,
+          ciphertext: encryptedData?.ciphertext,
+          dataToEncryptHash: encryptedData?.dataToEncryptHash,
+        },
+      };
+    case 'runOnce':
+      return {
+        litActionCode: `
+        (async () => {
+          let temp = await Lit.Actions.runOnce(
+            { waitForResponse: false, name: 'weather' },
+            async () => {
+              const url = 'https://api.weather.gov/gridpoints/TOP/31,80/forecast';
+              const resp = await fetch(url).then((response) => response.json());
+              const temp = resp.properties.periods[0].temperature;
+              return temp;
+            }
+          );
+
+          Lit.Actions.setResponse({ response: JSON.stringify(temp) });
+        })();`,
+        jsParams: undefined,
+      };
+    case 'sign':
+      return {
+        litActionCode: `
+        (async () => {
+          const { sigName, toSign, publicKey } = jsParams;
+          const { keccak256, arrayify } = ethers.utils;
+          
+          const toSignBytes = new TextEncoder().encode(toSign);
+          const toSignBytes32 = keccak256(toSignBytes);
+          const toSignBytes32Array = arrayify(toSignBytes32);
+          
+          const sigShare = await Lit.Actions.signEcdsa({
+            toSign: toSignBytes32Array,
+            publicKey,
+            sigName,
+          });  
+        })();`,
+        jsParams: {
+          message: 'Test message from e2e executeJs',
+          sigName: 'e2e-test-sig',
+          toSign: 'Test message from e2e executeJs',
+          publicKey: state.masterAccount.pkp.pubkey,
+        },
+      };
+    default:
+      throw new Error(`Unknown variant: ${variant}`);
   }
 }

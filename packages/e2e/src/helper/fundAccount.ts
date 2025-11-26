@@ -104,10 +104,19 @@ export const fundAccount = async (
 
   const defaultRpcUrl = networkModule.getChainConfig().rpcUrls.default.http[0];
   const isLocalNetwork = defaultRpcUrl.includes('127.0.0.1');
+  const networkName =
+    typeof networkModule.getNetworkName === 'function'
+      ? networkModule.getNetworkName()
+      : undefined;
+  const isMainnetNetwork =
+    networkName === 'naga' || networkName === 'naga-proto';
   const customRpcUrl = isLocalNetwork
     ? process.env['LOCAL_RPC_URL']
-    : process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
-  const rpcUrl = customRpcUrl || defaultRpcUrl;
+    : process.env[
+        isMainnetNetwork
+          ? 'LIT_MAINNET_RPC_URL'
+          : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL'
+      ];
 
   if (customRpcUrl) {
     console.log(`- Using custom E2E RPC URL:`, `***${customRpcUrl.slice(-6)}`);

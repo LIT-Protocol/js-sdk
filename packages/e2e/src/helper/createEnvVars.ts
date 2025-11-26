@@ -1,8 +1,25 @@
-const supportedNetworks = ['naga-local', 'naga-test', 'naga-dev'] as const;
+export const SUPPORTED_NETWORKS = [
+  'naga-local',
+  'naga-test',
+  'naga-dev',
+  'naga-staging',
+  'naga-proto',
+  'naga',
+] as const;
+export type SupportedNetwork = (typeof SUPPORTED_NETWORKS)[number];
 type EnvName = 'local' | 'live';
 
+const RPC_ENV_KEY_BY_NETWORK: Record<SupportedNetwork, string | undefined> = {
+  'naga-local': undefined,
+  'naga-dev': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
+  'naga-test': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
+  'naga-staging': 'LIT_YELLOWSTONE_PRIVATE_RPC_URL',
+  'naga-proto': 'LIT_MAINNET_RPC_URL',
+  naga: 'LIT_MAINNET_RPC_URL',
+} as const;
+
 export type EnvVars = {
-  network: string;
+  network: SupportedNetwork;
   privateKey: `0x${string}`;
   rpcUrl?: string | undefined;
   localContextPath?: string;
@@ -19,13 +36,18 @@ const testEnv: Record<
 
 export function createEnvVars(): EnvVars {
   // 1. Get network string
-  const network = process.env['NETWORK']!!;
+  const networkEnv = process.env['NETWORK'];
 
-  if (!network || !supportedNetworks.includes(network as any)) {
+  if (
+    !networkEnv ||
+    !SUPPORTED_NETWORKS.includes(networkEnv as SupportedNetwork)
+  ) {
     throw new Error(
-      `❌ NETWORK env var is not set or not supported. Found. ${network}`
+      `❌ NETWORK env var is not set or not supported. Found. ${networkEnv}`
     );
   }
+
+  const network = networkEnv as SupportedNetwork;
 
   const selectedNetwork = network.includes('local') ? 'local' : 'live';
 
@@ -71,11 +93,20 @@ export function createEnvVars(): EnvVars {
   }
 
   // -- live networks
-  if (network === 'naga-dev' || network === 'naga-test') {
-    const liveRpcUrl = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  const rpcEnvKey = RPC_ENV_KEY_BY_NETWORK[network];
 
+  if (rpcEnvKey) {
+    console.log(
+      `ℹ️ Checking override env var ${rpcEnvKey} for network ${network}`
+    );
+    const liveRpcUrl = process.env[rpcEnvKey];
     if (liveRpcUrl) {
       rpcUrl = liveRpcUrl;
+      console.log(`🔧 Using RPC override (${rpcEnvKey}) for ${network}`);
+    } else {
+      console.log(
+        `ℹ️ No RPC override provided via ${rpcEnvKey}; using module default for ${network}`
+      );
     }
   }
 

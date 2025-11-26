@@ -62,6 +62,7 @@ import {
   extractFileMetadata,
   inferDataType,
 } from './helpers/convertDecryptedData';
+import { executeWithHandshake } from './helpers/executeWithHandshake';
 import { createPKPViemAccount } from './intergrations/createPkpViemAccount';
 import { orchestrateHandshake } from './orchestrateHandshake';
 import {
@@ -206,6 +207,45 @@ export const _createNagaLitClient = async (
     );
   }
 
+  const buildHandshakeExecutionContext = async () => {
+    const handshakeResult = _stateManager.getCallbackResult();
+    const connectionInfo = _stateManager.getLatestConnectionInfo();
+
+    if (!handshakeResult || !connectionInfo) {
+      throw new LitNodeClientNotReadyError(
+        {
+          cause: new Error(
+            'Handshake result unavailable while building execution context'
+          ),
+          info: {
+            operation: 'buildHandshakeExecutionContext',
+          },
+        },
+        'Handshake result is not available from state manager.'
+      );
+    }
+
+    const jitContext = await networkModule.api.createJitContext(
+      connectionInfo,
+      handshakeResult
+    );
+
+    return { handshakeResult, connectionInfo, jitContext };
+  };
+
+  const refreshHandshakeExecutionContext = async (reason: string) => {
+    if (typeof _stateManager.refreshHandshake === 'function') {
+      _logger.info({ reason }, 'Refreshing handshake via state manager');
+      await _stateManager.refreshHandshake(reason);
+    } else {
+      _logger.warn(
+        { reason },
+        'State manager does not expose refreshHandshake; proceeding without manual refresh.'
+      );
+    }
+    return await buildHandshakeExecutionContext();
+  };
+
   async function _pkpSign(
     params: z.infer<typeof networkModule.api.pkpSign.schemas.Input.raw> & {
       bypassAutoHashing?: boolean;
@@ -217,149 +257,102 @@ export const _createNagaLitClient = async (
       })`
     );
 
-    // 🟩 get the fresh handshake results
-    const currentHandshakeResult = _stateManager.getCallbackResult();
-    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+    return await executeWithHandshake({
+      operation: 'pkpSign',
+      buildContext: buildHandshakeExecutionContext,
+      refreshContext: refreshHandshakeExecutionContext,
+      runner: async ({ handshakeResult, connectionInfo, jitContext }) => {
+        // 🟪 Create requests
+        // 1. This is where the orchestration begins — we delegate the creation of the
+        // request array to the `networkModule`. It encapsulates logic specific to the
+        // active network (e.g., pricing, thresholds, metadata) and returns a set of
+        // structured requests ready to be dispatched to the nodes.
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new LitNodeClientNotReadyError(
-        {
-          cause: new Error('Handshake result unavailable for pkpSign'),
-          info: {
-            operation: 'pkpSign',
+        const signingContext: any = {
+          pubKey: params.pubKey,
+          toSign: params.toSign,
+          signingScheme: params.signingScheme,
+        };
+
+        if (params.bypassAutoHashing) {
+          signingContext.bypassAutoHashing = true;
+        }
+
+        const requestArray = (await networkModule.api.pkpSign.createRequest({
+          serverKeys: handshakeResult.serverKeys,
+          pricingContext: {
+            product: 'SIGN',
+            userMaxPrice: params.userMaxPrice,
+            nodePrices: jitContext.nodePrices,
+            threshold: handshakeResult.threshold,
           },
-        },
-        'Handshake result is not available from state manager at the time of pkpSign.'
-      );
-    }
+          authContext: params.authContext,
+          signingContext,
+          connectionInfo,
+          version: networkModule.version,
+          chain: params.chain,
+          jitContext,
+        })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
-    if (!currentConnectionInfo) {
-      throw new Error(
-        'Connection info is not available from state manager at the time of pkpSign.'
-      );
-    }
+        const requestId = requestArray[0].requestId;
 
-    const jitContext = await networkModule.api.createJitContext(
-      currentConnectionInfo,
-      currentHandshakeResult
-    );
+        // 🟩 Dispatch requests
+        // 2. With the request array prepared, we now coordinate the parallel execution
+        // across multiple nodes. This step handles batching, minimum threshold success
+        // tracking, and error tolerance. The orchestration layer ensures enough valid
+        // responses are collected before proceeding.
+        const result = await dispatchRequests<
+          z.infer<typeof EncryptedVersion1Schema>,
+          z.infer<typeof EncryptedVersion1Schema>
+        >(requestArray, requestId, handshakeResult.threshold);
 
-    // 🟪 Create requests
-    // 1. This is where the orchestration begins — we delegate the creation of the
-    // request array to the `networkModule`. It encapsulates logic specific to the
-    // active network (e.g., pricing, thresholds, metadata) and returns a set of
-    // structured requests ready to be dispatched to the nodes.
-
-    // Create signing context with optional bypass flag
-    const signingContext: any = {
-      pubKey: params.pubKey,
-      toSign: params.toSign,
-      signingScheme: params.signingScheme,
-    };
-
-    // Add bypass flag if provided
-    if (params.bypassAutoHashing) {
-      signingContext.bypassAutoHashing = true;
-    }
-
-    const requestArray = (await networkModule.api.pkpSign.createRequest({
-      // add chain context (btc, eth, cosmos, solana)
-      serverKeys: currentHandshakeResult.serverKeys,
-      pricingContext: {
-        product: 'SIGN',
-        userMaxPrice: params.userMaxPrice,
-        nodePrices: jitContext.nodePrices,
-        threshold: currentHandshakeResult.threshold,
+        // 🟪 Handle response
+        // 3. Once node responses are received and validated, we delegate final
+        // interpretation and formatting of the result back to the `networkModule`.
+        // This allows the module to apply network-specific logic such as decoding,
+        // formatting, or transforming the response into a usable signature object.
+        return await networkModule.api.pkpSign.handleResponse(
+          result as any,
+          requestId,
+          jitContext
+        );
       },
-      authContext: params.authContext,
-      signingContext,
-      connectionInfo: currentConnectionInfo,
-      version: networkModule.version,
-      chain: params.chain,
-      jitContext,
-    })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
-
-    const requestId = requestArray[0].requestId;
-
-    // 🟩 Dispatch requests
-    // 2. With the request array prepared, we now coordinate the parallel execution
-    // across multiple nodes. This step handles batching, minimum threshold success
-    // tracking, and error tolerance. The orchestration layer ensures enough valid
-    // responses are collected before proceeding.
-    const result = await dispatchRequests<
-      z.infer<typeof EncryptedVersion1Schema>,
-      z.infer<typeof EncryptedVersion1Schema>
-    >(requestArray, requestId, currentHandshakeResult.threshold);
-
-    // 🟪 Handle response
-    // 3. Once node responses are received and validated, we delegate final
-    // interpretation and formatting of the result back to the `networkModule`.
-    // This allows the module to apply network-specific logic such as decoding,
-    // formatting, or transforming the response into a usable signature object.
-
-    // Pass the success result to handleResponse - the result structure matches GenericEncryptedPayloadSchema
-    return await networkModule.api.pkpSign.handleResponse(
-      result as any,
-      requestId,
-      jitContext
-    );
+    });
   }
 
   async function _signSessionKey(params: {
     nodeUrls: string[];
     requestBody: z.infer<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
   }): Promise<AuthSig> {
-    // 1. 🟩 get the fresh handshake results
-    const currentHandshakeResult = _stateManager.getCallbackResult();
-    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+    return await executeWithHandshake({
+      operation: 'signSessionKey',
+      buildContext: buildHandshakeExecutionContext,
+      refreshContext: refreshHandshakeExecutionContext,
+      runner: async ({ handshakeResult, jitContext }) => {
+        const requestArray =
+          await networkModule.api.signSessionKey.createRequest(
+            params.requestBody,
+            networkModule.config.httpProtocol,
+            networkModule.version,
+            jitContext
+          );
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new LitNodeClientNotReadyError(
-        {
-          cause: new Error('Handshake result unavailable for signSessionKey'),
-          info: {
-            operation: 'signSessionKey',
-          },
-        },
-        'Handshake result is not available from state manager at the time of pkpSign.'
-      );
-    }
+        const requestId = requestArray[0].requestId;
 
-    if (!currentConnectionInfo) {
-      throw new Error(
-        'Connection info is not available from state manager at the time of pkpSign.'
-      );
-    }
+        const result = await dispatchRequests<any, any>(
+          requestArray,
+          requestId,
+          handshakeResult.threshold
+        );
 
-    const jitContext = await networkModule.api.createJitContext(
-      currentConnectionInfo,
-      currentHandshakeResult
-    );
-
-    // 2. 🟪 Create requests
-    const requestArray = await networkModule.api.signSessionKey.createRequest(
-      params.requestBody,
-      networkModule.config.httpProtocol,
-      networkModule.version,
-      jitContext
-    );
-
-    const requestId = requestArray[0].requestId;
-
-    // 3. 🟩 Dispatch requests
-    const result = await dispatchRequests<any, any>(
-      requestArray,
-      requestId,
-      currentHandshakeResult.threshold
-    );
-
-    // 4. 🟪 Handle response
-    return await networkModule.api.signSessionKey.handleResponse(
-      result as any,
-      params.requestBody.pkpPublicKey,
-      jitContext,
-      requestId
-    );
+        return await networkModule.api.signSessionKey.handleResponse(
+          result as any,
+          params.requestBody.pkpPublicKey,
+          jitContext,
+          requestId
+        );
+      },
+    });
   }
 
   async function _signCustomSessionKey(params: {
@@ -368,74 +361,35 @@ export const _createNagaLitClient = async (
       typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
     >;
   }): Promise<AuthSig> {
-    // 1. 🟩 get the fresh handshake results
-    const currentHandshakeResult = _stateManager.getCallbackResult();
-    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+    return await executeWithHandshake({
+      operation: 'signCustomSessionKey',
+      buildContext: buildHandshakeExecutionContext,
+      refreshContext: refreshHandshakeExecutionContext,
+      runner: async ({ handshakeResult, jitContext }) => {
+        const requestArray =
+          await networkModule.api.signCustomSessionKey.createRequest(
+            params.requestBody,
+            networkModule.config.httpProtocol,
+            networkModule.version,
+            jitContext
+          );
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new LitNodeClientNotReadyError(
-        {
-          cause: new Error(
-            'Handshake result unavailable for signCustomSessionKey'
-          ),
-          info: {
-            operation: 'signCustomSessionKey',
-          },
-        },
-        'Handshake result is not available from state manager at the time of pkpSign.'
-      );
-    }
+        const requestId = requestArray[0].requestId;
 
-    if (!currentConnectionInfo) {
-      throw new Error(
-        'Connection info is not available from state manager at the time of pkpSign.'
-      );
-    }
+        const result = await dispatchRequests<any, any>(
+          requestArray,
+          requestId,
+          handshakeResult.threshold
+        );
 
-    const jitContext = await networkModule.api.createJitContext(
-      currentConnectionInfo,
-      currentHandshakeResult
-    );
-
-    if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new LitNodeClientNotReadyError(
-        {
-          cause: new Error(
-            'Handshake result unavailable for signCustomSessionKey'
-          ),
-          info: {
-            operation: 'signCustomSessionKey',
-          },
-        },
-        'Handshake result is not available from state manager at the time of pkpSign.'
-      );
-    }
-
-    // 2. 🟪 Create requests
-    const requestArray =
-      await networkModule.api.signCustomSessionKey.createRequest(
-        params.requestBody,
-        networkModule.config.httpProtocol,
-        networkModule.version,
-        jitContext
-      );
-
-    const requestId = requestArray[0].requestId;
-
-    // 3. 🟩 Dispatch requests
-    const result = await dispatchRequests<any, any>(
-      requestArray,
-      requestId,
-      currentHandshakeResult.threshold
-    );
-
-    // 4. 🟪 Handle response
-    return await networkModule.api.signCustomSessionKey.handleResponse(
-      result as any,
-      params.requestBody.pkpPublicKey,
-      jitContext,
-      requestId
-    );
+        return await networkModule.api.signCustomSessionKey.handleResponse(
+          result as any,
+          params.requestBody.pkpPublicKey,
+          jitContext,
+          requestId
+        );
+      },
+    });
   }
 
   async function _executeJs(
@@ -443,100 +397,65 @@ export const _createNagaLitClient = async (
   ): Promise<ExecuteJsResponse> {
     _logger.info(`🔥 executing JS with ${params.code ? 'code' : 'ipfsId'}`);
 
-    // 🟩 get the fresh handshake results
-    const currentHandshakeResult = _stateManager.getCallbackResult();
-    const currentConnectionInfo = _stateManager.getLatestConnectionInfo();
+    return await executeWithHandshake({
+      operation: 'executeJs',
+      buildContext: buildHandshakeExecutionContext,
+      refreshContext: refreshHandshakeExecutionContext,
+      runner: async ({ handshakeResult, connectionInfo, jitContext }) => {
+        type ExecuteJsCreateRequestParams = Parameters<
+          typeof networkModule.api.executeJs.createRequest
+        >[0];
 
-    if (!currentHandshakeResult || !currentConnectionInfo) {
-      throw new LitNodeClientNotReadyError(
-        {
-          cause: new Error('Handshake result unavailable for executeJs'),
-          info: {
-            operation: 'executeJs',
+        const pricingContext: ExecuteJsCreateRequestParams['pricingContext'] = {
+          product: 'LIT_ACTION',
+          userMaxPrice: params.userMaxPrice,
+          nodePrices: jitContext.nodePrices,
+          threshold: handshakeResult.threshold,
+        };
+
+        const baseExecuteJsParams = {
+          pricingContext,
+          executionContext: {
+            code: params.code,
+            ipfsId: params.ipfsId,
+            jsParams: params.jsParams,
           },
-        },
-        'Handshake result is not available from state manager at the time of executeJs.'
-      );
-    }
+          connectionInfo,
+          version: networkModule.version,
+          useSingleNode: params.useSingleNode,
+          responseStrategy: params.responseStrategy,
+          jitContext,
+        };
 
-    if (!currentConnectionInfo) {
-      throw new Error(
-        'Connection info is not available from state manager at the time of executeJs.'
-      );
-    }
+        const executeJsParams: ExecuteJsCreateRequestParams =
+          'sessionSigs' in params && params.sessionSigs
+            ? {
+                ...baseExecuteJsParams,
+                sessionSigs: params.sessionSigs,
+              }
+            : {
+                ...baseExecuteJsParams,
+                authContext: params.authContext,
+              };
 
-    const jitContext = await networkModule.api.createJitContext(
-      currentConnectionInfo,
-      currentHandshakeResult
-    );
+        const requestArray = (await networkModule.api.executeJs.createRequest(
+          executeJsParams
+        )) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
-    // 🟪 Create requests
-    // 1. This is where the orchestration begins — we delegate the creation of the
-    // request array to the `networkModule`. It encapsulates logic specific to the
-    // active network (e.g., pricing, thresholds, metadata) and returns a set of
-    // structured requests ready to be dispatched to the nodes.
-    type ExecuteJsCreateRequestParams = Parameters<
-      typeof networkModule.api.executeJs.createRequest
-    >[0];
+        const requestId = requestArray[0].requestId;
 
-    const pricingContext: ExecuteJsCreateRequestParams['pricingContext'] = {
-      product: 'LIT_ACTION',
-      userMaxPrice: params.userMaxPrice,
-      nodePrices: jitContext.nodePrices,
-      threshold: currentHandshakeResult.threshold,
-    };
+        const result = await dispatchRequests<
+          z.infer<typeof EncryptedVersion1Schema>,
+          z.infer<typeof EncryptedVersion1Schema>
+        >(requestArray, requestId, handshakeResult.threshold);
 
-    const baseExecuteJsParams = {
-      pricingContext,
-      executionContext: {
-        code: params.code,
-        ipfsId: params.ipfsId,
-        jsParams: params.jsParams,
+        return await networkModule.api.executeJs.handleResponse(
+          result as any,
+          requestId,
+          jitContext
+        );
       },
-      connectionInfo: currentConnectionInfo,
-      version: networkModule.version,
-      useSingleNode: params.useSingleNode,
-      responseStrategy: params.responseStrategy,
-      jitContext,
-    };
-
-    const executeJsParams: ExecuteJsCreateRequestParams =
-      'sessionSigs' in params && params.sessionSigs
-        ? {
-            ...baseExecuteJsParams,
-            sessionSigs: params.sessionSigs,
-          }
-        : {
-            ...baseExecuteJsParams,
-            authContext: params.authContext,
-          };
-
-    const requestArray = (await networkModule.api.executeJs.createRequest(
-      executeJsParams
-    )) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
-
-    const requestId = requestArray[0].requestId;
-
-    // 🟩 Dispatch requests
-    // 2. With the request array prepared, we now coordinate the parallel execution
-    // across multiple nodes. This step handles batching, minimum threshold success
-    // tracking, and error tolerance. The orchestration layer ensures enough valid
-    // responses are collected before proceeding.
-    const result = await dispatchRequests<
-      z.infer<typeof EncryptedVersion1Schema>,
-      z.infer<typeof EncryptedVersion1Schema>
-    >(requestArray, requestId, currentHandshakeResult.threshold);
-
-    // 🟪 Handle response
-    // 3. Once node responses are received and validated, we delegate final
-    // interpretation and formatting of the result back to the `networkModule`.
-    // This allows the module to apply network-specific logic such as decoding,
-    // formatting, or transforming the response into a usable executeJs result.
-    return await networkModule.api.executeJs.handleResponse(
-      result as any,
-      requestId,
-      jitContext
-    );
+    });
   }
 
   /**
@@ -685,7 +604,7 @@ export const _createNagaLitClient = async (
     // ========== Hash Private Data ==========
     const hashOfPrivateData = await crypto.subtle.digest(
       'SHA-256',
-      dataAsUint8Array
+      dataAsUint8Array as BufferSource
     );
     const hashOfPrivateDataStr = uint8arrayToString(
       new Uint8Array(hashOfPrivateData),
