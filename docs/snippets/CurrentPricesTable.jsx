@@ -1,4 +1,4 @@
-import { useEffect, useState, React } from 'react';
+import { useEffect, useState } from 'react';
 import { createPublicClient, http, formatUnits } from 'viem';
 
 // Naga Prod PriceFeed contract address
@@ -229,7 +229,7 @@ function formatPrice(priceInTokens, priceInUSD) {
   return `${priceInTokens.toFixed(6)} LITKEY ($${priceInUSD.toFixed(6)})`;
 }
 
-export function CurrentPricesTable() {
+export const CurrentPricesTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [basePrices, setBasePrices] = useState([]);
