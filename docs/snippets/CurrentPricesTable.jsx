@@ -331,6 +331,16 @@ export const CurrentPricesTable = () => {
             <tr style={{ backgroundColor: '#f5f5f5' }}>
               <th
                 style={{
+                  padding: '8px 10px',
+                  textAlign: 'right',
+                  border: '1px solid #ddd',
+                  fontSize: '0.9em',
+                }}
+              >
+                Current Price
+              </th>
+              <th
+                style={{
                   padding: '8px 6px 8px 0',
                   textAlign: 'left',
                   border: '1px solid #ddd',
@@ -359,16 +369,6 @@ export const CurrentPricesTable = () => {
               >
                 Max Price
               </th>
-              <th
-                style={{
-                  padding: '8px 10px',
-                  textAlign: 'right',
-                  border: '1px solid #ddd',
-                  fontSize: '0.9em',
-                }}
-              >
-                Current Price
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -388,6 +388,18 @@ export const CurrentPricesTable = () => {
 
               return (
                 <tr key={productId}>
+                  <td
+                    style={{
+                      padding: '8px 10px',
+                      textAlign: 'right',
+                      border: '1px solid #ddd',
+                      fontFamily: 'monospace',
+                      fontWeight: '600',
+                      fontSize: '0.85em',
+                    }}
+                  >
+                    {formatPrice(currentPriceInTokens, currentPriceInUSD)}
+                  </td>
                   <td
                     style={{
                       padding: '8px 6px 8px 0',
@@ -419,18 +431,6 @@ export const CurrentPricesTable = () => {
                     }}
                   >
                     {formatPrice(maxPriceInTokens, maxPriceInUSD)}
-                  </td>
-                  <td
-                    style={{
-                      padding: '8px 10px',
-                      textAlign: 'right',
-                      border: '1px solid #ddd',
-                      fontFamily: 'monospace',
-                      fontWeight: '600',
-                      fontSize: '0.85em',
-                    }}
-                  >
-                    {formatPrice(currentPriceInTokens, currentPriceInUSD)}
                   </td>
                 </tr>
               );
