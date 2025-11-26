@@ -303,7 +303,7 @@ export const CurrentPricesTable = () => {
   }
 
   return (
-    <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+    <div style={{ marginTop: '20px', marginBottom: '20px', paddingLeft: '4px' }}>
       {litKeyPriceUSD && (
         <p style={{ marginBottom: '20px', fontSize: '0.9em', color: '#666' }}>
           <strong>LITKEY Price:</strong> ${litKeyPriceUSD.toFixed(4)} USD
@@ -315,13 +315,15 @@ export const CurrentPricesTable = () => {
         </p>
       )}
 
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'auto', marginLeft: '0', marginRight: '0', paddingLeft: '0' }}>
         <table
           style={{
             width: '100%',
             maxWidth: '100%',
             borderCollapse: 'collapse',
             marginBottom: '30px',
+            marginLeft: '0',
+            marginRight: '0',
             tableLayout: 'auto',
           }}
         >
@@ -329,7 +331,7 @@ export const CurrentPricesTable = () => {
             <tr style={{ backgroundColor: '#f5f5f5' }}>
               <th
                 style={{
-                  padding: '8px 10px',
+                  padding: '8px 6px 8px 0',
                   textAlign: 'left',
                   border: '1px solid #ddd',
                   fontSize: '0.9em',
@@ -388,7 +390,7 @@ export const CurrentPricesTable = () => {
                 <tr key={productId}>
                   <td
                     style={{
-                      padding: '8px 10px',
+                      padding: '8px 6px 8px 0',
                       border: '1px solid #ddd',
                       fontWeight: '500',
                       fontSize: '0.9em',
@@ -440,12 +442,14 @@ export const CurrentPricesTable = () => {
       <h3 style={{ marginTop: '40px', marginBottom: '20px' }}>
         Lit Action Price Components
       </h3>
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'auto', marginLeft: '0', marginRight: '0', paddingLeft: '0' }}>
         <table
           style={{
             width: '100%',
             maxWidth: '100%',
             borderCollapse: 'collapse',
+            marginLeft: '0',
+            marginRight: '0',
             tableLayout: 'auto',
           }}
         >
