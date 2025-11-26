@@ -319,44 +319,50 @@ export const CurrentPricesTable = () => {
         <table
           style={{
             width: '100%',
+            maxWidth: '100%',
             borderCollapse: 'collapse',
             marginBottom: '30px',
+            tableLayout: 'auto',
           }}
         >
           <thead>
             <tr style={{ backgroundColor: '#f5f5f5' }}>
               <th
                 style={{
-                  padding: '12px',
+                  padding: '8px 10px',
                   textAlign: 'left',
                   border: '1px solid #ddd',
+                  fontSize: '0.9em',
                 }}
               >
                 Product
               </th>
               <th
                 style={{
-                  padding: '12px',
+                  padding: '8px 10px',
                   textAlign: 'right',
                   border: '1px solid #ddd',
+                  fontSize: '0.9em',
                 }}
               >
                 Base Price
               </th>
               <th
                 style={{
-                  padding: '12px',
+                  padding: '8px 10px',
                   textAlign: 'right',
                   border: '1px solid #ddd',
+                  fontSize: '0.9em',
                 }}
               >
                 Max Price
               </th>
               <th
                 style={{
-                  padding: '12px',
+                  padding: '8px 10px',
                   textAlign: 'right',
                   border: '1px solid #ddd',
+                  fontSize: '0.9em',
                 }}
               >
                 Current Price
@@ -382,40 +388,44 @@ export const CurrentPricesTable = () => {
                 <tr key={productId}>
                   <td
                     style={{
-                      padding: '12px',
+                      padding: '8px 10px',
                       border: '1px solid #ddd',
                       fontWeight: '500',
+                      fontSize: '0.9em',
                     }}
                   >
                     {PRODUCT_NAMES[productId]}
                   </td>
                   <td
                     style={{
-                      padding: '12px',
+                      padding: '8px 10px',
                       textAlign: 'right',
                       border: '1px solid #ddd',
                       fontFamily: 'monospace',
+                      fontSize: '0.85em',
                     }}
                   >
                     {formatPrice(basePriceInTokens, basePriceInUSD)}
                   </td>
                   <td
                     style={{
-                      padding: '12px',
+                      padding: '8px 10px',
                       textAlign: 'right',
                       border: '1px solid #ddd',
                       fontFamily: 'monospace',
+                      fontSize: '0.85em',
                     }}
                   >
                     {formatPrice(maxPriceInTokens, maxPriceInUSD)}
                   </td>
                   <td
                     style={{
-                      padding: '12px',
+                      padding: '8px 10px',
                       textAlign: 'right',
                       border: '1px solid #ddd',
                       fontFamily: 'monospace',
                       fontWeight: '600',
+                      fontSize: '0.85em',
                     }}
                   >
                     {formatPrice(currentPriceInTokens, currentPriceInUSD)}
@@ -434,25 +444,29 @@ export const CurrentPricesTable = () => {
         <table
           style={{
             width: '100%',
+            maxWidth: '100%',
             borderCollapse: 'collapse',
+            tableLayout: 'auto',
           }}
         >
           <thead>
             <tr style={{ backgroundColor: '#f5f5f5' }}>
               <th
                 style={{
-                  padding: '12px',
+                  padding: '8px 10px',
                   textAlign: 'left',
                   border: '1px solid #ddd',
+                  fontSize: '0.9em',
                 }}
               >
                 Component
               </th>
               <th
                 style={{
-                  padding: '12px',
+                  padding: '8px 10px',
                   textAlign: 'right',
                   border: '1px solid #ddd',
+                  fontSize: '0.9em',
                 }}
               >
                 Price
@@ -477,8 +491,9 @@ export const CurrentPricesTable = () => {
                 <tr key={index}>
                   <td
                     style={{
-                      padding: '12px',
+                      padding: '8px 10px',
                       border: '1px solid #ddd',
+                      fontSize: '0.9em',
                     }}
                   >
                     {componentName}
@@ -490,10 +505,11 @@ export const CurrentPricesTable = () => {
                   </td>
                   <td
                     style={{
-                      padding: '12px',
+                      padding: '8px 10px',
                       textAlign: 'right',
                       border: '1px solid #ddd',
                       fontFamily: 'monospace',
+                      fontSize: '0.85em',
                     }}
                   >
                     {formatPrice(priceInTokens, priceInUSD)}
