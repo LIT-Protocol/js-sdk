@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, React } from 'react';
 import { createPublicClient, http, formatUnits } from 'viem';
 
 // Naga Prod PriceFeed contract address
