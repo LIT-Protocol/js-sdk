@@ -1,0 +1,57 @@
+---
+title: "Payment Model"
+---
+
+Lit Protocol uses a token-based payment system to ensure the decentralized network can sustain itself and compensate node operators for providing cryptographic services.
+
+## How Payment Works
+
+### Token Deposit System
+
+To use Lit Protocol's services, you must first load tokens into the **Ledger Contract** on Lit Chain. This contract acts as a prepaid account that holds your $LITKEY tokens and automatically deducts fees as you use the network.
+
+### Dynamic Pricing Model
+
+Lit Protocol uses a dynamic pricing model that adjusts based on network usage:
+
+- **Base Price**: The minimum price for each service when the network has low usage
+- **Max Price**: The maximum price when the network is at full capacity
+- **Current Price**: The actual price at any given moment, which fluctuates between the base and max price based on current network usage
+
+This pricing mechanism ensures:
+- Fair pricing during low-usage periods (you pay less when demand is low)
+- Network stability during high-usage periods (prices increase to manage demand)
+- Sustainable compensation for node operators
+
+### Pricing in $LITKEY Tokens
+
+All services on Lit Protocol are priced in **$LITKEY tokens**, the native token of Lit Chain. When you use network services such as:
+
+- **PKP Signing**: Generating signatures with your Programmable Key Pair
+- **Encrypted Signing**: Signing with encrypted keys
+- **Lit Actions**: Executing serverless JavaScript functions
+- **Sign Session Key**: Session-based signing operations
+
+The network automatically deducts the appropriate amount of $LITKEY tokens from your ledger balance based on the current dynamic price.
+
+### Automatic Deduction
+
+When you make a request to the network, the system:
+1. Checks your ledger balance
+2. Calculates the current price for the requested service
+3. Deducts the required tokens from your balance
+4. Processes your request
+
+If your balance is insufficient, the request will fail. You can check your balance and deposit more tokens as needed using the [Payment Manager](/sdk/getting-started/payment-manager-setup).
+
+## Getting Started
+
+To start using Lit Protocol's paid services:
+
+1. **Acquire $LITKEY tokens** - Get tokens from exchanges or other sources
+2. **Set up Payment Manager** - Configure your payment system using the [Payment Manager Setup Guide](/sdk/getting-started/payment-manager-setup)
+3. **Deposit tokens** - Load tokens into the ledger contract
+4. **Use the network** - Start making requests; tokens will be deducted automatically
+
+For detailed information on current pricing, see the [Current Prices](/learning-lit/pricing/current-prices) page.
+

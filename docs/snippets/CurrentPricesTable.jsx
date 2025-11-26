@@ -1,0 +1,538 @@
+import { useEffect, useState } from 'react';
+import { createPublicClient, http, formatUnits } from 'viem';
+
+// Naga Prod PriceFeed contract address
+const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
+
+// Lit Chain configuration
+const LIT_CHAIN = {
+  id: 175200,
+  name: 'Lit Chain',
+  network: 'lit-chain',
+  nativeCurrency: {
+    name: 'Lit Chain',
+    symbol: 'LITKEY',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://lit-chain-rpc.litprotocol.com/'],
+    },
+    public: {
+      http: ['https://lit-chain-rpc.litprotocol.com/'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Lit Chain Explorer',
+      url: 'https://lit-chain-explorer.litprotocol.com/',
+    },
+  },
+};
+
+// Product IDs
+const ProductId = {
+  PkpSign: 0,
+  EncSign: 1,
+  LitAction: 2,
+  SignSessionKey: 3,
+};
+
+// LitActionPriceComponent enum values
+const LitActionPriceComponent = {
+  baseAmount: 0,
+  runtimeLength: 1,
+  memoryUsage: 2,
+  codeLength: 3,
+  responseLength: 4,
+  signatures: 5,
+  broadcasts: 6,
+  contractCalls: 7,
+  callDepth: 8,
+  decrypts: 9,
+  fetches: 10,
+};
+
+// NodePriceMeasurement enum values
+const NodePriceMeasurement = {
+  perSecond: 0,
+  perMegabyte: 1,
+  perCount: 2,
+};
+
+const PRODUCT_NAMES = {
+  [ProductId.PkpSign]: 'PKP Sign',
+  [ProductId.EncSign]: 'Encrypted Sign',
+  [ProductId.LitAction]: 'Lit Action',
+  [ProductId.SignSessionKey]: 'Sign Session Key',
+};
+
+const LIT_ACTION_COMPONENT_NAMES = {
+  [LitActionPriceComponent.baseAmount]: 'Base Amount',
+  [LitActionPriceComponent.runtimeLength]: 'Runtime Length',
+  [LitActionPriceComponent.memoryUsage]: 'Memory Usage',
+  [LitActionPriceComponent.codeLength]: 'Code Length',
+  [LitActionPriceComponent.responseLength]: 'Response Length',
+  [LitActionPriceComponent.signatures]: 'Signatures',
+  [LitActionPriceComponent.broadcasts]: 'Broadcasts',
+  [LitActionPriceComponent.contractCalls]: 'Contract Calls',
+  [LitActionPriceComponent.callDepth]: 'Call Depth',
+  [LitActionPriceComponent.decrypts]: 'Decrypts',
+  [LitActionPriceComponent.fetches]: 'Fetches',
+};
+
+const MEASUREMENT_NAMES = {
+  [NodePriceMeasurement.perSecond]: '/second',
+  [NodePriceMeasurement.perMegabyte]: '/MB',
+  [NodePriceMeasurement.perCount]: '/count',
+};
+
+// PriceFeed ABI (minimal - only functions we need)
+const PRICE_FEED_ABI = [
+  {
+    inputs: [
+      {
+        internalType: 'uint256[]',
+        name: 'productIds',
+        type: 'uint256[]',
+      },
+    ],
+    name: 'baseNetworkPrices',
+    outputs: [
+      {
+        internalType: 'uint256[]',
+        name: '',
+        type: 'uint256[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256[]',
+        name: 'productIds',
+        type: 'uint256[]',
+      },
+    ],
+    name: 'maxNetworkPrices',
+    outputs: [
+      {
+        internalType: 'uint256[]',
+        name: '',
+        type: 'uint256[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'usagePercent',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256[]',
+        name: 'productIds',
+        type: 'uint256[]',
+      },
+    ],
+    name: 'usagePercentToPrices',
+    outputs: [
+      {
+        internalType: 'uint256[]',
+        name: '',
+        type: 'uint256[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getLitActionPriceConfigs',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'enum LibPriceFeedStorage.LitActionPriceComponent',
+            name: 'priceComponent',
+            type: 'uint8',
+          },
+          {
+            internalType: 'enum LibPriceFeedStorage.NodePriceMeasurement',
+            name: 'priceMeasurement',
+            type: 'uint8',
+          },
+          {
+            internalType: 'uint256',
+            name: 'price',
+            type: 'uint256',
+          },
+        ],
+        internalType: 'struct LibPriceFeedStorage.LitActionPriceConfig[]',
+        name: '',
+        type: 'tuple[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
+
+/**
+ * Get LITKEY token price in USD from CoinGecko
+ */
+async function getLitKeyPrice() {
+  try {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=lit-protocol&vs_currencies=usd'
+    );
+    const data = await response.json();
+
+    if (data['lit-protocol'] && data['lit-protocol'].usd) {
+      return data['lit-protocol'].usd;
+    }
+
+    throw new Error('LIT price not found in CoinGecko response');
+  } catch (error) {
+    console.error('Error fetching LITKEY price from CoinGecko:', error);
+    return null; // Return null if we can't fetch price
+  }
+}
+
+/**
+ * Convert wei to LITKEY tokens (18 decimals)
+ */
+function weiToTokens(wei) {
+  return Number(formatUnits(wei, 18));
+}
+
+/**
+ * Format price for display
+ */
+function formatPrice(priceInTokens, priceInUSD) {
+  if (priceInUSD === null) {
+    return `${priceInTokens.toFixed(6)} LITKEY`;
+  }
+  return `${priceInTokens.toFixed(6)} LITKEY ($${priceInUSD.toFixed(6)})`;
+}
+
+export function CurrentPricesTable() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [basePrices, setBasePrices] = useState([]);
+  const [maxPrices, setMaxPrices] = useState([]);
+  const [currentPrices, setCurrentPrices] = useState([]);
+  const [litActionConfigs, setLitActionConfigs] = useState([]);
+  const [litKeyPriceUSD, setLitKeyPriceUSD] = useState(null);
+  const [usagePercent, setUsagePercent] = useState(null);
+
+  useEffect(() => {
+    async function fetchPrices() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Create public client
+        const publicClient = createPublicClient({
+          chain: LIT_CHAIN,
+          transport: http(LIT_CHAIN.rpcUrls.default.http[0]),
+        });
+
+        // Get LITKEY price in USD
+        const priceUSD = await getLitKeyPrice();
+        setLitKeyPriceUSD(priceUSD);
+
+        // Get product IDs
+        const productIds = [
+          ProductId.PkpSign,
+          ProductId.EncSign,
+          ProductId.LitAction,
+          ProductId.SignSessionKey,
+        ];
+
+        // Fetch base prices
+        const basePricesResult = await publicClient.readContract({
+          address: NAGA_PROD_PRICE_FEED_ADDRESS,
+          abi: PRICE_FEED_ABI,
+          functionName: 'baseNetworkPrices',
+          args: [productIds],
+        });
+
+        // Fetch max prices
+        const maxPricesResult = await publicClient.readContract({
+          address: NAGA_PROD_PRICE_FEED_ADDRESS,
+          abi: PRICE_FEED_ABI,
+          functionName: 'maxNetworkPrices',
+          args: [productIds],
+        });
+
+        // Fetch current prices (we'll estimate at 50% usage for now)
+        // In a real implementation, you might want to fetch actual usage from the contract
+        const estimatedUsage = 50;
+        setUsagePercent(estimatedUsage);
+        const currentPricesResult = await publicClient.readContract({
+          address: NAGA_PROD_PRICE_FEED_ADDRESS,
+          abi: PRICE_FEED_ABI,
+          functionName: 'usagePercentToPrices',
+          args: [estimatedUsage, productIds],
+        });
+
+        // Fetch LitAction price configs
+        const litActionConfigsResult = await publicClient.readContract({
+          address: NAGA_PROD_PRICE_FEED_ADDRESS,
+          abi: PRICE_FEED_ABI,
+          functionName: 'getLitActionPriceConfigs',
+        });
+
+        setBasePrices(basePricesResult);
+        setMaxPrices(maxPricesResult);
+        setCurrentPrices(currentPricesResult);
+        setLitActionConfigs(litActionConfigsResult);
+      } catch (err) {
+        console.error('Error fetching prices:', err);
+        setError(err.message || 'Failed to fetch prices');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPrices();
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <p>Loading current prices from blockchain...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '20px', color: 'red' }}>
+        <p>Error loading prices: {error}</p>
+        <p style={{ fontSize: '0.9em', marginTop: '10px' }}>
+          Please ensure you have an internet connection and try refreshing the page.
+        </p>
+      </div>
+    );
+  }
+
+  const productIds = [
+    ProductId.PkpSign,
+    ProductId.EncSign,
+    ProductId.LitAction,
+    ProductId.SignSessionKey,
+  ];
+
+  return (
+    <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+      {litKeyPriceUSD && (
+        <p style={{ marginBottom: '20px', fontSize: '0.9em', color: '#666' }}>
+          <strong>LITKEY Price:</strong> ${litKeyPriceUSD.toFixed(4)} USD
+          {usagePercent !== null && (
+            <span style={{ marginLeft: '20px' }}>
+              <strong>Estimated Network Usage:</strong> {usagePercent}%
+            </span>
+          )}
+        </p>
+      )}
+
+      <div style={{ overflowX: 'auto' }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginBottom: '30px',
+          }}
+        >
+          <thead>
+            <tr style={{ backgroundColor: '#f5f5f5' }}>
+              <th
+                style={{
+                  padding: '12px',
+                  textAlign: 'left',
+                  border: '1px solid #ddd',
+                }}
+              >
+                Product
+              </th>
+              <th
+                style={{
+                  padding: '12px',
+                  textAlign: 'right',
+                  border: '1px solid #ddd',
+                }}
+              >
+                Base Price
+              </th>
+              <th
+                style={{
+                  padding: '12px',
+                  textAlign: 'right',
+                  border: '1px solid #ddd',
+                }}
+              >
+                Max Price
+              </th>
+              <th
+                style={{
+                  padding: '12px',
+                  textAlign: 'right',
+                  border: '1px solid #ddd',
+                }}
+              >
+                Current Price
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {productIds.map((productId, index) => {
+              const basePriceInTokens = weiToTokens(basePrices[index]);
+              const maxPriceInTokens = weiToTokens(maxPrices[index]);
+              const currentPriceInTokens = weiToTokens(currentPrices[index]);
+              const basePriceInUSD = litKeyPriceUSD
+                ? basePriceInTokens * litKeyPriceUSD
+                : null;
+              const maxPriceInUSD = litKeyPriceUSD
+                ? maxPriceInTokens * litKeyPriceUSD
+                : null;
+              const currentPriceInUSD = litKeyPriceUSD
+                ? currentPriceInTokens * litKeyPriceUSD
+                : null;
+
+              return (
+                <tr key={productId}>
+                  <td
+                    style={{
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      fontWeight: '500',
+                    }}
+                  >
+                    {PRODUCT_NAMES[productId]}
+                  </td>
+                  <td
+                    style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      border: '1px solid #ddd',
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {formatPrice(basePriceInTokens, basePriceInUSD)}
+                  </td>
+                  <td
+                    style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      border: '1px solid #ddd',
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {formatPrice(maxPriceInTokens, maxPriceInUSD)}
+                  </td>
+                  <td
+                    style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      border: '1px solid #ddd',
+                      fontFamily: 'monospace',
+                      fontWeight: '600',
+                    }}
+                  >
+                    {formatPrice(currentPriceInTokens, currentPriceInUSD)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style={{ marginTop: '40px', marginBottom: '20px' }}>
+        Lit Action Price Components
+      </h3>
+      <div style={{ overflowX: 'auto' }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+          }}
+        >
+          <thead>
+            <tr style={{ backgroundColor: '#f5f5f5' }}>
+              <th
+                style={{
+                  padding: '12px',
+                  textAlign: 'left',
+                  border: '1px solid #ddd',
+                }}
+              >
+                Component
+              </th>
+              <th
+                style={{
+                  padding: '12px',
+                  textAlign: 'right',
+                  border: '1px solid #ddd',
+                }}
+              >
+                Price
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {litActionConfigs.map((config, index) => {
+              const priceComponentNum = Number(config.priceComponent);
+              const priceMeasurementNum = Number(config.priceMeasurement);
+              const componentName =
+                LIT_ACTION_COMPONENT_NAMES[priceComponentNum] ||
+                `Component ${priceComponentNum}`;
+              const measurementName =
+                MEASUREMENT_NAMES[priceMeasurementNum] || '';
+              const priceInTokens = weiToTokens(config.price);
+              const priceInUSD = litKeyPriceUSD
+                ? priceInTokens * litKeyPriceUSD
+                : null;
+
+              return (
+                <tr key={index}>
+                  <td
+                    style={{
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                    }}
+                  >
+                    {componentName}
+                    {measurementName && (
+                      <span style={{ color: '#666', marginLeft: '5px' }}>
+                        {measurementName}
+                      </span>
+                    )}
+                  </td>
+                  <td
+                    style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      border: '1px solid #ddd',
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {formatPrice(priceInTokens, priceInUSD)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
