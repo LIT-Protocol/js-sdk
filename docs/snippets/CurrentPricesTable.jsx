@@ -10,7 +10,7 @@ const LIT_CHAIN = {
   name: 'Lit Chain',
   network: 'lit-chain',
   nativeCurrency: {
-    name: 'Lit Chain',
+    name: 'Lit Protocol',
     symbol: 'LITKEY',
     decimals: 18,
   },
