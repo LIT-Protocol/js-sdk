@@ -253,15 +253,25 @@ export const CurrentPricesTable = () => {
       return;
     }
 
-    // Load ethers from CDN
+    // Load ethers from jsdelivr CDN (fallback to cdnjs if needed)
     const script = document.createElement('script');
-    script.src = 'https://cdn.ethers.io/lib/ethers-5.7.umd.min.js';
+    // Try jsdelivr first
+    script.src = 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js';
     script.onload = () => {
       setEthersLoaded(true);
     };
     script.onerror = () => {
-      setError('Failed to load ethers library from CDN');
-      setLoading(false);
+      // Fallback to cdnjs if jsdelivr fails
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js';
+      fallbackScript.onload = () => {
+        setEthersLoaded(true);
+      };
+      fallbackScript.onerror = () => {
+        setError('Failed to load ethers library from CDN');
+        setLoading(false);
+      };
+      document.head.appendChild(fallbackScript);
     };
     document.head.appendChild(script);
 
