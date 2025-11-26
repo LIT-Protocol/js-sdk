@@ -212,14 +212,15 @@ async function getLitKeyPrice() {
 }
 
 /**
- * Convert wei to LITKEY tokens (18 decimals)
+ * Convert wei to LITKEY tokens (18 decimals) using ethers
  */
-function weiToTokens(wei, viem) {
-  if (!viem || !viem.formatUnits) {
-    // Fallback if viem isn't loaded yet
-    return Number(wei) / 1e18;
+function weiToTokens(wei, ethers) {
+  if (!ethers || !ethers.utils) {
+    // Fallback if ethers isn't loaded yet
+    return 0;
   }
-  return Number(viem.formatUnits(wei, 18));
+  // Use ethers' formatUnits which handles BigNumber conversion safely
+  return parseFloat(ethers.utils.formatUnits(wei, 18));
 }
 
 /**
@@ -232,6 +233,7 @@ function formatPrice(priceInTokens, priceInUSD) {
   return `${priceInTokens.toFixed(6)} LITKEY ($${priceInUSD.toFixed(6)})`;
 }
 
+
 export const CurrentPricesTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -241,29 +243,37 @@ export const CurrentPricesTable = () => {
   const [litActionConfigs, setLitActionConfigs] = useState([]);
   const [litKeyPriceUSD, setLitKeyPriceUSD] = useState(null);
   const [usagePercent, setUsagePercent] = useState(null);
-  const [viemLoaded, setViemLoaded] = useState(false);
+  const [ethersLoaded, setEthersLoaded] = useState(false);
 
-  // Load viem from CDN
+  // Load ethers from CDN
   useEffect(() => {
-    // Check if viem is already loaded
-    if (window.viem) {
-      setViemLoaded(true);
+    // Check if ethers is already loaded
+    if (window.ethers) {
+      setEthersLoaded(true);
       return;
     }
 
-    // Load viem from esm.sh CDN (supports ES modules)
-    import('https://esm.sh/viem@2.38.3').then((viemModule) => {
-      window.viem = viemModule;
-      setViemLoaded(true);
-    }).catch((err) => {
-      console.error('Error loading viem:', err);
-      setError('Failed to load viem library from CDN');
+    // Load ethers from CDN
+    const script = document.createElement('script');
+    script.src = 'https://cdn.ethers.io/lib/ethers-5.7.umd.min.js';
+    script.onload = () => {
+      setEthersLoaded(true);
+    };
+    script.onerror = () => {
+      setError('Failed to load ethers library from CDN');
       setLoading(false);
-    });
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
   }, []);
 
   useEffect(() => {
-    if (!viemLoaded || !window.viem) {
+    if (!ethersLoaded || !window.ethers) {
       return;
     }
 
@@ -272,52 +282,29 @@ export const CurrentPricesTable = () => {
         setLoading(true);
         setError(null);
 
-        const viem = window.viem;
-        const { createPublicClient, http } = viem;
-
-        // Create public client
-        const publicClient = createPublicClient({
-          chain: LIT_CHAIN,
-          transport: http(LIT_CHAIN.rpcUrls.default.http[0]),
-        });
+        const { ethers } = window;
+        const rpcUrl = LIT_CHAIN.rpcUrls.default.http[0];
+        const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+        const contract = new ethers.Contract(NAGA_PROD_PRICE_FEED_ADDRESS, PRICE_FEED_ABI, provider);
 
         // Get LITKEY price in USD
         const priceUSD = await getLitKeyPrice();
         setLitKeyPriceUSD(priceUSD);
 
         // Fetch base prices
-        const basePricesResult = await publicClient.readContract({
-          address: NAGA_PROD_PRICE_FEED_ADDRESS,
-          abi: PRICE_FEED_ABI,
-          functionName: 'baseNetworkPrices',
-          args: [PRODUCT_IDS],
-        });
+        const basePricesResult = await contract.baseNetworkPrices(PRODUCT_IDS);
 
         // Fetch max prices
-        const maxPricesResult = await publicClient.readContract({
-          address: NAGA_PROD_PRICE_FEED_ADDRESS,
-          abi: PRICE_FEED_ABI,
-          functionName: 'maxNetworkPrices',
-          args: [PRODUCT_IDS],
-        });
+        const maxPricesResult = await contract.maxNetworkPrices(PRODUCT_IDS);
 
         // Fetch current prices (we'll estimate at 50% usage for now)
         // In a real implementation, you might want to fetch actual usage from the contract
         const estimatedUsage = 50;
         setUsagePercent(estimatedUsage);
-        const currentPricesResult = await publicClient.readContract({
-          address: NAGA_PROD_PRICE_FEED_ADDRESS,
-          abi: PRICE_FEED_ABI,
-          functionName: 'usagePercentToPrices',
-          args: [estimatedUsage, PRODUCT_IDS],
-        });
+        const currentPricesResult = await contract.usagePercentToPrices(estimatedUsage, PRODUCT_IDS);
 
         // Fetch LitAction price configs
-        const litActionConfigsResult = await publicClient.readContract({
-          address: NAGA_PROD_PRICE_FEED_ADDRESS,
-          abi: PRICE_FEED_ABI,
-          functionName: 'getLitActionPriceConfigs',
-        });
+        const litActionConfigsResult = await contract.getLitActionPriceConfigs();
 
         setBasePrices(basePricesResult);
         setMaxPrices(maxPricesResult);
@@ -332,7 +319,7 @@ export const CurrentPricesTable = () => {
     }
 
     fetchPrices();
-  }, [viemLoaded]);
+  }, [ethersLoaded]);
 
   if (loading) {
     return (
@@ -416,9 +403,9 @@ export const CurrentPricesTable = () => {
           </thead>
           <tbody>
             {PRODUCT_IDS.map((productId, index) => {
-              const basePriceInTokens = weiToTokens(basePrices[index], window.viem);
-              const maxPriceInTokens = weiToTokens(maxPrices[index], window.viem);
-              const currentPriceInTokens = weiToTokens(currentPrices[index], window.viem);
+              const basePriceInTokens = weiToTokens(basePrices[index], window.ethers);
+              const maxPriceInTokens = weiToTokens(maxPrices[index], window.ethers);
+              const currentPriceInTokens = weiToTokens(currentPrices[index], window.ethers);
               const basePriceInUSD = litKeyPriceUSD
                 ? basePriceInTokens * litKeyPriceUSD
                 : null;
@@ -519,7 +506,7 @@ export const CurrentPricesTable = () => {
                 `Component ${priceComponentNum}`;
               const measurementName =
                 MEASUREMENT_NAMES[priceMeasurementNum] || '';
-              const priceInTokens = weiToTokens(config.price, window.viem);
+              const priceInTokens = weiToTokens(config.price, window.ethers);
               const priceInUSD = litKeyPriceUSD
                 ? priceInTokens * litKeyPriceUSD
                 : null;
