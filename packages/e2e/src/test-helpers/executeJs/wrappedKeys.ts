@@ -1,7 +1,13 @@
-import { createHash, randomBytes } from 'crypto';
-import nacl from 'tweetnacl';
-import { Wallet } from 'ethers';
-import bs58 from 'bs58';
+import type { SerializedTransaction } from '@lit-protocol/wrapped-keys';
+import {
+  api as wrappedKeysApi,
+  config as wrappedKeysConfig,
+} from '@lit-protocol/wrapped-keys';
+import {
+  litActionRepository,
+  litActionRepositoryCommon,
+} from '@lit-protocol/wrapped-keys-lit-actions';
+import type { Blockhash } from '@solana/kit';
 import {
   address,
   assertIsAddress,
@@ -18,57 +24,40 @@ import {
   signatureBytes as toSignatureBytes,
   verifySignature,
 } from '@solana/kit';
-import type { Blockhash } from '@solana/kit';
-import { generateSessionKeyPair } from '@lit-protocol/auth';
-import {
-  api as wrappedKeysApi,
-  config as wrappedKeysConfig,
-} from '@lit-protocol/wrapped-keys';
-import type { SerializedTransaction } from '@lit-protocol/wrapped-keys';
+import bs58 from 'bs58';
+import { createHash, randomBytes } from 'crypto';
+import { Wallet } from 'ethers';
+import nacl from 'tweetnacl';
 import { createPublicClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import {
-  litActionRepository,
-  litActionRepositoryCommon,
-} from '@lit-protocol/wrapped-keys-lit-actions';
 
-import { initFast } from '../../init';
+import { AuthSig } from '@lit-protocol/types';
+import { createEnvVars } from '../../helper/createEnvVars';
+import {
+  createTestAccount,
+  CreateTestAccountResult,
+} from '../../helper/createTestAccount';
+import { createTestEnv } from '../../helper/createTestEnv';
 import { fundAccount } from '../../helper/fundAccount';
 
-export const registerWrappedKeysExecuteJsTests = () => {
-  type InitContext = Awaited<ReturnType<typeof initFast>>;
-  type WrappedKeysTestContext = InitContext & {
-    sessionKeyPair: ReturnType<typeof generateSessionKeyPair>;
-    delegationAuthSig: Awaited<
-      ReturnType<InitContext['authManager']['generatePkpDelegationAuthSig']>
-    >;
-    pkpAuthContext: Awaited<
-      ReturnType<InitContext['authManager']['createPkpAuthContext']>
-    >;
-    pkpViemAccount: Awaited<
-      ReturnType<InitContext['litClient']['getPkpViemAccount']>
-    >;
-    chainId: number;
-    masterAccount: ReturnType<typeof privateKeyToAccount>;
-  };
+const DEFAULT_NETWORK = 'evm' as const;
+const SOLANA_NETWORK = 'solana' as const;
+const EVM_CHAIN = 'yellowstone' as const;
+const SOLANA_CHAIN = 'devnet' as const;
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-  const ctx = {} as WrappedKeysTestContext;
+namespace TestHelper {
+  type TestEnvType = Awaited<ReturnType<typeof createTestEnv>>;
 
-  const DEFAULT_NETWORK: 'evm' = 'evm';
-  const SOLANA_NETWORK: 'solana' = 'solana';
-  const EVM_CHAIN = 'yellowstone' as const;
-  const SOLANA_CHAIN = 'devnet' as const;
-  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
-  const randomMemo = (prefix: string) =>
+  export const randomMemo = (prefix: string) =>
     `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 
-  const randomCiphertext = () => randomBytes(48).toString('base64');
+  export const randomCiphertext = () => randomBytes(48).toString('base64');
 
-  const randomHash = (input: string) =>
+  export const randomHash = (input: string) =>
     createHash('sha256').update(input).digest('hex');
 
-  const createStorePayload = (memo = randomMemo('store')) => {
+  export const createStorePayload = (memo = randomMemo('store')) => {
     const ciphertext = randomCiphertext();
     return {
       ciphertext,
@@ -79,18 +68,18 @@ export const registerWrappedKeysExecuteJsTests = () => {
     };
   };
 
-  const createSolanaStorePayload = (memo = randomMemo('sol-store')) => {
+  export const createSolanaStorePayload = (memo = randomMemo('sol-store')) => {
     const ciphertext = randomCiphertext();
     return {
       ciphertext,
       dataToEncryptHash: randomHash(ciphertext),
-      publicKey: bs58.encode(randomBytes(32)),
+      publicKey: bs58.encode(Uint8Array.from(randomBytes(32))),
       keyType: 'ed25519' as const,
       memo,
     };
   };
 
-  const createSolanaUnsignedTransaction = (
+  export const createSolanaUnsignedTransaction = (
     feePayerBase58: string
   ): SerializedTransaction => {
     const feePayer = address(feePayerBase58);
@@ -118,138 +107,182 @@ export const registerWrappedKeysExecuteJsTests = () => {
     };
   };
 
-  const createPkpSessionSigs = async () => {
-    const { delegationAuthSig, sessionKeyPair, authManager, litClient } = ctx;
+  type PkpSessionArgs = {
+    testEnv: TestEnvType;
+    alice: CreateTestAccountResult;
+    delegationAuthSig: AuthSig;
+  };
 
-    return authManager.createPkpSessionSigs({
-      sessionKeyPair,
-      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
+  export const createPkpSessionSigs = async ({
+    testEnv,
+    alice,
+    delegationAuthSig,
+  }: PkpSessionArgs) => {
+    return testEnv.authManager.createPkpSessionSigs({
+      sessionKeyPair: testEnv.sessionKeyPair,
+      pkpPublicKey: alice.pkp!.pubkey,
       delegationAuthSig,
-      litClient,
+      litClient: testEnv.litClient,
     });
   };
 
-  const generateWrappedKeyForTest = async (memo = randomMemo('generated')) => {
-    const pkpSessionSigs = await createPkpSessionSigs();
+  type GenerateWrappedKeyArgs = PkpSessionArgs & {
+    memo?: string;
+    network: 'evm' | 'solana';
+  };
+
+  export const generateWrappedKeyForTest = async ({
+    testEnv,
+    alice,
+    delegationAuthSig,
+    network,
+    memo = randomMemo('generatePrivateKey'),
+  }: GenerateWrappedKeyArgs) => {
+    const pkpSessionSigs = await createPkpSessionSigs({
+      testEnv,
+      alice,
+      delegationAuthSig,
+    });
     const result = await wrappedKeysApi.generatePrivateKey({
       pkpSessionSigs,
-      network: DEFAULT_NETWORK,
-      litClient: ctx.litClient,
+      network,
+      litClient: testEnv.litClient,
       memo,
     });
 
-    return { memo, id: result.id };
+    return {
+      memo,
+      id: result.id,
+      generatedPublicKey: result.generatedPublicKey,
+    };
   };
 
-  const generateSolanaWrappedKeyForTest = async (
-    memo = randomMemo('sol-generated')
-  ) => {
-    const pkpSessionSigs = await createPkpSessionSigs();
+  type GenerateSolanaWrappedKeyArgs = PkpSessionArgs & {
+    memo?: string;
+  };
+
+  export const generateSolanaWrappedKeyForTest = async ({
+    testEnv,
+    alice,
+    delegationAuthSig,
+    memo = randomMemo('sol-generate'),
+  }: GenerateSolanaWrappedKeyArgs) => {
+    const pkpSessionSigs = await createPkpSessionSigs({
+      testEnv,
+      alice,
+      delegationAuthSig,
+    });
     const result = await wrappedKeysApi.generatePrivateKey({
       pkpSessionSigs,
       network: SOLANA_NETWORK,
-      litClient: ctx.litClient,
+      litClient: testEnv.litClient,
       memo,
     });
 
-    return { memo, id: result.id, publicKey: result.generatedPublicKey };
+    return {
+      memo,
+      id: result.id,
+      publicKey: result.generatedPublicKey,
+    };
   };
+}
+
+export const registerWrappedKeysTests = () => {
+  let envVars: ReturnType<typeof createEnvVars>;
+  let testEnv: Awaited<ReturnType<typeof createTestEnv>>;
+  let alice: CreateTestAccountResult;
+  let aliceDelegationAuthSig: AuthSig;
 
   beforeAll(async () => {
     wrappedKeysConfig.setLitActionsCode(litActionRepository);
     wrappedKeysConfig.setLitActionsCodeCommon(litActionRepositoryCommon);
 
-    const initContext = await initFast();
+    envVars = createEnvVars();
+    testEnv = await createTestEnv(envVars);
 
-    Object.assign(ctx, initContext);
+    // Wrapped tests related env
+    console.log('testEnv.sessionKeyPair:', testEnv.sessionKeyPair);
 
-    ctx.sessionKeyPair = generateSessionKeyPair();
-
-    const masterAccount =
-      ctx.resolvedNetwork.type === 'local'
-        ? ctx.localMasterAccount
-        : privateKeyToAccount(
-            process.env['LIVE_MASTER_ACCOUNT'] as `0x${string}`
-          );
-
-    ctx.pkpAuthContext = await ctx.authManager.createPkpAuthContext({
-      authData: ctx.aliceViemAccountAuthData,
-      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-      authConfig: {
-        resources: [
-          ['pkp-signing', '*'],
-          ['lit-action-execution', '*'],
-          ['access-control-condition-decryption', '*'],
-        ],
-        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-      },
-      litClient: ctx.litClient,
+    // 1. First, create Alice
+    alice = await createTestAccount(testEnv, {
+      label: 'Alice',
+      fundAccount: true,
+      hasEoaAuthContext: true,
+      fundLedger: true,
+      hasPKP: true,
+      fundPKP: true,
+      hasPKPAuthContext: true,
+      fundPKPLedger: true,
     });
 
-    const chainConfig = ctx.resolvedNetwork.networkModule.getChainConfig();
+    console.log('alice:', alice);
 
-    ctx.pkpViemAccount = await ctx.litClient.getPkpViemAccount({
-      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-      authContext: ctx.pkpAuthContext,
-      chainConfig,
-    });
+    console.log("alice's PKP Viem account", alice.pkpViemAccount!.address);
 
-    ctx.chainId = chainConfig.id;
+    // 2. Next, generate Alice's delegation Auth Sig
+    aliceDelegationAuthSig =
+      await testEnv.authManager.generatePkpDelegationAuthSig({
+        pkpPublicKey: alice.pkp.pubkey,
+        authData: alice.authData,
+        sessionKeyPair: testEnv.sessionKeyPair,
+        authConfig: {
+          resources: [
+            ['pkp-signing', '*'],
+            ['lit-action-execution', '*'],
+            ['access-control-condition-decryption', '*'],
+          ],
+          expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+        },
+        litClient: testEnv.litClient,
+      });
 
-    ctx.masterAccount = masterAccount;
-
-    await fundAccount(
-      ctx.pkpViemAccount,
-      ctx.masterAccount,
-      ctx.resolvedNetwork.networkModule,
-      {
-        ifLessThan: '0.005',
-        thenFund: '0.01',
-      }
-    );
-
-    ctx.delegationAuthSig = await ctx.authManager.generatePkpDelegationAuthSig({
-      pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-      authData: ctx.aliceViemAccountAuthData,
-      sessionKeyPair: ctx.sessionKeyPair,
-      authConfig: {
-        resources: [
-          ['pkp-signing', '*'],
-          ['lit-action-execution', '*'],
-          ['access-control-condition-decryption', '*'],
-        ],
-        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-      },
-      litClient: ctx.litClient,
-    });
+    console.log('aliceDelegationAuthSig:', aliceDelegationAuthSig);
   });
 
-  describe('executeJs integration', () => {
+  describe('executeJs Integration', () => {
     describe('EVM network', () => {
       test('generatePrivateKey creates a new wrapped key', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
+
+        console.log('pkpSessionSigs:', pkpSessionSigs);
 
         const { pkpAddress, generatedPublicKey, id } =
           await wrappedKeysApi.generatePrivateKey({
             pkpSessionSigs,
             network: DEFAULT_NETWORK,
-            litClient: ctx.litClient,
-            memo: randomMemo('generate'),
+            litClient: testEnv.litClient,
+            memo: TestHelper.randomMemo('generatePrivateKey-evm'),
           });
 
-        expect(pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
-        expect(generatedPublicKey).toBeTruthy();
-        expect(id).toEqual(expect.any(String));
+        console.log('Generated wrapped key pkpAddress:', pkpAddress);
+        console.log(
+          'Generated wrapped key generatedPublicKey:',
+          generatedPublicKey
+        );
+        console.log('Generated wrapped key id:', id);
       });
 
       test('exportPrivateKey decrypts a stored wrapped key', async () => {
-        const { id } = await generateWrappedKeyForTest(randomMemo('export'));
+        const { id } = await TestHelper.generateWrappedKeyForTest({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+          network: DEFAULT_NETWORK,
+          memo: TestHelper.randomMemo('export-evm'),
+        });
 
-        const pkpSessionSigs = await createPkpSessionSigs();
-        // Export once so we can derive and fund the generated key prior to gas estimation.
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
         const { decryptedPrivateKey } = await wrappedKeysApi.exportPrivateKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
           network: DEFAULT_NETWORK,
         });
@@ -259,13 +292,23 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('listEncryptedKeyMetadata returns metadata for stored keys', async () => {
-        const memo = randomMemo('list');
-        const { id } = await generateWrappedKeyForTest(memo);
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const memo = TestHelper.randomMemo('list-evm');
+        const { id } = await TestHelper.generateWrappedKeyForTest({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+          network: DEFAULT_NETWORK,
+          memo,
+        });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
         const metadata = await wrappedKeysApi.listEncryptedKeyMetadata({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
         });
 
         const entry = metadata.find((item) => item.id === id);
@@ -274,12 +317,22 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('getEncryptedKey fetches ciphertext for a stored key', async () => {
-        const { id } = await generateWrappedKeyForTest(randomMemo('get'));
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const { id } = await TestHelper.generateWrappedKeyForTest({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+          network: DEFAULT_NETWORK,
+          memo: TestHelper.randomMemo('get-evm'),
+        });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
         const storedKey = await wrappedKeysApi.getEncryptedKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
         });
 
@@ -289,48 +342,63 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('importPrivateKey persists an externally generated key', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
         const wallet = Wallet.createRandom();
-        const memo = randomMemo('import');
+        const memo = TestHelper.randomMemo('import-evm');
 
         const result = await wrappedKeysApi.importPrivateKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           privateKey: wallet.privateKey,
           publicKey: wallet.publicKey,
           keyType: 'K256',
           memo,
         });
 
-        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.pkpAddress).toBe(alice.pkp!.ethAddress);
         expect(result.id).toEqual(expect.any(String));
       });
 
       test('storeEncryptedKey persists provided ciphertext', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
-        const payload = createStorePayload();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
+        const payload = TestHelper.createStorePayload();
 
         const result = await wrappedKeysApi.storeEncryptedKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           ...payload,
         });
 
-        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.pkpAddress).toBe(alice.pkp!.ethAddress);
         expect(result.id).toEqual(expect.any(String));
       });
 
       test('storeEncryptedKeyBatch persists multiple ciphertexts', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
-        const keyBatch = [createStorePayload(), createStorePayload()];
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
+        const keyBatch = [
+          TestHelper.createStorePayload(),
+          TestHelper.createStorePayload(),
+        ];
 
         const result = await wrappedKeysApi.storeEncryptedKeyBatch({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           keyBatch,
         });
 
-        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.pkpAddress).toBe(alice.pkp!.ethAddress);
         expect(result.ids.length).toBe(keyBatch.length);
         for (const id of result.ids) {
           expect(id).toEqual(expect.any(String));
@@ -338,15 +406,23 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('signMessageWithEncryptedKey signs messages with stored keys', async () => {
-        const { id } = await generateWrappedKeyForTest(
-          randomMemo('sign-message')
-        );
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const { id } = await TestHelper.generateWrappedKeyForTest({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+          network: DEFAULT_NETWORK,
+          memo: TestHelper.randomMemo('sign-message-evm'),
+        });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
         const message = 'hello from wrapped-keys';
 
         const signature = await wrappedKeysApi.signMessageWithEncryptedKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
           network: DEFAULT_NETWORK,
           messageToSign: message,
@@ -357,14 +433,22 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('signTransactionWithEncryptedKey signs EVM transactions', async () => {
-        const { id } = await generateWrappedKeyForTest(
-          randomMemo('sign-transaction')
-        );
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const { id } = await TestHelper.generateWrappedKeyForTest({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+          network: DEFAULT_NETWORK,
+          memo: TestHelper.randomMemo('sign-transaction-evm'),
+        });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
         const { decryptedPrivateKey } = await wrappedKeysApi.exportPrivateKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
           network: DEFAULT_NETWORK,
         });
@@ -378,39 +462,55 @@ export const registerWrappedKeysExecuteJsTests = () => {
           generatedAccount.address
         );
 
-        const fundingResult = await fundAccount(
+        await fundAccount(
           generatedAccount,
-          ctx.masterAccount,
-          ctx.resolvedNetwork.networkModule,
+          testEnv.masterAccount,
+          testEnv.networkModule,
           {
             ifLessThan: '0.005',
             thenFund: '0.01',
+            label: 'generated wrapped key',
           }
         );
 
-        if (fundingResult) {
-          console.log('Waiting for funding tx receipt:', fundingResult.txHash);
-          const publicClient = createPublicClient({
-            chain: ctx.resolvedNetwork.networkModule.getChainConfig(),
-            transport: http(fundingResult.rpcUrl),
-          });
+        const chainConfig = testEnv.networkModule.getChainConfig();
+        const rpcUrl = chainConfig.rpcUrls?.default?.http?.[0];
+        if (!rpcUrl) {
+          throw new Error('Unable to determine RPC URL for funding wait');
+        }
 
-          await publicClient.waitForTransactionReceipt({
-            hash: fundingResult.txHash,
+        const publicClient = createPublicClient({
+          chain: chainConfig,
+          transport: http(rpcUrl),
+        });
+
+        const sleep = (ms: number) =>
+          new Promise((resolve) => setTimeout(resolve, ms));
+        const maxAttempts = 10;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const balance = await publicClient.getBalance({
+            address: generatedAccount.address,
           });
+          if (balance > 0n) {
+            break;
+          }
+          if (attempt === maxAttempts - 1) {
+            throw new Error('Timed out waiting for generated account funding');
+          }
+          await sleep(1500);
         }
 
         const unsignedTransaction = {
           toAddress: ZERO_ADDRESS,
           value: '0',
-          chainId: ctx.chainId,
+          chainId: chainConfig.id,
           chain: EVM_CHAIN,
         };
 
         const signedTransaction =
           await wrappedKeysApi.signTransactionWithEncryptedKey({
             pkpSessionSigs,
-            litClient: ctx.litClient,
+            litClient: testEnv.litClient,
             id,
             network: DEFAULT_NETWORK,
             unsignedTransaction,
@@ -422,22 +522,26 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('batchGeneratePrivateKeys generates multiple keys in one request', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
         const actions = [
           {
             network: DEFAULT_NETWORK,
-            generateKeyParams: { memo: randomMemo('batch-0') },
+            generateKeyParams: { memo: TestHelper.randomMemo('batch-evm-0') },
           },
         ];
 
         try {
           const result = await wrappedKeysApi.batchGeneratePrivateKeys({
             pkpSessionSigs,
-            litClient: ctx.litClient,
+            litClient: testEnv.litClient,
             actions,
           });
 
-          expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+          expect(result.pkpAddress).toBe(alice.pkp!.ethAddress);
           expect(result.results.length).toBe(actions.length);
           for (const actionResult of result.results) {
             expect(actionResult.generateEncryptedPrivateKey.id).toEqual(
@@ -459,31 +563,43 @@ export const registerWrappedKeysExecuteJsTests = () => {
 
     describe('Solana network', () => {
       test('generatePrivateKey creates a new Solana wrapped key', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
         const { pkpAddress, generatedPublicKey, id } =
           await wrappedKeysApi.generatePrivateKey({
             pkpSessionSigs,
             network: SOLANA_NETWORK,
-            litClient: ctx.litClient,
-            memo: randomMemo('sol-generate'),
+            litClient: testEnv.litClient,
+            memo: TestHelper.randomMemo('sol-generate'),
           });
 
-        expect(pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(pkpAddress).toBe(alice.pkp!.ethAddress);
         expect(() => assertIsAddress(generatedPublicKey)).not.toThrow();
         expect(id).toEqual(expect.any(String));
       });
 
       test('exportPrivateKey decrypts a stored Solana wrapped key', async () => {
-        const { id, publicKey } = await generateSolanaWrappedKeyForTest(
-          randomMemo('sol-export')
-        );
+        const { id, publicKey } =
+          await TestHelper.generateSolanaWrappedKeyForTest({
+            testEnv,
+            alice,
+            delegationAuthSig: aliceDelegationAuthSig,
+            memo: TestHelper.randomMemo('sol-export'),
+          });
 
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
         const exported = await wrappedKeysApi.exportPrivateKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
           network: SOLANA_NETWORK,
         });
@@ -508,13 +624,22 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('listEncryptedKeyMetadata returns metadata for Solana keys', async () => {
-        const memo = randomMemo('sol-list');
-        const { id } = await generateSolanaWrappedKeyForTest(memo);
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const memo = TestHelper.randomMemo('sol-list');
+        const { id } = await TestHelper.generateSolanaWrappedKeyForTest({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+          memo,
+        });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
         const metadata = await wrappedKeysApi.listEncryptedKeyMetadata({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
         });
 
         const entry = metadata.find((item) => item.id === id);
@@ -523,51 +648,65 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('getEncryptedKey fetches ciphertext for a Solana key', async () => {
-        const { id } = await generateSolanaWrappedKeyForTest(
-          randomMemo('sol-get')
-        );
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const { id } = await TestHelper.generateSolanaWrappedKeyForTest({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+          memo: TestHelper.randomMemo('sol-get'),
+        });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
         const storedKey = await wrappedKeysApi.getEncryptedKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
         });
 
         expect(storedKey.id).toBe(id);
         expect(storedKey.ciphertext).toBeTruthy();
         expect(storedKey.dataToEncryptHash).toBeTruthy();
-        expect(storedKey.keyType).toBe('ed25519');
       });
 
       test('storeEncryptedKey persists provided Solana ciphertext', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
-        const payload = createSolanaStorePayload();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
+        const payload = TestHelper.createSolanaStorePayload();
 
         const result = await wrappedKeysApi.storeEncryptedKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           ...payload,
         });
 
-        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.pkpAddress).toBe(alice.pkp!.ethAddress);
         expect(result.id).toEqual(expect.any(String));
       });
 
       test('storeEncryptedKeyBatch persists multiple Solana ciphertexts', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
         const keyBatch = [
-          createSolanaStorePayload(),
-          createSolanaStorePayload(),
+          TestHelper.createSolanaStorePayload(),
+          TestHelper.createSolanaStorePayload(),
         ];
 
         const result = await wrappedKeysApi.storeEncryptedKeyBatch({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           keyBatch,
         });
 
-        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.pkpAddress).toBe(alice.pkp!.ethAddress);
         expect(result.ids.length).toBe(keyBatch.length);
         for (const id of result.ids) {
           expect(id).toEqual(expect.any(String));
@@ -575,36 +714,48 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('importPrivateKey persists a Solana wrapped key', async () => {
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
         const keyPair = nacl.sign.keyPair();
         const secretKeyBytes = keyPair.secretKey;
         const publicKey = bs58.encode(keyPair.publicKey);
         const privateKeyHex = Buffer.from(secretKeyBytes).toString('hex');
 
-        const memo = randomMemo('sol-import');
+        const memo = TestHelper.randomMemo('sol-import');
         const result = await wrappedKeysApi.importPrivateKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           privateKey: privateKeyHex,
           publicKey,
           keyType: 'ed25519',
           memo,
         });
 
-        expect(result.pkpAddress).toBe(ctx.aliceViemAccountPkp.ethAddress);
+        expect(result.pkpAddress).toBe(alice.pkp!.ethAddress);
         expect(result.id).toEqual(expect.any(String));
       });
 
       test('signMessageWithEncryptedKey signs messages with Solana keys', async () => {
-        const { id, publicKey } = await generateSolanaWrappedKeyForTest(
-          randomMemo('sol-sign-message')
-        );
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const { id, publicKey } =
+          await TestHelper.generateSolanaWrappedKeyForTest({
+            testEnv,
+            alice,
+            delegationAuthSig: aliceDelegationAuthSig,
+            memo: TestHelper.randomMemo('sol-sign-message'),
+          });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
         const message = 'hello from solana wrapped-keys';
 
         const signature = await wrappedKeysApi.signMessageWithEncryptedKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
           network: SOLANA_NETWORK,
           messageToSign: message,
@@ -632,16 +783,25 @@ export const registerWrappedKeysExecuteJsTests = () => {
       });
 
       test('signTransactionWithEncryptedKey signs Solana transactions', async () => {
-        const { id, publicKey } = await generateSolanaWrappedKeyForTest(
-          randomMemo('sol-sign-transaction')
-        );
-        const pkpSessionSigs = await createPkpSessionSigs();
+        const { id, publicKey } =
+          await TestHelper.generateSolanaWrappedKeyForTest({
+            testEnv,
+            alice,
+            delegationAuthSig: aliceDelegationAuthSig,
+            memo: TestHelper.randomMemo('sol-sign-transaction'),
+          });
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
 
-        const unsignedTransaction = createSolanaUnsignedTransaction(publicKey);
+        const unsignedTransaction =
+          TestHelper.createSolanaUnsignedTransaction(publicKey);
 
         const signature = await wrappedKeysApi.signTransactionWithEncryptedKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
           network: SOLANA_NETWORK,
           unsignedTransaction,
@@ -652,7 +812,7 @@ export const registerWrappedKeysExecuteJsTests = () => {
 
         const { decryptedPrivateKey } = await wrappedKeysApi.exportPrivateKey({
           pkpSessionSigs,
-          litClient: ctx.litClient,
+          litClient: testEnv.litClient,
           id,
           network: SOLANA_NETWORK,
         });

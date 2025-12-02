@@ -16,6 +16,8 @@ export const NETWORKS = {
   'naga-test': { importName: 'nagaTest', type: 'live' },
   'naga-local': { importName: 'nagaLocal', type: 'local' },
   'naga-staging': { importName: 'nagaStaging', type: 'live' },
+  'naga-proto': { importName: 'nagaProto', type: 'live' },
+  naga: { importName: 'naga', type: 'live' },
 } as const;
 
 export type NetworkName = keyof typeof NETWORKS;

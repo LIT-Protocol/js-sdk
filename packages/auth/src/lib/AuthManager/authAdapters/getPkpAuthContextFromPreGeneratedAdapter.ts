@@ -292,6 +292,8 @@ function extractAuthConfigFromDelegationAuthSig(delegationAuthSig: AuthSig): {
 } {
   const siweMessage = delegationAuthSig.signedMessage;
 
+  // const parsedSiweMessage = new SiweMessage(siweMessage);
+
   // Extract domain
   const domainMatch = siweMessage.match(/^([^\s]+) wants you to sign in/m);
   const domain = domainMatch ? domainMatch[1] : undefined;

@@ -126,6 +126,8 @@ export const fundAccount = async (
     console.log(`- Using default network RPC URL:`, defaultRpcUrl);
   }
 
+  const rpcUrl = customRpcUrl ?? defaultRpcUrl;
+
   // check account balance
   const publicClient = createPublicClient({
     chain: networkModule.getChainConfig(),
