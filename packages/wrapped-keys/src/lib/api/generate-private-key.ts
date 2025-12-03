@@ -3,6 +3,7 @@ import {
   getKeyTypeFromNetwork,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
 } from './utils';
 import { generateKeyWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCid } from '../lit-actions-client/utils';
@@ -23,7 +24,7 @@ import { GeneratePrivateKeyParams, GeneratePrivateKeyResult } from '../types';
 export async function generatePrivateKey(
   params: GeneratePrivateKeyParams
 ): Promise<GeneratePrivateKeyResult> {
-  const { pkpSessionSigs, network, litNodeClient, memo } = params;
+  const { pkpSessionSigs, network, litClient, memo, userMaxPrice } = params;
 
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
@@ -37,10 +38,12 @@ export async function generatePrivateKey(
   const { ciphertext, dataToEncryptHash, publicKey } =
     await generateKeyWithLitAction({
       ...params,
+      litClient,
       pkpAddress,
       litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
       litActionCode: litActionCode ? litActionCode : undefined,
       accessControlConditions: [allowPkpAddressToDecrypt],
+      userMaxPrice,
     });
 
   const { id } = await storePrivateKey({
@@ -52,7 +55,7 @@ export async function generatePrivateKey(
       dataToEncryptHash,
       memo,
     },
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork: getLitNetworkFromClient(litClient),
   });
 
   return {

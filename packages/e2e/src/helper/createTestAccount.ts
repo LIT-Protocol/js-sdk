@@ -1,5 +1,5 @@
 import { ViemAccountAuthenticator } from '@lit-protocol/auth';
-import { PKPData } from '@lit-protocol/schemas';
+import { AuthData, PKPData } from '@lit-protocol/schemas';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AuthContext } from '../types';
 import { TestEnv } from './createTestEnv';
@@ -40,6 +40,7 @@ export type CreateTestAccountResult = {
   paymentManager?: Awaited<
     ReturnType<TestEnv['litClient']['getPaymentManager']>
   >;
+  authData?: AuthData;
 };
 
 export async function createTestAccount(
@@ -55,11 +56,15 @@ export async function createTestAccount(
     pkpAuthContext: undefined,
     pkpViemAccount: undefined,
     paymentManager: undefined,
+    authData: undefined,
   };
 
   const personAccountAuthData = await ViemAccountAuthenticator.authenticate(
     person.account
   );
+
+  person.authData = personAccountAuthData;
+
   console.log(`Address`, person.account.address);
   console.log(`opts:`, opts);
 

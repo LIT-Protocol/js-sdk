@@ -3,6 +3,7 @@ import {
   getKeyTypeFromNetwork,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
 } from './utils';
 import { batchGenerateKeysWithLitAction } from '../lit-actions-client';
 import { getLitActionCodeOrCidCommon } from '../lit-actions-client/utils';
@@ -22,7 +23,7 @@ import {
 export async function batchGeneratePrivateKeys(
   params: BatchGeneratePrivateKeysParams
 ): Promise<BatchGeneratePrivateKeysResult> {
-  const { pkpSessionSigs, litNodeClient } = params;
+  const { pkpSessionSigs, litClient } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
@@ -35,6 +36,7 @@ export async function batchGeneratePrivateKeys(
 
   const actionResults = await batchGenerateKeysWithLitAction({
     ...params,
+    litClient,
     litActionIpfsCid: litActionCode ? undefined : litActionIpfsCid,
     litActionCode: litActionCode ? litActionCode : undefined,
     accessControlConditions: [allowPkpAddressToDecrypt],
@@ -52,7 +54,7 @@ export async function batchGeneratePrivateKeys(
   const { ids } = await storePrivateKeyBatch({
     sessionSig,
     storedKeyMetadataBatch: keyParamsBatch,
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork: getLitNetworkFromClient(litClient),
   });
 
   const results = actionResults.map(

@@ -126,10 +126,12 @@ export const fundAccount = async (
     console.log(`- Using default network RPC URL:`, defaultRpcUrl);
   }
 
+  const rpcUrl = customRpcUrl ?? defaultRpcUrl;
+
   // check account balance
   const publicClient = createPublicClient({
     chain: networkModule.getChainConfig(),
-    transport: http(customRpcUrl || defaultRpcUrl),
+    transport: http(rpcUrl),
   });
 
   const balance = await publicClient.getBalance({
@@ -142,7 +144,7 @@ export const fundAccount = async (
 
     const walletClient = createWalletClient({
       account: sponsorAccount,
-      transport: http(customRpcUrl || defaultRpcUrl),
+      transport: http(rpcUrl),
     });
 
     // Get the next managed nonce for this sponsor account
@@ -156,11 +158,11 @@ export const fundAccount = async (
       account: sponsorAccount, // Add account for retry logic
     };
 
-    await sendTransactionWithRetry(
+    const txHash = (await sendTransactionWithRetry(
       walletClient,
       transactionRequest,
       publicClient
-    );
+    )) as `0x${string}`;
 
     console.log(
       `- Topped up account ${recipientAddress} with`,
@@ -170,4 +172,6 @@ export const fundAccount = async (
   } else {
     console.log(`- Account ${recipientAddress} has enough balance\n`);
   }
+
+  return undefined;
 };

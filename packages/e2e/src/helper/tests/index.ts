@@ -14,3 +14,7 @@ export { createEoaNativeAuthFlowTest } from './eoa-native-auth-flow';
 export { createViemSignMessageTest } from './viem-sign-message';
 export { createViemSignTransactionTest } from './viem-sign-transaction';
 export { createViemSignTypedDataTest } from './viem-sign-typed-data';
+
+// We should move the above tests into their own category/folder like this one
+export { createPregenDelegationServerReuseTest } from '../../test-helpers/signSessionKey/pregen-delegation';
+export { registerWrappedKeysTests } from '../../test-helpers/executeJs/wrappedKeys';

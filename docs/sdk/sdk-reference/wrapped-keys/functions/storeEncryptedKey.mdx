@@ -1,0 +1,45 @@
+---
+title: storeEncryptedKey
+---
+
+# Function
+
+> **storeEncryptedKey**(`params`)
+
+Persists externally encrypted ciphertext and associated metadata to the wrapped-keys service.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required />
+<ParamField path="params.litClient" type="LitClient" required />
+<ParamField path="params.ciphertext" type="string" required />
+<ParamField path="params.dataToEncryptHash" type="string" required />
+<ParamField path="params.publicKey" type="string" required />
+<ParamField path="params.keyType" type="'K256' | 'ed25519'" required />
+<ParamField path="params.memo" type="string" required />
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional `executeJs` price cap.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="StoreEncryptedKeyResult">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="pkpAddress" type="string" required />
+    <ResponseField name="id" type="string" required />
+  </Expandable>
+</ResponseField>
+
+## Example
+
+```ts
+const { id } = await wrappedKeysApi.storeEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  ciphertext,
+  dataToEncryptHash,
+  publicKey,
+  keyType: 'K256',
+  memo: 'pre-encrypted key',
+});
+```

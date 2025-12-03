@@ -2,6 +2,7 @@ import {
   getFirstSessionSig,
   getPkpAccessControlCondition,
   getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
 } from './utils';
 import { LIT_PREFIX } from '../constants';
 import { storePrivateKey } from '../service-client';
@@ -19,14 +20,8 @@ import { ImportPrivateKeyParams, ImportPrivateKeyResult } from '../types';
 export async function importPrivateKey(
   params: ImportPrivateKeyParams
 ): Promise<ImportPrivateKeyResult> {
-  const {
-    pkpSessionSigs,
-    privateKey,
-    publicKey,
-    keyType,
-    litNodeClient,
-    memo,
-  } = params;
+  const { pkpSessionSigs, privateKey, publicKey, keyType, litClient, memo } =
+    params;
 
   const firstSessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(firstSessionSig);
@@ -34,14 +29,16 @@ export async function importPrivateKey(
 
   const saltedPrivateKey = LIT_PREFIX + privateKey;
 
-  const { ciphertext, dataToEncryptHash } = await litNodeClient.encrypt({
+  const { ciphertext, dataToEncryptHash } = await litClient.encrypt({
     accessControlConditions: [allowPkpAddressToDecrypt],
     dataToEncrypt: Buffer.from(saltedPrivateKey, 'utf8'),
   });
 
+  const litNetwork = getLitNetworkFromClient(litClient);
+
   const { id } = await storePrivateKey({
     sessionSig: firstSessionSig,
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
     storedKeyMetadata: {
       ciphertext,
       publicKey,

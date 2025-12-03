@@ -1,17 +1,21 @@
 import {
+  createAuthManager,
+  generateSessionKeyPair,
+  storagePlugins,
+} from '@lit-protocol/auth';
+import { createLitClient } from '@lit-protocol/lit-client';
+import {
   LitNetworkModule,
+  naga,
   nagaDev,
   nagaLocal,
+  nagaProto,
   nagaStaging,
   nagaTest,
-  nagaProto,
-  naga,
   PaymentManager,
 } from '@lit-protocol/networks';
-import { EnvVars } from './createEnvVars';
-import { createLitClient } from '@lit-protocol/lit-client';
-import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
 import { privateKeyToAccount } from 'viem/accounts';
+import { EnvVars } from './createEnvVars';
 
 export const CONFIG = {
   LOCAL: {
@@ -24,7 +28,7 @@ export const CONFIG = {
   },
   LIVE: {
     nativeFundingAmount: '0.1',
-    ledgerDepositAmount: '0.1',
+    ledgerDepositAmount: '10',
     sponsorshipLimits: {
       totalMaxPriceInWei: '50000000000000000',
       userMaxPrice: 50000000000000000n,
@@ -59,6 +63,9 @@ export type TestEnv = {
       userMaxPrice: bigint;
     };
   };
+
+  // --- Wrapped Keys related ---
+  sessionKeyPair: ReturnType<typeof generateSessionKeyPair>;
 };
 
 export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
@@ -149,6 +156,9 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
     account: masterAccount,
   });
 
+  // --- This info are used by wrapped keys tests ---
+  const sessionKeyPair = generateSessionKeyPair();
+
   return {
     masterAccount,
     masterPaymentManager,
@@ -156,5 +166,6 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
     litClient,
     authManager,
     config,
+    sessionKeyPair,
   };
 };

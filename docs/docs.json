@@ -80,7 +80,8 @@
             "pages": [
               "sdk/auth-context-consumption/pkp-sign",
               "sdk/auth-context-consumption/execute-js",
-              "sdk/auth-context-consumption/encrypt-and-decrypt"
+              "sdk/auth-context-consumption/encrypt-and-decrypt",
+              "sdk/auth-context-consumption/wrapped-keys"
             ]
           },
           {
@@ -110,13 +111,34 @@
               {
                 "group": "@lit-protocol/auth",
                 "pages": [
-                  "sdk/sdk-reference/auth/functions/createAuthManager"
+                  "sdk/sdk-reference/auth/functions/createAuthManager",
+                  "sdk/sdk-reference/auth/functions/generatePkpDelegationAuthSig",
+                  "sdk/sdk-reference/auth/functions/generateEoaDelegationAuthSig",
+                  "sdk/sdk-reference/auth/functions/validateDelegationAuthSig",
+                  "sdk/sdk-reference/auth/functions/createPkpAuthContextFromPreGenerated",
+                  "sdk/sdk-reference/auth/functions/createPkpSessionSigs"
                 ]
               },
               {
                 "group": "@lit-protocol/networks",
                 "pages": [
                   "sdk/sdk-reference/networks/functions/withOverrides"
+                ]
+              },
+              {
+                "group": "@lit-protocol/wrapped-keys",
+                "pages": [
+                  "sdk/sdk-reference/wrapped-keys/index",
+                  "sdk/sdk-reference/wrapped-keys/functions/generatePrivateKey",
+                  "sdk/sdk-reference/wrapped-keys/functions/exportPrivateKey",
+                  "sdk/sdk-reference/wrapped-keys/functions/importPrivateKey",
+                  "sdk/sdk-reference/wrapped-keys/functions/getEncryptedKey",
+                  "sdk/sdk-reference/wrapped-keys/functions/listEncryptedKeyMetadata",
+                  "sdk/sdk-reference/wrapped-keys/functions/storeEncryptedKey",
+                  "sdk/sdk-reference/wrapped-keys/functions/storeEncryptedKeyBatch",
+                  "sdk/sdk-reference/wrapped-keys/functions/batchGeneratePrivateKeys",
+                  "sdk/sdk-reference/wrapped-keys/functions/signMessageWithEncryptedKey",
+                  "sdk/sdk-reference/wrapped-keys/functions/signTransactionWithEncryptedKey"
                 ]
               }
             ]
@@ -131,7 +153,8 @@
           {
             "group": "Guides",
             "pages": [
-              "guides/lit-action-sign-as-action"
+              "guides/lit-action-sign-as-action",
+              "guides/server-sessions"
             ]
           },
           {

@@ -1,51 +1,78 @@
 import { nagaLocal } from '@lit-protocol/networks';
+import type {
+  ConnectionInfo,
+  PKPStorageProvider,
+} from '@lit-protocol/networks';
 import {
   ExecuteJsResponse,
+  AuthSig,
   LitNodeSignature,
   EncryptSdkParams,
   EncryptResponse,
   DecryptRequest,
   DecryptResponse,
   PkpIdentifierRaw,
+  OrchestrateHandshakeResponse,
 } from '@lit-protocol/types';
 import { z } from 'zod';
 import { MintWithCustomAuthRequest } from '../schemas/MintWithCustomAuthSchema';
 import { BaseLitClient } from './BaseClient.type';
 import {
   AuthContextSchema2,
-  AuthDataSchema,
+  AuthData,
   HexPrefixedSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema,
+  JsonSignCustomSessionKeyRequestForPkpReturnSchema,
 } from '@lit-protocol/schemas';
 import { Chain, Hex } from 'viem';
-import type { PKPStorageProvider } from '@lit-protocol/networks';
 
-// export interface NagaLitClientContext {
-//   latestBlockhash: string;
-//   latestConnectionInfo: ConnectionInfo;
-//   handshakeResult: OrchestrateHandshakeResponse;
-//   getMaxPricesForNodeProduct: (
-//     nodeProduct: MaxPricesForNodes
-//   ) => Promise<number>;
-//   getUserMaxPrice: (nodeProduct: MaxPricesForNodes) => Promise<number>;
-//   signSessionKey: (params: {
-//     nodeUrls: string[];
-//     requestBody: z.infer<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
-//   }) => Promise<void>;
-//   signCustomSessionKey: (params: {
-//     nodeUrls: string[];
-//     requestBody: z.infer<
-//       typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
-//     >;
-//   }) => Promise<void>;
-//   executeJs: (
-//     params: z.infer<typeof nagaLocal.api.executeJs.schemas.Input>
-//   ) => Promise<ExecuteJsResponse>;
-// }
+type GetMaxPricesForNodeProductFn =
+  typeof import('@lit-protocol/networks')['getMaxPricesForNodeProduct'];
+type GetUserMaxPriceFn =
+  typeof import('@lit-protocol/networks')['getUserMaxPrice'];
+
+type RawPkpSignInput = z.infer<typeof nagaLocal.api.pkpSign.schemas.Input.raw>;
+
+type EthereumPkpSignInput = Omit<
+  z.input<typeof nagaLocal.api.pkpSign.schemas.Input.ethereum>,
+  'chain' | 'signingScheme'
+> & {
+  chain?: never;
+  signingScheme?: never;
+};
+
+type BitcoinPkpSignInput = Omit<
+  z.input<typeof nagaLocal.api.pkpSign.schemas.Input.bitcoin>,
+  'chain'
+> & {
+  chain?: never;
+};
+
+export interface NagaLitClientContext {
+  latestBlockhash: string;
+  latestConnectionInfo: ConnectionInfo | null;
+  handshakeResult: OrchestrateHandshakeResponse | null;
+  getMaxPricesForNodeProduct: GetMaxPricesForNodeProductFn;
+  getUserMaxPrice: GetUserMaxPriceFn;
+  signSessionKey: (params: {
+    nodeUrls: string[];
+    requestBody: z.infer<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
+  }) => Promise<AuthSig>;
+  signCustomSessionKey: (params: {
+    nodeUrls: string[];
+    requestBody: z.infer<
+      typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
+    >;
+  }) => Promise<AuthSig>;
+  executeJs: (
+    params: z.infer<typeof nagaLocal.api.executeJs.schemas.Input>
+  ) => Promise<ExecuteJsResponse>;
+}
 
 /**
  * Naga network client with full PKP signing capabilities
  */
-export interface NagaLitClient extends BaseLitClient<any> {
+export interface NagaLitClient extends BaseLitClient<NagaLitClientContext> {
   /**
    * Encrypts data with access control conditions using BLS encryption
    * @param params - Encryption parameters including data and access control conditions
@@ -92,7 +119,21 @@ export interface NagaLitClient extends BaseLitClient<any> {
    * Gets the current client context including handshake results and connection info
    * @returns Promise resolving to the current client context
    */
-  getContext: () => Promise<any>;
+  getContext: () => Promise<NagaLitClientContext>;
+  /**
+   * Utility helpers for interacting with network-level resources
+   */
+  utils: {
+    /**
+     * Resolves the derived public key for a given derived key identifier
+     * @example
+     * ```ts
+     * import { keccak256, stringToBytes } from 'viem';
+     * const derivedKeyId = keccak256(stringToBytes(`lit_action_${IPFS_CID}`));
+     * ```
+     */
+    getDerivedKeyId: (derivedKeyId: string) => Promise<string>;
+  };
 
   /**
    * Gets chain configuration including Viem config and RPC URL
@@ -107,7 +148,7 @@ export interface NagaLitClient extends BaseLitClient<any> {
    * Default service URLs for authentication and login
    */
   getDefault: {
-    authServiceUrl: string;
+    authServiceUrl?: string;
     loginUrl: string;
   };
 
@@ -214,13 +255,7 @@ export interface NagaLitClient extends BaseLitClient<any> {
    * ```
    */
   viewPKPsByAuthData: (params: {
-    authData:
-      | {
-          authMethodType: number | bigint;
-          authMethodId: string;
-          accessToken?: string;
-        }
-      | z.infer<typeof AuthDataSchema>;
+    authData: Partial<AuthData>;
     pagination?: { limit?: number; offset?: number };
     storageProvider?: PKPStorageProvider;
   }) => Promise<any>;
@@ -253,6 +288,14 @@ export interface NagaLitClient extends BaseLitClient<any> {
      * @returns Promise resolving to PKP minting result
      */
     mintWithAuth: (params: any) => Promise<any>;
+    /**
+     * Registers a payer via the authentication service
+     */
+    registerPayer: (params: any) => Promise<any>;
+    /**
+     * Delegates users via the authentication service
+     */
+    delegateUsers: (params: any) => Promise<any>;
   };
 
   /**
@@ -328,9 +371,7 @@ export interface NagaLitClient extends BaseLitClient<any> {
        * });
        * ```
        */
-      pkpSign: (
-        params: z.infer<typeof nagaLocal.api.pkpSign.schemas.Input.raw>
-      ) => Promise<LitNodeSignature>;
+      pkpSign: (params: RawPkpSignInput) => Promise<LitNodeSignature>;
     };
     /**
      * Ethereum-specific PKP signing methods
@@ -348,9 +389,7 @@ export interface NagaLitClient extends BaseLitClient<any> {
        * });
        * ```
        */
-      pkpSign: (
-        params: z.infer<typeof nagaLocal.api.pkpSign.schemas.Input.ethereum>
-      ) => Promise<LitNodeSignature>;
+      pkpSign: (params: EthereumPkpSignInput) => Promise<LitNodeSignature>;
     };
     /**
      * Bitcoin-specific PKP signing methods
@@ -368,9 +407,7 @@ export interface NagaLitClient extends BaseLitClient<any> {
        * });
        * ```
        */
-      pkpSign: (
-        params: z.infer<typeof nagaLocal.api.pkpSign.schemas.Input.bitcoin>
-      ) => Promise<LitNodeSignature>;
+      pkpSign: (params: BitcoinPkpSignInput) => Promise<LitNodeSignature>;
     };
   };
 }
