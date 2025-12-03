@@ -5,6 +5,7 @@ import {
   parseLitResource,
 } from '@lit-protocol/auth-helpers';
 import { RESOLVED_AUTH_CONTEXT_PREFIX } from '@lit-protocol/auth-helpers';
+import { SiweMessage } from 'siwe';
 import {
   AUTH_METHOD_TYPE,
   AUTH_METHOD_TYPE_VALUES,
@@ -292,29 +293,24 @@ function extractAuthConfigFromDelegationAuthSig(delegationAuthSig: AuthSig): {
 } {
   const siweMessage = delegationAuthSig.signedMessage;
 
-  // const parsedSiweMessage = new SiweMessage(siweMessage);
-
-  // Extract domain
-  const domainMatch = siweMessage.match(/^([^\s]+) wants you to sign in/m);
-  const domain = domainMatch ? domainMatch[1] : undefined;
+  const parsedSiweMessage = new SiweMessage(siweMessage);
+  const domain = parsedSiweMessage.domain;
 
   // Extract statement
-  const statementMatch = siweMessage.match(/^(.*?)(?:\n\nURI:|$)/m);
-  const statement = statementMatch
-    ? statementMatch[1].split('\n').slice(2).join('\n').trim()
-    : undefined;
+  const statement = parsedSiweMessage.statement;
 
   // Extract expiration
-  const expirationMatch = siweMessage.match(/^Expiration Time: (.*)$/m);
-  const expiration = expirationMatch ? expirationMatch[1].trim() : undefined;
+  const expiration = parsedSiweMessage.expirationTime;
 
-  const resourceMatches = [...siweMessage.matchAll(/-\s*(urn:recap:[^\s]+)/g)];
+  const resourceMatches = parsedSiweMessage.resources ?? [];
 
   const resources: LitResourceAbilityRequest[] = [];
   let derivedAuthData: AuthData | undefined;
 
-  for (const match of resourceMatches) {
-    const urn = match[1];
+  for (const urn of resourceMatches) {
+    if (!urn.startsWith('urn:recap:')) {
+      continue;
+    }
     const { requests, derivedAuthData: candidateAuthData } =
       decodeRecapResource(urn);
 
