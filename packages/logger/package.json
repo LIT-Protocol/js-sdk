@@ -12,6 +12,6 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
-    "pino": "^9.6.0"
+    "pino": "9.6.0"
   }
 }
