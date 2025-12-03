@@ -232,8 +232,27 @@ export interface ImportPrivateKeyResult {
   id: string;
 }
 
+interface TypedDataField {
+  name: string;
+  type: string;
+}
+
+interface TypedDataDomain {
+  name?: string;
+  version?: string;
+  chainId?: number | string | bigint;
+  verifyingContract?: string;
+  salt?: string;
+}
+
+interface signTypedDataMessageParams {
+  domain: TypedDataDomain;
+  types: Record<string, TypedDataField[]>;
+  value: Record<string, string | number>;
+}
+
 interface SignMessageParams {
-  messageToSign: string | Uint8Array;
+  messageToSign: string | Uint8Array | signTypedDataMessageParams;
   id: string;
 }
 

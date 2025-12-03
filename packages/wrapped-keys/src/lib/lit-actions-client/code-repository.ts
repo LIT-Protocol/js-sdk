@@ -23,6 +23,10 @@ const litActionCodeRepository: LitActionCodeRepository = Object.freeze({
     evm: '',
     solana: '',
   }),
+  signTypedData: Object.seal({
+    evm: '',
+    solana: '',
+  }),
   generateEncryptedKey: Object.seal({
     evm: '',
     solana: '',

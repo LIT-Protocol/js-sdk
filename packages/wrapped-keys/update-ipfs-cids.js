@@ -19,6 +19,9 @@ const {
   code: signTransactionWithEncryptedEthereumKey,
 } = require('../wrapped-keys-lit-actions/src/generated/ethereum/signTransactionWithEncryptedEthereumKey');
 const {
+  code: signTypedDataWithEncryptedEthereumKey,
+} = require('../wrapped-keys-lit-actions/src/generated/ethereum/signTypedDataWithEncryptedEthereumKey');
+const {
   code: generateEncryptedSolanaPrivateKey,
 } = require('../wrapped-keys-lit-actions/src/generated/solana/generateEncryptedSolanaPrivateKey');
 const {
@@ -38,6 +41,10 @@ async function updateConstants() {
     signMessage: {
       evm: await Hash.of(signMessageWithEncryptedEthereumKey),
       solana: await Hash.of(signMessageWithEncryptedSolanaKey),
+    },
+    signTypedData: {
+      evm: await Hash.of(signTypedDataWithEncryptedEthereumKey),
+      solana: '',
     },
     generateEncryptedKey: {
       evm: await Hash.of(generateEncryptedEthereumPrivateKey),
