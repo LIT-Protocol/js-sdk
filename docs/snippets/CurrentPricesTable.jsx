@@ -1,6 +1,6 @@
-import { usePrices, weiToTokens, formatPrice, LitActionPriceComponent, NodePriceMeasurement } from './PriceProvider';
+import { weiToTokens, formatPrice, LitActionPriceComponent, NodePriceMeasurement } from './PriceProvider';
 
-export const CurrentPricesTable = () => {
+export const CurrentPricesTable = ({ priceData }) => {
   // Product IDs
   const ProductId = {
     PkpSign: 0,
@@ -44,6 +44,14 @@ export const CurrentPricesTable = () => {
     [NodePriceMeasurement.perCount]: '/count',
   };
 
+  if (!priceData) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <p>Price data not available. Please wrap this component with PriceProvider.</p>
+      </div>
+    );
+  }
+
   const {
     loading,
     error,
@@ -55,7 +63,7 @@ export const CurrentPricesTable = () => {
     usagePercent,
     pkpMintCost,
     ethers,
-  } = usePrices();
+  } = priceData;
 
   if (loading) {
     return (

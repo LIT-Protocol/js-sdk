@@ -1,13 +1,21 @@
-import { usePrices, weiToTokens, formatPrice, LitActionPriceComponent, NodePriceMeasurement } from './PriceProvider';
+import { weiToTokens, formatPrice, LitActionPriceComponent, NodePriceMeasurement } from './PriceProvider';
 
-export const ExampleLitActionCosts = () => {
+export const ExampleLitActionCosts = ({ priceData }) => {
+  if (!priceData) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <p>Price data not available. Please wrap this component with PriceProvider.</p>
+      </div>
+    );
+  }
+
   const {
     loading,
     error,
     litActionConfigs,
     litKeyPriceUSD,
     ethers,
-  } = usePrices();
+  } = priceData;
 
   // Helper to get price for a specific component
   const getComponentPrice = (componentType, measurementType) => {

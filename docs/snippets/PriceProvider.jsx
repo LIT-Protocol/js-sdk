@@ -1,7 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-
-// Create context
-const PriceContext = createContext(null);
+import { useEffect, useState, Children, cloneElement } from 'react';
 
 // Constants - defined inside component for Mintlify compatibility
 const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
@@ -283,7 +280,7 @@ export const PriceProvider = ({ children }) => {
     fetchPrices();
   }, [ethersLoaded]);
 
-  const value = {
+  const priceData = {
     loading,
     error,
     basePrices,
@@ -296,14 +293,17 @@ export const PriceProvider = ({ children }) => {
     ethers: window.ethers,
   };
 
-  return <PriceContext.Provider value={value}>{children}</PriceContext.Provider>;
-};
-
-export const usePrices = () => {
-  const context = useContext(PriceContext);
-  if (!context) {
-    throw new Error('usePrices must be used within a PriceProvider');
+  // Clone children and pass price data as props
+  // Handle both single child and multiple children
+  if (!children) {
+    return null;
   }
-  return context;
+
+  return Children.map(children, (child) => {
+    if (child && typeof child === 'object' && 'type' in child && typeof child.type !== 'string') {
+      return cloneElement(child, { priceData });
+    }
+    return child;
+  });
 };
 
