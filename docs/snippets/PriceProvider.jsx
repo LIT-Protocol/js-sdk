@@ -1,4 +1,4 @@
-import { useEffect, useState, Children, cloneElement } from 'react';
+import { useEffect, useState } from 'react';
 
 // Constants - defined inside component for Mintlify compatibility
 const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
@@ -189,7 +189,7 @@ export const formatPrice = (priceInTokens, priceInUSD) => {
   return `${priceInTokens.toFixed(6)} LITKEY ($${priceInUSD.toFixed(6)})`;
 };
 
-export const PriceProvider = ({ children }) => {
+export const PriceProvider = ({ children, component: Component }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [basePrices, setBasePrices] = useState([]);
@@ -293,17 +293,20 @@ export const PriceProvider = ({ children }) => {
     ethers: window.ethers,
   };
 
-  // Clone children and pass price data as props
-  // Handle both single child and multiple children
-  if (!children) {
+  // Render the component with price data as a prop
+  // Prefer component prop, fall back to children if provided
+  const ComponentToRender = Component || (children && typeof children === 'function' ? children : null);
+  
+  if (!ComponentToRender) {
     return null;
   }
 
-  return Children.map(children, (child) => {
-    if (child && typeof child === 'object' && 'type' in child && typeof child.type !== 'string') {
-      return cloneElement(child, { priceData });
-    }
-    return child;
-  });
+  // Render the component with priceData prop
+  if (typeof ComponentToRender === 'function') {
+    return <ComponentToRender priceData={priceData} />;
+  }
+
+  // If children is a React element, try to render it (shouldn't happen with our usage pattern)
+  return children;
 };
 
