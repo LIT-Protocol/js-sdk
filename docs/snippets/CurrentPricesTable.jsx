@@ -1,11 +1,6 @@
-import { useEffect, useState } from 'react';
+import { usePrices, weiToTokens, formatPrice, LitActionPriceComponent, NodePriceMeasurement } from './PriceProvider';
 
 export const CurrentPricesTable = () => {
-  // Constants - defined inside component for Mintlify compatibility
-  const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
-  const NAGA_PROD_PKP_ADDRESS = '0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168';
-  const RPC_URL = 'https://lit-chain-rpc.litprotocol.com/';
-
   // Product IDs
   const ProductId = {
     PkpSign: 0,
@@ -21,28 +16,6 @@ export const CurrentPricesTable = () => {
     ProductId.LitAction,
     ProductId.SignSessionKey,
   ];
-
-  // LitActionPriceComponent enum values
-  const LitActionPriceComponent = {
-    baseAmount: 0,
-    runtimeLength: 1,
-    memoryUsage: 2,
-    codeLength: 3,
-    responseLength: 4,
-    signatures: 5,
-    broadcasts: 6,
-    contractCalls: 7,
-    callDepth: 8,
-    decrypts: 9,
-    fetches: 10,
-  };
-
-  // NodePriceMeasurement enum values
-  const NodePriceMeasurement = {
-    perSecond: 0,
-    perMegabyte: 1,
-    perCount: 2,
-  };
 
   const PRODUCT_NAMES = {
     [ProductId.PkpSign]: 'PKP Sign',
@@ -71,241 +44,18 @@ export const CurrentPricesTable = () => {
     [NodePriceMeasurement.perCount]: '/count',
   };
 
-  // PriceFeed ABI (minimal - only functions we need)
-  const PRICE_FEED_ABI = [
-    {
-      inputs: [
-        {
-          internalType: 'uint256[]',
-          name: 'productIds',
-          type: 'uint256[]',
-        },
-      ],
-      name: 'baseNetworkPrices',
-      outputs: [
-        {
-          internalType: 'uint256[]',
-          name: '',
-          type: 'uint256[]',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256[]',
-          name: 'productIds',
-          type: 'uint256[]',
-        },
-      ],
-      name: 'maxNetworkPrices',
-      outputs: [
-        {
-          internalType: 'uint256[]',
-          name: '',
-          type: 'uint256[]',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'usagePercent',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'productIds',
-          type: 'uint256[]',
-        },
-      ],
-      name: 'usagePercentToPrices',
-      outputs: [
-        {
-          internalType: 'uint256[]',
-          name: '',
-          type: 'uint256[]',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'getLitActionPriceConfigs',
-      outputs: [
-        {
-          components: [
-            {
-              internalType: 'enum LibPriceFeedStorage.LitActionPriceComponent',
-              name: 'priceComponent',
-              type: 'uint8',
-            },
-            {
-              internalType: 'enum LibPriceFeedStorage.NodePriceMeasurement',
-              name: 'priceMeasurement',
-              type: 'uint8',
-            },
-            {
-              internalType: 'uint256',
-              name: 'price',
-              type: 'uint256',
-            },
-          ],
-          internalType: 'struct LibPriceFeedStorage.LitActionPriceConfig[]',
-          name: '',
-          type: 'tuple[]',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ];
-
-  // PKP Contract ABI (for mintCost)
-  const PKP_ABI = [
-    {
-      inputs: [],
-      name: 'mintCost',
-      outputs: [
-        {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ];
-
-  // Helper functions
-  const getLitKeyPrice = async () => {
-    try {
-      const response = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=lit-protocol&vs_currencies=usd'
-      );
-      const data = await response.json();
-
-      if (data['lit-protocol'] && data['lit-protocol'].usd) {
-        return data['lit-protocol'].usd;
-      }
-
-      throw new Error('LIT price not found in CoinGecko response');
-    } catch (error) {
-      console.error('Error fetching LITKEY price from CoinGecko:', error);
-      return null;
-    }
-  };
-
-  const weiToTokens = (wei, ethers) => {
-    if (!ethers || !ethers.utils) {
-      return 0;
-    }
-    return parseFloat(ethers.utils.formatUnits(wei, 18));
-  };
-
-  const formatPrice = (priceInTokens, priceInUSD) => {
-    if (priceInUSD === null) {
-      return `${priceInTokens.toFixed(6)} LITKEY`;
-    }
-    return `${priceInTokens.toFixed(6)} LITKEY ($${priceInUSD.toFixed(6)})`;
-  };
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [basePrices, setBasePrices] = useState([]);
-  const [maxPrices, setMaxPrices] = useState([]);
-  const [currentPrices, setCurrentPrices] = useState([]);
-  const [litActionConfigs, setLitActionConfigs] = useState([]);
-  const [litKeyPriceUSD, setLitKeyPriceUSD] = useState(null);
-  const [usagePercent, setUsagePercent] = useState(null);
-  const [pkpMintCost, setPkpMintCost] = useState(null);
-  const [ethersLoaded, setEthersLoaded] = useState(false);
-
-  // Load ethers from CDN
-  useEffect(() => {
-    if (window.ethers) {
-      setEthersLoaded(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js';
-    script.onload = () => {
-      setEthersLoaded(true);
-    };
-    script.onerror = () => {
-      const fallbackScript = document.createElement('script');
-      fallbackScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js';
-      fallbackScript.onload = () => {
-        setEthersLoaded(true);
-      };
-      fallbackScript.onerror = () => {
-        setError('Failed to load ethers library from CDN');
-        setLoading(false);
-      };
-      document.head.appendChild(fallbackScript);
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!ethersLoaded || !window.ethers) {
-      return;
-    }
-
-    async function fetchPrices() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const { ethers } = window;
-        const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-        const contract = new ethers.Contract(NAGA_PROD_PRICE_FEED_ADDRESS, PRICE_FEED_ABI, provider);
-        const pkpContract = new ethers.Contract(NAGA_PROD_PKP_ADDRESS, PKP_ABI, provider);
-
-        const priceUSD = await getLitKeyPrice();
-        setLitKeyPriceUSD(priceUSD);
-
-        const basePricesResult = await contract.baseNetworkPrices(PRODUCT_IDS);
-        const maxPricesResult = await contract.maxNetworkPrices(PRODUCT_IDS);
-
-        const estimatedUsage = 50;
-        setUsagePercent(estimatedUsage);
-        const currentPricesResult = await contract.usagePercentToPrices(estimatedUsage, PRODUCT_IDS);
-
-        const litActionConfigsResult = await contract.getLitActionPriceConfigs();
-
-        // Fetch PKP minting cost (static price)
-        const mintCostResult = await pkpContract.mintCost();
-        setPkpMintCost(mintCostResult);
-
-        setBasePrices(basePricesResult);
-        setMaxPrices(maxPricesResult);
-        setCurrentPrices(currentPricesResult);
-        setLitActionConfigs(litActionConfigsResult);
-      } catch (err) {
-        console.error('Error fetching prices:', err);
-        setError(err.message || 'Failed to fetch prices');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchPrices();
-  }, [ethersLoaded]);
+  const {
+    loading,
+    error,
+    basePrices,
+    maxPrices,
+    currentPrices,
+    litActionConfigs,
+    litKeyPriceUSD,
+    usagePercent,
+    pkpMintCost,
+    ethers,
+  } = usePrices();
 
   if (loading) {
     return (
@@ -397,9 +147,9 @@ export const CurrentPricesTable = () => {
           </thead>
           <tbody>
             {PRODUCT_IDS.map((productId, index) => {
-              const basePriceInTokens = weiToTokens(basePrices[index], window.ethers);
-              const maxPriceInTokens = weiToTokens(maxPrices[index], window.ethers);
-              const currentPriceInTokens = weiToTokens(currentPrices[index], window.ethers);
+              const basePriceInTokens = weiToTokens(basePrices[index], ethers);
+              const maxPriceInTokens = weiToTokens(maxPrices[index], ethers);
+              const currentPriceInTokens = weiToTokens(currentPrices[index], ethers);
               const basePriceInUSD = litKeyPriceUSD
                 ? basePriceInTokens * litKeyPriceUSD
                 : null;
@@ -492,9 +242,9 @@ export const CurrentPricesTable = () => {
                   }}
                 >
                   {formatPrice(
-                    weiToTokens(pkpMintCost, window.ethers),
+                    weiToTokens(pkpMintCost, ethers),
                     litKeyPriceUSD
-                      ? weiToTokens(pkpMintCost, window.ethers) * litKeyPriceUSD
+                      ? weiToTokens(pkpMintCost, ethers) * litKeyPriceUSD
                       : null
                   )}
                 </td>
@@ -508,9 +258,9 @@ export const CurrentPricesTable = () => {
                   }}
                 >
                   {formatPrice(
-                    weiToTokens(pkpMintCost, window.ethers),
+                    weiToTokens(pkpMintCost, ethers),
                     litKeyPriceUSD
-                      ? weiToTokens(pkpMintCost, window.ethers) * litKeyPriceUSD
+                      ? weiToTokens(pkpMintCost, ethers) * litKeyPriceUSD
                       : null
                   )}
                 </td>
@@ -524,9 +274,9 @@ export const CurrentPricesTable = () => {
                   }}
                 >
                   {formatPrice(
-                    weiToTokens(pkpMintCost, window.ethers),
+                    weiToTokens(pkpMintCost, ethers),
                     litKeyPriceUSD
-                      ? weiToTokens(pkpMintCost, window.ethers) * litKeyPriceUSD
+                      ? weiToTokens(pkpMintCost, ethers) * litKeyPriceUSD
                       : null
                   )}
                 </td>
@@ -583,7 +333,7 @@ export const CurrentPricesTable = () => {
                 `Component ${priceComponentNum}`;
               const measurementName =
                 MEASUREMENT_NAMES[priceMeasurementNum] || '';
-              const priceInTokens = weiToTokens(config.price, window.ethers);
+              const priceInTokens = weiToTokens(config.price, ethers);
               const priceInUSD = litKeyPriceUSD
                 ? priceInTokens * litKeyPriceUSD
                 : null;

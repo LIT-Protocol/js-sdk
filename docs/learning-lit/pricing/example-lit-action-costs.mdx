@@ -1,0 +1,28 @@
+---
+title: "Example Lit Action Costs"
+---
+import { ExampleLitActionCosts } from "/snippets/ExampleLitActionCosts.jsx";
+import { PriceProvider } from "/snippets/PriceProvider.jsx";
+
+This page demonstrates real-world cost estimates for common Lit Action operations. The costs are calculated using current real-time prices from the blockchain and show how different resource usage affects the total cost.
+
+<Note>
+These are estimates based on current prices and the specified resource usage. Actual costs may vary slightly based on network conditions and exact resource consumption.
+</Note>
+
+<PriceProvider>
+  <ExampleLitActionCosts />
+</PriceProvider>
+
+## Understanding the Cost Breakdown
+
+Each example shows a detailed breakdown of costs by component:
+
+- **Base Amount**: Fixed cost per Lit Action execution
+- **Runtime Length**: Cost based on execution time (charged per second)
+- **Fetches**: Cost per HTTP fetch request
+- **Signatures**: Cost per signature generated
+- **Decrypts**: Cost per decryption operation
+
+The total cost is the sum of all applicable components based on the operation's resource usage.
+

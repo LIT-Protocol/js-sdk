@@ -2,6 +2,7 @@
 title: "Current Prices"
 ---
 import { CurrentPricesTable } from "/snippets/CurrentPricesTable.jsx";
+import { PriceProvider } from "/snippets/PriceProvider.jsx";
 
 The following table shows the current pricing for Lit Protocol services on the **Naga Prod / Mainnet V1** network. Prices are displayed in both $LITKEY tokens and USD (based on current market rates).
 
@@ -9,7 +10,9 @@ The following table shows the current pricing for Lit Protocol services on the *
 Most prices update dynamically based on network usage. The values shown below reflect real-time prices fetched from the blockchain. Note that PKP Minting cost is static and does not change with network utilization.
 </Note>
 
-<CurrentPricesTable />
+<PriceProvider>
+  <CurrentPricesTable />
+</PriceProvider>
 
 ## Understanding the Price Table
 
