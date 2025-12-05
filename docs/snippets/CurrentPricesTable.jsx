@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 export const CurrentPricesTable = () => {
   // Constants - defined inside component for Mintlify compatibility
   const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
+  const NAGA_PROD_PKP_ADDRESS = '0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168';
   const RPC_URL = 'https://lit-chain-rpc.litprotocol.com/';
 
   // Product IDs
@@ -166,6 +167,23 @@ export const CurrentPricesTable = () => {
     },
   ];
 
+  // PKP Contract ABI (for mintCost)
+  const PKP_ABI = [
+    {
+      inputs: [],
+      name: 'mintCost',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+  ];
+
   // Helper functions
   const getLitKeyPrice = async () => {
     try {
@@ -207,6 +225,7 @@ export const CurrentPricesTable = () => {
   const [litActionConfigs, setLitActionConfigs] = useState([]);
   const [litKeyPriceUSD, setLitKeyPriceUSD] = useState(null);
   const [usagePercent, setUsagePercent] = useState(null);
+  const [pkpMintCost, setPkpMintCost] = useState(null);
   const [ethersLoaded, setEthersLoaded] = useState(false);
 
   // Load ethers from CDN
@@ -255,6 +274,7 @@ export const CurrentPricesTable = () => {
         const { ethers } = window;
         const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
         const contract = new ethers.Contract(NAGA_PROD_PRICE_FEED_ADDRESS, PRICE_FEED_ABI, provider);
+        const pkpContract = new ethers.Contract(NAGA_PROD_PKP_ADDRESS, PKP_ABI, provider);
 
         const priceUSD = await getLitKeyPrice();
         setLitKeyPriceUSD(priceUSD);
@@ -267,6 +287,10 @@ export const CurrentPricesTable = () => {
         const currentPricesResult = await contract.usagePercentToPrices(estimatedUsage, PRODUCT_IDS);
 
         const litActionConfigsResult = await contract.getLitActionPriceConfigs();
+
+        // Fetch PKP minting cost (static price)
+        const mintCostResult = await pkpContract.mintCost();
+        setPkpMintCost(mintCostResult);
 
         setBasePrices(basePricesResult);
         setMaxPrices(maxPricesResult);
@@ -435,6 +459,79 @@ export const CurrentPricesTable = () => {
                 </tr>
               );
             })}
+            {pkpMintCost !== null && (
+              <tr>
+                <td
+                  style={{
+                    padding: '8px 6px 8px 8px',
+                    border: '1px solid #ddd',
+                    fontWeight: '500',
+                    fontSize: '0.9em',
+                  }}
+                >
+                  PKP Minting{' '}
+                  <span
+                    style={{
+                      color: '#666',
+                      fontSize: '0.85em',
+                      fontWeight: 'normal',
+                      fontStyle: 'italic',
+                    }}
+                  >
+                    (Static)
+                  </span>
+                </td>
+                <td
+                  style={{
+                    padding: '8px 10px',
+                    textAlign: 'right',
+                    border: '1px solid #ddd',
+                    fontFamily: 'monospace',
+                    fontWeight: '600',
+                    fontSize: '0.85em',
+                  }}
+                >
+                  {formatPrice(
+                    weiToTokens(pkpMintCost, window.ethers),
+                    litKeyPriceUSD
+                      ? weiToTokens(pkpMintCost, window.ethers) * litKeyPriceUSD
+                      : null
+                  )}
+                </td>
+                <td
+                  style={{
+                    padding: '8px 10px',
+                    textAlign: 'right',
+                    border: '1px solid #ddd',
+                    fontFamily: 'monospace',
+                    fontSize: '0.85em',
+                  }}
+                >
+                  {formatPrice(
+                    weiToTokens(pkpMintCost, window.ethers),
+                    litKeyPriceUSD
+                      ? weiToTokens(pkpMintCost, window.ethers) * litKeyPriceUSD
+                      : null
+                  )}
+                </td>
+                <td
+                  style={{
+                    padding: '8px 10px',
+                    textAlign: 'right',
+                    border: '1px solid #ddd',
+                    fontFamily: 'monospace',
+                    fontSize: '0.85em',
+                  }}
+                >
+                  {formatPrice(
+                    weiToTokens(pkpMintCost, window.ethers),
+                    litKeyPriceUSD
+                      ? weiToTokens(pkpMintCost, window.ethers) * litKeyPriceUSD
+                      : null
+                  )}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
