@@ -331,7 +331,7 @@ export const CurrentPricesTable = () => {
             <tr style={{ backgroundColor: '#f5f5f5' }}>
               <th
                 style={{
-                  padding: '8px 6px 8px 0',
+                  padding: '8px 6px 8px 8px',
                   textAlign: 'left',
                   border: '1px solid #ddd',
                   fontSize: '0.9em',
