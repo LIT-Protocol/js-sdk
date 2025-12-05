@@ -390,7 +390,7 @@ export const CurrentPricesTable = () => {
                 <tr key={productId}>
                   <td
                     style={{
-                      padding: '8px 6px 8px 0',
+                      padding: '8px 6px 8px 8px',
                       border: '1px solid #ddd',
                       fontWeight: '500',
                       fontSize: '0.9em',
