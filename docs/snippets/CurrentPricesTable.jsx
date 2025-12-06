@@ -1,4 +1,4 @@
-import { weiToTokens, formatPrice, LitActionPriceComponent, NodePriceMeasurement } from './PriceProvider';
+import { weiToTokens, formatPrice } from './PriceProvider';
 
 export const CurrentPricesTable = ({ priceData }) => {
   // Product IDs
@@ -16,6 +16,28 @@ export const CurrentPricesTable = ({ priceData }) => {
     ProductId.LitAction,
     ProductId.SignSessionKey,
   ];
+
+  // LitActionPriceComponent enum values
+  const LitActionPriceComponent = {
+    baseAmount: 0,
+    runtimeLength: 1,
+    memoryUsage: 2,
+    codeLength: 3,
+    responseLength: 4,
+    signatures: 5,
+    broadcasts: 6,
+    contractCalls: 7,
+    callDepth: 8,
+    decrypts: 9,
+    fetches: 10,
+  };
+
+  // NodePriceMeasurement enum values
+  const NodePriceMeasurement = {
+    perSecond: 0,
+    perMegabyte: 1,
+    perCount: 2,
+  };
 
   const PRODUCT_NAMES = {
     [ProductId.PkpSign]: 'PKP Sign',

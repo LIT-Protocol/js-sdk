@@ -1,6 +1,27 @@
-import { weiToTokens, formatPrice, LitActionPriceComponent, NodePriceMeasurement } from './PriceProvider';
+import { weiToTokens, formatPrice } from './PriceProvider';
 
 export const ExampleLitActionCosts = ({ priceData }) => {
+  // LitActionPriceComponent enum values
+  const LitActionPriceComponent = {
+    baseAmount: 0,
+    runtimeLength: 1,
+    memoryUsage: 2,
+    codeLength: 3,
+    responseLength: 4,
+    signatures: 5,
+    broadcasts: 6,
+    contractCalls: 7,
+    callDepth: 8,
+    decrypts: 9,
+    fetches: 10,
+  };
+
+  // NodePriceMeasurement enum values
+  const NodePriceMeasurement = {
+    perSecond: 0,
+    perMegabyte: 1,
+    perCount: 2,
+  };
   if (!priceData) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
