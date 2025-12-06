@@ -22,7 +22,7 @@ const PRODUCT_IDS = [
 ];
 
 // LitActionPriceComponent enum values
-export const LitActionPriceComponent = {
+export const getLitActionPriceComponent = () => ({
   baseAmount: 0,
   runtimeLength: 1,
   memoryUsage: 2,
@@ -34,14 +34,14 @@ export const LitActionPriceComponent = {
   callDepth: 8,
   decrypts: 9,
   fetches: 10,
-};
+});
 
 // NodePriceMeasurement enum values
-export const NodePriceMeasurement = {
+export const getNodePriceMeasurement = () => ({
   perSecond: 0,
   perMegabyte: 1,
   perCount: 2,
-};
+});
 
 // PriceFeed ABI (minimal - only functions we need)
 const PRICE_FEED_ABI = [
