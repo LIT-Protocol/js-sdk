@@ -193,7 +193,7 @@ export const ExampleLitActionCosts = ({ priceData }) => {
   return (
     <div style={{ marginTop: '20px', marginBottom: '20px' }}>
       {litKeyPriceUSD && (
-        <p style={{ marginBottom: '20px', fontSize: '0.9em', color: '#666' }}>
+        <p style={{ marginBottom: '20px', fontSize: '0.9em', color: 'var(--mint-text-secondary, #666)' }}>
           <strong>LITKEY Price:</strong> ${litKeyPriceUSD.toFixed(4)} USD
         </p>
       )}
@@ -208,15 +208,15 @@ export const ExampleLitActionCosts = ({ priceData }) => {
             style={{
               marginBottom: '40px',
               padding: '20px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--mint-border, #ddd)',
               borderRadius: '8px',
-              backgroundColor: '#fafafa',
+              backgroundColor: 'var(--mint-bg-secondary, #fafafa)',
             }}
           >
             <h3 style={{ marginTop: '0', marginBottom: '10px' }}>
               {example.title}
             </h3>
-            <p style={{ marginBottom: '20px', color: '#666', fontSize: '0.9em' }}>
+            <p style={{ marginBottom: '20px', color: 'var(--mint-text-secondary, #666)', fontSize: '0.9em' }}>
               {example.description}
             </p>
 
@@ -236,12 +236,13 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                 }}
               >
                 <thead>
-                  <tr style={{ backgroundColor: '#f5f5f5' }}>
+                  <tr style={{ backgroundColor: 'var(--mint-bg-tertiary, #f5f5f5)' }}>
                     <th
                       style={{
                         padding: '8px 10px',
                         textAlign: 'left',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
+                        color: 'var(--mint-text, inherit)',
                       }}
                     >
                       Component
@@ -250,7 +251,8 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                       style={{
                         padding: '8px 10px',
                         textAlign: 'right',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
+                        color: 'var(--mint-text, inherit)',
                       }}
                     >
                       Quantity
@@ -259,7 +261,8 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                       style={{
                         padding: '8px 10px',
                         textAlign: 'right',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
+                        color: 'var(--mint-text, inherit)',
                       }}
                     >
                       Unit Price
@@ -268,7 +271,8 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                       style={{
                         padding: '8px 10px',
                         textAlign: 'right',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
+                        color: 'var(--mint-text, inherit)',
                       }}
                     >
                       Total
@@ -281,7 +285,7 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                       <td
                         style={{
                           padding: '8px 10px',
-                          border: '1px solid #ddd',
+                          border: '1px solid var(--mint-border, #ddd)',
                         }}
                       >
                         {item.component}
@@ -290,7 +294,7 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                         style={{
                           padding: '8px 10px',
                           textAlign: 'right',
-                          border: '1px solid #ddd',
+                          border: '1px solid var(--mint-border, #ddd)',
                           fontFamily: 'monospace',
                         }}
                       >
@@ -300,7 +304,7 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                         style={{
                           padding: '8px 10px',
                           textAlign: 'right',
-                          border: '1px solid #ddd',
+                          border: '1px solid var(--mint-border, #ddd)',
                           fontFamily: 'monospace',
                         }}
                       >
@@ -310,7 +314,7 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                         style={{
                           padding: '8px 10px',
                           textAlign: 'right',
-                          border: '1px solid #ddd',
+                          border: '1px solid var(--mint-border, #ddd)',
                           fontFamily: 'monospace',
                           fontWeight: '600',
                         }}
@@ -319,11 +323,11 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                       </td>
                     </tr>
                   ))}
-                  <tr style={{ backgroundColor: '#f0f0f0', fontWeight: '600' }}>
+                  <tr style={{ backgroundColor: 'var(--mint-bg-tertiary, #f0f0f0)', fontWeight: '600' }}>
                     <td
                       style={{
                         padding: '8px 10px',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
                       }}
                     >
                       <strong>Total</strong>
@@ -332,21 +336,21 @@ export const ExampleLitActionCosts = ({ priceData }) => {
                       style={{
                         padding: '8px 10px',
                         textAlign: 'right',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
                       }}
                     ></td>
                     <td
                       style={{
                         padding: '8px 10px',
                         textAlign: 'right',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
                       }}
                     ></td>
                     <td
                       style={{
                         padding: '8px 10px',
                         textAlign: 'right',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--mint-border, #ddd)',
                         fontFamily: 'monospace',
                       }}
                     >

@@ -91,7 +91,7 @@ export const CurrentPricesTable = ({ priceData }) => {
   return (
     <div style={{ marginTop: '20px', marginBottom: '20px', paddingLeft: '4px' }}>
       {litKeyPriceUSD && (
-        <p style={{ marginBottom: '20px', fontSize: '0.9em', color: '#666' }}>
+        <p style={{ marginBottom: '20px', fontSize: '0.9em', color: 'var(--mint-text-secondary, #666)' }}>
           <strong>LITKEY Price:</strong> ${litKeyPriceUSD.toFixed(4)} USD
           {usagePercent !== null && (
             <span style={{ marginLeft: '20px' }}>
@@ -114,13 +114,14 @@ export const CurrentPricesTable = ({ priceData }) => {
           }}
         >
           <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
+            <tr style={{ backgroundColor: 'var(--mint-bg-secondary, #f5f5f5)' }}>
               <th
                 style={{
                   padding: '8px 6px 8px 8px',
                   textAlign: 'left',
-                  border: '1px solid #ddd',
+                  border: '1px solid var(--mint-border, #ddd)',
                   fontSize: '0.9em',
+                  color: 'var(--mint-text, inherit)',
                 }}
               >
                 Product
@@ -129,8 +130,9 @@ export const CurrentPricesTable = ({ priceData }) => {
                 style={{
                   padding: '8px 10px',
                   textAlign: 'right',
-                  border: '1px solid #ddd',
+                  border: '1px solid var(--mint-border, #ddd)',
                   fontSize: '0.9em',
+                  color: 'var(--mint-text, inherit)',
                 }}
               >
                 Current Price
@@ -139,8 +141,9 @@ export const CurrentPricesTable = ({ priceData }) => {
                 style={{
                   padding: '8px 10px',
                   textAlign: 'right',
-                  border: '1px solid #ddd',
+                  border: '1px solid var(--mint-border, #ddd)',
                   fontSize: '0.9em',
+                  color: 'var(--mint-text, inherit)',
                 }}
               >
                 Base Price
@@ -149,8 +152,9 @@ export const CurrentPricesTable = ({ priceData }) => {
                 style={{
                   padding: '8px 10px',
                   textAlign: 'right',
-                  border: '1px solid #ddd',
+                  border: '1px solid var(--mint-border, #ddd)',
                   fontSize: '0.9em',
+                  color: 'var(--mint-text, inherit)',
                 }}
               >
                 Max Price
@@ -177,7 +181,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                   <td
                     style={{
                       padding: '8px 6px 8px 8px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--mint-border, #ddd)',
                       fontWeight: '500',
                       fontSize: '0.9em',
                     }}
@@ -188,7 +192,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                     style={{
                       padding: '8px 10px',
                       textAlign: 'right',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--mint-border, #ddd)',
                       fontFamily: 'monospace',
                       fontWeight: '600',
                       fontSize: '0.85em',
@@ -200,7 +204,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                     style={{
                       padding: '8px 10px',
                       textAlign: 'right',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--mint-border, #ddd)',
                       fontFamily: 'monospace',
                       fontSize: '0.85em',
                     }}
@@ -211,7 +215,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                     style={{
                       padding: '8px 10px',
                       textAlign: 'right',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--mint-border, #ddd)',
                       fontFamily: 'monospace',
                       fontSize: '0.85em',
                     }}
@@ -226,7 +230,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                 <td
                   style={{
                     padding: '8px 6px 8px 8px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--mint-border, #ddd)',
                     fontWeight: '500',
                     fontSize: '0.9em',
                   }}
@@ -234,7 +238,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                   PKP Minting{' '}
                   <span
                     style={{
-                      color: '#666',
+                      color: 'var(--mint-text-secondary, #666)',
                       fontSize: '0.85em',
                       fontWeight: 'normal',
                       fontStyle: 'italic',
@@ -247,7 +251,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                   style={{
                     padding: '8px 10px',
                     textAlign: 'right',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--mint-border, #ddd)',
                     fontFamily: 'monospace',
                     fontWeight: '600',
                     fontSize: '0.85em',
@@ -264,7 +268,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                   style={{
                     padding: '8px 10px',
                     textAlign: 'right',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--mint-border, #ddd)',
                     fontFamily: 'monospace',
                     fontSize: '0.85em',
                   }}
@@ -280,7 +284,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                   style={{
                     padding: '8px 10px',
                     textAlign: 'right',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--mint-border, #ddd)',
                     fontFamily: 'monospace',
                     fontSize: '0.85em',
                   }}
@@ -313,13 +317,14 @@ export const CurrentPricesTable = ({ priceData }) => {
           }}
         >
           <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
+            <tr style={{ backgroundColor: 'var(--mint-bg-secondary, #f5f5f5)' }}>
               <th
                 style={{
                   padding: '8px 10px',
                   textAlign: 'left',
-                  border: '1px solid #ddd',
+                  border: '1px solid var(--mint-border, #ddd)',
                   fontSize: '0.9em',
+                  color: 'var(--mint-text, inherit)',
                 }}
               >
                 Component
@@ -328,8 +333,9 @@ export const CurrentPricesTable = ({ priceData }) => {
                 style={{
                   padding: '8px 10px',
                   textAlign: 'right',
-                  border: '1px solid #ddd',
+                  border: '1px solid var(--mint-border, #ddd)',
                   fontSize: '0.9em',
+                  color: 'var(--mint-text, inherit)',
                 }}
               >
                 Price
@@ -355,13 +361,13 @@ export const CurrentPricesTable = ({ priceData }) => {
                   <td
                     style={{
                       padding: '8px 10px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--mint-border, #ddd)',
                       fontSize: '0.9em',
                     }}
                   >
                     {componentName}
                     {measurementName && (
-                      <span style={{ color: '#666', marginLeft: '5px' }}>
+                      <span style={{ color: 'var(--mint-text-secondary, #666)', marginLeft: '5px' }}>
                         {measurementName}
                       </span>
                     )}
@@ -370,7 +376,7 @@ export const CurrentPricesTable = ({ priceData }) => {
                     style={{
                       padding: '8px 10px',
                       textAlign: 'right',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--mint-border, #ddd)',
                       fontFamily: 'monospace',
                       fontSize: '0.85em',
                     }}
