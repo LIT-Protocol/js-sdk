@@ -1,9 +1,9 @@
-import { weiToTokens, formatPrice, getLitActionPriceComponent, getNodePriceMeasurement } from './PriceProvider';
+import { weiToTokens, formatPrice } from './PriceProvider';
 
 export const ExampleLitActionCosts = ({ priceData }) => {
-  // Get enum values from functions
-  const LitActionPriceComponent = getLitActionPriceComponent();
-  const NodePriceMeasurement = getNodePriceMeasurement();
+  // Get constants from window (populated by lit-pricing-constants.js)
+  const LitActionPriceComponent = window.LitPricingConstants?.LitActionPriceComponent || {};
+  const NodePriceMeasurement = window.LitPricingConstants?.NodePriceMeasurement || {};
   if (!priceData) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>

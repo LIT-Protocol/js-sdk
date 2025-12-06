@@ -1,8 +1,10 @@
-import { weiToTokens, formatPrice, getNodePriceMeasurement } from './PriceProvider';
-
-import { getLitActionPriceComponent } from './utils';
+import { weiToTokens, formatPrice } from './PriceProvider';
 
 export const CurrentPricesTable = ({ priceData }) => {
+  // Get constants from window (populated by lit-pricing-constants.js)
+  const LitActionPriceComponent = window.LitPricingConstants?.LitActionPriceComponent || {};
+  const NodePriceMeasurement = window.LitPricingConstants?.NodePriceMeasurement || {};
+
   // Product IDs
   const ProductId = {
     PkpSign: 0,
@@ -18,10 +20,6 @@ export const CurrentPricesTable = ({ priceData }) => {
     ProductId.LitAction,
     ProductId.SignSessionKey,
   ];
-
-  // Get enum values from functions
-  const LitActionPriceComponent = getLitActionPriceComponent();
-  const NodePriceMeasurement = getNodePriceMeasurement();
 
   const PRODUCT_NAMES = {
     [ProductId.PkpSign]: 'PKP Sign',

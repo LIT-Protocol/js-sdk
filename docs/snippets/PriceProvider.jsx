@@ -21,14 +21,7 @@ const PRODUCT_IDS = [
   ProductId.SignSessionKey,
 ];
 
-
-
-// NodePriceMeasurement enum values
-export const getNodePriceMeasurement = () => ({
-  perSecond: 0,
-  perMegabyte: 1,
-  perCount: 2,
-});
+// Constants are now in lit-pricing-constants.js and available via window.LitPricingConstants
 
 // PriceFeed ABI (minimal - only functions we need)
 const PRICE_FEED_ABI = [
