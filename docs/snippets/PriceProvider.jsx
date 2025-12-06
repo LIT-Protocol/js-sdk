@@ -1,160 +1,5 @@
 import { useEffect, useState } from 'react';
 
-// Constants - defined inside component for Mintlify compatibility
-const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
-const NAGA_PROD_PKP_ADDRESS = '0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168';
-const RPC_URL = 'https://lit-chain-rpc.litprotocol.com/';
-
-// Product IDs
-const ProductId = {
-  PkpSign: 0,
-  EncSign: 1,
-  LitAction: 2,
-  SignSessionKey: 3,
-};
-
-// Product IDs array used for fetching prices
-const PRODUCT_IDS = [
-  ProductId.PkpSign,
-  ProductId.EncSign,
-  ProductId.LitAction,
-  ProductId.SignSessionKey,
-];
-
-// Constants are now in lit-pricing-constants.js and available via window.LitPricingConstants
-
-// PriceFeed ABI (minimal - only functions we need)
-const PRICE_FEED_ABI = [
-  {
-    inputs: [
-      {
-        internalType: 'uint256[]',
-        name: 'productIds',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'baseNetworkPrices',
-    outputs: [
-      {
-        internalType: 'uint256[]',
-        name: '',
-        type: 'uint256[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256[]',
-        name: 'productIds',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'maxNetworkPrices',
-    outputs: [
-      {
-        internalType: 'uint256[]',
-        name: '',
-        type: 'uint256[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'usagePercent',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'productIds',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'usagePercentToPrices',
-    outputs: [
-      {
-        internalType: 'uint256[]',
-        name: '',
-        type: 'uint256[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'getLitActionPriceConfigs',
-    outputs: [
-      {
-        components: [
-          {
-            internalType: 'enum LibPriceFeedStorage.LitActionPriceComponent',
-            name: 'priceComponent',
-            type: 'uint8',
-          },
-          {
-            internalType: 'enum LibPriceFeedStorage.NodePriceMeasurement',
-            name: 'priceMeasurement',
-            type: 'uint8',
-          },
-          {
-            internalType: 'uint256',
-            name: 'price',
-            type: 'uint256',
-          },
-        ],
-        internalType: 'struct LibPriceFeedStorage.LitActionPriceConfig[]',
-        name: '',
-        type: 'tuple[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-];
-
-// PKP Contract ABI (for mintCost)
-const PKP_ABI = [
-  {
-    inputs: [],
-    name: 'mintCost',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-];
-
-// Helper functions
-const getLitKeyPrice = async () => {
-  try {
-    const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=lit-protocol&vs_currencies=usd'
-    );
-    const data = await response.json();
-
-    if (data['lit-protocol'] && data['lit-protocol'].usd) {
-      return data['lit-protocol'].usd;
-    }
-
-    throw new Error('LIT price not found in CoinGecko response');
-  } catch (error) {
-    console.error('Error fetching LITKEY price from CoinGecko:', error);
-    return null;
-  }
-};
-
 export const weiToTokens = (wei, ethers) => {
   if (!ethers || !ethers.utils) {
     return 0;
@@ -170,6 +15,158 @@ export const formatPrice = (priceInTokens, priceInUSD) => {
 };
 
 export const PriceProvider = ({ children, component: Component }) => {
+  // Constants - defined inside component for Mintlify compatibility
+  const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
+  const NAGA_PROD_PKP_ADDRESS = '0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168';
+  const RPC_URL = 'https://lit-chain-rpc.litprotocol.com/';
+
+  // Product IDs
+  const ProductId = {
+    PkpSign: 0,
+    EncSign: 1,
+    LitAction: 2,
+    SignSessionKey: 3,
+  };
+
+  // Product IDs array used for fetching prices
+  const PRODUCT_IDS = [
+    ProductId.PkpSign,
+    ProductId.EncSign,
+    ProductId.LitAction,
+    ProductId.SignSessionKey,
+  ];
+
+  // PriceFeed ABI (minimal - only functions we need)
+  const PRICE_FEED_ABI = [
+    {
+      inputs: [
+        {
+          internalType: 'uint256[]',
+          name: 'productIds',
+          type: 'uint256[]',
+        },
+      ],
+      name: 'baseNetworkPrices',
+      outputs: [
+        {
+          internalType: 'uint256[]',
+          name: '',
+          type: 'uint256[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256[]',
+          name: 'productIds',
+          type: 'uint256[]',
+        },
+      ],
+      name: 'maxNetworkPrices',
+      outputs: [
+        {
+          internalType: 'uint256[]',
+          name: '',
+          type: 'uint256[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'usagePercent',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256[]',
+          name: 'productIds',
+          type: 'uint256[]',
+        },
+      ],
+      name: 'usagePercentToPrices',
+      outputs: [
+        {
+          internalType: 'uint256[]',
+          name: '',
+          type: 'uint256[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'getLitActionPriceConfigs',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'enum LibPriceFeedStorage.LitActionPriceComponent',
+              name: 'priceComponent',
+              type: 'uint8',
+            },
+            {
+              internalType: 'enum LibPriceFeedStorage.NodePriceMeasurement',
+              name: 'priceMeasurement',
+              type: 'uint8',
+            },
+            {
+              internalType: 'uint256',
+              name: 'price',
+              type: 'uint256',
+            },
+          ],
+          internalType: 'struct LibPriceFeedStorage.LitActionPriceConfig[]',
+          name: '',
+          type: 'tuple[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+  ];
+
+  // PKP Contract ABI (for mintCost)
+  const PKP_ABI = [
+    {
+      inputs: [],
+      name: 'mintCost',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+  ];
+
+  // Helper function to get LITKEY price
+  const getLitKeyPrice = async () => {
+    try {
+      const response = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=lit-protocol&vs_currencies=usd'
+      );
+      const data = await response.json();
+
+      if (data['lit-protocol'] && data['lit-protocol'].usd) {
+        return data['lit-protocol'].usd;
+      }
+
+      throw new Error('LIT price not found in CoinGecko response');
+    } catch (error) {
+      console.error('Error fetching LITKEY price from CoinGecko:', error);
+      return null;
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [basePrices, setBasePrices] = useState([]);
