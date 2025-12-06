@@ -1,19 +1,5 @@
 import { useEffect, useState } from 'react';
 
-export const weiToTokens = (wei, ethers) => {
-  if (!ethers || !ethers.utils) {
-    return 0;
-  }
-  return parseFloat(ethers.utils.formatUnits(wei, 18));
-};
-
-export const formatPrice = (priceInTokens, priceInUSD) => {
-  if (priceInUSD === null) {
-    return `${priceInTokens.toFixed(6)} LITKEY`;
-  }
-  return `${priceInTokens.toFixed(6)} LITKEY ($${priceInUSD.toFixed(6)})`;
-};
-
 export const PriceProvider = ({ children, component: Component }) => {
   // Constants - defined inside component for Mintlify compatibility
   const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';

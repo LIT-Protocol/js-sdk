@@ -1,9 +1,9 @@
-import { weiToTokens, formatPrice } from './PriceProvider';
-
 export const CurrentPricesTable = ({ priceData }) => {
-  // Get constants from window (populated by lit-pricing-constants.js)
+  // Get constants and helper functions from window (populated by lit-pricing-constants.js)
   const LitActionPriceComponent = window.LitPricingConstants?.LitActionPriceComponent || {};
   const NodePriceMeasurement = window.LitPricingConstants?.NodePriceMeasurement || {};
+  const weiToTokens = window.LitPricingConstants?.weiToTokens || (() => 0);
+  const formatPrice = window.LitPricingConstants?.formatPrice || ((price) => String(price));
 
   // Product IDs
   const ProductId = {
