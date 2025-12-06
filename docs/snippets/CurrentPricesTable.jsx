@@ -1,4 +1,6 @@
-import { weiToTokens, formatPrice, getLitActionPriceComponent, getNodePriceMeasurement } from './PriceProvider';
+import { weiToTokens, formatPrice, getNodePriceMeasurement } from './PriceProvider';
+
+import { getLitActionPriceComponent } from './utils';
 
 export const CurrentPricesTable = ({ priceData }) => {
   // Product IDs
