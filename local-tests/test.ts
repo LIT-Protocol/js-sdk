@@ -111,6 +111,11 @@ import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/test
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
 import { testFailBatchGeneratePrivateKeysAtomic } from './tests/wrapped-keys/testFailStoreEncryptedKeyBatchIsAtomic';
+import { testEthereumSignTypedDataWrappedKey } from './tests/wrapped-keys/testEthereumSignTypedDataWrappedKey';
+import { testEthereumSignTypedDataGeneratedKey } from './tests/wrapped-keys/testEthereumSignTypedDataGeneratedKey';
+import { testFailEthereumSignTypedDataWrappedKeyWithMissingParam } from './tests/wrapped-keys/testFailEthereumSignTypedDataWrappedKeyWithMissingParam';
+import { testFailEthereumSignTypedDataWrappedKeyWithInvalidParam } from './tests/wrapped-keys/testFailEthereumSignTypedDataWrappedKeyWithInvalidParam';
+import { testFailEthereumSignTypedDataWrappedKeyInvalidDecryption } from './tests/wrapped-keys/testFailEthereumSignTypedDataWrappedKeyInvalidDecryption';
 
 import { setLitActionsCodeToLocal } from './tests/wrapped-keys/util';
 import { testUseEoaSessionSigsToRequestSingleResponse } from './tests/testUseEoaSessionSigsToRequestSingleResponse';
@@ -141,6 +146,10 @@ setLitActionsCodeToLocal();
     testEthereumBroadcastTransactionWrappedKey,
     testEthereumBroadcastWrappedKeyWithFetchGasParams,
 
+    // -- typed data signing
+    testEthereumSignTypedDataWrappedKey,
+    testEthereumSignTypedDataGeneratedKey,
+
     // -- generate wrapped keys
     testGenerateEthereumWrappedKey,
     testGenerateSolanaWrappedKey,
@@ -161,6 +170,11 @@ setLitActionsCodeToLocal();
     testFailEthereumSignTransactionWrappedKeyWithInvalidParam,
     testFailEthereumSignTransactionWrappedKeyInvalidDecryption,
     testFailBatchGeneratePrivateKeysAtomic,
+
+    // -- typed data signing invalid cases
+    testFailEthereumSignTypedDataWrappedKeyWithMissingParam,
+    testFailEthereumSignTypedDataWrappedKeyWithInvalidParam,
+    testFailEthereumSignTypedDataWrappedKeyInvalidDecryption,
 
     // -- import wrapped keys
     testFailImportWrappedKeysWithSamePrivateKey,
