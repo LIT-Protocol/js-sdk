@@ -341,6 +341,56 @@ export const registerWrappedKeysTests = () => {
         expect(storedKey.dataToEncryptHash).toBeTruthy();
       });
 
+      test('updateEncryptedKey rotates ciphertext and returns version history', async () => {
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
+
+        const initialPayload = TestHelper.createStorePayload(
+          TestHelper.randomMemo('update-before')
+        );
+
+        const { id } = await wrappedKeysApi.storeEncryptedKey({
+          pkpSessionSigs,
+          litClient: testEnv.litClient,
+          ...initialPayload,
+        });
+
+        const newCiphertext = TestHelper.randomCiphertext();
+        const newMemo = TestHelper.randomMemo('update-after');
+
+        const updateResult = await wrappedKeysApi.updateEncryptedKey({
+          pkpSessionSigs,
+          litClient: testEnv.litClient,
+          id,
+          ciphertext: newCiphertext,
+          memo: newMemo,
+        });
+
+        expect(updateResult.id).toBe(id);
+        expect(updateResult.pkpAddress).toBe(alice.pkp!.ethAddress);
+        expect(updateResult.updatedAt).toBeTruthy();
+
+        const fetched = await wrappedKeysApi.getEncryptedKey({
+          pkpSessionSigs,
+          litClient: testEnv.litClient,
+          id,
+          includeVersions: true,
+        });
+
+        expect(fetched.ciphertext).toBe(newCiphertext);
+        expect(fetched.memo).toBe(newMemo);
+        expect(fetched.updatedAt).toBeTruthy();
+        expect(fetched.versions).toBeDefined();
+        expect(fetched.versions?.length).toBe(1);
+        expect(fetched.versions?.[0].ciphertext).toBe(
+          initialPayload.ciphertext
+        );
+        expect(fetched.versions?.[0].memo).toBe(initialPayload.memo);
+      });
+
       test('importPrivateKey persists an externally generated key', async () => {
         const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
           testEnv,
