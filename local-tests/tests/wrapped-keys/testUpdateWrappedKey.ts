@@ -32,6 +32,7 @@ export const testUpdateWrappedKey = async (devEnv: TinnyEnvironment) => {
       litNodeClient: devEnv.litNodeClient,
       memo: 'Test update key',
     });
+    console.log(`   Generated id=${id} for pkpAddress=${pkpAddress}`);
 
     console.log('3. Fetch initial encrypted key (without versions)');
     const initial = await getEncryptedKey({
@@ -39,6 +40,9 @@ export const testUpdateWrappedKey = async (devEnv: TinnyEnvironment) => {
       litNodeClient: devEnv.litNodeClient,
       id,
     });
+    console.log(
+      `   Initial ciphertext hash=${initial.dataToEncryptHash} memo="${initial.memo}"`
+    );
     const newCiphertext = randomBytes(48).toString('base64');
 
     console.log('4. Update encrypted key with new ciphertext/memo');
@@ -49,6 +53,9 @@ export const testUpdateWrappedKey = async (devEnv: TinnyEnvironment) => {
       ciphertext: newCiphertext,
       memo: 'rotated memo',
     });
+    console.log(
+      `   Update result: id=${updateResult.id} pkpAddress=${updateResult.pkpAddress} updatedAt=${updateResult.updatedAt}`
+    );
 
     if (updateResult.pkpAddress !== pkpAddress) {
       throw new Error('Updated key pkpAddress mismatch');
@@ -61,6 +68,9 @@ export const testUpdateWrappedKey = async (devEnv: TinnyEnvironment) => {
       id,
       includeVersions: true,
     });
+    console.log(
+      `   Updated ciphertext=${updated.ciphertext.slice(0, 16)}... versions=${updated.versions?.length}`
+    );
 
     if (updated.ciphertext !== newCiphertext) {
       throw new Error('Ciphertext was not updated');
