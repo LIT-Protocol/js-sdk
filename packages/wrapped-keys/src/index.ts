@@ -9,6 +9,7 @@ import {
   listEncryptedKeyMetadata,
   batchGeneratePrivateKeys,
   storeEncryptedKeyBatch,
+  updateEncryptedKey,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -53,6 +54,9 @@ import type {
   StoreEncryptedKeyResult,
   ImportPrivateKeyResult,
   StoreEncryptedKeyBatchResult,
+  UpdateEncryptedKeyParams,
+  UpdateEncryptedKeyResult,
+  WrappedKeyVersion,
 } from './lib/types';
 
 export const constants = {
@@ -75,6 +79,7 @@ export const api = {
   storeEncryptedKey,
   storeEncryptedKeyBatch,
   batchGeneratePrivateKeys,
+  updateEncryptedKey,
 };
 
 export const config = {
@@ -110,4 +115,7 @@ export {
   StoredKeyData,
   StoredKeyMetadata,
   SupportedNetworks,
+  UpdateEncryptedKeyParams,
+  UpdateEncryptedKeyResult,
+  WrappedKeyVersion,
 };

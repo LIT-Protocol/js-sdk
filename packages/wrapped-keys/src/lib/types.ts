@@ -43,6 +43,7 @@ export type ListEncryptedKeyMetadataParams = BaseApiParams;
  */
 export type GetEncryptedKeyDataParams = BaseApiParams & {
   id: string;
+  includeVersions?: boolean;
 };
 
 /** Metadata for a key that has been stored, encrypted, on the wrapped keys backend service
@@ -64,6 +65,8 @@ export interface StoredKeyMetadata {
   litNetwork: LIT_NETWORKS_KEYS;
   memo: string;
   id: string;
+  updatedAt?: string;
+  versions?: WrappedKeyVersion[];
 }
 
 /** Complete encrypted private key data, including the `ciphertext` and `dataToEncryptHash` necessary to decrypt the key
@@ -75,6 +78,21 @@ export interface StoredKeyMetadata {
 export interface StoredKeyData extends StoredKeyMetadata {
   ciphertext: string;
   dataToEncryptHash: string;
+}
+
+export interface WrappedKeyVersion
+  extends Pick<
+    StoredKeyData,
+    | 'ciphertext'
+    | 'dataToEncryptHash'
+    | 'keyType'
+    | 'litNetwork'
+    | 'memo'
+    | 'publicKey'
+  > {
+  id: string;
+  evmContractConditions?: string;
+  updatedAt: string;
 }
 
 /** Properties required to persist an encrypted key into the wrapped-keys backend storage service
@@ -124,6 +142,19 @@ export type StoreEncryptedKeyBatchParams = BaseApiParams & {
 export interface StoreEncryptedKeyBatchResult {
   ids: string[];
   pkpAddress: string;
+}
+
+export type UpdateEncryptedKeyParams = BaseApiParams & {
+  id: string;
+  ciphertext: string;
+  evmContractConditions?: string;
+  memo?: string;
+};
+
+export interface UpdateEncryptedKeyResult {
+  id: string;
+  pkpAddress: string;
+  updatedAt: string;
 }
 
 /** Exporting a previously persisted key only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.

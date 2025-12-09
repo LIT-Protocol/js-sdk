@@ -106,6 +106,7 @@ import { testFailImportWrappedKeysWithMaxExpirySessionSig } from './tests/wrappe
 import { testFailImportWrappedKeysWithInvalidSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithInvalidSessionSig';
 import { testFailImportWrappedKeysWithExpiredSessionSig } from './tests/wrapped-keys/testFailImportWrappedKeysWithExpiredSessionSig';
 import { testExportWrappedKey } from './tests/wrapped-keys/testExportWrappedKey';
+import { testUpdateWrappedKey } from './tests/wrapped-keys/testUpdateWrappedKey';
 import { testSignMessageWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignMessageWithSolanaEncryptedKey';
 import { testSignTransactionWithSolanaEncryptedKey } from './tests/wrapped-keys/testSignTransactionWithSolanaEncryptedKey';
 import { testBatchGeneratePrivateKeys } from './tests/wrapped-keys/testBatchGeneratePrivateKeys';
@@ -149,6 +150,7 @@ setLitActionsCodeToLocal();
 
     // -- export wrapped keys
     testExportWrappedKey,
+    testUpdateWrappedKey,
 
     // -- solana wrapped keys
     testSignMessageWithSolanaEncryptedKey,
