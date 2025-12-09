@@ -32,7 +32,7 @@ export const testUpdateWrappedKey = async (devEnv: TinnyEnvironment) => {
       litNodeClient: devEnv.litNodeClient,
       memo: 'Test update key',
     });
-    console.log(`   Generated id=${id} for pkpAddress=${pkpAddress}`);
+    console.log({ step: 'generated', id, pkpAddress });
 
     console.log('3. Fetch initial encrypted key (without versions)');
     const initial = await getEncryptedKey({
@@ -40,48 +40,60 @@ export const testUpdateWrappedKey = async (devEnv: TinnyEnvironment) => {
       litNodeClient: devEnv.litNodeClient,
       id,
     });
-    console.log(
-      `   Initial ciphertext hash=${initial.dataToEncryptHash} memo="${initial.memo}"`
-    );
-    const newCiphertext = randomBytes(48).toString('base64');
+    console.log({ step: 'initial', initial });
+    const newCiphertext1 = randomBytes(48).toString('base64');
+    const newCiphertext2 = randomBytes(48).toString('base64');
 
     console.log('4. Update encrypted key with new ciphertext/memo');
     const updateResult = await updateEncryptedKey({
       pkpSessionSigs,
       litNodeClient: devEnv.litNodeClient,
       id,
-      ciphertext: newCiphertext,
+      ciphertext: newCiphertext1,
       memo: 'rotated memo',
     });
-    console.log(
-      `   Update result: id=${updateResult.id} pkpAddress=${updateResult.pkpAddress} updatedAt=${updateResult.updatedAt}`
-    );
+    console.log({ step: 'update1', updateResult });
 
     if (updateResult.pkpAddress !== pkpAddress) {
       throw new Error('Updated key pkpAddress mismatch');
     }
 
-    console.log('5. Fetch updated key including versions');
+    console.log('5. Second update to generate another version');
+    const updateResult2 = await updateEncryptedKey({
+      pkpSessionSigs,
+      litNodeClient: devEnv.litNodeClient,
+      id,
+      ciphertext: newCiphertext2,
+      memo: 'rotated memo v2',
+    });
+    console.log({ step: 'update2', updateResult2 });
+
+    console.log('6. Fetch updated key including versions');
     const updated = await getEncryptedKey({
       pkpSessionSigs,
       litNodeClient: devEnv.litNodeClient,
       id,
       includeVersions: true,
     });
-    console.log(
-      `   Updated ciphertext=${updated.ciphertext.slice(0, 16)}... versions=${updated.versions?.length}`
-    );
+    console.log({ step: 'updated', updated });
 
-    if (updated.ciphertext !== newCiphertext) {
+    if (updated.ciphertext !== newCiphertext2) {
       throw new Error('Ciphertext was not updated');
     }
-    if (!updated.versions || updated.versions.length !== 1) {
+    if (!updated.versions || updated.versions.length !== 2) {
       throw new Error('Versions array missing or incorrect length');
     }
     if (updated.versions[0].ciphertext !== initial.ciphertext) {
-      throw new Error('Previous version ciphertext mismatch');
+      throw new Error('Initial version ciphertext mismatch');
     }
-    if (!updated.updatedAt || !updated.versions[0].updatedAt) {
+    if (updated.versions[1].ciphertext !== newCiphertext1) {
+      throw new Error('First update version ciphertext mismatch');
+    }
+    if (
+      !updated.updatedAt ||
+      !updated.versions[0].updatedAt ||
+      !updated.versions[1].updatedAt
+    ) {
       throw new Error('updatedAt timestamps not set');
     }
 
