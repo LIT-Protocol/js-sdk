@@ -1213,7 +1213,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
                 ipfsId: params.executionContext.ipfsId,
               }),
               ...(params.executionContext.jsParams && {
-                jsParams: { jsParams: params.executionContext.jsParams },
+                jsParams: params.executionContext.jsParams,
               }),
             });
 
