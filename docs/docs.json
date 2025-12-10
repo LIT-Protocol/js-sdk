@@ -133,6 +133,7 @@
                   "sdk/sdk-reference/wrapped-keys/functions/exportPrivateKey",
                   "sdk/sdk-reference/wrapped-keys/functions/importPrivateKey",
                   "sdk/sdk-reference/wrapped-keys/functions/getEncryptedKey",
+                  "sdk/sdk-reference/wrapped-keys/functions/updateEncryptedKey",
                   "sdk/sdk-reference/wrapped-keys/functions/listEncryptedKeyMetadata",
                   "sdk/sdk-reference/wrapped-keys/functions/storeEncryptedKey",
                   "sdk/sdk-reference/wrapped-keys/functions/storeEncryptedKeyBatch",
