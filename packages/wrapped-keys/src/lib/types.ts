@@ -172,7 +172,13 @@ export type UpdateEncryptedKeyParams = BaseApiParams & {
   memo?: string;
 };
 
-/** Result of updating a private key in the wrapped keys backend service */
+/** Result of updating a private key in the wrapped keys backend service
+ * 
+ * @typedef UpdateEncryptedKeyResult
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key that was updated
+ * @property { string } pkpAddress The LIT PKP Address that the key was linked to; this is derived from the provided pkpSessionSigs
+ * @property { string } updatedAt ISO 8601 timestamp of when the key was updated
+ */
 export interface UpdateEncryptedKeyResult {
   id: string;
   pkpAddress: string;
