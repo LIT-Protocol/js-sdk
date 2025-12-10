@@ -44,6 +44,7 @@ export type ListEncryptedKeyMetadataParams = BaseApiParams;
  * @extends BaseApiParams
  *
  * @property { string } id The unique identifier (UUID V4) of the encrypted private key
+ * @property { boolean } [includeVersions] Optional flag to include version history in the response
  */
 export type GetEncryptedKeyDataParams = BaseApiParams & {
   id: string;
