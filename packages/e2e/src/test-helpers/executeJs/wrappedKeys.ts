@@ -57,6 +57,21 @@ namespace TestHelper {
   export const randomHash = (input: string) =>
     createHash('sha256').update(input).digest('hex');
 
+  export const createEvmContractConditions = (address: string) =>
+    JSON.stringify([
+      {
+        contractAddress: '',
+        standardContractType: '',
+        chain: EVM_CHAIN,
+        method: '',
+        parameters: [':userAddress'],
+        returnValueTest: {
+          comparator: '=',
+          value: address,
+        },
+      },
+    ]);
+
   export const createStorePayload = (memo = randomMemo('store')) => {
     const ciphertext = randomCiphertext();
     return {
@@ -389,6 +404,61 @@ export const registerWrappedKeysTests = () => {
           initialPayload.ciphertext
         );
         expect(fetched.versions?.[0].memo).toBe(initialPayload.memo);
+      });
+
+      test('updateEncryptedKey with evmContractConditions stores conditions in version history', async () => {
+        const pkpSessionSigs = await TestHelper.createPkpSessionSigs({
+          testEnv,
+          alice,
+          delegationAuthSig: aliceDelegationAuthSig,
+        });
+
+        const initialPayload = TestHelper.createStorePayload(
+          TestHelper.randomMemo('update-evm-before')
+        );
+
+        const { id } = await wrappedKeysApi.storeEncryptedKey({
+          pkpSessionSigs,
+          litClient: testEnv.litClient,
+          ...initialPayload,
+        });
+
+        const newCiphertext = TestHelper.randomCiphertext();
+        const newMemo = TestHelper.randomMemo('update-evm-after');
+        const evmContractConditions = TestHelper.createEvmContractConditions(
+          alice.pkp!.ethAddress
+        );
+
+        const updateResult = await wrappedKeysApi.updateEncryptedKey({
+          pkpSessionSigs,
+          litClient: testEnv.litClient,
+          id,
+          ciphertext: newCiphertext,
+          memo: newMemo,
+          evmContractConditions,
+        });
+
+        expect(updateResult.id).toBe(id);
+        expect(updateResult.pkpAddress).toBe(alice.pkp!.ethAddress);
+        expect(updateResult.updatedAt).toBeTruthy();
+
+        const fetched = await wrappedKeysApi.getEncryptedKey({
+          pkpSessionSigs,
+          litClient: testEnv.litClient,
+          id,
+          includeVersions: true,
+        });
+
+        expect(fetched.ciphertext).toBe(newCiphertext);
+        expect(fetched.memo).toBe(newMemo);
+        expect(fetched.updatedAt).toBeTruthy();
+        expect(fetched.versions).toBeDefined();
+        expect(fetched.versions?.length).toBe(1);
+        expect(fetched.versions?.[0].ciphertext).toBe(
+          initialPayload.ciphertext
+        );
+        expect(fetched.versions?.[0].memo).toBe(initialPayload.memo);
+        expect(fetched.versions?.[0].evmContractConditions).toBeUndefined();
       });
 
       test('importPrivateKey persists an externally generated key', async () => {
