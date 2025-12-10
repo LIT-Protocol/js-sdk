@@ -61,6 +61,8 @@ export type GetEncryptedKeyDataParams = BaseApiParams & {
  * @property { string } memo A (typically) user-provided descriptor for the encrypted private key
  * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the client who stored the key was connected to
+ * @property { string } [updatedAt] ISO 8601 timestamp of when the key was last updated
+ * @property { WrappedKeyVersion[] } [versions] Array of historical versions of this key after update operations
  */
 export interface StoredKeyMetadata {
   publicKey: string;
