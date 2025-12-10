@@ -57,7 +57,7 @@ namespace TestHelper {
   export const randomHash = (input: string) =>
     createHash('sha256').update(input).digest('hex');
 
-  export const createEvmContractConditions = (address: string) =>
+  export const createEvmContractConditions = () =>
     JSON.stringify([
       {
         contractAddress: ZERO_ADDRESS,
@@ -425,9 +425,7 @@ export const registerWrappedKeysTests = () => {
 
         const newCiphertext = TestHelper.randomCiphertext();
         const newMemo = TestHelper.randomMemo('update-evm-after');
-        const evmContractConditions = TestHelper.createEvmContractConditions(
-          alice.pkp!.ethAddress
-        );
+        const evmContractConditions = TestHelper.createEvmContractConditions();
 
         const updateResult = await wrappedKeysApi.updateEncryptedKey({
           pkpSessionSigs,
