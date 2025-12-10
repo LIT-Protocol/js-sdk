@@ -87,7 +87,19 @@ export interface StoredKeyData extends StoredKeyMetadata {
   dataToEncryptHash: string;
 }
 
-/** Represents a historical version of a wrapped key after an update operation */
+/** Represents a historical version of a wrapped key after an update operation
+ *
+ * @typedef WrappedKeyVersion
+ * @property { string } id The unique identifier (UUID V4) of this key version
+ * @property { string } ciphertext The base64 encoded, salted & encrypted private key at this version
+ * @property { string } dataToEncryptHash SHA-256 of the ciphertext for this version
+ * @property { string } keyType The type of key that was encrypted -- e.g. ed25519, K256, etc.
+ * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the client was connected to
+ * @property { string } memo The descriptor for the encrypted private key at this version
+ * @property { string } publicKey The public key of the encrypted private key
+ * @property { string } [evmContractConditions] Optional EVM contract conditions for access control at this version
+ * @property { string } updatedAt ISO 8601 timestamp of when this version was created
+ */
 export interface WrappedKeyVersion
   extends Pick<
     StoredKeyData,
