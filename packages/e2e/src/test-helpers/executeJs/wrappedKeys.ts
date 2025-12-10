@@ -60,14 +60,14 @@ namespace TestHelper {
   export const createEvmContractConditions = (address: string) =>
     JSON.stringify([
       {
-        contractAddress: '',
-        standardContractType: '',
+        contractAddress: ZERO_ADDRESS,
+        standardContractType: 'ERC20',
         chain: EVM_CHAIN,
-        method: '',
+        method: 'balanceOf',
         parameters: [':userAddress'],
         returnValueTest: {
-          comparator: '=',
-          value: address,
+          comparator: '>=',
+          value: '0',
         },
       },
     ]);
