@@ -949,9 +949,7 @@ export const LIT_CHAINS: LITChain<LitEVMChainKeys, LITEVMChain> = {
     symbol: 'CAMP',
     decimals: 18,
     rpcUrls: ['https://rpc.camp.raas.gelato.cloud'],
-    blockExplorerUrls: [
-      'https://camp.cloud.blockscout.com/',
-    ],
+    blockExplorerUrls: ['https://camp.cloud.blockscout.com/'],
     type: null,
     vmType: VMTYPE.EVM,
   },
