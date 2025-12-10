@@ -164,7 +164,16 @@ export interface StoreEncryptedKeyBatchResult {
   pkpAddress: string;
 }
 
-/** Properties required to update an existing encrypted key in the wrapped-keys backend storage service */
+/** Properties required to update an existing encrypted key in the wrapped-keys backend storage service
+ *
+ * @typedef UpdateEncryptedKeyParams
+ * @extends BaseApiParams
+ *
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key to update
+ * @property { string } ciphertext The new base64 encoded, salted & encrypted private key
+ * @property { string } [evmContractConditions] Optional EVM contract conditions for access control
+ * @property { string } [memo] Optional descriptor for the encrypted private key
+ */
 export type UpdateEncryptedKeyParams = BaseApiParams & {
   id: string;
   ciphertext: string;
