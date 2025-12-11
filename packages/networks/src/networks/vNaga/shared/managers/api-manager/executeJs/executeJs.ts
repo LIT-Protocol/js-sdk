@@ -23,7 +23,11 @@ import {
 } from '@lit-protocol/types';
 import { z } from 'zod';
 import { combineExecuteJSSignatures } from '../helper/get-signatures';
-import { ExecuteJsValueResponse, LitActionClaimData } from '../types';
+import {
+  ExecuteJsValueResponse,
+  LitActionClaimData,
+  LitActionPaymentDetail,
+} from '../types';
 import { ExecuteJsResponseDataSchema } from './executeJs.ResponseDataSchema';
 
 const _logger = getChildLogger({
@@ -325,24 +329,33 @@ export const handleResponse = async (
 
   // Convert to ExecuteJsValueResponse format for compatibility with old code
   const responseData: ExecuteJsValueResponse[] = successfulValues.map(
-    (value) => ({
-      success: value.success,
-      response: value.response,
-      logs: value.logs,
-      signedData: value.signedData || {},
-      claimData: Object.entries(value.claimData || {}).reduce(
-        (acc, [key, claimData]) => {
-          acc[key] = {
-            signature: '', // Convert from signatures array to single signature for compatibility
-            derivedKeyId: claimData.derivedKeyId || '',
-          };
-          return acc;
-        },
-        {} as Record<string, LitActionClaimData>
-      ),
-      decryptedData: value.decryptedData || {},
-      paymentDetail: value.paymentDetail,
-    })
+    (value) => {
+      const paymentDetail: LitActionPaymentDetail[] | undefined =
+        value.paymentDetail?.map((detail) => ({
+          component: detail.component,
+          quantity: detail.quantity,
+          price: detail.price,
+        }));
+
+      return {
+        success: value.success,
+        response: value.response,
+        logs: value.logs,
+        signedData: value.signedData || {},
+        claimData: Object.entries(value.claimData || {}).reduce(
+          (acc, [key, claimData]) => {
+            acc[key] = {
+              signature: '', // Convert from signatures array to single signature for compatibility
+              derivedKeyId: claimData.derivedKeyId || '',
+            };
+            return acc;
+          },
+          {} as Record<string, LitActionClaimData>
+        ),
+        decryptedData: value.decryptedData || {},
+        paymentDetail,
+      };
+    }
   );
 
   // Check for signature data in responses and extract if found
