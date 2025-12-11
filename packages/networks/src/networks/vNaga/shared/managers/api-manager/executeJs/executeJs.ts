@@ -341,6 +341,7 @@ export const handleResponse = async (
         {} as Record<string, LitActionClaimData>
       ),
       decryptedData: value.decryptedData || {},
+      paymentDetail: value.paymentDetail,
     })
   );
 
@@ -363,6 +364,7 @@ export const handleResponse = async (
 
   const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
   const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
+  const paymentDetail = mostCommonResponse.paymentDetail;
 
   // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
   if (!hasSignedData && !hasClaimData && !hasSignatureData) {
@@ -372,6 +374,7 @@ export const handleResponse = async (
       signatures: {},
       response: mostCommonResponse.response,
       logs: mostCommonResponse.logs,
+      ...(paymentDetail && { paymentDetail }),
     };
   }
 
@@ -547,6 +550,7 @@ export const handleResponse = async (
     response: processedResponse,
     logs: mostCommonResponse.logs || '',
     ...(Object.keys(claims).length > 0 && { claims }),
+    ...(paymentDetail && { paymentDetail }),
   };
 
   _logger.info(

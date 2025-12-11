@@ -54,6 +54,19 @@ export const ExecuteJsResponseDataSchema = z.object({
        * Signed data from the Lit Action execution
        */
       signedData: z.record(z.string(), LitActionSignedDataSchema),
+
+      /**
+       * Payment details for the Lit Action execution (if payments are enabled)
+       */
+      paymentDetail: z
+        .array(
+          z.object({
+            component: z.string(),
+            quantity: z.number(),
+            price: z.number(),
+          })
+        )
+        .optional(),
     })
   ),
 });

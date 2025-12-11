@@ -522,6 +522,11 @@ export interface ExecuteJsResponseBase {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any;
+  paymentDetail?: {
+    component: string;
+    quantity: number;
+    price: number;
+  }[];
 }
 
 /**
