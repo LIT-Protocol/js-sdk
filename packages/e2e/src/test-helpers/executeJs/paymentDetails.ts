@@ -33,7 +33,9 @@ export const registerPaymentDetailsResponseTests = () => {
     });
 
     if (!payer.pkpAuthContext) {
-      throw new Error('PKP auth context was not created for payment detail test');
+      throw new Error(
+        'PKP auth context was not created for payment detail test'
+      );
     }
   });
 
@@ -53,7 +55,10 @@ export const registerPaymentDetailsResponseTests = () => {
       expect(executionResult.paymentDetail).toBeDefined();
 
       const paymentDetail = executionResult.paymentDetail!;
-      console.log('[payment detail] executeJs response paymentDetail:', paymentDetail);
+      console.log(
+        '[payment detail] executeJs response paymentDetail:',
+        paymentDetail
+      );
 
       expect(Array.isArray(paymentDetail)).toBe(true);
       expect(paymentDetail.length).toBeGreaterThan(0);
