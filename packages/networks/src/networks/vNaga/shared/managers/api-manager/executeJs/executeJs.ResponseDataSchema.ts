@@ -55,14 +55,18 @@ export const ExecuteJsResponseDataSchema = z.object({
        */
       signedData: z.record(z.string(), LitActionSignedDataSchema),
 
-      /** Payment details on what resources were used and how much was charged  */
-      paymentDetail: z.array(
-        z.object({
-          component: z.string(), // LitActionPriceComponent
-          quantity: z.bigint().or(z.number()), // Accept bigint OR number for compatibility
-          price: z.bigint().or(z.number()),
-        })
-      ),
+      /**
+       * Payment details for the Lit Action execution (if payments are enabled)
+       */
+      paymentDetail: z
+        .array(
+          z.object({
+            component: z.string(),
+            quantity: z.number(),
+            price: z.number(),
+          })
+        )
+        .optional(),
     })
   ),
 });

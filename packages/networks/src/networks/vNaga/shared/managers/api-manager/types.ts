@@ -113,6 +113,12 @@ export interface LitActionSignedData {
   sigType: EcdsaSigType;
 }
 
+export interface LitActionPaymentDetail {
+  component: string;
+  quantity: number;
+  price: number;
+}
+
 /**
  * This is what the /web/execute/v2 endpoint returns
  */
@@ -123,6 +129,7 @@ export interface ExecuteJsValueResponse {
   response: string;
   signedData: Record<string, LitActionSignedData>;
   success: boolean;
+  paymentDetail?: LitActionPaymentDetail[];
 }
 
 /**
