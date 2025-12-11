@@ -1,6 +1,7 @@
 import {
   AUTH_METHOD_TYPE,
   AUTH_METHOD_TYPE_VALUES,
+  KEY_SET_IDENTIFIERS,
 } from '@lit-protocol/constants';
 import { z } from 'zod';
 import {
@@ -44,6 +45,9 @@ export const JsonSignSessionKeyRequestForPkpReturnSchema = z.object({
   curveType: z.literal('BLS'),
   signingScheme: z.literal('BLS'),
   epoch: z.number(),
+  keySetIdentifier: z
+    .enum([KEY_SET_IDENTIFIERS.DATIL, KEY_SET_IDENTIFIERS.NAGA_KEYSET1])
+    .optional(),
 });
 
 export const JsonSignCustomSessionKeyRequestForPkpReturnSchema = z
@@ -56,6 +60,9 @@ export const JsonSignCustomSessionKeyRequestForPkpReturnSchema = z
     curveType: z.literal('BLS'),
     signingScheme: z.literal('BLS'),
     epoch: z.number(),
+    keySetIdentifier: z
+      .enum([KEY_SET_IDENTIFIERS.DATIL, KEY_SET_IDENTIFIERS.NAGA_KEYSET1])
+      .optional(),
 
     // custom auth params
     jsParams: z.record(z.any()).optional(),

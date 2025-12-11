@@ -7,15 +7,18 @@
  *
  * @returns { Promise<{ciphertext: string, dataToEncryptHash: string, publicKey: string}> } - Returns object with ciphertext & dataToEncryptHash which are the result of the encryption. Also returns the publicKey of the newly generated Ethers Wrapped Key.
  */
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 import { encryptPrivateKey } from '../../internal/common/encryptKey';
 import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
 
 export interface GenerateEncryptedEthereumPrivateKeyParams {
   accessControlConditions: string;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 export async function generateEncryptedEthereumPrivateKey({
   accessControlConditions,
+  keySetIdentifier,
 }: GenerateEncryptedEthereumPrivateKeyParams): Promise<{
   ciphertext: string;
   dataToEncryptHash: string;
@@ -26,5 +29,6 @@ export async function generateEncryptedEthereumPrivateKey({
     accessControlConditions,
     privateKey,
     publicKey,
+    keySetIdentifier,
   });
 }

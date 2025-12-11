@@ -150,10 +150,12 @@ declare global {
         toSign,
         publicKey,
         sigName,
+        keySetIdentifier,
       }: {
         toSign: Uint8Array;
         publicKey: string;
         sigName: string;
+        keySetIdentifier?: 'datil' | 'naga-keyset1';
       }): Promise<string>;
       /**
        * Ask the Lit Node to sign a message using the eth_personalSign algorithm.  The resulting signature share will be returned to the Lit JS SDK which will automatically combine the shares and give you the full signature to use.
@@ -280,7 +282,15 @@ declare global {
         dataToEncryptHash,
         authSig,
         chain,
-      }: string): string;
+        keySetIdentifier,
+      }: {
+        accessControlConditions: any[];
+        ciphertext: string;
+        dataToEncryptHash: string;
+        authSig: any;
+        chain: string;
+        keySetIdentifier?: 'datil' | 'naga-keyset1';
+      }): Promise<string>;
       /**
    * Decrypt to a single node.
    * @param {string} accessControlConditions The access control conditions
@@ -296,12 +306,14 @@ declare global {
         dataToEncryptHash,
         authSig,
         chain,
+        keySetIdentifier,
       }: {
         accessControlConditions: string;
         ciphertext: string;
         dataToEncryptHash: string;
         chain: string;
         authSig: any;
+        keySetIdentifier?: 'datil' | 'naga-keyset1';
       }): Promise<string>;
       /**
        * @param {Uint8array} toSign the message to sign
@@ -313,7 +325,13 @@ declare global {
         toSign,
         publicKey,
         sigName,
-      }: Uint8array): Uint8array;
+        keySetIdentifier,
+      }: {
+        toSign: Uint8Array;
+        publicKey: string;
+        sigName: string;
+        keySetIdentifier?: 'datil' | 'naga-keyset1';
+      }): Uint8Array;
       /**
        *
        * @param {bool} waitForResponse Whether to wait for a response or not - if false, the function will return immediately.
@@ -335,9 +353,11 @@ declare global {
       function encrypt({
         accessControlConditions,
         to_encrypt,
+        keySetIdentifier,
       }: {
         accessControlConditions: string;
         to_encrypt: Uint8Array;
+        keySetIdentifier?: 'datil' | 'naga-keyset1';
       }): {
         ciphertext: string;
         dataToEncryptHash: string;

@@ -1,4 +1,5 @@
 import { AccessControlConditions } from '@lit-protocol/types';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 
 import { postLitActionValidation } from './utils';
 import { BatchGeneratePrivateKeysParams, Network } from '../types';
@@ -9,6 +10,7 @@ interface BatchGeneratePrivateKeysWithLitActionParams
   litActionIpfsCid?: string;
   litActionCode?: string;
   userMaxPrice?: bigint;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 interface GeneratePrivateKeyLitActionResult {
@@ -35,6 +37,7 @@ export async function batchGenerateKeysWithLitAction(
     litActionIpfsCid,
     litActionCode,
     userMaxPrice,
+    keySetIdentifier,
   } = args;
 
   const result = await litClient.executeJs({
@@ -46,6 +49,7 @@ export async function batchGenerateKeysWithLitAction(
     jsParams: {
       actions,
       accessControlConditions,
+      keySetIdentifier,
     },
   });
 

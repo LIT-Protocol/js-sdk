@@ -1,4 +1,5 @@
 import { encryptPrivateKey } from '../../internal/common/encryptKey';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 import { generateEthereumPrivateKey } from '../../internal/ethereum/generatePrivateKey';
 import { signMessageEthereumKey } from '../../internal/ethereum/signMessage';
 import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateKey';
@@ -17,14 +18,17 @@ interface Action {
 export interface BatchGenerateEncryptedKeysParams {
   actions: Action[];
   accessControlConditions: string;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 async function processEthereumAction({
   action,
   accessControlConditions,
+  keySetIdentifier,
 }: {
   action: Action;
   accessControlConditions: string;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }) {
   const { network, generateKeyParams } = action;
   const messageToSign = action.signMessageParams?.messageToSign;
@@ -36,6 +40,7 @@ async function processEthereumAction({
       accessControlConditions,
       publicKey: ethereumKey.publicKey,
       privateKey: ethereumKey.privateKey,
+      keySetIdentifier,
     }),
     messageToSign
       ? signMessageEthereumKey({
@@ -60,9 +65,11 @@ async function processEthereumAction({
 async function processSolanaAction({
   action,
   accessControlConditions,
+  keySetIdentifier,
 }: {
   action: Action;
   accessControlConditions: string;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }) {
   const { network, generateKeyParams } = action;
 
@@ -75,6 +82,7 @@ async function processSolanaAction({
       accessControlConditions,
       publicKey: solanaKey.publicKey,
       privateKey: solanaKey.privateKey,
+      keySetIdentifier,
     }),
     messageToSign
       ? signMessageSolanaKey({
@@ -99,6 +107,7 @@ async function processSolanaAction({
 async function processActions({
   actions,
   accessControlConditions,
+  keySetIdentifier,
 }: BatchGenerateEncryptedKeysParams) {
   return Promise.all(
     actions.map(async (action, ndx) => {
@@ -108,11 +117,13 @@ async function processActions({
         return await processEthereumAction({
           action,
           accessControlConditions,
+          keySetIdentifier,
         });
       } else if (network === 'solana') {
         return await processSolanaAction({
           action,
           accessControlConditions,
+          keySetIdentifier,
         });
       } else {
         // Just in case :tm:
@@ -161,11 +172,13 @@ function validateParams(actions: Action[]) {
 export async function batchGenerateEncryptedKeys({
   actions,
   accessControlConditions,
+  keySetIdentifier,
 }: BatchGenerateEncryptedKeysParams) {
   validateParams(actions);
 
   return processActions({
     actions,
     accessControlConditions,
+    keySetIdentifier,
   });
 }

@@ -6,6 +6,7 @@ import {
   EoaAuthContextSchema,
 } from '@lit-protocol/schemas';
 import type { NagaJitContext } from '@lit-protocol/types';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 
 export type DecryptCreateRequestParams = {
   pricingContext: z.input<typeof PricingContextSchema>;
@@ -22,4 +23,5 @@ export type DecryptCreateRequestParams = {
   version: string;
   chain: string;
   jitContext: NagaJitContext;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 };

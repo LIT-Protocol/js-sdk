@@ -1,5 +1,6 @@
 import { encryptPrivateKey } from '../../internal/common/encryptKey';
 import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateKey';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 
 /**
  * Bundles solana/web3.js package as it's required to generate a random Solana key and only allows the provided PKP to decrypt it
@@ -10,10 +11,12 @@ import { generateSolanaPrivateKey } from '../../internal/solana/generatePrivateK
  */
 export interface GenerateEncryptedSolanaPrivateKeyParams {
   accessControlConditions: string;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 export async function generateEncryptedSolanaPrivateKey({
   accessControlConditions,
+  keySetIdentifier,
 }: GenerateEncryptedSolanaPrivateKeyParams): Promise<{
   ciphertext: string;
   dataToEncryptHash: string;
@@ -25,5 +28,6 @@ export async function generateEncryptedSolanaPrivateKey({
     accessControlConditions,
     publicKey,
     privateKey,
+    keySetIdentifier,
   });
 }

@@ -1,4 +1,5 @@
 import { SigningSchemeSchema } from '@lit-protocol/constants';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 import {
   EoaAuthContextSchema,
   HexPrefixedSchema,
@@ -32,4 +33,5 @@ export type PKPSignCreateRequestParams = {
   jitContext: NagaJitContext;
   sessionSigs?: SessionSigsMap;
   delegationAuthSig?: AuthSig;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 };

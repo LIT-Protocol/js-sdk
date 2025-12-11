@@ -645,16 +645,17 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               'pkpSign:createRequest: Generating request data'
             );
 
-            const _requestData = PKPSignRequestDataSchema.parse({
-              toSign: Array.from(params.signingContext.toSign),
-              signingScheme: params.signingContext.signingScheme,
-              pubkey: params.signingContext.pubKey,
-              authSig: sessionSigs[url],
-              nodeSet: urls,
-              chain: params.chain,
-              bypassAutoHashing: params.signingContext.bypassAutoHashing,
-              epoch: params.connectionInfo.epochState.currentNumber,
-            });
+          const _requestData = PKPSignRequestDataSchema.parse({
+            toSign: Array.from(params.signingContext.toSign),
+            signingScheme: params.signingContext.signingScheme,
+            pubkey: params.signingContext.pubKey,
+            authSig: sessionSigs[url],
+            nodeSet: urls,
+            chain: params.chain,
+            bypassAutoHashing: params.signingContext.bypassAutoHashing,
+            epoch: params.connectionInfo.epochState.currentNumber,
+            keySetIdentifier: params.keySetIdentifier,
+          });
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
               _requestData,
@@ -790,6 +791,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
                 params.unifiedAccessControlConditions,
               authSig: sessionSigs[url],
               chain: params.chain,
+              keySetIdentifier: params.keySetIdentifier,
             });
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -924,6 +926,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               maxPrice: getUserMaxPrice({
                 product: 'SIGN_SESSION_KEY',
               }).toString(),
+              keySetIdentifier: requestBody.keySetIdentifier,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -1051,6 +1054,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               maxPrice: getUserMaxPrice({
                 product: 'SIGN_SESSION_KEY',
               }).toString(),
+              keySetIdentifier: requestBody.keySetIdentifier,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(

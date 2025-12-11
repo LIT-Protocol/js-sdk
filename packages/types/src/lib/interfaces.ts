@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
-import { LitEVMChainKeys } from '@lit-protocol/constants';
+import {
+  KEY_SET_IDENTIFIER_VALUES,
+  LitEVMChainKeys,
+} from '@lit-protocol/constants';
 import {
   AuthCallbackSchema,
   AuthenticationContextSchema,
@@ -180,6 +183,10 @@ pub struct JsonExecutionRequest {
 }
  */
 
+export type KeySetIdentifier = 'datil' | 'naga-keyset1';
+
+export type KeySetIdentifier = KEY_SET_IDENTIFIER_VALUES;
+
 /**
  * The 'pkpSign' function param. Please note that the structure
  * is different than the payload sent to the node.
@@ -198,6 +205,7 @@ export interface JsonPkpSignRequest<T> extends NodeSetRequired {
   toSign: ArrayLike<number>;
   authMethods?: AuthMethod[];
   authSig: AuthSig;
+  keySetIdentifier?: KeySetIdentifier;
 
   /**
    * note that 'key' is in lower case, because this is what the node expects
@@ -243,6 +251,7 @@ export interface JsonSignSessionKeyRequestV1
   siweMessage: string;
   curveType: 'BLS';
   epoch?: number;
+  keySetIdentifier?: KeySetIdentifier;
 
   // custom auth params
   code?: string;
@@ -261,6 +270,7 @@ export interface JsonSignSessionKeyRequestForPKP {
   curveType: 'BLS';
   signingScheme: 'BLS';
   epoch: number;
+  keySetIdentifier?: KeySetIdentifier;
 }
 /**
  * module: LitNodeClient
@@ -281,6 +291,7 @@ export interface JsonSignSessionKeyRequestV2<T>
   siweMessage: string;
   curveType: 'BLS';
   epoch?: number;
+  keySetIdentifier?: KeySetIdentifier;
 
   // custom auth params
   code?: string;

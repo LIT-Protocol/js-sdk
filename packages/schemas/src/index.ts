@@ -1,4 +1,5 @@
 import { DomainSchema, ExpirationSchema } from './lib/schemas';
+import { KEY_SET_IDENTIFIERS } from '@lit-protocol/constants';
 
 import { z } from 'zod';
 import { LitResourceAbilityRequestSchema } from './lib/models';
@@ -30,5 +31,8 @@ export const AuthConfigSchema = z.preprocess(
     statement: z.string().optional().default(''),
     domain: DomainSchema.optional().default('localhost'),
     resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
+    keySetIdentifier: z
+      .enum([KEY_SET_IDENTIFIERS.DATIL, KEY_SET_IDENTIFIERS.NAGA_KEYSET1])
+      .optional(),
   })
 );

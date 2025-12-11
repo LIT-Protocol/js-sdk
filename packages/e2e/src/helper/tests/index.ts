@@ -18,3 +18,4 @@ export { createViemSignTypedDataTest } from './viem-sign-typed-data';
 // We should move the above tests into their own category/folder like this one
 export { createPregenDelegationServerReuseTest } from '../../test-helpers/signSessionKey/pregen-delegation';
 export { registerWrappedKeysTests } from '../../test-helpers/executeJs/wrappedKeys';
+export { registerKeysetTests } from '../../test-helpers/executeJs/keysets';

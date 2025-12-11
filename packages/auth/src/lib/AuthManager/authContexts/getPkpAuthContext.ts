@@ -111,6 +111,7 @@ const preparePkpAuthRequestBody = async (
     curveType: 'BLS' as const,
     signingScheme: 'BLS' as const,
     epoch: params.deps.currentEpoch,
+    keySetIdentifier: _authConfig.keySetIdentifier,
   };
 };
 

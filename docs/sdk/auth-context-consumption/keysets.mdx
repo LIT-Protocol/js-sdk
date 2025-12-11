@@ -1,0 +1,66 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Keysets in the JS SDK
+
+Datil keys can be used on Naga by selecting a keyset per request. Keyset selection is **explicit and optional** – if omitted, the SDK defaults to `naga-keyset1`.
+
+## When to pass `keySetIdentifier`
+
+- Decrypt requests (`decrypt`): add `keySetIdentifier` to pick Datil vs Naga keys for decryption.
+- PKP signing (`pkpSign` / chain helpers): add `keySetIdentifier` to sign with a specific keyset.
+- Session key signing (`signSessionKey`): accepts `keySetIdentifier`, but sessions are always signed with the Naga keyset (Datil sessions are not valid on Naga).
+- Lit Actions bindings: pass `keySetIdentifier` to `signEcdsa`, `sign`, `signAndCombineEcdsa`, `signAndCombine`, `decryptAndCombine`, `decryptToSingleNode`, and `encrypt`.
+
+## Examples
+
+### PKP Sign with a keyset
+
+```ts
+const signature = await litClient.chain.raw.pkpSign({
+  chain: 'ethereum',
+  signingScheme: 'EcdsaK256Sha256',
+  pubKey: pkpPublicKey,
+  toSign: new Uint8Array([1, 2, 3]),
+  sessionSigs, // or authContext
+  keySetIdentifier: 'datil', // or 'naga-keyset1'
+});
+```
+
+### Lit Action signing with a keyset
+
+```ts
+const code = `
+  const go = async () => {
+    const resp = await Lit.Actions.signEcdsa({
+      toSign: new Uint8Array([1, 2, 3, 4]),
+      publicKey: "${pkpPublicKey}",
+      sigName: "sig",
+      keySetIdentifier: "datil", // or "naga-keyset1"
+    });
+    Lit.Actions.setResponse({ response: resp });
+  };
+  go();
+`;
+
+const result = await litClient.executeJs({
+  sessionSigs,
+  code,
+  useSingleNode: true,
+});
+```
+
+### Decrypt with a keyset
+
+```ts
+const { decryptedData } = await litClient.decrypt({
+  accessControlConditions,
+  ciphertext,
+  dataToEncryptHash,
+  authContext,
+  chain: 'ethereum',
+  keySetIdentifier: 'datil',
+});
+```
+
+> **Note:** If you pass `keySetIdentifier: "datil"` to `signSessionKey`, the session is still signed with the Naga keyset; Datil sessions are not accepted on Naga.

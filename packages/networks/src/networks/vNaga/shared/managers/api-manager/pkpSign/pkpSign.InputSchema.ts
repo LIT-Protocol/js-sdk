@@ -1,4 +1,4 @@
-import { SigningSchemeSchema } from '@lit-protocol/constants';
+import { KEY_SET_IDENTIFIERS, SigningSchemeSchema } from '@lit-protocol/constants';
 import {
   PKPAuthContextSchema,
   EoaAuthContextSchema,
@@ -22,6 +22,9 @@ export const PKPSignInputSchema = z.object({
   authContext: z.union([PKPAuthContextSchema, EoaAuthContextSchema]),
   userMaxPrice: z.bigint().optional(),
   bypassAutoHashing: z.boolean().optional(),
+  keySetIdentifier: z
+    .enum([KEY_SET_IDENTIFIERS.DATIL, KEY_SET_IDENTIFIERS.NAGA_KEYSET1])
+    .optional(),
 });
 
 export const EthereumPKPSignInputSchema = PKPSignInputSchema.omit({

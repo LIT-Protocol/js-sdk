@@ -145,10 +145,12 @@ declare namespace Lit {
       toSign,
       publicKey,
       sigName,
+      keySetIdentifier,
     }: {
       toSign: Uint8Array;
       publicKey: string;
       sigName: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<string>;
     /**
      * @param {Uint8array} toSign the message to sign
@@ -177,7 +179,14 @@ declare namespace Lit {
       publicKey,
       sigName,
       signingScheme,
-    }: Uint8array): Uint8array;
+      keySetIdentifier,
+    }: {
+      toSign: Uint8Array;
+      publicKey: string;
+      sigName: string;
+      signingScheme: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
+    }): Uint8Array;
     /**
      * Sign data using the Lit Action's own cryptographic identity derived from its IPFS CID.
      * This allows actions to sign as themselves (not as a PKP), enabling autonomous agent behavior,
@@ -405,12 +414,14 @@ declare namespace Lit {
       dataToEncryptHash,
       authSig,
       chain,
+      keySetIdentifier,
     }: {
       accessControlConditions: Array<any>;
       ciphertext: string;
       dataToEncryptHash: string;
       authSig: any;
       chain: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<string>;
     /**
      * Decrypt to a single node
@@ -429,12 +440,14 @@ declare namespace Lit {
       dataToEncryptHash,
       authSig,
       chain,
+      keySetIdentifier,
     }: {
       accessControlConditions: Array<any>;
       ciphertext: string;
       dataToEncryptHash: string;
       authSig: any;
       chain: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<string>;
     /**
      * Sign with ECDSA and automatically combine signature shares from all nodes into a complete signature
@@ -449,10 +462,12 @@ declare namespace Lit {
       toSign,
       publicKey,
       sigName,
+      keySetIdentifier,
     }: {
       toSign: Uint8Array;
       publicKey: string;
       sigName: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<Uint8Array>;
     /**
      * Sign with any signing scheme and automatically combine signature shares from all nodes into a complete signature
@@ -474,11 +489,13 @@ declare namespace Lit {
       publicKey,
       sigName,
       signingScheme,
+      keySetIdentifier,
     }: {
       toSign: Uint8Array;
       publicKey: string;
       sigName: string;
       signingScheme: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<Uint8Array>;
     /**
      * Run a function only once across all nodes using leader election
@@ -518,9 +535,11 @@ declare namespace Lit {
     function encrypt({
       accessControlConditions,
       to_encrypt,
+      keySetIdentifier,
     }: {
       accessControlConditions: Array<any>;
       to_encrypt: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<{
       ciphertext: string;
       dataToEncryptHash: string;

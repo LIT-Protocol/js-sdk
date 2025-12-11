@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
 
+import { KEY_SET_IDENTIFIERS } from '@lit-protocol/constants';
 import { PKPAuthContextSchema, EoaAuthContextSchema } from './schemas';
 import { AuthSigSchema, ChainedSchema, PricedSchema } from './schemas';
 
@@ -11,6 +12,9 @@ export const DecryptRequestBaseSchema =
     .extend({
       authContext: z.union([PKPAuthContextSchema, EoaAuthContextSchema]),
       authSig: AuthSigSchema.optional(),
+      keySetIdentifier: z
+        .enum([KEY_SET_IDENTIFIERS.DATIL, KEY_SET_IDENTIFIERS.NAGA_KEYSET1])
+        .optional(),
     });
 
 // Metadata schema for encryption

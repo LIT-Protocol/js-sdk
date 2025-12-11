@@ -73,6 +73,7 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
           chain: params.chain,
           bypassAutoHashing: params.signingContext.bypassAutoHashing,
           epoch: params.connectionInfo.epochState.currentNumber,
+          keySetIdentifier: params.keySetIdentifier,
         });
 
         const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -194,6 +195,7 @@ export function createDecryptAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
           unifiedAccessControlConditions: params.unifiedAccessControlConditions,
           authSig: sessionSigs[url],
           chain: params.chain,
+          keySetIdentifier: params.keySetIdentifier,
         });
 
         const encryptedPayload = E2EERequestManager.encryptRequestData(

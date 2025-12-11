@@ -1,9 +1,11 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 
 export interface ExportPrivateKeyParams {
   accessControlConditions: string;
   ciphertext: string;
   dataToEncryptHash: string;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 /**
@@ -22,10 +24,12 @@ export async function exportPrivateKey({
   accessControlConditions,
   ciphertext,
   dataToEncryptHash,
+  keySetIdentifier,
 }: ExportPrivateKeyParams): Promise<string> {
   return getDecryptedKeyToSingleNode({
     accessControlConditions,
     ciphertext,
     dataToEncryptHash,
+    keySetIdentifier,
   });
 }
