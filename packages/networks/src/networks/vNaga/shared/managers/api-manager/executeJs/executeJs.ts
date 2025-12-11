@@ -331,11 +331,7 @@ export const handleResponse = async (
   const responseData: ExecuteJsValueResponse[] = successfulValues.map(
     (value) => {
       const paymentDetail: LitActionPaymentDetail[] | undefined =
-        value.paymentDetail?.map((detail) => ({
-          component: detail.component,
-          quantity: detail.quantity,
-          price: detail.price,
-        }));
+        value.paymentDetail;
 
       return {
         success: value.success,

@@ -113,6 +113,9 @@ export interface LitActionSignedData {
   sigType: EcdsaSigType;
 }
 
+/**
+ * Represents payment details for Lit Action execution including the component type, quantity used, and price charged.
+ */
 export interface LitActionPaymentDetail {
   component: string;
   quantity: number;
@@ -129,6 +132,10 @@ export interface ExecuteJsValueResponse {
   response: string;
   signedData: Record<string, LitActionSignedData>;
   success: boolean;
+  /**
+   * Contains payment details showing resource usage and costs for the Lit Action execution.
+   * Each entry describes a component, the quantity used, and the price charged.
+   */
   paymentDetail?: LitActionPaymentDetail[];
 }
 

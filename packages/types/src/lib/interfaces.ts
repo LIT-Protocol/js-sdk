@@ -511,6 +511,10 @@ export interface ExecuteJsResponseBase {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any;
+  /**
+   * Contains payment details showing resource usage and costs for the Lit Action execution.
+   * Each entry describes a component, the quantity used, and the price charged.
+   */
   paymentDetail?: {
     component: string;
     quantity: number;
