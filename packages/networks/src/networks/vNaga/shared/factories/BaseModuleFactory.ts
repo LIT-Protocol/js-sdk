@@ -907,6 +907,10 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             accessToken: requestBody.authData.accessToken,
           } as AuthMethod;
 
+          const maxPriceHex = `0x${getUserMaxPrice({
+            product: 'SIGN_SESSION_KEY',
+          }).toString(16)}`;
+
           const requests: RequestItem<
             z.infer<typeof EncryptedVersion1Schema>
           >[] = [];
@@ -921,9 +925,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               curveType: 'BLS' as const,
               epoch: requestBody.epoch,
               nodeSet: requestBody.nodeSet,
-              maxPrice: getUserMaxPrice({
-                product: 'SIGN_SESSION_KEY',
-              }).toString(),
+              maxPrice: maxPriceHex,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -1031,6 +1033,28 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             (node) => `${httpProtocol}${node.socketAddress}`
           );
 
+          const encodedCode = requestBody.litActionCode
+            ? Buffer.from(requestBody.litActionCode, 'utf-8').toString('base64')
+            : undefined;
+
+          const maxPriceHex = `0x${getUserMaxPrice({
+            product: 'SIGN_SESSION_KEY',
+          }).toString(16)}`;
+
+          // `requestBody.jsParams` can arrive in either shape:
+          // - raw: `<raw>`
+          // - nested (AuthManager): `{ jsParams: <raw> }` via
+          //   `params.customAuthParams.jsParams = { jsParams: params.customAuthParams.jsParams };`
+          //   in `packages/auth/src/lib/AuthManager/auth-manager.ts`
+          //
+          // Example:
+          // - user passes: `{ foo: 1 }`
+          // - AuthManager wraps: `{ jsParams: { foo: 1 } }`
+          // - normalized here: `rawJsParams = { foo: 1 }`
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const rawJsParams =
+            (requestBody.jsParams as any)?.jsParams ?? requestBody.jsParams;
+
           const requests: RequestItem<
             z.infer<typeof EncryptedVersion1Schema>
           >[] = [];
@@ -1045,12 +1069,20 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               curveType: 'BLS' as const,
               epoch: requestBody.epoch,
               nodeSet: requestBody.nodeSet,
-              litActionCode: requestBody.litActionCode,
-              litActionIpfsId: requestBody.litActionIpfsId,
-              jsParams: requestBody.jsParams,
-              maxPrice: getUserMaxPrice({
-                product: 'SIGN_SESSION_KEY',
-              }).toString(),
+              ...(encodedCode && { code: encodedCode }),
+              ...(requestBody.litActionIpfsId && {
+                litActionIpfsId: requestBody.litActionIpfsId,
+              }),
+              ...(rawJsParams && {
+                // Expose both raw + nested `jsParams` for compatibility:
+                // - Lit Action can read `jsParams.foo`
+                // - or `jsParams.jsParams.foo`
+                jsParams: {
+                  ...rawJsParams,
+                  jsParams: rawJsParams,
+                },
+              }),
+              maxPrice: maxPriceHex,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
