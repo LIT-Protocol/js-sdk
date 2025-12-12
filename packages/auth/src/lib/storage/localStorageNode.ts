@@ -144,7 +144,10 @@ const getNodeStorageInstance = async (storagePath: string): Promise<any> => {
   if (!NodeLocalStorageConstructor) {
     try {
       const moduleName = 'node-localstorage';
-      const module = await import(moduleName);
+      const module = await import(
+        /* @vite-ignore */
+        moduleName
+      );
       NodeLocalStorageConstructor = module.LocalStorage;
     } catch (e) {
       console.error(
