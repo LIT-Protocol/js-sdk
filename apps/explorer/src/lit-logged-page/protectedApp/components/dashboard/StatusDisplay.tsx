@@ -4,14 +4,14 @@
  * Reusable status message display with transaction links
  */
 
-import React from 'react';
+import type { FC } from "react";
 
 interface StatusDisplayProps {
   status: string;
   onDismiss: () => void;
 }
 
-export const StatusDisplay: React.FC<StatusDisplayProps> = ({
+export const StatusDisplay: FC<StatusDisplayProps> = ({
   status,
   onDismiss,
 }) => {

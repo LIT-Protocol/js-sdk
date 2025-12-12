@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { UIPKP, TransactionResult, LedgerBalanceInfo } from "../../types";
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+import { useEffect, useState, type FC } from "react";
+
+import { getAllChains } from "@/domain/lit/chains";
+
 import AccountMethodSelector from "./AccountMethodSelector";
 import { useOptionalLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
-import { triggerLedgerRefresh } from "../../utils/ledgerRefresh";
-import { usePaymentManagerInstance } from "../../hooks/usePaymentManagerInstance";
 import { useLedgerBalance } from "../../hooks/useLedgerBalance";
+import { usePaymentManagerInstance } from "../../hooks/usePaymentManagerInstance";
 import { useWithdrawStatus } from "../../hooks/useWithdrawStatus";
-import { getAllChains } from "@/domain/lit/chains";
+import { UIPKP, TransactionResult, LedgerBalanceInfo } from "../../types";
+import { triggerLedgerRefresh } from "../../utils/ledgerRefresh";
+
 
 interface PaymentManagementDashboardProps {
   selectedPkp: UIPKP | null;
@@ -27,7 +31,7 @@ interface PaymentManagementDashboardProps {
   hideAccountSelection?: boolean;
 }
 
-export const PaymentManagementDashboard: React.FC<
+export const PaymentManagementDashboard: FC<
   PaymentManagementDashboardProps
 > = ({
   selectedPkp,
@@ -258,7 +262,9 @@ export const PaymentManagementDashboard: React.FC<
         if (resolvedAccountAddress) {
           triggerLedgerRefresh(resolvedAccountAddress);
         }
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
     } catch (error: any) {
       console.error("Deposit failed:", error);
       showError(`Deposit failed: ${error.message}`);
@@ -294,7 +300,9 @@ export const PaymentManagementDashboard: React.FC<
       try {
         const addr = targetUserAddress || depositForUserAddress;
         if (addr) triggerLedgerRefresh(addr);
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
     } catch (error: any) {
       console.error("Deposit for user failed:", error);
       showError(`Deposit for user failed: ${error.message}`);
@@ -324,7 +332,9 @@ export const PaymentManagementDashboard: React.FC<
         if (resolvedAccountAddress) {
           triggerLedgerRefresh(resolvedAccountAddress);
         }
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
     } catch (error: any) {
       console.error("Withdrawal request failed:", error);
       showError(`Withdrawal request failed: ${error.message}`);
@@ -354,7 +364,9 @@ export const PaymentManagementDashboard: React.FC<
         if (resolvedAccountAddress) {
           triggerLedgerRefresh(resolvedAccountAddress);
         }
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
     } catch (error: any) {
       console.error("Withdrawal execution failed:", error);
       showError(`Withdrawal execution failed: ${error.message}`);
@@ -419,10 +431,10 @@ export const PaymentManagementDashboard: React.FC<
           {accountSource === "eoa" && (
             <AccountMethodSelector
               onAccountCreated={setAccount}
-              onMethodChange={() => {}}
-              setStatus={() => {}}
+              onMethodChange={() => undefined}
+              setStatus={() => undefined}
               showError={showError}
-              showSuccess={() => {}}
+              showSuccess={() => undefined}
               successActionIds={{
                 createAccount: "pm-create-account",
                 getWalletAccount: "pm-get-wallet-account",
@@ -508,10 +520,10 @@ export const PaymentManagementDashboard: React.FC<
                 onAccountCreated={(acc) => {
                   setAccount(acc);
                 }}
-                onMethodChange={() => {}}
-                setStatus={() => {}}
+                onMethodChange={() => undefined}
+                setStatus={() => undefined}
                 showError={showError}
-                showSuccess={() => {}}
+                showSuccess={() => undefined}
                 successActionIds={{
                   createAccount: "pm-create-account",
                   getWalletAccount: "pm-get-wallet-account",

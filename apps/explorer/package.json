@@ -16,9 +16,12 @@
   "dependencies": {
     "@lit-protocol/access-control-conditions": "workspace:*",
     "@lit-protocol/auth": "workspace:*",
+    "@lit-protocol/constants": "workspace:*",
     "@lit-protocol/lit-client": "workspace:*",
     "@lit-protocol/naga-la-types": "0.1.0",
     "@lit-protocol/networks": "workspace:*",
+    "@lit-protocol/schemas": "workspace:*",
+    "@lit-protocol/types": "workspace:*",
     "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-hover-card": "^1.1.15",

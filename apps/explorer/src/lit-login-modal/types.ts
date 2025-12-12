@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LitServices } from "../hooks/useLitServiceSetup";
 import type { PKPData } from "@lit-protocol/schemas";
+import type { ReactNode } from "react";
 
 export type SupportedNetworkName =
   | "naga-dev"

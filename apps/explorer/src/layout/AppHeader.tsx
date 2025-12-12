@@ -5,15 +5,19 @@
  * Mirrors current spacing and borders used in the app header.
  */
 
-import React from "react";
+import type { FC, ReactNode } from "react";
 
 interface AppHeaderProps {
-  leftSlot?: React.ReactNode; // e.g., logo/link
-  centerSlot?: React.ReactNode; // e.g., search
-  rightSlot?: React.ReactNode; // e.g., auth actions
+  leftSlot?: ReactNode; // e.g., logo/link
+  centerSlot?: ReactNode; // e.g., search
+  rightSlot?: ReactNode; // e.g., auth actions
 }
 
-export const AppHeader: React.FC<AppHeaderProps> = ({ leftSlot, centerSlot, rightSlot }) => {
+export const AppHeader: FC<AppHeaderProps> = ({
+  leftSlot,
+  centerSlot,
+  rightSlot,
+}) => {
   return (
     <div className="sticky top-0 z-50 bg-white">
       <div className="max-w-8xl mx-auto relative text-black">
@@ -32,5 +36,4 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ leftSlot, centerSlot, righ
     </div>
   );
 };
-
 

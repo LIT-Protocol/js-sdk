@@ -1,15 +1,16 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "./styles/global.css";
-import "@rainbow-me/rainbowkit/styles.css";
-import { WagmiProvider, http } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
+import "@rainbow-me/rainbowkit/styles.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
+import { WagmiProvider, createConfig, http } from "wagmi";
 import { mainnet } from "wagmi/chains";
-import { createConfig } from "wagmi";
+
 import { litChainViemConfig } from "@/domain/lit/litChainConfig";
+
 import { router } from "./router";
+import "./styles/global.css";
 
 const PUBLIC_ENV_VARS = {
   VITE_LOGIN_SERVICE_URL: import.meta.env.VITE_LOGIN_SERVICE_URL,
@@ -65,15 +66,24 @@ const defaultConfig = createConfig({
   chains: [mainnet, chronicleTestnet, litChainViemConfig],
   transports: {
     [mainnet.id]: http(),
-    [chronicleTestnet.id]: http(chronicleTestnet.rpcUrls.default.http[0]!),
+    [chronicleTestnet.id]: http(
+      chronicleTestnet.rpcUrls.default.http[0] ?? CHRONICLE_RPC_URL
+    ),
     [litChainViemConfig.id]: http(
-      litChainViemConfig.rpcUrls.default.http[0]!
+      litChainViemConfig.rpcUrls.default.http[0] ??
+        litChainViemConfig.rpcUrls.public.http[0] ??
+        CHRONICLE_RPC_URL
     ),
   },
 });
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+const rootEl = document.getElementById("root");
+if (!rootEl) {
+  throw new Error("Root element #root not found");
+}
+
+createRoot(rootEl).render(
+  <StrictMode>
     <WagmiProvider config={defaultConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={darkTheme()}>
@@ -81,5 +91,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
-  </React.StrictMode>
+  </StrictMode>
 );

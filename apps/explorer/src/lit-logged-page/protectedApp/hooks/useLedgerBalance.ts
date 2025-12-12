@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
+
 import type { LedgerBalanceInfo } from "../types";
 
 interface UseLedgerBalanceOptions {

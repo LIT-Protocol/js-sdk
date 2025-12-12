@@ -8,10 +8,12 @@
  * Default method is connected wallet for better UX.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState } from "react";
 import { privateKeyToAccount } from "viem/accounts";
 import { useWalletClient } from "wagmi";
+
 import { APP_INFO, FEATURES } from "../../../../_config";
 
 // Code snippets for documentation

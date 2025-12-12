@@ -4,25 +4,31 @@
  * Displays PKP wallet information including balance and addresses
  */
 
-import React, { useEffect, useRef, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Settings } from "lucide-react";
+import { useEffect, useRef, useState, type FC } from "react";
+import { getAddress } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+
+import { isTestnetNetwork } from "@/domain/lit/networkDefaults";
+
+import tfaIcon from "../../../../assets/2fa.svg";
+import copyIcon from "../../../../assets/copy.svg";
+import discordIcon from "../../../../assets/discord.png";
+import emailIcon from "../../../../assets/email.svg";
+import googleIcon from "../../../../assets/google.png";
+import passkeyIcon from "../../../../assets/passkey.svg";
+import phoneIcon from "../../../../assets/phone.svg";
+import web3WalletIcon from "../../../../assets/web3-wallet.svg";
+import whatsappIcon from "../../../../assets/whatsapp.svg";
+import { useOptionalLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
 import { UIPKP, BalanceInfo } from "../../types";
 import { formatPublicKey, copyToClipboard } from "../../utils";
-import copyIcon from "../../../../assets/copy.svg";
-import googleIcon from "../../../../assets/google.png";
-import discordIcon from "../../../../assets/discord.png";
-import web3WalletIcon from "../../../../assets/web3-wallet.svg";
-import passkeyIcon from "../../../../assets/passkey.svg";
-import emailIcon from "../../../../assets/email.svg";
-import phoneIcon from "../../../../assets/phone.svg";
-import whatsappIcon from "../../../../assets/whatsapp.svg";
-import tfaIcon from "../../../../assets/2fa.svg";
-import { getAddress } from "viem";
-import { ChainSelector } from "../layout";
-import { Settings } from "lucide-react";
-import { useOptionalLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
-import { privateKeyToAccount } from "viem/accounts";
 import { setCurrentBalance, useLedgerRefresh } from "../../utils/ledgerRefresh";
-import { isTestnetNetwork } from "@/domain/lit/networkDefaults";
+import { ChainSelector } from "../layout";
+
+
+
 // Replaced hover behaviour with a click-triggered menu
 const account = privateKeyToAccount(
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
@@ -50,7 +56,7 @@ interface PKPInfoCardProps {
   onChainChange: (chain: string) => void;
 }
 
-export const PKPInfoCard: React.FC<PKPInfoCardProps> = ({
+export const PKPInfoCard: FC<PKPInfoCardProps> = ({
   selectedPkp,
   balance,
   isLoadingBalance,
@@ -124,20 +130,16 @@ export const PKPInfoCard: React.FC<PKPInfoCardProps> = ({
   // Helper to fetch ledger balance
   const fetchLedgerBalance = async () => {
     if (!selectedPkp?.ethAddress || !services?.litClient) return null;
-    try {
-      const pm = await services.litClient.getPaymentManager({
-        account: account,
-      });
-      const bal = await pm.getBalance({
-        userAddress: selectedPkp.ethAddress,
-      });
-      return {
-        total: bal.totalBalance,
-        available: bal.availableBalance,
-      };
-    } catch (e: any) {
-      throw e;
-    }
+    const pm = await services.litClient.getPaymentManager({
+      account: account,
+    });
+    const bal = await pm.getBalance({
+      userAddress: selectedPkp.ethAddress,
+    });
+    return {
+      total: bal.totalBalance,
+      available: bal.availableBalance,
+    };
   };
 
   // Event-driven polling: only polls after actions

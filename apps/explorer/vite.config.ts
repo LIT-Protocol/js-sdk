@@ -1,8 +1,11 @@
-import { defineConfig, Plugin } from "vite";
-import react from "@vitejs/plugin-react-swc";
 import fs from "fs";
 import path from "path";
+
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react-swc";
+import { defineConfig, type Plugin } from "vite";
+
+import type { OutputAsset } from "rollup";
 // import inject from "@rollup/plugin-inject";
 
 // Rollup's CommonJS plugin only processes node_modules by default. Include our
@@ -132,7 +135,7 @@ function generateVersionPage(): Plugin {
         type: "asset",
         fileName: "version.html",
         source: html,
-      } as any;
+      } as OutputAsset;
     },
   };
 }

@@ -1,7 +1,9 @@
-import React from "react";
+import { APP_INFO } from "@/_config";
+
 import { UIPKP, BalanceInfo } from "../../types";
 import { PKPInfoCard } from "../pkp/PKPInfoCard";
-import { APP_INFO } from "@/_config";
+
+import type { FC, ReactNode } from "react";
 
 interface DashboardContentProps {
   selectedPkp: UIPKP | null;
@@ -11,10 +13,10 @@ interface DashboardContentProps {
   onShowPkpModal: () => void;
   onChainChange: (chain: string) => void;
   userMethod: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export const DashboardContent: React.FC<DashboardContentProps> = ({
+export const DashboardContent: FC<DashboardContentProps> = ({
   selectedPkp,
   balance,
   isLoadingBalance,

@@ -4,16 +4,17 @@
  * Displays transaction notifications with links to block explorer
  */
 
-import React from 'react';
 import { TransactionToast } from '../../types';
 import { formatTxHash } from '../../utils';
+
+import type { FC } from "react";
 
 interface TransactionToastContainerProps {
   toasts: TransactionToast[];
   onRemoveToast: (id: string) => void;
 }
 
-export const TransactionToastContainer: React.FC<TransactionToastContainerProps> = ({ 
+export const TransactionToastContainer: FC<TransactionToastContainerProps> = ({ 
   toasts, 
   onRemoveToast 
 }) => (

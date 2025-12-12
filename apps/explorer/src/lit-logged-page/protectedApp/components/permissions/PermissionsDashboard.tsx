@@ -4,18 +4,19 @@
  * Complete permissions management dashboard that combines all permission-related components
  */
 
-import React, { useEffect } from "react";
-import { usePKPPermissions } from "../../contexts/PKPPermissionsContext";
-import { PermissionsSummaryCards } from "./PermissionsSummaryCards";
-import { PermissionsList } from "./PermissionsList";
+import { useEffect, type FC } from "react";
+
 import { AddActionForm } from "./AddActionForm";
 import { AddAddressForm } from "./AddAddressForm";
+import { PermissionsList } from "./PermissionsList";
+import { PermissionsSummaryCards } from "./PermissionsSummaryCards";
+import { usePKPPermissions } from "../../contexts/PKPPermissionsContext";
 
 interface PermissionsDashboardProps {
   disabled?: boolean;
 }
 
-export const PermissionsDashboard: React.FC<PermissionsDashboardProps> = ({
+export const PermissionsDashboard: FC<PermissionsDashboardProps> = ({
   disabled = false,
 }) => {
   const {

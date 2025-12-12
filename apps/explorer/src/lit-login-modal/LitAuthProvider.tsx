@@ -1,26 +1,24 @@
-import { DiscordAuthenticator, GoogleAuthenticator } from "@lit-protocol/auth";
-import { Settings } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Settings } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FC,
+} from "react";
 import { privateKeyToAccount } from "viem/accounts";
 import { useWalletClient } from "wagmi";
-import { LitServices, useLitServiceSetup } from "../hooks/useLitServiceSetup";
-import litPrimaryOrangeIcon from "../assets/lit-primary-orange.svg";
-// Import icon assets
-import tfaIcon from "../assets/2fa.svg";
-import discordIcon from "../assets/discord.png";
-import emailIcon from "../assets/email.svg";
-import googleIcon from "../assets/google.png";
-import passkeyIcon from "../assets/passkey.svg";
-import phoneIcon from "../assets/phone.svg";
-import web3WalletIcon from "../assets/web3-wallet.svg";
-import whatsappIcon from "../assets/whatsapp.svg";
-import PKPSelectionSection from "./PKPSelectionSection";
-import { LedgerFundingPanel } from "./components/LedgerFundingPanel";
-import { AuthSettingsPanel } from "./components/AuthSettingsPanel";
-import { APP_INFO } from "../_config";
-import { nagaDev, nagaTest, nagaProto, naga } from "@lit-protocol/networks";
+
+import { isTestnetNetwork } from "@/domain/lit/networkDefaults";
+import { naga, nagaDev, nagaProto, nagaTest } from "@lit-protocol/networks";
 import { PKPData } from "@lit-protocol/schemas";
+
+import { AuthSettingsPanel } from "./components/AuthSettingsPanel";
+import { LedgerFundingPanel } from "./components/LedgerFundingPanel";
+import { LitAuthContext } from "./context/LitAuthContext";
+import PKPSelectionSection from "./PKPSelectionSection";
 import {
   AuthMethod,
   AuthUser,
@@ -28,8 +26,18 @@ import {
   LitAuthProviderProps,
   SupportedNetworkName,
 } from "./types";
-import { LitAuthContext } from "./context/LitAuthContext";
-import { isTestnetNetwork } from "@/domain/lit/networkDefaults";
+import { APP_INFO } from "../_config";
+import tfaIcon from "../assets/2fa.svg";
+import discordIcon from "../assets/discord.png";
+import emailIcon from "../assets/email.svg";
+import googleIcon from "../assets/google.png";
+import litPrimaryOrangeIcon from "../assets/lit-primary-orange.svg";
+import passkeyIcon from "../assets/passkey.svg";
+import phoneIcon from "../assets/phone.svg";
+import web3WalletIcon from "../assets/web3-wallet.svg";
+import whatsappIcon from "../assets/whatsapp.svg";
+import { LitServices, useLitServiceSetup } from "../hooks/useLitServiceSetup";
+
 export { useLitAuth, useOptionalLitAuth } from "./context/LitAuthContext";
 
 const NETWORK_MODULES: Partial<Record<SupportedNetworkName, any>> = {
@@ -61,7 +69,7 @@ interface AuthMethodInfo {
   comingSoon?: boolean;
 }
 
-export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
+export const LitAuthProvider: FC<LitAuthProviderProps> = ({
   children,
   appName = "lit-auth-app",
   networkName,
@@ -167,7 +175,6 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
         );
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localNetworkName, localNetwork]);
 
   // Setup Lit Protocol services
@@ -229,7 +236,9 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
         const parsed = JSON.parse(raw) as Record<string, string>;
         return parsed || {};
       }
-    } catch {}
+    } catch {
+      // ignore malformed stored auth URL map
+    }
     // Seed defaults per known network from config
     return {
       "naga-dev": authServiceBaseUrlProp || DEFAULT_AUTH_SERVICE_URLS["naga-dev"],
@@ -767,7 +776,9 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
         setError(
           "Please fund your Lit Ledger account for this PKP, then continue."
         );
-      } catch {}
+      } catch {
+        // ignore secondary UI state errors
+      }
     } finally {
       setIsAuthenticating(false);
     }
@@ -796,8 +807,6 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
       setError(null);
 
       // Modal stays open for PKP selection
-    } catch (error) {
-      throw error;
     } finally {
       setIsAuthenticating(false);
     }
@@ -1010,7 +1019,10 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
   const mintThenAwaitFunding = async (authData: any, method: AuthMethod) => {
     console.log("[mintThenAwaitFunding] Called.");
     try {
-      await services!.litClient.authService.mintWithAuth({
+      if (!services?.litClient) {
+        throw new Error("Services not ready");
+      }
+      await services.litClient.authService.mintWithAuth({
         authData,
         scopes: ["sign-anything"],
         authServiceBaseUrl: authServiceBaseUrl,
@@ -1024,8 +1036,6 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
       setSelectedMethod(null);
       setAuthStep("select");
       setError(null);
-    } catch (error) {
-      throw error;
     } finally {
       setIsAuthenticating(false);
     }
@@ -1036,6 +1046,7 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
       setIsAuthenticating(true);
       setError(null);
 
+      const { GoogleAuthenticator } = await import("@lit-protocol/auth");
       const authData = await GoogleAuthenticator.authenticate(
         loginServiceBaseUrl
       );
@@ -1060,6 +1071,7 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
       console.log("loginServiceBaseUrl", loginServiceBaseUrl);
       console.log("discordClientId", discordClientId);
 
+      const { DiscordAuthenticator } = await import("@lit-protocol/auth");
       const authData = await DiscordAuthenticator.authenticate(
         loginServiceBaseUrl,
         {
@@ -1153,7 +1165,9 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
       try {
         const chainCfg: any = services?.litClient?.getChainConfig?.();
         console.log("[authenticateWebAuthn] litClient chainConfig:", chainCfg);
-      } catch {}
+      } catch {
+        // ignore chain config read errors
+      }
 
       const { WebAuthnAuthenticator } = await import("@lit-protocol/auth");
 
@@ -1369,9 +1383,13 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
         throw new Error("Please fill in all custom auth parameters");
       }
 
+      if (!services?.authManager || !services?.litClient) {
+        throw new Error("Services not ready");
+      }
+
       // Create custom auth context using the demo parameters
       const customAuthContext =
-        await services!.authManager.createCustomAuthContext({
+        await services.authManager.createCustomAuthContext({
           pkpPublicKey: customPkpPublicKey,
           authConfig: {
             expiration: new Date(
@@ -1384,7 +1402,7 @@ export const LitAuthProvider: React.FC<LitAuthProviderProps> = ({
               ["lit-action-execution", "*"],
             ],
           },
-          litClient: services!.litClient,
+          litClient: services.litClient,
           customAuthParams: {
             litActionIpfsId: customValidationCid,
             jsParams: {

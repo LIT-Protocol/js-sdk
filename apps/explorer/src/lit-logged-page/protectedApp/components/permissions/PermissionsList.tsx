@@ -4,16 +4,19 @@
  * Displays current PKP permissions with ability to remove them
  */
 
-import React from 'react';
-import { RemoveButton } from '../ui/RemoveButton';
-import { usePKPPermissions } from '../../contexts/PKPPermissionsContext';
-import { hexToIpfsCid, getAuthMethodTypeName } from '../../utils';
-import { AUTH_METHOD_TYPE } from '../../types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getAddress, isAddress } from 'viem';
-import { useLitAuth } from '../../../../lit-login-modal/LitAuthProvider';
-import { triggerLedgerRefresh } from '../../utils/ledgerRefresh';
 
-export const PermissionsList: React.FC = () => {
+import { useLitAuth } from '../../../../lit-login-modal/LitAuthProvider';
+import { usePKPPermissions } from '../../contexts/PKPPermissionsContext';
+import { AUTH_METHOD_TYPE } from '../../types';
+import { hexToIpfsCid, getAuthMethodTypeName } from '../../utils';
+import { triggerLedgerRefresh } from '../../utils/ledgerRefresh';
+import { RemoveButton } from '../ui/RemoveButton';
+
+import type { FC } from "react";
+
+export const PermissionsList: FC = () => {
   const {
     permissionsContext,
     removingItems,
@@ -33,7 +36,9 @@ export const PermissionsList: React.FC = () => {
     if (Number(typeNumber) === AUTH_METHOD_TYPE.EthWallet) {
       try {
         if (isAddress(id)) return getAddress(id).toLowerCase();
-      } catch {}
+      } catch {
+        // ignore invalid address format
+      }
     }
     return String(id).toLowerCase();
   };
@@ -56,7 +61,9 @@ export const PermissionsList: React.FC = () => {
     try {
       const addr = selectedPkp?.ethAddress || user?.pkpInfo?.ethAddress;
       if (addr) await triggerLedgerRefresh(addr);
-    } catch {}
+    } catch {
+      // ignore ledger refresh errors
+    }
   };
 
   const handleRemoveAddress = async (address: string) => {
@@ -68,7 +75,9 @@ export const PermissionsList: React.FC = () => {
     try {
       const addr = selectedPkp?.ethAddress || user?.pkpInfo?.ethAddress;
       if (addr) await triggerLedgerRefresh(addr);
-    } catch {}
+    } catch {
+      // ignore ledger refresh errors
+    }
   };
 
   const handleRemoveAuthMethod = async (
@@ -97,7 +106,9 @@ export const PermissionsList: React.FC = () => {
     try {
       const addr = selectedPkp?.ethAddress || user?.pkpInfo?.ethAddress;
       if (addr) await triggerLedgerRefresh(addr);
-    } catch {}
+    } catch {
+      // ignore ledger refresh errors
+    }
   };
 
   if (!permissionsContext) {
@@ -300,7 +311,9 @@ export const PermissionsList: React.FC = () => {
                             </span>
                           );
                         }
-                      } catch {}
+                      } catch {
+                        // ignore address comparison errors
+                      }
                       return null;
                     })()}
                   </div>

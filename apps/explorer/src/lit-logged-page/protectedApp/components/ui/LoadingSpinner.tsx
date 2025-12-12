@@ -4,13 +4,13 @@
  * Reusable loading spinner with configurable size
  */
 
-import React from 'react';
+import type { FC } from "react";
 
 interface LoadingSpinnerProps {
   size?: number;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 16 }) => (
+export const LoadingSpinner: FC<LoadingSpinnerProps> = ({ size = 16 }) => (
   <div
     style={{
       width: `${size}px`,

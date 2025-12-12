@@ -4,10 +4,12 @@
  * Specialized dashboard for payment operations with enhanced UX
  */
 
-import React, { useState, useEffect } from 'react';
-import { UIPKP, TransactionResult } from '../../types';
-import { SendTransactionForm } from './SendTransactionForm';
+import { useEffect, useState, type FC } from "react";
+
 import { SUPPORTED_CHAINS } from "@/domain/lit/chains";
+
+import { SendTransactionForm } from './SendTransactionForm';
+import { UIPKP, TransactionResult } from '../../types';
 
 interface PaymentOperationsDashboardProps {
   selectedPkp: UIPKP | null;
@@ -31,7 +33,7 @@ interface RecentRecipient {
   transactionCount: number;
 }
 
-export const PaymentOperationsDashboard: React.FC<PaymentOperationsDashboardProps> = ({ 
+export const PaymentOperationsDashboard: FC<PaymentOperationsDashboardProps> = ({ 
   selectedPkp,
   selectedChain,
   disabled = false,

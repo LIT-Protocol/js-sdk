@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+
 import type { LitAuthContextValue } from "../types";
 
 export const LitAuthContext = createContext<LitAuthContextValue | null>(null);

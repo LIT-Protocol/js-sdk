@@ -1,18 +1,22 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState, type FC } from "react";
 import { getAddress } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+
 // import { createLitClient } from "@lit-protocol/lit-client";
-import { PKPData } from "@lit-protocol/schemas";
-import { UIPKP } from "../lit-logged-page/protectedApp/types";
-import { LitServices } from "@/hooks/useLitServiceSetup";
 import { APP_INFO } from "@/_config";
-import { PaymentManagementDashboard } from "../lit-logged-page/protectedApp/components/PaymentManagement/PaymentManagementDashboard";
-import { useLedgerRefresh } from "../lit-logged-page/protectedApp/utils/ledgerRefresh";
 import { SUPPORTED_CHAINS } from "@/domain/lit/chains";
 import {
   getDefaultChainForNetwork,
   isTestnetNetwork,
 } from "@/domain/lit/networkDefaults";
+import { LitServices } from "@/hooks/useLitServiceSetup";
+import { PKPData } from "@lit-protocol/schemas";
+
+import { PaymentManagementDashboard } from "../lit-logged-page/protectedApp/components/PaymentManagement/PaymentManagementDashboard";
+import { UIPKP } from "../lit-logged-page/protectedApp/types";
+import { useLedgerRefresh } from "../lit-logged-page/protectedApp/utils/ledgerRefresh";
+
 
 // Read-only viem account for PaymentManager (view-only operations)
 const READ_ONLY_PRIVATE_KEY =
@@ -32,7 +36,7 @@ interface PKPSelectionSectionProps {
   currentNetworkName?: string;
 }
 
-const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
+const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
   authData,
   onPkpSelected,
   authMethodName,
@@ -335,10 +339,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
     setPkps([...updated]);
   };
 
-  const loadExistingPkps = async (
-    page: number,
-    _forceRefresh: boolean = false
-  ) => {
+  const loadExistingPkps = async (page: number) => {
     // console.log(`🔄 [PAGINATION] loadExistingPkps called - Page: ${page}, forceRefresh: ${forceRefresh}`);
     // console.log(`🔄 [PAGINATION] Current state - currentPage: ${currentPage}, pkps.length: ${pkps.length}`);
     // console.log(`🔄 [PAGINATION] Current PKP tokenIds in state:`, pkps.map(p => p.tokenId?.toString().slice(-8)));
@@ -596,7 +597,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
                       setIsRefreshingPkps(true);
                       setPkps([]);
                       try {
-                        await loadExistingPkps(1, true);
+                        await loadExistingPkps(1);
                         setStatus("✅ Refreshed");
                       } catch (e) {
                         setStatus("❌ Failed to refresh");
@@ -1182,7 +1183,9 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
                             : p
                         )
                       );
-                    } catch {}
+                    } catch {
+                      // ignore balance refresh errors
+                    }
                   }}
                   onTransactionComplete={() => {
                     const addr = pkps.find(

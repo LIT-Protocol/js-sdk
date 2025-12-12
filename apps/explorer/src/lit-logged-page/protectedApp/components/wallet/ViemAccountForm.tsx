@@ -4,11 +4,13 @@
  * Form for signing messages using PKP as a Viem account
  */
 
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, type FC } from "react";
+
 import { useLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
 import { UIPKP } from "../../types";
-import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { triggerLedgerRefresh } from "../../utils/ledgerRefresh";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 interface ViemAccountFormProps {
   selectedPkp: UIPKP | null;
@@ -22,7 +24,7 @@ interface ViemSignatureResult {
   timestamp: string;
 }
 
-export const ViemAccountForm: React.FC<ViemAccountFormProps> = ({
+export const ViemAccountForm: FC<ViemAccountFormProps> = ({
   selectedPkp,
   disabled = false,
 }) => {
@@ -77,7 +79,9 @@ export const ViemAccountForm: React.FC<ViemAccountFormProps> = ({
       try {
         const addr = selectedPkp?.ethAddress || user.pkpInfo?.ethAddress;
         if (addr) await triggerLedgerRefresh(addr);
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
     } catch (error: any) {
       console.error("Failed to sign with viem account:", error);
       setIsSigningViem(false);

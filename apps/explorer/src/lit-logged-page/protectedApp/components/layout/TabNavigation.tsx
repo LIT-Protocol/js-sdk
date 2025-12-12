@@ -4,7 +4,7 @@
  * Reusable tab navigation component
  */
 
-import React from 'react';
+import type { FC } from "react";
 
 export interface Tab {
   id: string;
@@ -18,7 +18,7 @@ interface TabNavigationProps {
   onTabChange: (tabId: string) => void;
 }
 
-export const TabNavigation: React.FC<TabNavigationProps> = ({
+export const TabNavigation: FC<TabNavigationProps> = ({
   tabs,
   activeTab,
   onTabChange,

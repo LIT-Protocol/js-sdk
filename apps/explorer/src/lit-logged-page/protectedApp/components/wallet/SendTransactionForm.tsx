@@ -4,12 +4,15 @@
  * Form for sending transactions using PKP wallet via Viem
  */
 
-import React, { useState, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState, type FC } from "react";
+
+import { getAllChains } from "@/domain/lit/chains";
+
 import { useLitAuth } from '../../../../lit-login-modal/LitAuthProvider';
 import { UIPKP, TransactionResult } from '../../types';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { getAllChains } from "@/domain/lit/chains";
 import { triggerLedgerRefresh } from '../../utils/ledgerRefresh';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 interface SendTransactionFormProps {
   selectedPkp: UIPKP | null;
@@ -20,7 +23,7 @@ interface SendTransactionFormProps {
   initialAmount?: string;
 }
 
-export const SendTransactionForm: React.FC<SendTransactionFormProps> = ({ 
+export const SendTransactionForm: FC<SendTransactionFormProps> = ({ 
   selectedPkp,
   selectedChain,
   disabled = false,
@@ -145,7 +148,9 @@ export const SendTransactionForm: React.FC<SendTransactionFormProps> = ({
       try {
         const addr = selectedPkp?.ethAddress || user.pkpInfo?.ethAddress;
         if (addr) await triggerLedgerRefresh(addr);
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
 
       // Invoke callback if provided
       if (onTransactionComplete) onTransactionComplete(result);

@@ -4,8 +4,9 @@
  * Reusable component for selecting permission scopes
  */
 
-import React from 'react';
 import { ScopeConfig } from '../../types';
+
+import type { FC } from "react";
 
 interface ScopeCheckboxesProps {
   availableScopes: ScopeConfig[];
@@ -14,7 +15,7 @@ interface ScopeCheckboxesProps {
   disabled?: boolean;
 }
 
-export const ScopeCheckboxes: React.FC<ScopeCheckboxesProps> = ({
+export const ScopeCheckboxes: FC<ScopeCheckboxesProps> = ({
   availableScopes,
   selectedScopes,
   onScopeChange,

@@ -4,27 +4,34 @@
  * Form for executing Lit Actions with custom JavaScript code
  */
 
-import React, {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import MonacoEditor from "@monaco-editor/react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { ChevronDown, Check, Share2, Info } from "lucide-react";
+import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type FC,
+  type ReactNode,
 } from "react";
-import Editor from "@monaco-editor/react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronDown, Check, Share2, Info } from "lucide-react";
-import { useLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
-import { UIPKP } from "../../types";
-import { LoadingSpinner } from "../ui/LoadingSpinner";
-import { triggerLedgerRefresh } from "../../utils/ledgerRefresh";
+
+// eslint-disable-next-line import/default
+import litActionsGlobalDefinition from "@lit-protocol/naga-la-types/globals?raw";
+// eslint-disable-next-line import/default
+import litActionsNamespaceDefinition from "@lit-protocol/naga-la-types?raw";
+
 import {
   getDefaultLitActionExample,
   getLitActionExample,
   litActionExamples,
 } from "../../../../lit-action-examples";
-import litActionsGlobalDefinition from "@lit-protocol/naga-la-types/globals?raw";
-import litActionsNamespaceDefinition from "@lit-protocol/naga-la-types?raw";
+import { useLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
+import { UIPKP } from "../../types";
+import { triggerLedgerRefresh } from "../../utils/ledgerRefresh";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 // UI constants
 const EDITOR_FONT_SIZE_COMPACT = 10;
@@ -69,7 +76,7 @@ const AUTO_LOGIN_INFO_MESSAGE =
 
 const CTA_HEIGHT = 44;
 
-const SectionHeader: React.FC<{ title: string; textColor?: string }> = ({
+const SectionHeader: FC<{ title: string; textColor?: string }> = ({
   title,
   textColor = "#111827",
 }) => (
@@ -136,7 +143,7 @@ const BADGE_STYLES: Record<ExampleBadgeTone, { background: string; border: strin
   },
 };
 
-const ExampleSelector: React.FC<ExampleSelectorProps> = ({
+const ExampleSelector: FC<ExampleSelectorProps> = ({
   options,
   selectedId,
   onSelect,
@@ -306,7 +313,7 @@ interface ShareLinkMenuProps {
   triggerId?: string;
 }
 
-const ShareLinkMenu: React.FC<ShareLinkMenuProps> = ({
+const ShareLinkMenu: FC<ShareLinkMenuProps> = ({
   disabled = false,
   onShareStandard,
   onShareAutoLogin,
@@ -474,7 +481,7 @@ interface LitActionResult {
   timestamp: string;
 }
 
-export const LitActionForm: React.FC<LitActionFormProps> = ({
+export const LitActionForm: FC<LitActionFormProps> = ({
   selectedPkp,
   disabled = false,
 }) => {
@@ -501,7 +508,7 @@ export const LitActionForm: React.FC<LitActionFormProps> = ({
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const editorRef = useRef<any>(null);
   const paramsEditorRef = useRef<any>(null);
-  const triggerExecuteRef = useRef<() => void>(() => {});
+  const triggerExecuteRef = useRef<() => void>(() => undefined);
   const monacoConfiguredRef = useRef(false);
   const litTypesDisposablesRef = useRef<any[]>([]);
   const litTypesModelRef = useRef<any>(null);
@@ -840,7 +847,7 @@ export const LitActionForm: React.FC<LitActionFormProps> = ({
     editorHeight: string | number,
     fullscreen: boolean
   ) => (
-    <Editor
+    <MonacoEditor
       value={litActionCode}
       onChange={(value) => setLitActionCode(value || "")}
       language="javascript"
@@ -886,7 +893,7 @@ export const LitActionForm: React.FC<LitActionFormProps> = ({
 
     return (
       <>
-        <Editor
+        <MonacoEditor
           value={jsParamsInput}
           onChange={(value) => {
             setJsParamsInput(value ?? "");
@@ -1077,7 +1084,7 @@ export const LitActionForm: React.FC<LitActionFormProps> = ({
     value: Record<string, unknown> | unknown[],
     fullscreen: boolean,
     path: string[] = []
-  ): React.ReactNode => {
+  ): ReactNode => {
     const entryBackground = fullscreen ? "rgba(59, 130, 246, 0.08)" : "#f3f4f6";
     const entryBorder = fullscreen
       ? "1px solid rgba(59, 130, 246, 0.25)"
@@ -1570,7 +1577,9 @@ export const LitActionForm: React.FC<LitActionFormProps> = ({
       try {
         const addr = selectedPkp?.ethAddress || user.pkpInfo?.ethAddress;
         if (addr) await triggerLedgerRefresh(addr);
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
     } catch (error: any) {
       console.error("Failed to execute Lit Action:", error);
       setIsExecutingAction(false);

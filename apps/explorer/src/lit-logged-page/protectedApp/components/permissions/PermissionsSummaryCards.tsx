@@ -4,18 +4,19 @@
  * Google-style dashboard summary cards for permissions overview
  */
 
-import React from 'react';
-import { getAddress } from 'viem';
-import { usePKPPermissions } from '../../contexts/PKPPermissionsContext';
+import { useMemo, type FC } from "react";
+import { getAddress } from "viem";
 
-export const PermissionsSummaryCards: React.FC = () => {
+import { usePKPPermissions } from "../../contexts/PKPPermissionsContext";
+
+export const PermissionsSummaryCards: FC = () => {
   const { permissionsContext } = usePKPPermissions();
 
   if (!permissionsContext) {
     return null;
   }
 
-  const uniqueAddressCount = React.useMemo(() => {
+  const uniqueAddressCount = useMemo(() => {
     const addresses: string[] = permissionsContext?.addresses || [];
     try {
       const normalise = (addr: string) => {

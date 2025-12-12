@@ -4,15 +4,16 @@
  * Reusable button for removing items with loading state
  */
 
-import React from 'react';
-import { LoadingSpinner } from './LoadingSpinner';
+import { LoadingSpinner } from "./LoadingSpinner";
+
+import type { FC } from "react";
 
 interface RemoveButtonProps {
   onRemove: () => void;
   isRemoving: boolean;
 }
 
-export const RemoveButton: React.FC<RemoveButtonProps> = ({
+export const RemoveButton: FC<RemoveButtonProps> = ({
   onRemove,
   isRemoving,
 }) => (

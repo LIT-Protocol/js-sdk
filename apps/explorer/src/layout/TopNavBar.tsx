@@ -10,7 +10,7 @@
  *  <TopNavBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} rightSlot={<AccountMenu .../>} />
  */
 
-import React from "react";
+import type { FC, ReactNode } from "react";
 
 export interface TopNavTab {
   id: string;
@@ -21,12 +21,12 @@ interface TopNavBarProps {
   tabs: TopNavTab[];
   activeTab: string;
   onTabChange: (id: string) => void;
-  rightSlot?: React.ReactNode;
+  rightSlot?: ReactNode;
   /** Override sticky offsets if your header height differs */
   stickyClassName?: string; // e.g. "sticky top-14 sm:top-16"
 }
 
-export const TopNavBar: React.FC<TopNavBarProps> = ({
+export const TopNavBar: FC<TopNavBarProps> = ({
   tabs,
   activeTab,
   onTabChange,
@@ -58,5 +58,4 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
     </div>
   );
 };
-
 

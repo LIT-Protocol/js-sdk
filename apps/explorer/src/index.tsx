@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+
+import { Header } from "@/Header";
+
 import { APP_INFO } from "./_config";
 import { LitAuthProvider } from "./lit-login-modal/LitAuthProvider";
-import { Header } from "@/Header";
 
 interface ErrorDisplayProps {
   error: string | null;

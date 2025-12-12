@@ -4,18 +4,21 @@
  * Form for adding permitted actions to a PKP
  */
 
-import React, { useState } from 'react';
-import { ScopeCheckboxes } from '../ui/ScopeCheckboxes';
-import { AVAILABLE_SCOPES } from '../../types';
-import { usePKPPermissions } from '../../contexts/PKPPermissionsContext';
+import { useState, type FC } from "react";
+
 import { useLitAuth } from '../../../../lit-login-modal/LitAuthProvider';
+import { usePKPPermissions } from '../../contexts/PKPPermissionsContext';
+import { AVAILABLE_SCOPES } from '../../types';
 import { triggerLedgerRefresh } from '../../utils/ledgerRefresh';
+import { ScopeCheckboxes } from '../ui/ScopeCheckboxes';
 
 interface AddActionFormProps {
   disabled?: boolean;
 }
 
-export const AddActionForm: React.FC<AddActionFormProps> = ({ disabled = false }) => {
+export const AddActionForm: FC<AddActionFormProps> = ({
+  disabled = false,
+}) => {
   const { addPermittedAction } = usePKPPermissions();
   const { user } = useLitAuth();
   const [newActionIpfsId, setNewActionIpfsId] = useState(
@@ -39,7 +42,9 @@ export const AddActionForm: React.FC<AddActionFormProps> = ({ disabled = false }
       try {
         const addr = user?.pkpInfo?.ethAddress;
         if (addr) await triggerLedgerRefresh(addr);
-      } catch {}
+      } catch {
+        // ignore ledger refresh errors
+      }
     } catch (error) {
       console.error("Failed to add permitted action:", error);
     } finally {

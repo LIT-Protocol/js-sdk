@@ -5,22 +5,22 @@
  * Visible only below a breakpoint (default: lg).
  */
 
-import React from "react";
+import { useState, type FC, type ReactNode } from "react";
 
 interface BurgerMenuProps {
-  menu: React.ReactNode;
+  menu: ReactNode;
   buttonAriaLabel?: string;
   positionClass?: string; // default fixed top-2 right-2 sm:top-3 sm:right-3
   visibleBelowBreakpoint?: 'lg' | 'md' | 'xl';
 }
 
-export const BurgerMenu: React.FC<BurgerMenuProps> = ({
+export const BurgerMenu: FC<BurgerMenuProps> = ({
   menu,
   buttonAriaLabel = "Open menu",
   positionClass = "fixed top-2 right-2 sm:top-3 sm:right-3",
   visibleBelowBreakpoint = 'lg',
 }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const visibilityClass = visibleBelowBreakpoint === 'lg' ? 'block lg:hidden' : visibleBelowBreakpoint === 'md' ? 'block md:hidden' : 'block xl:hidden';
   return (
     <div className={`${positionClass} z-[1100] ${visibilityClass}`}>
@@ -46,5 +46,4 @@ export const BurgerMenu: React.FC<BurgerMenuProps> = ({
     </div>
   );
 };
-
 

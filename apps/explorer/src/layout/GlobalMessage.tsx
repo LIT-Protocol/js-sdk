@@ -8,7 +8,7 @@
  *  <GlobalMessage visible={true} message="..." />
  */
 
-import React from "react";
+import type { FC } from "react";
 
 interface GlobalMessageProps {
   visible: boolean;
@@ -18,7 +18,7 @@ interface GlobalMessageProps {
   stickyOffsetClass?: string; // default "md:sticky md:top-28"
 }
 
-export const GlobalMessage: React.FC<GlobalMessageProps> = ({
+export const GlobalMessage: FC<GlobalMessageProps> = ({
   visible,
   message,
   className,
@@ -36,5 +36,4 @@ export const GlobalMessage: React.FC<GlobalMessageProps> = ({
     </div>
   );
 };
-
 
