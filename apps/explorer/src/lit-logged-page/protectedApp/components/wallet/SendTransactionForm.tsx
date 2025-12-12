@@ -6,6 +6,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, type FC } from "react";
+import { createWalletClient, http, parseEther } from "viem";
 
 import { getAllChains } from "@/domain/lit/chains";
 
@@ -113,9 +114,6 @@ export const SendTransactionForm: FC<SendTransactionFormProps> = ({
         authContext: user.authContext,
         chainConfig: chainConfig,
       });
-
-      // Create wallet client with PKP account
-      const { createWalletClient, http, parseEther } = await import("viem");
 
       const walletClient = createWalletClient({
         account: pkpViemAccount,

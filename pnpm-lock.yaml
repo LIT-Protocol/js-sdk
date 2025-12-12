@@ -258,18 +258,33 @@ importers:
 
   apps/explorer:
     dependencies:
+      '@ethersproject/providers':
+        specifier: 5.7.0
+        version: 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@lit-protocol/access-control-conditions':
         specifier: workspace:*
         version: link:../../dist/packages/access-control-conditions
+      '@lit-protocol/access-control-conditions-schemas':
+        specifier: workspace:*
+        version: link:../../dist/packages/access-control-conditions-schemas
       '@lit-protocol/auth':
         specifier: workspace:*
         version: link:../../dist/packages/auth
+      '@lit-protocol/auth-helpers':
+        specifier: workspace:*
+        version: link:../../dist/packages/auth-helpers
       '@lit-protocol/constants':
         specifier: workspace:*
         version: link:../../dist/packages/constants
+      '@lit-protocol/crypto':
+        specifier: workspace:*
+        version: link:../../dist/packages/crypto
       '@lit-protocol/lit-client':
         specifier: workspace:*
         version: link:../../dist/packages/lit-client
+      '@lit-protocol/logger':
+        specifier: workspace:*
+        version: link:../../dist/packages/logger
       '@lit-protocol/naga-la-types':
         specifier: 0.1.0
         version: 0.1.0
@@ -285,6 +300,9 @@ importers:
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.54.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@noble/hashes':
+        specifier: 1.8.0
+        version: 1.8.0
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.16
         version: 2.1.16(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

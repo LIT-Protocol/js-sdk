@@ -143,7 +143,8 @@ let NodeLocalStorageConstructor: any = null; // To cache the constructor after d
 const getNodeStorageInstance = async (storagePath: string): Promise<any> => {
   if (!NodeLocalStorageConstructor) {
     try {
-      const module = await import('node-localstorage');
+      const moduleName = 'node-localstorage';
+      const module = await import(moduleName);
       NodeLocalStorageConstructor = module.LocalStorage;
     } catch (e) {
       console.error(

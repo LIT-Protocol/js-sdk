@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo , useState as useReactState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getAddress } from "viem";
+import { createPublicClient, getAddress, http } from "viem";
 
 import { APP_INFO } from "@/_config";
 import { getDefaultChainForNetwork } from "@/domain/lit/networkDefaults";
@@ -196,7 +196,6 @@ export default function LoggedInDashboard() {
 
     if (!silent) setIsLoadingBalance(true);
     try {
-      const { createPublicClient, http } = await import("viem");
       const allChains = getAllChains();
       const chainInfo = allChains[selectedChain as keyof typeof allChains];
       if (!chainInfo) throw new Error(`Unknown chain: ${selectedChain}`);
@@ -271,7 +270,6 @@ export default function LoggedInDashboard() {
     let cancelled = false;
     (async () => {
       try {
-        const { createPublicClient, http } = await import("viem");
         const allChains = getAllChains();
         const chainInfo = allChains[selectedChain as keyof typeof allChains];
         if (!chainInfo) return;

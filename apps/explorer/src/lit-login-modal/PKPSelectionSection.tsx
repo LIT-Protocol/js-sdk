@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, type FC } from "react";
-import { getAddress } from "viem";
+import { createPublicClient, getAddress, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 // import { createLitClient } from "@lit-protocol/lit-client";
@@ -138,9 +138,6 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
       }
 
       // console.log(`💰 [BALANCE] Using chain: ${chainInfo.name} (${chainInfo.symbol}) RPC: ${chainInfo.rpcUrl}`);
-
-      // Import viem for balance fetching
-      const { createPublicClient, http } = await import("viem");
 
       // Create chain config for viem
       const chainConfig = {
