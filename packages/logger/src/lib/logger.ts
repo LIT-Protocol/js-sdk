@@ -11,7 +11,8 @@ export type LogLevel =
   | 'warn'
   | 'info'
   | 'debug'
-  | 'debug2'
+  | 'debug_text'
+  | 'debug2' // deprecated alias for debug_text
   | 'trace';
 
 export interface LogEntry {
@@ -32,9 +33,13 @@ const LEVEL_RANK: Record<LogLevel, number> = {
   warn: 40,
   info: 30,
   debug: 20,
+  debug_text: 15,
   debug2: 15,
   trace: 10,
 };
+
+const canonicalizeLevel = (level: LogLevel): LogLevel =>
+  level === 'debug2' ? 'debug_text' : level;
 
 const isNodeEnvironment = () =>
   typeof process !== 'undefined' &&
@@ -51,7 +56,8 @@ export const getDefaultLevel = (): LogLevel => {
     logLevel = globalThis['LOG_LEVEL'];
   }
 
-  return (logLevel as LogLevel) || 'silent';
+  const level = (logLevel as LogLevel) || 'silent';
+  return canonicalizeLevel(level);
 };
 
 const DEFAULT_LOGGER_OPTIONS: LoggerOptions<string, false> = {
@@ -66,6 +72,9 @@ type LoggerImpl = {
   warn: (...args: any[]) => void;
   info: (...args: any[]) => void;
   debug: (...args: any[]) => void;
+  debug_text?: (...args: any[]) => void;
+  debug2?: (...args: any[]) => void;
+  debugText?: (...args: any[]) => void;
   trace: (...args: any[]) => void;
   child?: (bindings: Record<string, unknown>) => LoggerImpl;
   isLevelEnabled?: (level: string) => boolean;
@@ -83,7 +92,7 @@ interface InternalConfig {
 }
 
 const normalizeLevelForPino = (level: LogLevel): string =>
-  level === 'debug2' ? 'debug' : level;
+  canonicalizeLevel(level) === 'debug_text' ? 'debug' : canonicalizeLevel(level);
 
 const createConsoleLogger = (name: string): LoggerImpl => {
   const baseLogger: LoggerImpl = {
@@ -103,9 +112,12 @@ const createConsoleLogger = (name: string): LoggerImpl => {
     isLevelEnabled: () => true,
   };
 
-  // @ts-expect-error - debug2 is not part of LoggerImpl, but we keep it for compatibility.
-  baseLogger.debug2 = (...args: any[]) =>
-    console.log(`[${name}] DEBUG2:`, ...args);
+  const debugText = (...args: any[]) =>
+    console.log(`[${name}] DEBUG_TEXT:`, ...args);
+
+  baseLogger.debug_text = debugText;
+  baseLogger.debugText = debugText;
+  baseLogger.debug2 = debugText;
 
   return baseLogger;
 };
@@ -114,13 +126,15 @@ const createDefaultImpl = (
   options: LoggerOptions<string, false>,
   destination?: DestinationStream
 ): LoggerImpl => {
-  const effectiveLevel = normalizeLevelForPino(
-    (options.level as LogLevel) || getDefaultLevel()
+  const requestedLevel = canonicalizeLevel(
+    ((options.level as LogLevel) || getDefaultLevel()) as LogLevel
   );
 
-  if (options.level === 'debug2') {
+  if (requestedLevel === 'debug_text') {
     return createConsoleLogger(options.name || DEFAULT_LOGGER_OPTIONS.name!);
   }
+
+  const effectiveLevel = normalizeLevelForPino(requestedLevel);
 
   const pinoOptions: LoggerOptions<string, false> = {
     ...DEFAULT_LOGGER_OPTIONS,
@@ -199,10 +213,11 @@ const logWithLevel = (
   bindings: Record<string, unknown>,
   args: unknown[]
 ) => {
-  if (!shouldLog(level)) return;
+  const canonicalLevel = canonicalizeLevel(level);
+  if (!shouldLog(canonicalLevel)) return;
 
   const impl = getImpl();
-  const implLevel = normalizeLevelForPino(level);
+  const implLevel = normalizeLevelForPino(canonicalLevel);
   const mergedBindings = {
     name: config.name,
     ...config.bindings,
@@ -210,7 +225,8 @@ const logWithLevel = (
   };
   const implMethod =
     // @ts-ignore - dynamic level access
-    (impl as any)[level] || (level === 'debug2' ? impl.debug : undefined);
+    (impl as any)[canonicalLevel] ||
+    (canonicalLevel === 'debug_text' ? impl.debug : undefined);
 
   if (
     config.useDefaultTransports &&
@@ -223,7 +239,7 @@ const logWithLevel = (
   if (config.transports.length > 0) {
     const { msg, data } = extractMsgAndData(args);
     emitToTransports({
-      level,
+      level: canonicalLevel,
       time: Date.now(),
       msg,
       data,
@@ -247,8 +263,9 @@ const createLoggerWrapper = (
     info: (...args) => logWithLevel('info', getImpl, bindings, args),
     debug: (...args) => logWithLevel('debug', getImpl, bindings, args),
     trace: (...args) => logWithLevel('trace', getImpl, bindings, args),
-    // @ts-expect-error - debug2 is custom but supported.
-    debug2: (...args: any[]) => logWithLevel('debug2', getImpl, bindings, args),
+    debug_text: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
+    debugText: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
+    debug2: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
     child: (childBindings) => {
       const mergedBindings = { ...bindings, ...childBindings };
       return createLoggerWrapper(
@@ -299,7 +316,9 @@ function setLoggerOptions(
     config.transports = transports;
   }
 
-  const level = (loggerOptions.level as LogLevel) || getDefaultLevel();
+  const level = canonicalizeLevel(
+    ((loggerOptions.level as LogLevel) || getDefaultLevel()) as LogLevel
+  );
   config.level = level;
 
   const name = (loggerOptions.name as string) || DEFAULT_LOGGER_OPTIONS.name!;
@@ -308,7 +327,7 @@ function setLoggerOptions(
   if (impl) {
     config.impl = impl;
   } else {
-    if (level === 'debug2') {
+    if (level === 'debug_text') {
       config.impl = createConsoleLogger(name);
     } else {
       const effectivePinoOptions: LoggerOptions<string, false> = {

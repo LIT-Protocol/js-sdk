@@ -19,9 +19,9 @@ Logging verbosity is controlled by:
 - Node.js: `process.env.LOG_LEVEL`
 - Browser: `globalThis.LOG_LEVEL`
 
-Supported levels: `silent`, `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `debug2`.
+Supported levels: `silent`, `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `debug_text`.
 
-`debug2` is treated like `debug` but uses raw console output for maximum verbosity.
+`debug_text` switches the default output to console-style text (not JSON). `debug2` is a deprecated alias for `debug_text`.
 
 ## Configuration
 
@@ -90,7 +90,7 @@ setLoggerOptions({
       const status =
         level === 'fatal'
           ? 'error'
-          : level === 'trace' || level === 'debug2'
+          : level === 'trace' || level === 'debug_text' || level === 'debug2'
             ? 'debug'
             : level;
 
@@ -102,6 +102,54 @@ setLoggerOptions({
       }
 
       (datadogLogs.logger as any)[status](msg || 'log', context);
+    },
+  ],
+});
+```
+
+### OpenTelemetry example (Node.js)
+
+You can forward logs via `transports` to the OpenTelemetry Logs API:
+
+```ts
+import { logs, SeverityNumber } from '@opentelemetry/api-logs';
+import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { setLoggerOptions } from '@lit-protocol/logger';
+
+const provider = new LoggerProvider();
+provider.addLogRecordProcessor(
+  new BatchLogRecordProcessor(
+    new OTLPLogExporter({ url: 'http://localhost:4318/v1/logs' })
+  )
+);
+logs.setGlobalLoggerProvider(provider);
+
+const otelLogger = logs.getLogger('lit-sdk');
+
+const levelToSeverity: Record<string, SeverityNumber> = {
+  fatal: SeverityNumber.FATAL,
+  error: SeverityNumber.ERROR,
+  warn: SeverityNumber.WARN,
+  info: SeverityNumber.INFO,
+  debug: SeverityNumber.DEBUG,
+  debug_text: SeverityNumber.DEBUG,
+  trace: SeverityNumber.TRACE,
+};
+
+setLoggerOptions({
+  level: 'info',
+  useDefaultTransports: false,
+  transports: [
+    ({ level, msg, bindings, data, time }) => {
+      if (level === 'silent') return;
+      otelLogger.emit({
+        body: msg ?? 'log',
+        severityNumber: levelToSeverity[level] ?? SeverityNumber.UNSPECIFIED,
+        severityText: level,
+        attributes: { ...bindings, ...(data as any) },
+        timestamp: time,
+      });
     },
   ],
 });

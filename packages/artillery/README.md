@@ -6,7 +6,7 @@ Usage via root scripts remains the same, now pointing to `packages/artillery`.
 
 # 🚀 Run Artillery tests
 
-- LOG_LEVEL= `debug` | `info` | `silent` | `debug2` (raw console.log)
+- LOG_LEVEL= `debug` | `info` | `silent` | `debug_text` (console-style text output, not JSON; `debug2` is a deprecated alias)
 - NETWORK= `naga-dev` | `naga-staging`
 
 ## Setup Commands
