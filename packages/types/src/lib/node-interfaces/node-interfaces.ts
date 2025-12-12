@@ -31,7 +31,7 @@ export interface JsonPKPClaimKeyRequest {
 //   #[serde(default = "default_epoch")]
 //   pub epoch: u64,
 // }
-export type KeySetIdentifier = KEY_SET_IDENTIFIER_VALUES;
+type KeySetIdentifier = KEY_SET_IDENTIFIER_VALUES;
 
 export interface EncryptionSignRequest {
   accessControlConditions?: AccessControlConditions[];

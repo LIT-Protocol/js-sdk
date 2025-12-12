@@ -341,7 +341,11 @@ export const handleResponse = async (
         {} as Record<string, LitActionClaimData>
       ),
       decryptedData: value.decryptedData || {},
-      paymentDetail: value.paymentDetail,
+      paymentDetail: value.paymentDetail?.map((detail) => ({
+        component: detail.component ?? '',
+        quantity: detail.quantity ?? 0,
+        price: detail.price ?? 0,
+      })),
     })
   );
 

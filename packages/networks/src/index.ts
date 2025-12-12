@@ -6,6 +6,9 @@ import type { NagaStagingModule } from './networks/vNaga';
 import type { NagaMainnetModule } from './networks/vNaga';
 import type { NagaProtoModule } from './networks/vNaga';
 import type { NagaModule } from './networks/vNaga';
+import type { DatilDevModule } from './networks/vDatil';
+import type { DatilTestModule } from './networks/vDatil';
+import type { DatilModule } from './networks/vDatil';
 
 // Network modules
 export {
@@ -19,6 +22,11 @@ export {
   nagaProto,
   naga,
 } from './networks/vNaga';
+export { 
+  datilDev, 
+  datilTest, 
+  datil 
+} from './networks/vDatil';
 
 // Network module types
 export type { NagaLocalModule } from './networks/vNaga';
@@ -28,6 +36,14 @@ export type { NagaStagingModule } from './networks/vNaga';
 export type { NagaMainnetModule } from './networks/vNaga';
 export type { NagaProtoModule } from './networks/vNaga';
 export type { NagaModule } from './networks/vNaga';
+export type { DatilDevModule } from './networks/vDatil';
+export type { DatilTestModule } from './networks/vDatil';
+export type { DatilModule } from './networks/vDatil';
+export type {
+  DatilDevEnvironment,
+  DatilTestEnvironment,
+  DatilEnvironment,
+} from './networks/vDatil';
 
 // All Network modules
 export type LitNetworkModule =
@@ -37,13 +53,10 @@ export type LitNetworkModule =
   | NagaStagingModule
   | NagaMainnetModule
   | NagaProtoModule
-  | NagaModule;
-// | NagaProdModule
-// | NagaLocalModule
-// | DatilDevModule
-// | DatilTestModule
-// | DatilProdModule
-// | DatilLocalModule
+  | NagaModule
+  | DatilDevModule
+  | DatilTestModule
+  | DatilModule;
 
 // ----- types
 export type { ConnectionInfo } from './networks/vNaga/shared/managers/LitChainClient/types';
@@ -68,3 +81,4 @@ export { getUserMaxPrice } from './networks/vNaga/shared/managers/pricing-manage
 export { PRODUCT_IDS } from './networks/vNaga/shared/managers/pricing-manager/constants';
 export { PricingContextSchema } from './networks/vNaga/shared/managers/pricing-manager/schema';
 export { issueSessionFromContext } from './networks/vNaga/shared/managers/session-manager/issueSessionFromContext';
+export { resolveKeysetForPkp } from './networks/shared/keyset-resolver';

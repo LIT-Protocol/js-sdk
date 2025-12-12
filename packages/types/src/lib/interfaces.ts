@@ -183,8 +183,6 @@ pub struct JsonExecutionRequest {
 }
  */
 
-export type KeySetIdentifier = 'datil' | 'naga-keyset1';
-
 export type KeySetIdentifier = KEY_SET_IDENTIFIER_VALUES;
 
 /**
