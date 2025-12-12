@@ -45,6 +45,7 @@
     }
   },
   "dependencies": {
+    "@lit-protocol/logger": "workspace:*",
     "@lit-protocol/uint8arrays": "7.1.1",
     "bs58": "6.0.0",
     "typestub-ipfs-only-hash": "^4.0.0",

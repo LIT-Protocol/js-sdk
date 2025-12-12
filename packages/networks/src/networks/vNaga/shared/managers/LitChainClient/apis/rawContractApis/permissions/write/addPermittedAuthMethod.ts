@@ -45,8 +45,6 @@ export async function addPermittedAuthMethod(
   const validatedRequest = addPermittedAuthMethodSchema.parse(request);
   logger.debug({ validatedRequest }, 'Adding permitted auth method');
 
-  console.log('🔐 ADD PERMITTED AUTH METHOD:', validatedRequest);
-
   const { pkpPermissionsContract, publicClient } = createContractsManager(
     networkCtx,
     accountOrWalletClient

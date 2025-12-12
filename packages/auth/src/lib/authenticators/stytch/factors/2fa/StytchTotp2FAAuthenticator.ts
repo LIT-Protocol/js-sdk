@@ -3,6 +3,9 @@ import { AuthData } from '@lit-protocol/schemas';
 import { AuthMethod, StytchToken } from '@lit-protocol/types';
 import { AuthMethodTypeStringMap } from '../../../../types';
 import { totpAuthFactorParser } from '../../parsers';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({ module: 'StytchTotp2FAAuthenticator' });
 
 /**
  * Configuration for the Stytch TOTP authenticate method.
@@ -114,7 +117,7 @@ export class StytchTotp2FAAuthenticator {
       }
       accessToken = verifyData.accessToken;
     } catch (e: any) {
-      console.error('Error verifying TOTP via auth service:', e);
+      _logger.error({ e }, 'Error verifying TOTP via auth service');
       throw e;
     }
 
@@ -146,7 +149,7 @@ export class StytchTotp2FAAuthenticator {
           authMethodId: generatedAuthMethodId,
         });
       } catch (e) {
-        console.error('Error processing Stytch TOTP token:', e);
+        _logger.error({ e }, 'Error processing Stytch TOTP token');
         reject(e);
       }
     });
@@ -243,7 +246,7 @@ export class StytchTotp2FAAuthenticator {
 
       const createData = await createResponse.json();
 
-      console.log('createData', createData);
+      _logger.debug({ createData }, 'TOTP registration create response');
 
       if (
         !createData.totpRegistrationId ||
@@ -262,7 +265,10 @@ export class StytchTotp2FAAuthenticator {
         recoveryCodes: createData.recoveryCodes || [],
       };
     } catch (e: any) {
-      console.error('Error initiating TOTP registration via auth service:', e);
+      _logger.error(
+        { e },
+        'Error initiating TOTP registration via auth service'
+      );
       throw e;
     }
   }
@@ -304,14 +310,17 @@ export class StytchTotp2FAAuthenticator {
         );
       }
 
-      console.log('verifyData', verifyData);
+      _logger.debug({ verifyData }, 'TOTP registration verify response');
 
       return {
         accessToken: verifyData.accessToken,
         totpId: verifyData.totpId || '',
       };
     } catch (e: any) {
-      console.error('Error verifying TOTP registration via auth service:', e);
+      _logger.error(
+        { e },
+        'Error verifying TOTP registration via auth service'
+      );
       throw e;
     }
   }

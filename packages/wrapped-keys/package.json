@@ -30,6 +30,7 @@
     "@lit-protocol/auth": "workspace:*",
     "@lit-protocol/constants": "workspace:*",
     "@lit-protocol/lit-client": "workspace:*",
+    "@lit-protocol/logger": "workspace:*",
     "@lit-protocol/networks": "workspace:*",
     "@lit-protocol/schemas": "workspace:*",
     "@lit-protocol/types": "workspace:*"

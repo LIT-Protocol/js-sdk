@@ -25,6 +25,7 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
+    "@lit-protocol/logger": "workspace:*",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
     "@noble/curves": "1.8.1",

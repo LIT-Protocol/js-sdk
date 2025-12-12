@@ -19,11 +19,7 @@ import {
   NodeErrorV3,
   RelayClaimProcessor,
 } from '@lit-protocol/types';
-import { getGlobal } from '@lit-protocol/constants';
-
-const globalScope = getGlobal();
-
-const logBuffer: any[][] = [];
+import { getChildLogger, logger as sdkLogger } from '@lit-protocol/logger';
 const ajv = new Ajv();
 
 // Module scoped variable to store the LitNodeClientConfig passed to LitCore
@@ -41,9 +37,7 @@ export const setMiscLitConfig = (config: LitNodeClientConfig | undefined) => {
  * @returns { void }
  */
 export const printError = (e: Error): void => {
-  console.log('Error Stack', e.stack);
-  console.log('Error Name', e.name);
-  console.log('Error Message', e.message);
+  sdkLogger.error({ err: e, stack: e.stack, name: e.name }, e.message);
 };
 
 /**
@@ -113,13 +107,8 @@ export const findMostCommonResponse = <T extends Record<string, any>>(
   return result as T;
 };
 
-declare global {
-  var logger: any;
-  var logManager: any;
-}
-
 export const getLoggerbyId = (id: string) => {
-  return globalScope.logManager.get(id);
+  return getChildLogger({ requestId: id });
 };
 
 /**
@@ -131,101 +120,21 @@ export const getLoggerbyId = (id: string) => {
  * @returns { void }
  */
 export const log = (...args: any): void => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger && globalThis?.logger.debug(...log);
-  }
-
-  globalThis?.logger && globalThis?.logger.debug(...args);
+  sdkLogger.debug(...args);
 };
 
 export const logWithRequestId = (id: string, ...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalScope.logManager.get(globalScope.logger.category, id).debug(...log);
-  }
-
-  globalThis?.logger &&
-    globalScope.logManager.get(globalScope.logger.category, id).debug(...args);
+  const child = getChildLogger({ requestId: id });
+  child.debug(...args);
 };
 
 export const logErrorWithRequestId = (id: string, ...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalScope.logManager.get(globalScope.logger.category, id).error(...log);
-  }
-
-  globalThis?.logger &&
-    globalScope.logManager.get(globalScope.logger.category, id).error(...args);
+  const child = getChildLogger({ requestId: id });
+  child.error(...args);
 };
 
 export const logError = (...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalScope.logManager.get(globalScope.logger.category).error(...log);
-  }
-
-  globalThis?.logger &&
-    globalScope.logManager.get(globalScope.logger.category).error(...args);
+  sdkLogger.error(...args);
 };
 
 /**

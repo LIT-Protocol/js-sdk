@@ -3,6 +3,9 @@ import { AuthData } from '@lit-protocol/schemas';
 import { AuthMethod, StytchToken } from '@lit-protocol/types';
 import { AuthMethodTypeStringMap } from '../../../types';
 import { emailOtpAuthFactorParser } from '../parsers';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({ module: 'StytchEmailOtpAuthenticator' });
 
 /**
  * Configuration for initiating the Stytch Email OTP sending process.
@@ -74,7 +77,7 @@ export class StytchEmailOtpAuthenticator {
         methodId: responseData.methodId,
       };
     } catch (e: any) {
-      console.error('Error in sendOtp:', e);
+      _logger.error({ e }, 'Error in sendOtp');
       throw e; // Re-throw the error to be handled by the caller
     }
   }
@@ -116,7 +119,7 @@ export class StytchEmailOtpAuthenticator {
       accessToken = verifyData.accessToken;
       userId = verifyData.userId;
     } catch (e: any) {
-      console.error('Error verifying OTP via auth service:', e);
+      _logger.error({ e }, 'Error verifying OTP via auth service');
       throw e; // Re-throw the error
     }
 
@@ -158,7 +161,7 @@ export class StytchEmailOtpAuthenticator {
           },
         });
       } catch (e) {
-        console.error('Error processing Stytch token:', e);
+        _logger.error({ e }, 'Error processing Stytch token');
         reject(e);
       }
     });

@@ -57,7 +57,10 @@ export const handleAuthServerRequest = async <T>(params: {
         data: returnValue.data,
       };
     } catch (error: any) {
-      console.error(`Error during ${params.jobName} polling:`, error);
+      logger.error(
+        { error },
+        `Error during ${params.jobName} polling`
+      );
       const errMsg = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to ${params.jobName} after polling: ${errMsg}`);
     }

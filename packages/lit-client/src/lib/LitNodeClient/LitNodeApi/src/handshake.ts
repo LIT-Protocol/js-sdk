@@ -163,7 +163,7 @@ export const handshake = async (params: {
           return errorData as RawHandshakeResponse;
         }
       } catch (parseError) {
-        console.error('🔍 Failed to parse errorObject:', parseError);
+        _logger.error({ parseError }, '🔍 Failed to parse errorObject');
       }
     }
 
@@ -185,8 +185,9 @@ export const resolveHandshakeResponse = ({
   );
 
   if (!latestBlockhash) {
-    console.error(
-      `Error getting latest blockhash from the nodes. Request ID: ${requestId}`
+    _logger.error(
+      { requestId },
+      'Error getting latest blockhash from the nodes'
     );
 
     throw new InvalidEthBlockhash(

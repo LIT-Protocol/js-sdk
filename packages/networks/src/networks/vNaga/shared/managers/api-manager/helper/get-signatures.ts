@@ -6,6 +6,7 @@ import {
   combinePKPSignNodeShares,
   hexifyStringValues,
   logErrorWithRequestId,
+  logWithRequestId,
   mostCommonString,
 } from '@lit-protocol/crypto';
 import {
@@ -199,7 +200,8 @@ export const combineExecuteJSSignatures = async (params: {
               continue;
             }
 
-            console.log(
+            logWithRequestId(
+              requestId,
               `[executeJs] dropping signature share ${index + 1}/${
                 shares.length
               } for ${signatureKey}; drops left ${dropBudget - 1}`

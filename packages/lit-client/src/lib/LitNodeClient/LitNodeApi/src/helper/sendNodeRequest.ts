@@ -85,7 +85,10 @@ export async function sendNodeRequest<T>(
 
     if (isDebugMode) {
       const timestamp = new Date().toISOString();
-      console.log(`🔄 response at ${timestamp}`, response);
+      _logger.debug(
+        { timestamp, status: response.status, url: _fullUrl },
+        '🔄 response received'
+      );
     }
 
     const isJson = response.headers

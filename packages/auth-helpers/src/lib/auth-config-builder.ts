@@ -33,6 +33,9 @@ import {
 } from './resources'; // Corrected path: from ../lib/auth-config-builder.ts to ../lib/resources/
 
 import { z } from 'zod';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const logger = getChildLogger({ module: 'auth-config-builder' });
 
 // Infer the AuthConfig type from the Zod schema
 type AuthConfig = z.infer<typeof AuthConfigSchema>;
@@ -163,7 +166,7 @@ export const createAuthConfigBuilder = (): IAuthConfigBuilder => {
         return parsedConfig;
       } catch (e) {
         if (e instanceof z.ZodError) {
-          console.error('AuthConfig validation failed:', e.errors);
+          logger.error({ errors: e.errors }, 'AuthConfig validation failed');
         }
         throw new Error(`Failed to build AuthConfig: ${(e as Error).message}`);
       }

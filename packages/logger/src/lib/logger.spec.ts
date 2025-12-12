@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { logger, setLoggerOptions, getChildLogger } from './logger';
+import { logger, setLoggerOptions, getChildLogger, getDefaultLevel } from './logger';
 
 class TestStream extends Writable {
   public data = '';
@@ -16,8 +16,8 @@ class TestStream extends Writable {
 }
 
 describe('logger', () => {
-  it('should have default level "info"', () => {
-    expect(logger.level).toBe('info');
+  it('should have default level from environment', () => {
+    expect(logger.level).toBe(getDefaultLevel());
   });
 
   it('setLoggerOptions should update logger options', () => {
