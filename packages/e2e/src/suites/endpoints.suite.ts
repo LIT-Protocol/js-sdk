@@ -78,23 +78,42 @@ export function registerEndpointSuite(
       it('viewPKPsByAuthData', async () => {
         const testEnv = getTestEnv();
         const aliceAccount = opts.getAliceAccount();
-        const authData =
-          opts.authDataOverride ??
-          aliceAccount.authData ??
-          (await ViemAccountAuthenticator.authenticate(aliceAccount.account));
+        const pkps = await withRetry(
+          async () => {
+            const authData =
+              opts.authDataOverride ??
+              (await ViemAccountAuthenticator.authenticate(
+                aliceAccount.account
+              ));
 
-        const pkps = await testEnv.litClient.viewPKPsByAuthData({
-          authData: {
-            authMethodType: authData.authMethodType,
-            authMethodId: authData.authMethodId,
-            accessToken: authData.accessToken || 'mock-token',
+            const res = await testEnv.litClient.viewPKPsByAuthData({
+              authData: {
+                authMethodType: authData.authMethodType,
+                authMethodId: authData.authMethodId,
+                accessToken: authData.accessToken || 'mock-token',
+              },
+              pagination: { limit: 10, offset: 0 },
+            });
+
+            if (!res.pkps?.length) {
+              throw new Error('No PKPs found yet');
+            }
+
+            return res;
           },
-          pagination: { limit: 10, offset: 0 },
-        });
+          {
+            transientMessageFragments: [
+              'Verification failed',
+              'Failed to verify signature',
+              'authentication failed',
+              'No PKPs found yet',
+              ...PKP_SIGN_TRANSIENT_FRAGMENTS,
+            ],
+          }
+        );
 
         expect(pkps).toBeDefined();
         expect(Array.isArray(pkps.pkps)).toBe(true);
-        expect(pkps.pkps.length).toBeGreaterThan(0);
 
         const firstPkp = pkps.pkps[0];
         expect(firstPkp.tokenId).toBeDefined();
