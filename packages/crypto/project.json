@@ -5,7 +5,7 @@
   "projectType": "library",
   "implicitDependencies": ["wasm"],
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -14,6 +14,26 @@
         "tsConfig": "packages/crypto/tsconfig.lib.json",
         "assets": ["packages/crypto/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/crypto/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/crypto/cjs --rootDir packages/crypto/src --baseUrl packages/crypto/src && node tools/write-cjs-packagejson.mjs dist/packages/crypto/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run crypto:build-esm"
+          },
+          {
+            "command": "nx run crypto:build-cjs"
+          }
+        ],
+        "parallel": false
       }
     },
     "check-deps": {

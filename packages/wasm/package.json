@@ -1,7 +1,7 @@
 {
   "name": "@lit-protocol/wasm",
   "version": "8.1.0",
-  "type": "commonjs",
+  "type": "module",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
     "type": "git",
@@ -29,8 +29,16 @@
     "rust:postbuild": "node scripts/copyWasmBinary.mjs && rm -rf src/pkg && mkdir src/pkg && mv rust/pkg/wasm-internal.js src/pkg && mv rust/pkg/wasm-internal.d.ts src/pkg",
     "rust:build:debug": "wasm-pack build ./rust --target web --dev --out-name wasm-internal && pnpm run rust:postbuild"
   },
-  "main": "./src/index.js",
-  "typings": "./src/index.d.ts",
+  "main": "./cjs/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./cjs/index.js"
+    }
+  },
   "dependencies": {
     "ethers": "5.7.2",
     "pako": "2.1.0"

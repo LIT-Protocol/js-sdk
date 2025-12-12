@@ -23,21 +23,75 @@ importers:
       '@ethersproject/contracts':
         specifier: 5.7.0
         version: 5.7.0
+      '@ethersproject/providers':
+        specifier: 5.7.0
+        version: 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@ethersproject/transactions':
+        specifier: 5.7.0
+        version: 5.7.0
+      '@lit-protocol/access-control-conditions':
+        specifier: workspace:*
+        version: link:dist/packages/access-control-conditions
+      '@lit-protocol/access-control-conditions-schemas':
+        specifier: workspace:*
+        version: link:dist/packages/access-control-conditions-schemas
+      '@lit-protocol/auth':
+        specifier: workspace:*
+        version: link:dist/packages/auth
+      '@lit-protocol/auth-helpers':
+        specifier: workspace:*
+        version: link:dist/packages/auth-helpers
+      '@lit-protocol/auth-services':
+        specifier: workspace:*
+        version: link:dist/packages/auth-services
+      '@lit-protocol/constants':
+        specifier: workspace:*
+        version: link:dist/packages/constants
       '@lit-protocol/contracts':
         specifier: workspace:*
         version: link:dist/packages/contracts
+      '@lit-protocol/crypto':
+        specifier: workspace:*
+        version: link:dist/packages/crypto
+      '@lit-protocol/lit-client':
+        specifier: workspace:*
+        version: link:dist/packages/lit-client
+      '@lit-protocol/logger':
+        specifier: workspace:*
+        version: link:dist/packages/logger
       '@lit-protocol/nacl':
         specifier: 7.1.1
         version: 7.1.1
+      '@lit-protocol/networks':
+        specifier: workspace:*
+        version: link:dist/packages/networks
+      '@lit-protocol/schemas':
+        specifier: workspace:*
+        version: link:dist/packages/schemas
+      '@lit-protocol/types':
+        specifier: workspace:*
+        version: link:dist/packages/types
       '@lit-protocol/uint8arrays':
         specifier: 7.1.1
         version: 7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@lit-protocol/wasm':
+        specifier: workspace:*
+        version: link:dist/packages/wasm
+      '@lit-protocol/wrapped-keys':
+        specifier: workspace:*
+        version: link:dist/packages/wrapped-keys
+      '@lit-protocol/wrapped-keys-lit-actions':
+        specifier: workspace:*
+        version: link:dist/packages/wrapped-keys-lit-actions
       '@metamask/eth-sig-util':
         specifier: 5.0.2
         version: 5.0.2
       '@noble/curves':
         specifier: 1.8.1
         version: 1.8.1
+      '@noble/hashes':
+        specifier: 1.8.0
+        version: 1.8.0
       '@openagenda/verror':
         specifier: 3.1.4
         version: 3.1.4
@@ -19021,7 +19075,7 @@ snapshots:
 
   '@vue/shared@3.5.22': {}
 
-  '@wagmi/connectors@6.0.1(ca91dfc09229debedec4747ea28138c2)':
+  '@wagmi/connectors@6.0.1(4ivbjbado6jvjrj76kxayej5sq)':
     dependencies:
       '@base-org/account': 1.1.1(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
       '@coinbase/wallet-sdk': 4.3.6(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
@@ -19068,7 +19122,7 @@ snapshots:
       - wagmi
       - zod
 
-  '@wagmi/connectors@6.1.0(a73984ae2cf8f13fff6b4163038b7ac0)':
+  '@wagmi/connectors@6.1.0(xq3q2qgyn5j67huuv3r4r2zjce)':
     dependencies:
       '@base-org/account': 1.1.1(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
       '@coinbase/wallet-sdk': 4.3.6(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
@@ -27448,7 +27502,7 @@ snapshots:
   wagmi@2.18.1(@azure/identity@4.13.0)(@azure/storage-blob@12.29.1)(@tanstack/query-core@5.90.5)(@tanstack/react-query@5.90.5(react@18.3.1))(@types/react@18.3.27)(@upstash/redis@1.35.6)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.2)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))(zod@3.24.3):
     dependencies:
       '@tanstack/react-query': 5.90.5(react@18.3.1)
-      '@wagmi/connectors': 6.0.1(ca91dfc09229debedec4747ea28138c2)
+      '@wagmi/connectors': 6.0.1(4ivbjbado6jvjrj76kxayej5sq)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
       react: 18.3.1
       use-sync-external-store: 1.4.0(react@18.3.1)
@@ -27487,7 +27541,7 @@ snapshots:
   wagmi@2.18.2(@azure/identity@4.13.0)(@azure/storage-blob@12.29.1)(@tanstack/query-core@5.90.5)(@tanstack/react-query@5.90.5(react@18.3.1))(@types/react@18.3.27)(@upstash/redis@1.35.6)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.2)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))(zod@3.24.3):
     dependencies:
       '@tanstack/react-query': 5.90.5(react@18.3.1)
-      '@wagmi/connectors': 6.1.0(a73984ae2cf8f13fff6b4163038b7ac0)
+      '@wagmi/connectors': 6.1.0(xq3q2qgyn5j67huuv3r4r2zjce)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
       react: 18.3.1
       use-sync-external-store: 1.4.0(react@18.3.1)

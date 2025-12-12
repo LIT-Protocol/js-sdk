@@ -9,7 +9,7 @@
   "keywords": [
     "library"
   ],
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
@@ -28,6 +28,14 @@
     "universal"
   ],
   "version": "8.0.2",
-  "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "main": "./cjs/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./cjs/index.js"
+    }
+  }
 }

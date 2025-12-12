@@ -4,7 +4,7 @@
   "sourceRoot": "packages/auth-services/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -13,6 +13,26 @@
         "tsConfig": "packages/auth-services/tsconfig.lib.json",
         "assets": ["packages/auth-services/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec esbuild dist/packages/auth-services/src/**/*.js --outdir=dist/packages/auth-services/cjs --outbase=dist/packages/auth-services/src --format=cjs --platform=node --sourcemap --packages=external && node tools/write-cjs-packagejson.mjs dist/packages/auth-services/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run auth-services:build-esm"
+          },
+          {
+            "command": "nx run auth-services:build-cjs"
+          }
+        ],
+        "parallel": false
       }
     },
     "publish": {

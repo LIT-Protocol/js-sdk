@@ -4,7 +4,7 @@
   "sourceRoot": "packages/wrapped-keys/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -13,6 +13,26 @@
         "tsConfig": "packages/wrapped-keys/tsconfig.lib.json",
         "assets": ["packages/wrapped-keys/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/wrapped-keys/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/wrapped-keys/cjs --rootDir packages/wrapped-keys/src --baseUrl packages/wrapped-keys/src && node tools/write-cjs-packagejson.mjs dist/packages/wrapped-keys/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run wrapped-keys:build-esm"
+          },
+          {
+            "command": "nx run wrapped-keys:build-cjs"
+          }
+        ],
+        "parallel": false
       }
     },
     "lint": {

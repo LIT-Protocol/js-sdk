@@ -4,7 +4,7 @@
   "sourceRoot": "packages/access-control-conditions-schemas/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -13,6 +13,26 @@
         "tsConfig": "packages/access-control-conditions-schemas/tsconfig.lib.json",
         "assets": ["packages/access-control-conditions-schemas/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/access-control-conditions-schemas/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/access-control-conditions-schemas/cjs --rootDir packages/access-control-conditions-schemas/src --baseUrl packages/access-control-conditions-schemas/src && node tools/write-cjs-packagejson.mjs dist/packages/access-control-conditions-schemas/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run access-control-conditions-schemas:build-esm"
+          },
+          {
+            "command": "nx run access-control-conditions-schemas:build-cjs"
+          }
+        ],
+        "parallel": false
       }
     },
     "check-deps": {

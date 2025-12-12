@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@openagenda/verror": "3.1.4",
     "tslib": "2.8.1",
@@ -28,6 +28,14 @@
     "universal"
   ],
   "version": "8.0.8",
-  "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "main": "./cjs/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./cjs/index.js"
+    }
+  }
 }

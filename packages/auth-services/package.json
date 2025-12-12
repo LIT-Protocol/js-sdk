@@ -2,9 +2,17 @@
   "name": "@lit-protocol/auth-services",
   "version": "2.0.8",
   "license": "MIT",
-  "type": "commonjs",
-  "main": "./src/index.js",
+  "type": "module",
+  "main": "./cjs/index.js",
+  "module": "./src/index.js",
   "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./cjs/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/auth-services"
