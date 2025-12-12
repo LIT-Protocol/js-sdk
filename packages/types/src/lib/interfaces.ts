@@ -504,6 +504,16 @@ export interface SigResponse {
   dataSigned: string;
 }
 
+export interface LitActionPaymentDetail {
+  component: string;
+  quantity: number;
+  /**
+   * Price in wei for this component.
+   * Use bigint to avoid precision loss.
+   */
+  price: bigint;
+}
+
 export interface ExecuteJsResponseBase {
   signatures:
     | {
@@ -511,11 +521,7 @@ export interface ExecuteJsResponseBase {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any;
-  paymentDetail?: {
-    component: string;
-    quantity: number;
-    price: number;
-  }[];
+  paymentDetail?: LitActionPaymentDetail[];
 }
 
 /**
@@ -532,13 +538,17 @@ export interface ExecuteJsResponse extends ExecuteJsResponseBase {
   logs: string;
   claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
-    allNodeResponses: NodeResponse[];
-    allNodeLogs: {
+    allNodeResponses?: NodeResponse[];
+    allNodeLogs?: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logs: any;
     }[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rawNodeHTTPResponses: any;
+    rawNodeHTTPResponses?: any;
+    paymentDetailByNode?: {
+      nodeUrl: string;
+      paymentDetail: LitActionPaymentDetail[];
+    }[];
   };
 }
 

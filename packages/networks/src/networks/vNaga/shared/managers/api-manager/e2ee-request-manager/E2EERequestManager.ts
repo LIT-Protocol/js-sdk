@@ -62,7 +62,7 @@ interface DecryptBatchResponseOptions {
 const decryptBatchResponse = <T>(
   encryptedResult: z.infer<typeof GenericEncryptedPayloadSchema>,
   jitContext: NagaJitContext,
-  extractResponseData: (decryptedJson: any) => T,
+  extractResponseData: (decryptedJson: any, nodeUrl: string) => T,
   options: DecryptBatchResponseOptions = {}
 ): T[] => {
   const operationName = options.operationName ?? 'Lit network operation';
@@ -142,7 +142,7 @@ const decryptBatchResponse = <T>(
       const parsedData = JSON.parse(decryptedText);
 
       // Extract the actual response data using the provided function
-      const responseData = extractResponseData(parsedData);
+      const responseData = extractResponseData(parsedData, keyData.url);
       decryptedValues.push(responseData);
     } catch (decryptError) {
       const convertedError =
