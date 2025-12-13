@@ -5,6 +5,8 @@ import { Header } from "@/Header";
 
 import { APP_INFO } from "./_config";
 import { LitAuthProvider } from "./lit-login-modal/LitAuthProvider";
+import PKPSelectionSection from "./lit-login-modal/PKPSelectionSection";
+import { LedgerFundingPanel } from "./lit-login-modal/components/LedgerFundingPanel";
 
 interface ErrorDisplayProps {
   error: string | null;
@@ -59,11 +61,31 @@ export const HomePage = () => {
       appName="lit-auth-modal-demo"
       supportedNetworks={["naga-dev", "naga-test", "naga-proto", "naga"]}
       defaultNetwork="naga-dev"
-      authServiceBaseUrl={APP_INFO.litAuthServer}
+      enabledAuthMethods={[
+        "eoa",
+        "google",
+        "discord",
+        "webauthn",
+        "stytch-email",
+        "stytch-sms",
+        "stytch-whatsapp",
+        "stytch-totp",
+      ]}
+      services={{
+        authServiceUrls: APP_INFO.authServiceUrls,
+        authServiceApiKey: APP_INFO.litAuthServerApiKey,
+        loginServerUrl: APP_INFO.litLoginServer,
+        discordClientId: APP_INFO.discordClientId,
+      }}
+      features={{ funding: true, settings: true, persistSettings: true }}
+      components={{
+        PkpSelection: PKPSelectionSection,
+        FundingPanel: LedgerFundingPanel,
+      }}
+      faucetUrl={`${APP_INFO.faucetUrl}?action=combined&ledgerPercent=80`}
+      defaultPrivateKey={APP_INFO.defaultPrivateKey}
       persistUser={false}
       closeOnBackdropClick={false}
-      showSettingsButton={true}
-      showSignUpPage={false}
       showNetworkMessage={true}
     >
       {/* ---------- Header ---------- */}

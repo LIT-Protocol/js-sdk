@@ -1,0 +1,62 @@
+{
+  "name": "login-modal",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/login-modal/src",
+  "projectType": "library",
+  "targets": {
+    "build-esm": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/login-modal",
+        "main": "packages/login-modal/src/index.ts",
+        "tsConfig": "packages/login-modal/tsconfig.lib.json",
+        "assets": [
+          "packages/login-modal/*.md"
+        ],
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/login-modal/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/login-modal/cjs --rootDir packages/login-modal/src --baseUrl packages/login-modal/src && node tools/write-cjs-packagejson.mjs dist/packages/login-modal/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run login-modal:build-esm"
+          },
+          {
+            "command": "nx run login-modal:build-cjs"
+          }
+        ],
+        "parallel": false
+      }
+    },
+    "check-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "depcheck",
+        "cwd": "packages/login-modal"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/login-modal/**/*.{ts,tsx}"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

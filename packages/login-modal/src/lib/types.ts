@@ -1,0 +1,124 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { AuthData, PKPData } from '@lit-protocol/schemas';
+import type { ReactNode } from 'react';
+
+export type SupportedNetworkName = 'naga-dev' | 'naga-test' | 'naga-proto' | 'naga';
+
+export type AuthMethod =
+  | 'eoa'
+  | 'google'
+  | 'discord'
+  | 'webauthn'
+  | 'stytch-email'
+  | 'stytch-sms'
+  | 'stytch-whatsapp'
+  | 'stytch-totp';
+
+export interface AuthUser {
+  authContext: any;
+  pkpInfo: PKPData;
+  method: AuthMethod;
+  timestamp: number;
+  authData: AuthData;
+}
+
+export interface LitServices {
+  litClient: Awaited<
+    ReturnType<(typeof import('@lit-protocol/lit-client'))['createLitClient']>
+  >;
+  authManager: Awaited<
+    ReturnType<(typeof import('@lit-protocol/auth'))['createAuthManager']>
+  >;
+}
+
+export interface LitLoginServicesConfig {
+  authServiceUrls?: Partial<Record<SupportedNetworkName, string>>;
+  authServiceApiKey?: string;
+
+  loginServerUrl?: string;
+  discordClientId?: string;
+}
+
+export interface LitLoginModalFeatures {
+  funding?: boolean;
+  settings?: boolean;
+  persistSettings?: boolean;
+}
+
+export interface PkpSelectionSectionProps {
+  authData: AuthData;
+  onPkpSelected: (pkpInfo: PKPData) => void;
+  authMethodName: string;
+  services: LitServices;
+  disabled?: boolean;
+  authServiceBaseUrl: string;
+  singlePkpMessaging?: boolean;
+  currentNetworkName?: SupportedNetworkName;
+}
+
+export interface LedgerFundingPanelProps {
+  pkpAddress: string;
+  networkName: SupportedNetworkName;
+  faucetUrl: string;
+  children?: ReactNode;
+}
+
+export interface LitLoginModalComponents {
+  PkpSelection?: (props: PkpSelectionSectionProps) => ReactNode;
+  FundingPanel?: (props: LedgerFundingPanelProps) => ReactNode;
+}
+
+export interface LitAuthContextValue {
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  isAuthenticating: boolean;
+  error: string | null;
+
+  services: LitServices | null;
+  isServicesReady: boolean;
+  isInitializingServices: boolean;
+
+  currentNetworkName: SupportedNetworkName;
+  authServiceBaseUrl: string;
+  setAuthServiceBaseUrl: (url: string) => void;
+  loginServiceBaseUrl: string;
+  setLoginServiceBaseUrl: (url: string) => void;
+  shouldDisplayNetworkMessage: boolean;
+
+  showAuthModal: () => void;
+  hideAuthModal: () => void;
+  initiateAuthentication: () => void;
+  forceNetworkSelection: (networkName: SupportedNetworkName) => Promise<void>;
+  autoLoginWithDefaultKey: (options?: {
+    forceNetwork?: SupportedNetworkName;
+  }) => Promise<boolean>;
+  isAutoLoggingIn: boolean;
+  autoLoginStatus: string | null;
+  logout: () => void;
+}
+
+export interface LitLoginModalProps {
+  children?: ReactNode;
+
+  appName: string;
+
+  supportedNetworks?: SupportedNetworkName[];
+  defaultNetwork?: SupportedNetworkName;
+
+  enabledAuthMethods?: AuthMethod[];
+
+  services?: LitLoginServicesConfig;
+
+  features?: LitLoginModalFeatures;
+  components?: LitLoginModalComponents;
+
+  persistUser?: boolean;
+  storageKey?: string;
+  closeOnBackdropClick?: boolean;
+
+  faucetUrl?: string;
+
+  showNetworkMessage?: boolean;
+
+  defaultPrivateKey?: string;
+}

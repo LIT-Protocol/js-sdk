@@ -22,6 +22,7 @@
     "@lit-protocol/constants": "workspace:*",
     "@lit-protocol/crypto": "workspace:*",
     "@lit-protocol/lit-client": "workspace:*",
+    "@lit-protocol/login-modal": "workspace:*",
     "@lit-protocol/naga-la-types": "0.1.0",
     "@lit-protocol/networks": "workspace:*",
     "@lit-protocol/logger": "workspace:*",
