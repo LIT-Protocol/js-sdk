@@ -1,0 +1,11 @@
+[workspace]
+members = [
+  "crates/lit-sdk",
+  "crates/lit-e2e",
+  "crates/vendor/elliptic-curve-tools",
+  "packages/wasm/rust",
+]
+resolver = "2"
+
+[patch.crates-io]
+elliptic-curve-tools = { path = "crates/vendor/elliptic-curve-tools" }
