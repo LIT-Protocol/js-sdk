@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AuthData, PKPData } from '@lit-protocol/schemas';
 import type { ReactNode } from 'react';
+import type { ExpectedAccountOrWalletClient } from '@lit-protocol/networks';
 import type { WalletClient } from 'viem';
 
 export type SupportedNetworkName = 'naga-dev' | 'naga-test' | 'naga-proto' | 'naga';
@@ -66,12 +67,18 @@ export interface LitEoaWalletProvider {
 export interface PkpSelectionSectionProps {
   authData: AuthData;
   onPkpSelected: (pkpInfo: PKPData) => void;
+  authMethod?: AuthMethod;
   authMethodName: string;
   services: LitServices;
   disabled?: boolean;
   authServiceBaseUrl: string;
   singlePkpMessaging?: boolean;
   currentNetworkName?: SupportedNetworkName;
+  /**
+   * Optional helper for EOA-only mint flows (no auth service).
+   * The modal provides this when the user authenticated via EOA.
+   */
+  getEoaMintAccount?: () => Promise<ExpectedAccountOrWalletClient>;
 }
 
 export interface LedgerFundingPanelProps {

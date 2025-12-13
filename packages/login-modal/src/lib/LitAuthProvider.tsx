@@ -8,10 +8,16 @@ import {
 } from 'react';
 
 import { createLitClient } from '@lit-protocol/lit-client';
-import { naga, nagaDev, nagaProto, nagaTest } from '@lit-protocol/networks';
+import {
+  type ExpectedAccountOrWalletClient,
+  naga,
+  nagaDev,
+  nagaProto,
+  nagaTest,
+} from '@lit-protocol/networks';
 import type { AuthData, PKPData } from '@lit-protocol/schemas';
 import { WalletClientAuthenticator } from '@lit-protocol/auth';
-import { createWalletClient, custom, getAddress } from 'viem';
+import { createWalletClient, custom, getAddress, type Chain } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
 import { LitAuthContext } from './LitAuthContext';
@@ -136,7 +142,7 @@ function ensureValidConfig(params: {
   }
 }
 
-async function getInjectedWalletClient() {
+async function getInjectedWalletClient(params?: { chain?: Chain }) {
   const ethereum = (globalThis as any).ethereum;
   if (!ethereum) throw new Error('No injected wallet found (window.ethereum)');
 
@@ -148,6 +154,7 @@ async function getInjectedWalletClient() {
 
   return createWalletClient({
     account: getAddress(address),
+    chain: params?.chain,
     transport: custom(ethereum),
   });
 }
@@ -694,6 +701,27 @@ export function LitLoginModal({
     }
   }, [eoa, privateKey, proceedToPkpSelection]);
 
+  const getEoaMintAccount = useCallback(
+    async (): Promise<ExpectedAccountOrWalletClient> => {
+      const rawPrivateKey = privateKey.trim();
+      if (rawPrivateKey) {
+        const normalizedPrivateKey = rawPrivateKey.startsWith('0x')
+          ? rawPrivateKey
+          : `0x${rawPrivateKey}`;
+        return privateKeyToAccount(normalizedPrivateKey as `0x${string}`);
+      }
+
+      if (typeof eoa?.getWalletClient === 'function') {
+        return await eoa.getWalletClient();
+      }
+
+      const chain = servicesRef.current?.litClient?.getChainConfig()
+        .viemConfig as Chain | undefined;
+      return await getInjectedWalletClient({ chain });
+    },
+    [eoa, privateKey]
+  );
+
   const authenticateWebAuthn = useCallback(async () => {
     setIsAuthenticating(true);
     setError(null);
@@ -1093,11 +1121,13 @@ export function LitLoginModal({
           {renderAlerts()}
           <PkpSelection
             authData={pendingAuthData}
+            authMethod={pendingMethod}
             onPkpSelected={handlePkpSelected}
             authMethodName={`${getAuthMethodDisplayName(pendingMethod)} Auth`}
             services={servicesState}
             disabled={isAuthenticating}
             authServiceBaseUrl={authServiceBaseUrl}
+            getEoaMintAccount={getEoaMintAccount}
             currentNetworkName={currentNetworkName}
           />
         </div>

@@ -26,11 +26,13 @@ function toPkpData(pkp: LitClientPkp): PKPData {
 
 export function DefaultPkpSelectionSection({
   authData,
+  authMethod,
   onPkpSelected,
   authMethodName,
   services,
   disabled = false,
   authServiceBaseUrl,
+  getEoaMintAccount,
 }: PkpSelectionSectionProps): ReactNode {
   const [pkps, setPkps] = useState<PKPData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,11 +68,23 @@ export function DefaultPkpSelectionSection({
     setIsMinting(true);
     setError(null);
     try {
-      await services.litClient.authService.mintWithAuth({
-        authData,
-        scopes: ['sign-anything'],
-        authServiceBaseUrl,
-      });
+      if (authMethod === 'eoa') {
+        if (!getEoaMintAccount) {
+          throw new Error('EOA mint requires a wallet account to be provided.');
+        }
+        const account = await getEoaMintAccount();
+        await services.litClient.mintWithAuth({
+          account,
+          authData,
+          scopes: ['sign-anything'],
+        } as any);
+      } else {
+        await services.litClient.authService.mintWithAuth({
+          authData,
+          scopes: ['sign-anything'],
+          authServiceBaseUrl,
+        });
+      }
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -110,7 +124,11 @@ export function DefaultPkpSelectionSection({
           type="button"
           onClick={() => void mint()}
           disabled={disabled || isLoading || isMinting}
-          title="Requires an auth service"
+          title={
+            authMethod === 'eoa'
+              ? 'Mints on chain using your connected wallet'
+              : 'Requires an auth service'
+          }
           className="lit-login-modal__btn lit-login-modal__btn--primary"
         >
           Mint new PKP

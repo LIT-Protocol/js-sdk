@@ -12,6 +12,7 @@ import {
 } from "@/domain/lit/networkDefaults";
 import { LitServices } from "@/hooks/useLitServiceSetup";
 import { PKPData } from "@lit-protocol/schemas";
+import type { ExpectedAccountOrWalletClient } from "@lit-protocol/networks";
 
 import { PaymentManagementDashboard } from "../lit-logged-page/protectedApp/components/PaymentManagement/PaymentManagementDashboard";
 import { UIPKP } from "../lit-logged-page/protectedApp/types";
@@ -28,23 +29,27 @@ const READ_ONLY_ACCOUNT = privateKeyToAccount(
 interface PKPSelectionSectionProps {
   authData: any;
   onPkpSelected: (pkpInfo: PKPData) => void;
+  authMethod?: string;
   authMethodName: string;
   services: LitServices;
   disabled?: boolean;
   authServiceBaseUrl: string;
   singlePkpMessaging?: boolean;
   currentNetworkName?: string;
+  getEoaMintAccount?: () => Promise<ExpectedAccountOrWalletClient>;
 }
 
 const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
   authData,
   onPkpSelected,
+  authMethod,
   authMethodName,
   services,
   disabled = false,
   authServiceBaseUrl,
   singlePkpMessaging = false,
   currentNetworkName = "naga-test",
+  getEoaMintAccount,
 }) => {
   const [mode, setMode] = useState<"existing" | "mint">("existing");
   const [pkps, setPkps] = useState<UIPKP[]>([]);
@@ -464,12 +469,29 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
     setStatus("Minting new PKP...");
     // console.log("authServiceBaseUrl:", authServiceBaseUrl);
     try {
-      const result = await services.litClient.authService.mintWithAuth({
-        authData,
-        authServiceBaseUrl: authServiceBaseUrl,
-        scopes: ["sign-anything"],
-        apiKey: APP_INFO.litAuthServerApiKey,
-      });
+      const isEoa =
+        authMethod === "eoa" || Number(authData?.authMethodType) === 1;
+
+      const result = isEoa
+        ? await (async () => {
+            if (!getEoaMintAccount) {
+              throw new Error(
+                "EOA mint requires a connected wallet. Provide an EOA wallet provider to the login modal."
+              );
+            }
+            const account = await getEoaMintAccount();
+            return await services.litClient.mintWithAuth({
+              account,
+              authData,
+              scopes: ["sign-anything"],
+            } as any);
+          })()
+        : await services.litClient.authService.mintWithAuth({
+            authData,
+            authServiceBaseUrl: authServiceBaseUrl,
+            scopes: ["sign-anything"],
+            apiKey: APP_INFO.litAuthServerApiKey,
+          });
 
       if (result?.data) {
         const newPkp: UIPKP = {
