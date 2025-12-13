@@ -36,7 +36,8 @@
           {
             "group": "SDK",
             "pages": [
-              "sdk/introduction"
+              "sdk/introduction",
+              "sdk/rust-sdk"
             ]
           },
           {

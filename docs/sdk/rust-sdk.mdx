@@ -1,0 +1,87 @@
+---
+title: "Rust SDK (Naga)"
+description: "How to use the experimental Rust SDK for Lit Protocol Naga (v1)"
+---
+
+This repo includes an experimental Rust SDK under `crates/lit-sdk` that mirrors the JS SDK behavior for the Lit Protocol Naga network.
+
+## Install / use in your project
+
+Until this is published to crates.io, use a path dependency:
+
+```toml
+[dependencies]
+lit-sdk = { path = "../rust-sdk/crates/lit-sdk", default-features = false }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
+## Create a client
+
+`create_lit_client` needs a `NetworkConfig`. If `bootstrap_urls` is empty and `rpc_url` is set, the SDK auto-discovers bootstrap URLs from the chain.
+
+```rust
+use lit_sdk::{create_lit_client, naga_dev};
+
+let rpc_url = std::env::var("LIT_RPC_URL")?;
+let config = naga_dev().with_rpc_url(rpc_url);
+let client = create_lit_client(config).await?;
+```
+
+## Authentication (AuthContext)
+
+Most SDK calls require an `AuthContext` (session keypair + capabilities + auth sig).
+
+### EOA session (native auth)
+
+Build a session for an EOA by generating a session keypair, creating a SIWE message with recap resources, and signing it with the EOA key.
+
+See `crates/lit-sdk/examples/execute_js.rs`.
+
+### PKP session (native PKP auth)
+
+If you have a PKP public key and an EOA auth method, create an `AuthData` and let the nodes issue the PKP session signature:
+
+See `crates/lit-sdk/examples/pkp_sign_ethereum.rs`.
+
+### Custom auth (Lit Action)
+
+The SDK supports “custom auth” via a Lit Action (IPFS id or code) using:
+
+`LitClient::create_custom_auth_context(...)`
+
+## Core capabilities
+
+- Encrypt: `LitClient::encrypt(...)` (see `crates/lit-sdk/examples/naga_encrypt.rs`)
+- Decrypt: `LitClient::decrypt(...)`
+- PKP signing: `LitClient::pkp_sign_ethereum(...)`
+- Lit Actions: `LitClient::execute_js(...)` (code or IPFS id)
+
+## Payments / pricing (paid networks)
+
+On paid networks, some requests require a payment method (Ledger balance, delegation, or capacity).
+
+The Rust SDK exposes a Ledger wrapper via `PaymentManager`:
+
+```rust
+use ethers::{prelude::*, providers::Provider};
+use lit_sdk::{PaymentManager, naga_test};
+use std::sync::Arc;
+
+let rpc_url = std::env::var("LIT_RPC_URL")?;
+let config = naga_test().with_rpc_url(rpc_url.clone());
+let provider = Provider::<Http>::try_from(rpc_url)?;
+let wallet: LocalWallet = std::env::var("LIT_EOA_PRIVATE_KEY")?.parse()?;
+let signer = Arc::new(SignerMiddleware::new(provider, wallet));
+
+let payments = PaymentManager::new(&config, signer)?;
+// payments.deposit_for_user(address, amount_wei).await?;
+```
+
+## Run Rust E2E tests
+
+Rust parity lives in `crates/lit-e2e`:
+
+```bash
+NETWORK_NAME=naga-dev cargo test -p lit-e2e -- --nocapture
+```
+

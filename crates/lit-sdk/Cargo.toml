@@ -43,3 +43,4 @@ bs58 = "0.5"
 
 [dev-dependencies]
 tokio = { version = "1.40", features = ["macros", "rt-multi-thread"] }
+dotenvy = "0.15"

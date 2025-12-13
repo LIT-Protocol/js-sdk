@@ -255,6 +255,17 @@ impl LitClient {
         &self.handshake
     }
 
+    fn is_node_payload_decryption_error(err: &LitSdkError) -> bool {
+        match err {
+            LitSdkError::Network(msg) => {
+                msg.contains("can't decrypt")
+                    || msg.contains("encrypted payload decryption failed")
+                    || msg.contains("E2EE decryption failed")
+            }
+            _ => false,
+        }
+    }
+
     pub async fn encrypt(&self, params: EncryptParams) -> Result<EncryptResponse, LitSdkError> {
         let subnet_pub_key = &self.handshake.core_node_config.subnet_pub_key;
 
@@ -286,6 +297,23 @@ impl LitClient {
     }
 
     pub async fn decrypt(
+        &self,
+        params: DecryptParams,
+        auth_context: &AuthContext,
+        chain: &str,
+    ) -> Result<DecryptResponse, LitSdkError> {
+        let res = self.decrypt_inner(params.clone(), auth_context, chain).await;
+        match res {
+            Ok(v) => Ok(v),
+            Err(e) if Self::is_node_payload_decryption_error(&e) => {
+                let refreshed = create_lit_client(self.config.clone()).await?;
+                refreshed.decrypt_inner(params, auth_context, chain).await
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    async fn decrypt_inner(
         &self,
         params: DecryptParams,
         auth_context: &AuthContext,
@@ -442,6 +470,35 @@ impl LitClient {
     }
 
     pub async fn execute_js_with_options(
+        &self,
+        code: Option<String>,
+        ipfs_id: Option<String>,
+        js_params: Option<serde_json::Value>,
+        auth_context: &AuthContext,
+        options: ExecuteJsOptions,
+    ) -> Result<ExecuteJsResponse, LitSdkError> {
+        let res = self
+            .execute_js_with_options_inner(
+                code.clone(),
+                ipfs_id.clone(),
+                js_params.clone(),
+                auth_context,
+                options,
+            )
+            .await;
+        match res {
+            Ok(v) => Ok(v),
+            Err(e) if Self::is_node_payload_decryption_error(&e) => {
+                let refreshed = create_lit_client(self.config.clone()).await?;
+                refreshed
+                    .execute_js_with_options_inner(code, ipfs_id, js_params, auth_context, options)
+                    .await
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    async fn execute_js_with_options_inner(
         &self,
         code: Option<String>,
         ipfs_id: Option<String>,
@@ -749,6 +806,41 @@ impl LitClient {
         session_key_pair: &SessionKeyPair,
         user_max_price_wei: Option<U256>,
     ) -> Result<AuthSig, LitSdkError> {
+        let res = self
+            .sign_session_key_for_pkp_inner(
+                pkp_public_key,
+                auth_data,
+                auth_config,
+                session_key_pair,
+                user_max_price_wei.clone(),
+            )
+            .await;
+        match res {
+            Ok(v) => Ok(v),
+            Err(e) if Self::is_node_payload_decryption_error(&e) => {
+                let refreshed = create_lit_client(self.config.clone()).await?;
+                refreshed
+                    .sign_session_key_for_pkp_inner(
+                        pkp_public_key,
+                        auth_data,
+                        auth_config,
+                        session_key_pair,
+                        user_max_price_wei,
+                    )
+                    .await
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    async fn sign_session_key_for_pkp_inner(
+        &self,
+        pkp_public_key: &str,
+        auth_data: &AuthData,
+        auth_config: &AuthConfig,
+        session_key_pair: &SessionKeyPair,
+        user_max_price_wei: Option<U256>,
+    ) -> Result<AuthSig, LitSdkError> {
         let jit = self.create_jit_context()?;
         let threshold = self.handshake.threshold.max(1);
 
@@ -939,6 +1031,41 @@ impl LitClient {
             ));
         }
 
+        let res = self
+            .sign_custom_session_key_for_pkp_inner(
+                pkp_public_key,
+                auth_config,
+                custom_auth_params,
+                session_key_pair,
+                user_max_price_wei.clone(),
+            )
+            .await;
+        match res {
+            Ok(v) => Ok(v),
+            Err(e) if Self::is_node_payload_decryption_error(&e) => {
+                let refreshed = create_lit_client(self.config.clone()).await?;
+                refreshed
+                    .sign_custom_session_key_for_pkp_inner(
+                        pkp_public_key,
+                        auth_config,
+                        custom_auth_params,
+                        session_key_pair,
+                        user_max_price_wei,
+                    )
+                    .await
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    async fn sign_custom_session_key_for_pkp_inner(
+        &self,
+        pkp_public_key: &str,
+        auth_config: &AuthConfig,
+        custom_auth_params: &CustomAuthParams,
+        session_key_pair: &SessionKeyPair,
+        user_max_price_wei: Option<U256>,
+    ) -> Result<AuthSig, LitSdkError> {
         let jit = self.create_jit_context()?;
         let threshold = self.handshake.threshold.max(1);
 
@@ -1190,6 +1317,47 @@ impl LitClient {
     }
 
     pub async fn pkp_sign_raw_with_options(
+        &self,
+        chain: &str,
+        signing_scheme: &str,
+        pkp_pubkey: &str,
+        to_sign: &[u8],
+        auth_context: &AuthContext,
+        user_max_price_wei: Option<ethers::types::U256>,
+        bypass_auto_hashing: bool,
+    ) -> Result<serde_json::Value, LitSdkError> {
+        let res = self
+            .pkp_sign_raw_with_options_inner(
+                chain,
+                signing_scheme,
+                pkp_pubkey,
+                to_sign,
+                auth_context,
+                user_max_price_wei.clone(),
+                bypass_auto_hashing,
+            )
+            .await;
+        match res {
+            Ok(v) => Ok(v),
+            Err(e) if Self::is_node_payload_decryption_error(&e) => {
+                let refreshed = create_lit_client(self.config.clone()).await?;
+                refreshed
+                    .pkp_sign_raw_with_options_inner(
+                        chain,
+                        signing_scheme,
+                        pkp_pubkey,
+                        to_sign,
+                        auth_context,
+                        user_max_price_wei,
+                        bypass_auto_hashing,
+                    )
+                    .await
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    async fn pkp_sign_raw_with_options_inner(
         &self,
         chain: &str,
         signing_scheme: &str,

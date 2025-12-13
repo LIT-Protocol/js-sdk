@@ -65,6 +65,80 @@ abigen!(
 );
 
 abigen!(
+    PaymentDelegationContract,
+    r#"[{
+        "inputs":[{"internalType":"address","name":"user","type":"address"}],
+        "name":"delegatePayments",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    },{
+        "inputs":[{"internalType":"address[]","name":"users","type":"address[]"}],
+        "name":"delegatePaymentsBatch",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    },{
+        "inputs":[{"components":[
+            {"internalType":"uint128","name":"totalMaxPrice","type":"uint128"},
+            {"internalType":"uint256","name":"requestsPerPeriod","type":"uint256"},
+            {"internalType":"uint256","name":"periodSeconds","type":"uint256"}
+        ],"internalType":"struct LibPaymentDelegationStorage.Restriction","name":"r","type":"tuple"}],
+        "name":"setRestriction",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    },{
+        "inputs":[{"internalType":"address","name":"payer","type":"address"}],
+        "name":"getRestriction",
+        "outputs":[{"components":[
+            {"internalType":"uint128","name":"totalMaxPrice","type":"uint128"},
+            {"internalType":"uint256","name":"requestsPerPeriod","type":"uint256"},
+            {"internalType":"uint256","name":"periodSeconds","type":"uint256"}
+        ],"internalType":"struct LibPaymentDelegationStorage.Restriction","name":"","type":"tuple"}],
+        "stateMutability":"view",
+        "type":"function"
+    },{
+        "inputs":[{"internalType":"address","name":"user","type":"address"}],
+        "name":"getPayers",
+        "outputs":[{"internalType":"address[]","name":"","type":"address[]"}],
+        "stateMutability":"view",
+        "type":"function"
+    },{
+        "inputs":[{"internalType":"address","name":"payer","type":"address"}],
+        "name":"getUsers",
+        "outputs":[{"internalType":"address[]","name":"","type":"address[]"}],
+        "stateMutability":"view",
+        "type":"function"
+    },{
+        "inputs":[{"internalType":"address[]","name":"users","type":"address[]"}],
+        "name":"getPayersAndRestrictions",
+        "outputs":[
+            {"internalType":"address[][]","name":"","type":"address[][]"},
+            {"components":[
+                {"internalType":"uint128","name":"totalMaxPrice","type":"uint128"},
+                {"internalType":"uint256","name":"requestsPerPeriod","type":"uint256"},
+                {"internalType":"uint256","name":"periodSeconds","type":"uint256"}
+            ],"internalType":"struct LibPaymentDelegationStorage.Restriction[][]","name":"","type":"tuple[][]"}
+        ],
+        "stateMutability":"view",
+        "type":"function"
+    },{
+        "inputs":[{"internalType":"address","name":"user","type":"address"}],
+        "name":"undelegatePayments",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    },{
+        "inputs":[{"internalType":"address[]","name":"users","type":"address[]"}],
+        "name":"undelegatePaymentsBatch",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    }]"#,
+);
+
+abigen!(
     PkpNftEnumerableContract,
     r#"[{
         "inputs":[
@@ -239,7 +313,7 @@ abigen!(
     }]"#,
 );
 
-fn ledger_address_for(network: &str) -> Option<Address> {
+pub fn ledger_address_for(network: &str) -> Option<Address> {
     match network {
         "naga-dev" => Some("0x81061b50a66EBB3E7F9CEbeF2b1C1A961aE858F4".parse().ok()?),
         "naga-test" => Some("0xbA0aEB6Bbf58F1B74E896416A20DB5be51C991f2".parse().ok()?),
@@ -250,7 +324,18 @@ fn ledger_address_for(network: &str) -> Option<Address> {
     }
 }
 
-fn pkp_nft_address_for(network: &str) -> Option<Address> {
+pub fn payment_delegation_address_for(network: &str) -> Option<Address> {
+    match network {
+        "naga-dev" => Some("0x2F202f846CBB27Aa5EbE6b9cfad50D65c49c01FF".parse().ok()?),
+        "naga-test" => Some("0xd1E59c174BcF85012c54086AB600Dd0aB032e88B".parse().ok()?),
+        "naga-staging" => Some("0x13fC0864A37B38D3C2A7d5E9C08D5124B9Cec4bF".parse().ok()?),
+        "naga-proto" => Some("0x5033b79388EBBAf466B4CF82c0b72Abd9bB940d6".parse().ok()?),
+        "naga" => Some("0x5EF658cB6ab3C3BfB75C8293B9a6C8ccb0b96C3c".parse().ok()?),
+        _ => None,
+    }
+}
+
+pub fn pkp_nft_address_for(network: &str) -> Option<Address> {
     match network {
         "naga-dev" => Some("0xB144B88514316a2f155D22937C76795b8fC9aDCd".parse().ok()?),
         "naga-test" => Some("0xaf4Dddb07Cdde48042e93eb5bf266b49950bC5BD".parse().ok()?),
@@ -261,7 +346,7 @@ fn pkp_nft_address_for(network: &str) -> Option<Address> {
     }
 }
 
-fn pkp_helper_address_for(network: &str) -> Option<Address> {
+pub fn pkp_helper_address_for(network: &str) -> Option<Address> {
     match network {
         "naga-dev" => Some("0xDC62fcb77554229FF2d9857B25f5BB824d33aE71".parse().ok()?),
         "naga-test" => Some("0x13428A18C0b181344F97ceaC5596F31a9d182e5c".parse().ok()?),

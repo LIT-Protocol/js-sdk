@@ -10,6 +10,11 @@ use lit_sdk::auth::{
     sign_siwe_with_eoa, AuthConfig, AuthContext, AuthSig, LitAbility, ResourceAbilityRequest,
     SessionKeyPair, CustomAuthParams,
 };
+use lit_sdk::chain::{
+    ledger_address_for, payment_delegation_address_for, pkp_helper_address_for,
+    pkp_nft_address_for, LedgerContract, PaymentDelegationContract, PkpHelperContract,
+    PkpNftMintContract, Restriction,
+};
 use lit_sdk::client::{create_lit_client, LitClient};
 use lit_sdk::network::{
     naga_dev, naga_local, naga_mainnet, naga_proto, naga_staging, naga_test, NetworkConfig,
@@ -28,142 +33,6 @@ use tokio::sync::OnceCell;
 use tokio::time::{sleep, Duration};
 use rand::RngCore;
 use sha2::{Digest as Sha2Digest, Sha256};
-
-abigen!(
-    LedgerContract,
-    r#"[{
-        "inputs":[{"internalType":"address","name":"user","type":"address"}],
-        "name":"balance",
-        "outputs":[{"internalType":"int256","name":"","type":"int256"}],
-        "stateMutability":"view",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address","name":"user","type":"address"}],
-        "name":"stableBalance",
-        "outputs":[{"internalType":"int256","name":"","type":"int256"}],
-        "stateMutability":"view",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address","name":"user","type":"address"}],
-        "name":"depositForUser",
-        "outputs":[],
-        "stateMutability":"payable",
-        "type":"function"
-    }]"#,
-);
-
-abigen!(
-    PaymentDelegationContract,
-    r#"[{
-        "inputs":[{"internalType":"address","name":"user","type":"address"}],
-        "name":"delegatePayments",
-        "outputs":[],
-        "stateMutability":"nonpayable",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address[]","name":"users","type":"address[]"}],
-        "name":"delegatePaymentsBatch",
-        "outputs":[],
-        "stateMutability":"nonpayable",
-        "type":"function"
-    },{
-        "inputs":[{"components":[
-            {"internalType":"uint128","name":"totalMaxPrice","type":"uint128"},
-            {"internalType":"uint256","name":"requestsPerPeriod","type":"uint256"},
-            {"internalType":"uint256","name":"periodSeconds","type":"uint256"}
-        ],"internalType":"struct LibPaymentDelegationStorage.Restriction","name":"r","type":"tuple"}],
-        "name":"setRestriction",
-        "outputs":[],
-        "stateMutability":"nonpayable",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address","name":"payer","type":"address"}],
-        "name":"getRestriction",
-        "outputs":[{"components":[
-            {"internalType":"uint128","name":"totalMaxPrice","type":"uint128"},
-            {"internalType":"uint256","name":"requestsPerPeriod","type":"uint256"},
-            {"internalType":"uint256","name":"periodSeconds","type":"uint256"}
-        ],"internalType":"struct LibPaymentDelegationStorage.Restriction","name":"","type":"tuple"}],
-        "stateMutability":"view",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address","name":"user","type":"address"}],
-        "name":"getPayers",
-        "outputs":[{"internalType":"address[]","name":"","type":"address[]"}],
-        "stateMutability":"view",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address","name":"payer","type":"address"}],
-        "name":"getUsers",
-        "outputs":[{"internalType":"address[]","name":"","type":"address[]"}],
-        "stateMutability":"view",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address[]","name":"users","type":"address[]"}],
-        "name":"getPayersAndRestrictions",
-        "outputs":[
-            {"internalType":"address[][]","name":"","type":"address[][]"},
-            {"components":[
-                {"internalType":"uint128","name":"totalMaxPrice","type":"uint128"},
-                {"internalType":"uint256","name":"requestsPerPeriod","type":"uint256"},
-                {"internalType":"uint256","name":"periodSeconds","type":"uint256"}
-            ],"internalType":"struct LibPaymentDelegationStorage.Restriction[][]","name":"","type":"tuple[][]"}
-        ],
-        "stateMutability":"view",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address","name":"user","type":"address"}],
-        "name":"undelegatePayments",
-        "outputs":[],
-        "stateMutability":"nonpayable",
-        "type":"function"
-    },{
-        "inputs":[{"internalType":"address[]","name":"users","type":"address[]"}],
-        "name":"undelegatePaymentsBatch",
-        "outputs":[],
-        "stateMutability":"nonpayable",
-        "type":"function"
-    }]"#,
-);
-
-abigen!(
-    PkpNftContract,
-    r#"[{
-        "inputs":[],
-        "name":"mintCost",
-        "outputs":[{"internalType":"uint256","name":"","type":"uint256"}],
-        "stateMutability":"view",
-        "type":"function"
-    },{
-        "anonymous":false,
-        "inputs":[
-            {"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},
-            {"indexed":false,"internalType":"bytes","name":"pubkey","type":"bytes"}
-        ],
-        "name":"PKPMinted",
-        "type":"event"
-    }]"#,
-);
-
-abigen!(
-    PkpHelperContract,
-    r#"[{
-        "inputs":[
-            {"internalType":"uint256","name":"keyType","type":"uint256"},
-            {"internalType":"string","name":"keySetId","type":"string"},
-            {"internalType":"uint256[]","name":"permittedAuthMethodTypes","type":"uint256[]"},
-            {"internalType":"bytes[]","name":"permittedAuthMethodIds","type":"bytes[]"},
-            {"internalType":"bytes[]","name":"permittedAuthMethodPubkeys","type":"bytes[]"},
-            {"internalType":"uint256[][]","name":"permittedAuthMethodScopes","type":"uint256[][]"},
-            {"internalType":"bool","name":"addPkpEthAddressAsPermittedAddress","type":"bool"},
-            {"internalType":"bool","name":"sendPkpToItself","type":"bool"}
-        ],
-        "name":"mintNextAndAddAuthMethods",
-        "outputs":[{"internalType":"uint256","name":"","type":"uint256"}],
-        "stateMutability":"payable",
-        "type":"function"
-    }]"#,
-);
 
 fn load_env() {
     let _ = dotenv();
@@ -217,55 +86,6 @@ fn test_config_for(network: &str) -> TestConfig {
             sponsorship_total_max_price_wei: "50000000000000000",
         },
     }
-}
-
-fn ledger_address_for(network: &str) -> Result<Address> {
-    let addr = match network {
-        "naga-dev" => "0x81061b50a66EBB3E7F9CEbeF2b1C1A961aE858F4",
-        "naga-test" => "0xbA0aEB6Bbf58F1B74E896416A20DB5be51C991f2",
-        "naga-staging" => "0x23Be686cAFCe69C5Fb075E2be7a4505598E338E8",
-        "naga-proto" => "0x25be72246358491Ac7a1eF138C39Ff3b240E50b5",
-        "naga" => "0x9BD023448d2D3b2D73fe61E4d7859007F6dA372c",
-        other => return Err(anyhow!("unsupported network {other}")),
-    };
-    addr.parse().map_err(|e| anyhow!("bad Ledger address: {e}"))
-}
-
-fn payment_delegation_address_for(network: &str) -> Result<Address> {
-    let addr = match network {
-        "naga-dev" => "0x2F202f846CBB27Aa5EbE6b9cfad50D65c49c01FF",
-        "naga-test" => "0xd1E59c174BcF85012c54086AB600Dd0aB032e88B",
-        "naga-staging" => "0x13fC0864A37B38D3C2A7d5E9C08D5124B9Cec4bF",
-        "naga-proto" => "0x5033b79388EBBAf466B4CF82c0b72Abd9bB940d6",
-        "naga" => "0x5EF658cB6ab3C3BfB75C8293B9a6C8ccb0b96C3c",
-        other => return Err(anyhow!("unsupported network {other}")),
-    };
-    addr.parse()
-        .map_err(|e| anyhow!("bad PaymentDelegation address: {e}"))
-}
-
-fn pkp_nft_address_for(network: &str) -> Result<Address> {
-    let addr = match network {
-        "naga-dev" => "0xB144B88514316a2f155D22937C76795b8fC9aDCd",
-        "naga-test" => "0xaf4Dddb07Cdde48042e93eb5bf266b49950bC5BD",
-        "naga-staging" => "0x92d2a4Acb70E498a486E0523AD42fF3F6d3D3642",
-        "naga-proto" => "0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168",
-        "naga" => "0x11eBfFeab32f6cb5775BeF83E09124B9322E4026",
-        other => return Err(anyhow!("unsupported network {other}")),
-    };
-    addr.parse().map_err(|e| anyhow!("bad PKPNFT address: {e}"))
-}
-
-fn pkp_helper_address_for(network: &str) -> Result<Address> {
-    let addr = match network {
-        "naga-dev" => "0xDC62fcb77554229FF2d9857B25f5BB824d33aE71",
-        "naga-test" => "0x13428A18C0b181344F97ceaC5596F31a9d182e5c",
-        "naga-staging" => "0xe97fFbc4eDa5CdF70375D4b8f87e476D40b628EC",
-        "naga-proto" => "0xCCb4A87731B3eFd6732e257381486912eEde24C5",
-        "naga" => "0xAe666c3080AA5Dd935574099c18E1eD779FFB231",
-        other => return Err(anyhow!("unsupported network {other}")),
-    };
-    addr.parse().map_err(|e| anyhow!("bad PKPHelper address: {e}"))
 }
 
 fn resolve_private_key(network: &str) -> Result<String> {
@@ -571,7 +391,7 @@ async fn shared_eoa_context() -> Result<&'static SharedEoaContext> {
 
             // On paid networks, ensure EOA + PKP have ledger balance before node calls.
             if network != "naga-dev" {
-                if let Ok(ledger_addr) = ledger_address_for(&network) {
+                if let Some(ledger_addr) = ledger_address_for(&network) {
                     let ledger = LedgerContract::new(ledger_addr, master.clone());
                     let deposit_wei = parse_ether(cfg.ledger_deposit_amount_eth)?;
 
@@ -771,7 +591,7 @@ async fn shared_custom_auth_context() -> Result<&'static SharedCustomAuthContext
 
             // On paid networks, ensure the custom PKP has some Ledger balance.
             if ctx.network != "naga-dev" {
-                if let Ok(ledger_addr) = ledger_address_for(&ctx.network) {
+                if let Some(ledger_addr) = ledger_address_for(&ctx.network) {
                     let deposit_wei = parse_ether(cfg.ledger_deposit_amount_eth)?;
                     let master_pk = resolve_private_key(&ctx.network)?;
                     let master_wallet: LocalWallet = master_pk.parse()?;
@@ -867,10 +687,12 @@ async fn mint_pkp_for_wallet(
 ) -> Result<MintedPkp> {
     let signer = Arc::new(SignerMiddleware::new(provider.clone(), wallet));
 
-    let pkp_nft_addr = pkp_nft_address_for(network)?;
-    let pkp_helper_addr = pkp_helper_address_for(network)?;
+    let pkp_nft_addr = pkp_nft_address_for(network)
+        .ok_or_else(|| anyhow!("unsupported network {network}"))?;
+    let pkp_helper_addr = pkp_helper_address_for(network)
+        .ok_or_else(|| anyhow!("unsupported network {network}"))?;
 
-    let pkp_nft = PkpNftContract::new(pkp_nft_addr, signer.clone());
+    let pkp_nft = PkpNftMintContract::new(pkp_nft_addr, signer.clone());
     let pkp_helper = PkpHelperContract::new(pkp_helper_addr, signer.clone());
 
     let mint_cost = pkp_nft.mint_cost().call().await?;
@@ -955,7 +777,7 @@ async fn encrypt_decrypt_roundtrip() -> Result<()> {
     // On paid networks, decrypt requests require a payment method (Ledger balance, delegation, or capacity).
     // Mirror the JS suite behavior by ensuring the master account has some Ledger balance.
     if network != "naga-dev" {
-        if let Ok(ledger_addr) = ledger_address_for(&network) {
+        if let Some(ledger_addr) = ledger_address_for(&network) {
             let provider = Arc::new(Provider::<Http>::try_from(rpc_url.clone())?);
             let chain_id = provider.get_chainid().await?.as_u64();
             let master_pk = resolve_private_key(&network)?;
@@ -1038,7 +860,8 @@ async fn payment_delegation_contract_flow() -> Result<()> {
     let provider = Arc::new(Provider::<Http>::try_from(rpc_url.clone())?);
     let chain_id = provider.get_chainid().await?.as_u64();
 
-    let payment_delegation_addr = payment_delegation_address_for(&network)?;
+    let payment_delegation_addr = payment_delegation_address_for(&network)
+        .ok_or_else(|| anyhow!("unsupported network {network}"))?;
 
     // Master signer for funding.
     let master_pk = resolve_private_key(&network)?;
@@ -1232,8 +1055,10 @@ async fn payment_delegation_flow() -> Result<()> {
         .get_transaction_count(master_address, Some(BlockId::Number(BlockNumber::Pending)))
         .await?;
 
-    let ledger_addr = ledger_address_for(&network)?;
-    let payment_delegation_addr = payment_delegation_address_for(&network)?;
+    let ledger_addr =
+        ledger_address_for(&network).ok_or_else(|| anyhow!("unsupported network {network}"))?;
+    let payment_delegation_addr = payment_delegation_address_for(&network)
+        .ok_or_else(|| anyhow!("unsupported network {network}"))?;
 
     let ledger_master = LedgerContract::new(ledger_addr, master.clone());
 
