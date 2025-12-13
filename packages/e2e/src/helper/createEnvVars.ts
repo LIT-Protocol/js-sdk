@@ -23,6 +23,10 @@ export type EnvVars = {
   privateKey: `0x${string}`;
   rpcUrl?: string | undefined;
   localContextPath?: string;
+  testAccountPrivateKeys?: {
+    alice?: `0x${string}`;
+    bob?: `0x${string}`;
+  };
 };
 
 // -- configure
@@ -110,16 +114,35 @@ export function createEnvVars(): EnvVars {
     }
   }
 
+  // 4. Get optional test account private keys (for reusing accounts across test runs)
+  const testAccountPrivateKeys = {
+    alice: process.env['TEST_ALICE_PRIVATE_KEY'] as `0x${string}` | undefined,
+    bob: process.env['TEST_BOB_PRIVATE_KEY'] as `0x${string}` | undefined,
+  };
+
   const result = {
     network,
     privateKey,
     rpcUrl,
     localContextPath,
+    testAccountPrivateKeys: testAccountPrivateKeys.alice || testAccountPrivateKeys.bob
+      ? testAccountPrivateKeys
+      : undefined,
   };
 
   const clone = Object.freeze({
     ...result,
     privateKey: (privateKey.slice(0, 6) + '...') as `0x${string}`,
+    testAccountPrivateKeys: result.testAccountPrivateKeys
+      ? {
+          alice: result.testAccountPrivateKeys.alice
+            ? (result.testAccountPrivateKeys.alice.slice(0, 6) + '...') as `0x${string}`
+            : undefined,
+          bob: result.testAccountPrivateKeys.bob
+            ? (result.testAccountPrivateKeys.bob.slice(0, 6) + '...') as `0x${string}`
+            : undefined,
+        }
+      : undefined,
   });
 
   console.log('✅ Env Vars:', clone);
