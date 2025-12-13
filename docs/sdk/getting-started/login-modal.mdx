@@ -1,0 +1,137 @@
+---
+title: "Login Modal (React)"
+description: "Drop-in React login modal for Lit PKP authentication"
+---
+
+<Note>
+  <code>@lit-protocol/login-modal</code> is currently experimental and focuses on a minimal, modular API. Expect breaking changes as it hardens.
+</Note>
+
+## Install
+
+<CodeGroup>
+
+```bash npm
+npm i @lit-protocol/login-modal
+```
+
+```bash yarn
+yarn add @lit-protocol/login-modal
+```
+
+```bash pnpm
+pnpm add @lit-protocol/login-modal
+```
+
+```bash bun
+bun add @lit-protocol/login-modal
+```
+
+</CodeGroup>
+
+## Quickstart
+
+Wrap your app with <code>LitAuthProvider</code>, then call <code>showAuthModal()</code> when you want to prompt login.
+
+```tsx
+import { LitAuthProvider, useLitAuth } from "@lit-protocol/login-modal";
+
+function App() {
+  const { isAuthenticated, showAuthModal, logout, user } = useLitAuth();
+
+  return (
+    <div>
+      {isAuthenticated ? (
+        <>
+          <pre>{JSON.stringify(user?.pkpInfo, null, 2)}</pre>
+          <button onClick={logout}>Logout</button>
+        </>
+      ) : (
+        <button onClick={showAuthModal}>Sign in</button>
+      )}
+    </div>
+  );
+}
+
+export default function Root() {
+  return (
+    <LitAuthProvider appName="my-app" enabledAuthMethods={["eoa"]}>
+      <App />
+    </LitAuthProvider>
+  );
+}
+```
+
+## Auth services (required for non-EOA methods)
+
+If you enable any auth method other than <code>eoa</code>, you must provide:
+
+- <code>services.authServiceUrls</code> (per network)
+- <code>services.loginServerUrl</code> (Google/Discord)
+- <code>services.discordClientId</code> (Discord)
+
+```tsx
+import { LitAuthProvider } from "@lit-protocol/login-modal";
+
+export function Root() {
+  return (
+    <LitAuthProvider
+      appName="my-app"
+      supportedNetworks={["naga-dev", "naga-test", "naga-proto", "naga"]}
+      enabledAuthMethods={["eoa", "google", "discord", "webauthn"]}
+      services={{
+        authServiceUrls: {
+          "naga-dev": "https://naga-dev-auth-service.getlit.dev",
+          "naga-test": "https://naga-test-auth-service.getlit.dev",
+          "naga-proto": "https://naga-proto-auth-service.getlit.dev",
+          naga: "https://naga-auth-service.getlit.dev",
+        },
+        loginServerUrl: "https://login.litgateway.com",
+        discordClientId: "YOUR_DISCORD_CLIENT_ID",
+      }}
+    >
+      {/* ... */}
+    </LitAuthProvider>
+  );
+}
+```
+
+## EOA wallet provider integration (RainbowKit / Wagmi, etc.)
+
+By default, the EOA flow uses <code>window.ethereum</code>. If your app uses a wallet framework (Wagmi, WalletConnect, custom EIP-1193 provider), pass an EOA wallet provider so the modal can authenticate with the *already connected* wallet client.
+
+```tsx
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useWalletClient } from "wagmi";
+import { LitAuthProvider } from "@lit-protocol/login-modal";
+
+export function Root() {
+  const { data: walletClient } = useWalletClient();
+
+  return (
+    <LitAuthProvider
+      appName="my-app"
+      enabledAuthMethods={["eoa"]}
+      eoa={{
+        getWalletClient: async () => {
+          if (!walletClient) throw new Error("Connect a wallet first.");
+          return walletClient;
+        },
+        renderConnect: () => <ConnectButton showBalance={false} />,
+      }}
+    >
+      {/* ... */}
+    </LitAuthProvider>
+  );
+}
+```
+
+## Custom UI
+
+Use <code>components</code> to override specific parts of the modal:
+
+- <code>components.PkpSelection</code>: replace the default PKP selection UI
+- <code>components.FundingPanel</code>: replace the default Ledger funding UI
+
+This is how the Explorer app customises the PKP selection and funding experiences.
+

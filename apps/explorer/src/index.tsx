@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useWalletClient } from "wagmi";
+
 import { Header } from "@/Header";
 
 import { APP_INFO } from "./_config";
@@ -46,6 +49,8 @@ const ErrorDisplay = ({ error, isVisible, onClear }: ErrorDisplayProps) => {
 };
 
 export const HomePage = () => {
+  const { data: walletClient } = useWalletClient();
+
   // Error state management
   const [error, setError] = useState<string | null>(null);
   const [isErrorVisible, setIsErrorVisible] = useState<boolean>(false);
@@ -76,6 +81,17 @@ export const HomePage = () => {
         authServiceApiKey: APP_INFO.litAuthServerApiKey,
         loginServerUrl: APP_INFO.litLoginServer,
         discordClientId: APP_INFO.discordClientId,
+      }}
+      eoa={{
+        getWalletClient: async () => {
+          if (!walletClient) {
+            throw new Error(
+              "No wallet connected. Connect a wallet, then try again."
+            );
+          }
+          return walletClient;
+        },
+        renderConnect: () => <ConnectButton showBalance={false} />,
       }}
       features={{ funding: true, settings: true, persistSettings: true }}
       components={{

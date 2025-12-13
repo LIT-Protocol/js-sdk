@@ -51,6 +51,7 @@
               },
               "sdk/getting-started/lit-client",
               "sdk/getting-started/auth-manager",
+              "sdk/getting-started/login-modal",
               "sdk/getting-started/payment-manager-setup",
               "sdk/getting-started/auth-services"
             ]

@@ -133,9 +133,30 @@ export const useLitServiceSetup = (
 
   const clearServices = useCallback(() => {
     console.log("🧹 Clearing Lit Protocol services...");
-    setServices(null);
+    setServices((current) => {
+      if (current?.litClient && typeof current.litClient.disconnect === "function") {
+        try {
+          current.litClient.disconnect();
+        } catch {
+          // ignore
+        }
+      }
+      return null;
+    });
     setError(null);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (services?.litClient && typeof services.litClient.disconnect === "function") {
+        try {
+          services.litClient.disconnect();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, [services?.litClient]);
 
   // Auto-setup on mount if requested
   useEffect(() => {

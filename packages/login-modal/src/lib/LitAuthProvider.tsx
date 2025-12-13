@@ -190,6 +190,7 @@ export function LitLoginModal({
   faucetUrl,
   showNetworkMessage = false,
   defaultPrivateKey,
+  eoa,
 }: LitLoginModalProps) {
   ensureValidConfig({ enabledAuthMethods, supportedNetworks, services });
 
@@ -401,9 +402,32 @@ export function LitLoginModal({
   }, [appName]);
 
   const clearServices = useCallback(() => {
+    const existing = servicesRef.current;
+    if (existing?.litClient && typeof existing.litClient.disconnect === 'function') {
+      try {
+        existing.litClient.disconnect();
+      } catch {
+        // ignore
+      }
+    }
+
     servicesRef.current = null;
     setServicesState(null);
     setServicesError(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      const existing = servicesRef.current;
+      if (existing?.litClient && typeof existing.litClient.disconnect === 'function') {
+        try {
+          existing.litClient.disconnect();
+        } catch {
+          // ignore
+        }
+      }
+      servicesRef.current = null;
+    };
   }, []);
 
   const forceNetworkSelection = useCallback(
@@ -655,6 +679,9 @@ export function LitLoginModal({
         const account = privateKeyToAccount(privateKey.trim() as `0x${string}`);
         const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
         authData = await ViemAccountAuthenticator.authenticate(account);
+      } else if (typeof eoa?.getWalletClient === 'function') {
+        const walletClient = await eoa.getWalletClient();
+        authData = await WalletClientAuthenticator.authenticate(walletClient);
       } else {
         const walletClient = await getInjectedWalletClient();
         authData = await WalletClientAuthenticator.authenticate(walletClient);
@@ -665,7 +692,7 @@ export function LitLoginModal({
     } finally {
       setIsAuthenticating(false);
     }
-  }, [privateKey, proceedToPkpSelection]);
+  }, [eoa, privateKey, proceedToPkpSelection]);
 
   const authenticateWebAuthn = useCallback(async () => {
     setIsAuthenticating(true);
@@ -992,6 +1019,9 @@ export function LitLoginModal({
 
   const PkpSelection = components.PkpSelection ?? DefaultPkpSelectionSection;
   const FundingPanel = components.FundingPanel ?? LedgerFundingPanel;
+  const hasExternalEoaWalletProvider = typeof eoa?.getWalletClient === 'function';
+  const allowEoaPrivateKey =
+    eoa?.allowPrivateKey ?? !hasExternalEoaWalletProvider;
 
   const renderAlerts = () => (
     <>
@@ -1140,17 +1170,30 @@ export function LitLoginModal({
           {selectedMethod === 'eoa' ? (
             <div className="lit-login-modal__section">
               <div className="lit-login-modal__muted">
-                Leave the private key blank to use an injected wallet.
+                {hasExternalEoaWalletProvider
+                  ? allowEoaPrivateKey
+                    ? 'Connect a wallet, then continue. (Optional: paste a private key instead.)'
+                    : 'Connect a wallet, then continue.'
+                  : 'Leave the private key blank to use an injected wallet (window.ethereum).'}
               </div>
-              <label className="lit-login-modal__field">
-                <span className="lit-login-modal__label">Private key (optional)</span>
-                <input
-                  value={privateKey}
-                  onChange={(e) => setPrivateKey(e.target.value)}
-                  placeholder="0x…"
-                  className="lit-login-modal__input"
-                />
-              </label>
+
+              {typeof eoa?.renderConnect === 'function' ? (
+                <div className="lit-login-modal__row">{eoa.renderConnect()}</div>
+              ) : null}
+
+              {allowEoaPrivateKey ? (
+                <label className="lit-login-modal__field">
+                  <span className="lit-login-modal__label">
+                    Private key (optional)
+                  </span>
+                  <input
+                    value={privateKey}
+                    onChange={(e) => setPrivateKey(e.target.value)}
+                    placeholder="0x…"
+                    className="lit-login-modal__input"
+                  />
+                </label>
+              ) : null}
               <button
                 type="button"
                 onClick={() => void authenticateEoa()}

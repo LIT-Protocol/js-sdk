@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AuthData, PKPData } from '@lit-protocol/schemas';
 import type { ReactNode } from 'react';
+import type { WalletClient } from 'viem';
 
 export type SupportedNetworkName = 'naga-dev' | 'naga-test' | 'naga-proto' | 'naga';
 
@@ -43,6 +44,23 @@ export interface LitLoginModalFeatures {
   funding?: boolean;
   settings?: boolean;
   persistSettings?: boolean;
+}
+
+export interface LitEoaWalletProvider {
+  /**
+   * Return a connected wallet client (e.g. Wagmi's `useWalletClient().data`).
+   * The login modal will use this to generate the EOA AuthData (SIWE / AuthSig).
+   */
+  getWalletClient: () => Promise<WalletClient>;
+  /**
+   * Optional UI to render in the EOA step (e.g. a RainbowKit connect button).
+   */
+  renderConnect?: () => ReactNode;
+  /**
+   * Show raw private key input in the EOA step (advanced/dev).
+   * Defaults to `true` only when no wallet provider is supplied.
+   */
+  allowPrivateKey?: boolean;
 }
 
 export interface PkpSelectionSectionProps {
@@ -121,4 +139,11 @@ export interface LitLoginModalProps {
   showNetworkMessage?: boolean;
 
   defaultPrivateKey?: string;
+
+  /**
+   * Optional external EOA wallet integration (RainbowKit/Wagmi, WalletConnect, etc).
+   * When provided, the EOA flow will use `eoa.getWalletClient()` instead of
+   * relying on `window.ethereum`.
+   */
+  eoa?: LitEoaWalletProvider;
 }
