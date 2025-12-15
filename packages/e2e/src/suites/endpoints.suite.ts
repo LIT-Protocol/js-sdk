@@ -398,10 +398,9 @@ export function registerEndpointSuite(
         const testEnv = getTestEnv();
         const aliceAccount = opts.getAliceAccount();
         const bobAccount = opts.getBobAccount();
-        const alicePaymentManager =
-          await testEnv.litClient.getPaymentManager({
-            account: aliceAccount.account,
-          });
+        const alicePaymentManager = await testEnv.litClient.getPaymentManager({
+          account: aliceAccount.account,
+        });
         const bobPaymentManager = await testEnv.litClient.getPaymentManager({
           account: bobAccount.account,
         });
@@ -431,10 +430,9 @@ export function registerEndpointSuite(
         });
         expect(usersAfterDelegate.length).toBe(initialUsers.length + 1);
 
-        const undelegateTx =
-          await alicePaymentManager.undelegatePayments({
-            userAddress: bobAddress,
-          });
+        const undelegateTx = await alicePaymentManager.undelegatePayments({
+          userAddress: bobAddress,
+        });
         expect(undelegateTx.receipt.status).toBe('success');
       });
     }

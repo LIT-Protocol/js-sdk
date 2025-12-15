@@ -43,9 +43,7 @@ export function registerPkpPreGeneratedMaterialsSuite(
               ['lit-action-execution', '*'],
               ['access-control-condition-decryption', '*'],
             ],
-            expiration: new Date(
-              Date.now() + 1000 * 60 * 15
-            ).toISOString(),
+            expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
           },
           litClient: testEnv.litClient,
         });
@@ -135,9 +133,7 @@ export function registerPkpPreGeneratedMaterialsSuite(
             pkpPublicKey: alice.pkp!.pubkey,
             authConfig: {
               resources: [['pkp-signing', '*']],
-              expiration: new Date(
-                Date.now() + 1000 * 60 * 15
-              ).toISOString(),
+              expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
             },
             litClient: testEnv.litClient,
           });
@@ -150,9 +146,7 @@ export function registerPkpPreGeneratedMaterialsSuite(
             pkpPublicKey: alice.pkp!.pubkey,
             authConfig: {
               resources: [['pkp-signing', '*']],
-              expiration: new Date(
-                Date.now() + 1000 * 60 * 15
-              ).toISOString(),
+              expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
             },
             litClient: testEnv.litClient,
             sessionKeyPair,
@@ -172,15 +166,12 @@ export function registerPkpPreGeneratedMaterialsSuite(
             pkpPublicKey: alice.pkp!.pubkey,
             authConfig: {
               resources: [['pkp-signing', '*']],
-              expiration: new Date(
-                Date.now() + 1000 * 60 * 15
-              ).toISOString(),
+              expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
             },
             litClient: testEnv.litClient,
           });
 
-        const delegationAuthSig =
-          await tempAuthContext.authNeededCallback();
+        const delegationAuthSig = await tempAuthContext.authNeededCallback();
 
         await expect(
           testEnv.authManager.createPkpAuthContext({
@@ -188,9 +179,7 @@ export function registerPkpPreGeneratedMaterialsSuite(
             pkpPublicKey: alice.pkp!.pubkey,
             authConfig: {
               resources: [['pkp-signing', '*']],
-              expiration: new Date(
-                Date.now() + 1000 * 60 * 15
-              ).toISOString(),
+              expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
             },
             litClient: testEnv.litClient,
             delegationAuthSig,

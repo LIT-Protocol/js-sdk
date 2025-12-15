@@ -131,11 +131,17 @@ describe('revamped e2e suite', () => {
     () => resolvedNetwork
   );
 
-  registerEoaNativeSuite(() => testEnv, () => alice);
+  registerEoaNativeSuite(
+    () => testEnv,
+    () => alice
+  );
 
   registerWrappedKeysSuite();
 
-  registerCustomAuthSuite(() => testEnv, () => bob);
+  registerCustomAuthSuite(
+    () => testEnv,
+    () => bob
+  );
 });
 
 describeIfPaid('Paid networks tests', () => {

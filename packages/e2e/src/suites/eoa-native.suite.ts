@@ -9,8 +9,9 @@ export function registerEoaNativeSuite(
   describe('EOA native authentication and PKP minting', () => {
     it('authenticates via ViemAccountAuthenticator', async () => {
       const alice = getAliceAccount();
-      const authDataViemAccount =
-        await ViemAccountAuthenticator.authenticate(alice.account);
+      const authDataViemAccount = await ViemAccountAuthenticator.authenticate(
+        alice.account
+      );
 
       expect(authDataViemAccount.accessToken).toBeDefined();
       expect(authDataViemAccount.authMethodType).toBeDefined();
@@ -50,4 +51,3 @@ export function registerEoaNativeSuite(
     });
   });
 }
-

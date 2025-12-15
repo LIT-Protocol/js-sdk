@@ -86,15 +86,11 @@ export function registerViemSuite(
           message: {
             from: {
               name: 'Alice',
-              wallet: getAddress(
-                '0x2111111111111111111111111111111111111111'
-              ),
+              wallet: getAddress('0x2111111111111111111111111111111111111111'),
             },
             to: {
               name: 'Bob',
-              wallet: getAddress(
-                '0x3111111111111111111111111111111111111111'
-              ),
+              wallet: getAddress('0x3111111111111111111111111111111111111111'),
             },
             contents: 'Hello from revamp e2e typed data test!',
           },
