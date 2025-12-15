@@ -16,6 +16,7 @@ log.debug({ foo: 'bar' }, 'doing work');
 ## Log levels
 
 Logging verbosity is controlled by:
+
 - Node.js: `process.env.LOG_LEVEL`
 - Browser: `globalThis.LOG_LEVEL`
 
@@ -68,7 +69,7 @@ setLoggerOptions({
 });
 ```
 
-To *replace* the default backend entirely, set `useDefaultTransports: false`.
+To _replace_ the default backend entirely, set `useDefaultTransports: false`.
 
 ### DataDog examples
 
@@ -91,8 +92,8 @@ setLoggerOptions({
         level === 'fatal'
           ? 'error'
           : level === 'trace' || level === 'debug_text' || level === 'debug2'
-            ? 'debug'
-            : level;
+          ? 'debug'
+          : level;
 
       const context = { ...bindings, ...(data as any) };
 
@@ -113,7 +114,10 @@ You can forward logs via `transports` to the OpenTelemetry Logs API:
 
 ```ts
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
-import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import {
+  LoggerProvider,
+  BatchLogRecordProcessor,
+} from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { setLoggerOptions } from '@lit-protocol/logger';
 

@@ -154,7 +154,8 @@
             "group": "Guides",
             "pages": [
               "guides/lit-action-sign-as-action",
-              "guides/server-sessions"
+              "guides/server-sessions",
+              "guides/debugging-node-requests"
             ]
           },
           {

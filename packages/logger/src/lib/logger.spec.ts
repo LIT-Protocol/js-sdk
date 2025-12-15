@@ -1,6 +1,11 @@
 import { Writable } from 'stream';
 
-import { logger, setLoggerOptions, getChildLogger, getDefaultLevel } from './logger';
+import {
+  logger,
+  setLoggerOptions,
+  getChildLogger,
+  getDefaultLevel,
+} from './logger';
 
 class TestStream extends Writable {
   public data = '';

@@ -92,7 +92,9 @@ interface InternalConfig {
 }
 
 const normalizeLevelForPino = (level: LogLevel): string =>
-  canonicalizeLevel(level) === 'debug_text' ? 'debug' : canonicalizeLevel(level);
+  canonicalizeLevel(level) === 'debug_text'
+    ? 'debug'
+    : canonicalizeLevel(level);
 
 const createConsoleLogger = (name: string): LoggerImpl => {
   const baseLogger: LoggerImpl = {
@@ -189,8 +191,8 @@ const extractMsgAndData = (args: unknown[]): Pick<LogEntry, 'msg' | 'data'> => {
       typeof second === 'string'
         ? second
         : typeof (first as any).msg === 'string'
-          ? (first as any).msg
-          : undefined;
+        ? (first as any).msg
+        : undefined;
     return { msg, data: first };
   }
 
@@ -263,18 +265,16 @@ const createLoggerWrapper = (
     info: (...args) => logWithLevel('info', getImpl, bindings, args),
     debug: (...args) => logWithLevel('debug', getImpl, bindings, args),
     trace: (...args) => logWithLevel('trace', getImpl, bindings, args),
-    debug_text: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
+    debug_text: (...args) =>
+      logWithLevel('debug_text', getImpl, bindings, args),
     debugText: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
     debug2: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
     child: (childBindings) => {
       const mergedBindings = { ...bindings, ...childBindings };
-      return createLoggerWrapper(
-        () => {
-          const impl = getImpl();
-          return impl.child ? impl.child(childBindings) : impl;
-        },
-        mergedBindings
-      );
+      return createLoggerWrapper(() => {
+        const impl = getImpl();
+        return impl.child ? impl.child(childBindings) : impl;
+      }, mergedBindings);
     },
   };
 
@@ -296,13 +296,8 @@ function setLoggerOptions(
   loggerOptions: LoggerOptions<string, false> & ExtraLoggerOptions,
   destination?: DestinationStream
 ): Logger {
-  const {
-    transports,
-    useDefaultTransports,
-    impl,
-    bindings,
-    ...pinoOptions
-  } = loggerOptions || {};
+  const { transports, useDefaultTransports, impl, bindings, ...pinoOptions } =
+    loggerOptions || {};
 
   if (bindings) {
     config.bindings = { ...config.bindings, ...bindings };
