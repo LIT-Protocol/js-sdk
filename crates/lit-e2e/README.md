@@ -19,4 +19,3 @@ At minimum you need:
   - `LIT_YELLOWSTONE_PRIVATE_RPC_URL` / `LIT_TXSENDER_RPC_URL` for live networks
 - A funded master private key for minting/funding accounts:
   - `LIVE_MASTER_ACCOUNT_*` (e.g. `LIVE_MASTER_ACCOUNT_NAGA_DEV`), or `LIVE_MASTER_ACCOUNT`, or `LOCAL_MASTER_ACCOUNT`
-
