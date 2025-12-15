@@ -3506,6 +3506,7 @@ dependencies = [
  "blsful 3.0.0-pre8",
  "bs58",
  "chrono",
+ "dotenvy",
  "ed25519-dalek",
  "ethers",
  "futures",
