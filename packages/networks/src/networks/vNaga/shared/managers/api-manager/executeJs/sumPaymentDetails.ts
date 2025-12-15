@@ -40,4 +40,3 @@ export const _sumPaymentDetails = (
     a.component.localeCompare(b.component)
   );
 };
-

@@ -13,8 +13,12 @@ describe('_sumPaymentDetails', () => {
     };
 
     expect(_sumPaymentDetails([])).toBeUndefined();
-    expect(_sumPaymentDetails([{ ...base, paymentDetail: undefined }])).toBeUndefined();
-    expect(_sumPaymentDetails([{ ...base, paymentDetail: [] }])).toBeUndefined();
+    expect(
+      _sumPaymentDetails([{ ...base, paymentDetail: undefined }])
+    ).toBeUndefined();
+    expect(
+      _sumPaymentDetails([{ ...base, paymentDetail: [] }])
+    ).toBeUndefined();
   });
 
   it('sums quantities and prices by component across nodes', () => {
@@ -32,22 +36,44 @@ describe('_sumPaymentDetails', () => {
         ...base,
         nodeUrl: 'https://node-a:7470',
         paymentDetail: [
-          { component: 'MemoryUsage', quantity: 14, price: 2_000_000_000_000_000n },
-          { component: 'BaseAmount', quantity: 1, price: 100_000_000_000_000_000n },
+          {
+            component: 'MemoryUsage',
+            quantity: 14,
+            price: 2_000_000_000_000_000n,
+          },
+          {
+            component: 'BaseAmount',
+            quantity: 1,
+            price: 100_000_000_000_000_000n,
+          },
         ],
       },
       {
         ...base,
         nodeUrl: 'https://node-b:7470',
         paymentDetail: [
-          { component: 'BaseAmount', quantity: 1, price: 100_000_000_000_000_000n },
-          { component: 'MemoryUsage', quantity: 15, price: 2_000_000_000_000_000n },
+          {
+            component: 'BaseAmount',
+            quantity: 1,
+            price: 100_000_000_000_000_000n,
+          },
+          {
+            component: 'MemoryUsage',
+            quantity: 15,
+            price: 2_000_000_000_000_000n,
+          },
         ],
       },
       {
         ...base,
         nodeUrl: 'https://node-c:7470',
-        paymentDetail: [{ component: 'BaseAmount', quantity: 1, price: 100_000_000_000_000_000n }],
+        paymentDetail: [
+          {
+            component: 'BaseAmount',
+            quantity: 1,
+            price: 100_000_000_000_000_000n,
+          },
+        ],
       },
     ]);
 

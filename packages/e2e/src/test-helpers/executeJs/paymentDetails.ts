@@ -80,8 +80,7 @@ export const registerPaymentDetailsResponseTests = () => {
       });
 
       expect(executionResult.debug?.paymentDetailByNode).toBeDefined();
-      const paymentDetailByNode =
-        executionResult.debug!.paymentDetailByNode!;
+      const paymentDetailByNode = executionResult.debug!.paymentDetailByNode!;
       console.log(
         '[payment detail] executeJs response paymentDetailByNode:',
         stringifyWithBigInt(paymentDetailByNode)
@@ -111,11 +110,10 @@ export const registerPaymentDetailsResponseTests = () => {
           expect(typeof detail.price).toBe('bigint');
           expect(detail.price).toBeGreaterThanOrEqual(0n);
 
-          const current =
-            totalsFromDebug.get(detail.component) ?? {
-              quantity: 0,
-              price: 0n,
-            };
+          const current = totalsFromDebug.get(detail.component) ?? {
+            quantity: 0,
+            price: 0n,
+          };
           current.quantity += detail.quantity;
           current.price += detail.price;
           totalsFromDebug.set(detail.component, current);
