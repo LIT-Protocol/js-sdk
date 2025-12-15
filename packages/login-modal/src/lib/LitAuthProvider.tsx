@@ -1,11 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { createLitClient } from '@lit-protocol/lit-client';
 import {
@@ -34,7 +28,11 @@ import type {
   SupportedNetworkName,
 } from './types';
 
-type NetworkModule = typeof nagaDev | typeof nagaTest | typeof nagaProto | typeof naga;
+type NetworkModule =
+  | typeof nagaDev
+  | typeof nagaTest
+  | typeof nagaProto
+  | typeof naga;
 
 const DEFAULT_SUPPORTED_NETWORKS: SupportedNetworkName[] = [
   'naga-dev',
@@ -91,9 +89,7 @@ function formatServicesSetupError(params: {
   return `Failed to connect to '${networkName}'.\n\n${raw}`;
 }
 
-function getButtonClass(
-  variant: 'primary' | 'secondary' | 'ghost',
-): string {
+function getButtonClass(variant: 'primary' | 'secondary' | 'ghost'): string {
   return `lit-login-modal__btn lit-login-modal__btn--${variant}`;
 }
 
@@ -128,10 +124,7 @@ function ensureValidConfig(params: {
     missing.push('services.loginServerUrl');
   }
 
-  if (
-    enabledAuthMethods.includes('discord') &&
-    !services?.discordClientId
-  ) {
+  if (enabledAuthMethods.includes('discord') && !services?.discordClientId) {
     missing.push('services.discordClientId');
   }
 
@@ -161,12 +154,18 @@ async function getInjectedWalletClient(params?: { chain?: Chain }) {
 
 type ModalStep = 'select-method' | 'method-detail' | 'pkp-select' | 'funding';
 
-const AUTH_METHOD_DISPLAY: Record<AuthMethod, { name: string; iconSrc: string }> = {
+const AUTH_METHOD_DISPLAY: Record<
+  AuthMethod,
+  { name: string; iconSrc: string }
+> = {
   google: { name: 'Google', iconSrc: AUTH_METHOD_ICON_SRC.google },
   discord: { name: 'Discord', iconSrc: AUTH_METHOD_ICON_SRC.discord },
   eoa: { name: 'Web3 Wallet', iconSrc: AUTH_METHOD_ICON_SRC.eoa },
   webauthn: { name: 'WebAuthn', iconSrc: AUTH_METHOD_ICON_SRC.webauthn },
-  'stytch-email': { name: 'Email OTP', iconSrc: AUTH_METHOD_ICON_SRC['stytch-email'] },
+  'stytch-email': {
+    name: 'Email OTP',
+    iconSrc: AUTH_METHOD_ICON_SRC['stytch-email'],
+  },
   'stytch-sms': { name: 'SMS', iconSrc: AUTH_METHOD_ICON_SRC['stytch-sms'] },
   'stytch-whatsapp': {
     name: 'WhatsApp',
@@ -234,7 +233,9 @@ export function LitLoginModal({
   const [webAuthnMode, setWebAuthnMode] = useState<'authenticate' | 'register'>(
     'authenticate'
   );
-  const [isFido2Available, setIsFido2Available] = useState<boolean | null>(null);
+  const [isFido2Available, setIsFido2Available] = useState<boolean | null>(
+    null
+  );
 
   const [pendingAuthData, setPendingAuthData] = useState<AuthData | null>(null);
   const [pendingMethod, setPendingMethod] = useState<AuthMethod | null>(null);
@@ -367,8 +368,7 @@ export function LitLoginModal({
       setServicesError(null);
 
       const networkName = currentNetworkNameRef.current;
-      const networkModule =
-        DEFAULT_NETWORK_MODULES[networkName] ?? nagaDev;
+      const networkModule = DEFAULT_NETWORK_MODULES[networkName] ?? nagaDev;
 
       const litClient = await withTimeout(
         createLitClient({
@@ -410,7 +410,10 @@ export function LitLoginModal({
 
   const clearServices = useCallback(() => {
     const existing = servicesRef.current;
-    if (existing?.litClient && typeof existing.litClient.disconnect === 'function') {
+    if (
+      existing?.litClient &&
+      typeof existing.litClient.disconnect === 'function'
+    ) {
       try {
         existing.litClient.disconnect();
       } catch {
@@ -426,7 +429,10 @@ export function LitLoginModal({
   useEffect(() => {
     return () => {
       const existing = servicesRef.current;
-      if (existing?.litClient && typeof existing.litClient.disconnect === 'function') {
+      if (
+        existing?.litClient &&
+        typeof existing.litClient.disconnect === 'function'
+      ) {
         try {
           existing.litClient.disconnect();
         } catch {
@@ -557,7 +563,13 @@ export function LitLoginModal({
     void setupServices().catch(() => {
       // handled via servicesError state
     });
-  }, [isAuthenticated, isInitializingServices, servicesError, setupServices, showModal]);
+  }, [
+    isAuthenticated,
+    isInitializingServices,
+    servicesError,
+    setupServices,
+    showModal,
+  ]);
 
   useEffect(() => {
     if (!showModal) return;
@@ -581,12 +593,14 @@ export function LitLoginModal({
         setIsAuthenticating(true);
         setError(null);
 
-        const authContext = await activeServices.authManager.createPkpAuthContext(
-          {
+        const authContext =
+          await activeServices.authManager.createPkpAuthContext({
             authData: pendingAuthData,
             pkpPublicKey: pkpInfo.pubkey,
             authConfig: {
-              expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+              expiration: new Date(
+                Date.now() + 1000 * 60 * 60 * 24
+              ).toISOString(),
               statement: '',
               domain: '',
               resources: [
@@ -596,8 +610,7 @@ export function LitLoginModal({
               ],
             },
             litClient: activeServices.litClient,
-          }
-        );
+          });
 
         saveUser({
           authContext,
@@ -607,7 +620,11 @@ export function LitLoginModal({
           authData: pendingAuthData,
         });
       } catch (err) {
-        if (features.funding && faucetUrl && isTestnetNetwork(currentNetworkName)) {
+        if (
+          features.funding &&
+          faucetUrl &&
+          isTestnetNetwork(currentNetworkName)
+        ) {
           setPendingPkpInfo(pkpInfo);
           setStep('funding');
           setError(
@@ -650,7 +667,9 @@ export function LitLoginModal({
     setError(null);
     try {
       const { GoogleAuthenticator } = await import('@lit-protocol/auth');
-      const authData = await GoogleAuthenticator.authenticate(loginServiceBaseUrl);
+      const authData = await GoogleAuthenticator.authenticate(
+        loginServiceBaseUrl
+      );
       await proceedToPkpSelection(authData, 'google');
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -666,9 +685,12 @@ export function LitLoginModal({
     setError(null);
     try {
       const { DiscordAuthenticator } = await import('@lit-protocol/auth');
-      const authData = await DiscordAuthenticator.authenticate(loginServiceBaseUrl, {
-        clientId: discordClientId,
-      });
+      const authData = await DiscordAuthenticator.authenticate(
+        loginServiceBaseUrl,
+        {
+          clientId: discordClientId,
+        }
+      );
       await proceedToPkpSelection(authData, 'discord');
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -688,7 +710,9 @@ export function LitLoginModal({
         authData = await ViemAccountAuthenticator.authenticate(account);
       } else if (typeof eoa?.getWalletClient === 'function') {
         const walletClient = await eoa.getWalletClient();
-        authData = await WalletClientAuthenticator.authenticate(walletClient as any);
+        authData = await WalletClientAuthenticator.authenticate(
+          walletClient as any
+        );
       } else {
         const walletClient = await getInjectedWalletClient();
         authData = await WalletClientAuthenticator.authenticate(walletClient);
@@ -701,8 +725,8 @@ export function LitLoginModal({
     }
   }, [eoa, privateKey, proceedToPkpSelection]);
 
-  const getEoaMintAccount = useCallback(
-    async (): Promise<ExpectedAccountOrWalletClient> => {
+  const getEoaMintAccount =
+    useCallback(async (): Promise<ExpectedAccountOrWalletClient> => {
       const rawPrivateKey = privateKey.trim();
       if (rawPrivateKey) {
         const normalizedPrivateKey = rawPrivateKey.startsWith('0x')
@@ -718,9 +742,7 @@ export function LitLoginModal({
       const chain = servicesRef.current?.litClient?.getChainConfig()
         .viemConfig as Chain | undefined;
       return await getInjectedWalletClient({ chain });
-    },
-    [eoa, privateKey]
-  );
+    }, [eoa, privateKey]);
 
   const authenticateWebAuthn = useCallback(async () => {
     setIsAuthenticating(true);
@@ -761,13 +783,17 @@ export function LitLoginModal({
       let result: { methodId?: string } | undefined;
 
       if (selectedMethod === 'stytch-email') {
-        const { StytchEmailOtpAuthenticator } = await import('@lit-protocol/auth');
+        const { StytchEmailOtpAuthenticator } = await import(
+          '@lit-protocol/auth'
+        );
         result = await StytchEmailOtpAuthenticator.sendOtp({
           email: stytchEmail,
           authServiceBaseUrl,
         });
       } else if (selectedMethod === 'stytch-sms') {
-        const { StytchSmsOtpAuthenticator } = await import('@lit-protocol/auth');
+        const { StytchSmsOtpAuthenticator } = await import(
+          '@lit-protocol/auth'
+        );
         result = await StytchSmsOtpAuthenticator.sendOtp({
           phoneNumber: stytchPhoneNumber,
           authServiceBaseUrl,
@@ -792,12 +818,7 @@ export function LitLoginModal({
     } finally {
       setIsAuthenticating(false);
     }
-  }, [
-    authServiceBaseUrl,
-    selectedMethod,
-    stytchEmail,
-    stytchPhoneNumber,
-  ]);
+  }, [authServiceBaseUrl, selectedMethod, stytchEmail, stytchPhoneNumber]);
 
   const verifyStytchOtp = useCallback(async () => {
     setIsAuthenticating(true);
@@ -806,14 +827,18 @@ export function LitLoginModal({
       let authData: AuthData | undefined;
 
       if (selectedMethod === 'stytch-email') {
-        const { StytchEmailOtpAuthenticator } = await import('@lit-protocol/auth');
+        const { StytchEmailOtpAuthenticator } = await import(
+          '@lit-protocol/auth'
+        );
         authData = await StytchEmailOtpAuthenticator.authenticate({
           methodId: stytchMethodId,
           code: stytchOtpCode,
           authServiceBaseUrl,
         });
       } else if (selectedMethod === 'stytch-sms') {
-        const { StytchSmsOtpAuthenticator } = await import('@lit-protocol/auth');
+        const { StytchSmsOtpAuthenticator } = await import(
+          '@lit-protocol/auth'
+        );
         authData = await StytchSmsOtpAuthenticator.authenticate({
           methodId: stytchMethodId,
           code: stytchOtpCode,
@@ -861,7 +886,12 @@ export function LitLoginModal({
     } finally {
       setIsAuthenticating(false);
     }
-  }, [authServiceBaseUrl, proceedToPkpSelection, stytchTotpCode, stytchTotpUserId]);
+  }, [
+    authServiceBaseUrl,
+    proceedToPkpSelection,
+    stytchTotpCode,
+    stytchTotpUserId,
+  ]);
 
   const autoLoginWithDefaultKey = useCallback(
     async (options?: {
@@ -892,7 +922,8 @@ export function LitLoginModal({
       setAutoLoginStatus('Preparing automatic login…');
 
       try {
-        const targetNetwork = options?.forceNetwork ?? currentNetworkNameRef.current;
+        const targetNetwork =
+          options?.forceNetwork ?? currentNetworkNameRef.current;
         setAutoLoginStatus(`Switching to ${targetNetwork} network…`);
         await forceNetworkSelection(targetNetwork);
 
@@ -906,22 +937,25 @@ export function LitLoginModal({
           throw new Error('Invalid private key format');
         }
 
-        const account = privateKeyToAccount(normalizedPrivateKey as `0x${string}`);
+        const account = privateKeyToAccount(
+          normalizedPrivateKey as `0x${string}`
+        );
         setAutoLoginStatus('Authenticating with development wallet…');
         const { ViemAccountAuthenticator } = await import('@lit-protocol/auth');
         const authData = await ViemAccountAuthenticator.authenticate(account);
 
         setAutoLoginStatus('Fetching PKPs for development wallet…');
-        const pkpResult: any = await activeServices.litClient.viewPKPsByAuthData({
-          authData: {
-            authMethodType: authData.authMethodType,
-            authMethodId: authData.authMethodId,
-          },
-          pagination: {
-            limit: 1,
-            offset: 0,
-          },
-        });
+        const pkpResult: any =
+          await activeServices.litClient.viewPKPsByAuthData({
+            authData: {
+              authMethodType: authData.authMethodType,
+              authMethodId: authData.authMethodId,
+            },
+            pagination: {
+              limit: 1,
+              offset: 0,
+            },
+          });
 
         const firstPkp = pkpResult?.pkps?.[0];
         if (!firstPkp) {
@@ -947,21 +981,24 @@ export function LitLoginModal({
         }
 
         setAutoLoginStatus('Creating Lit session for your PKP…');
-        const authContext = await activeServices.authManager.createPkpAuthContext({
-          authData,
-          pkpPublicKey: pkpInfo.pubkey,
-          authConfig: {
-            expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-            statement: '',
-            domain: '',
-            resources: [
-              ['pkp-signing', '*'],
-              ['lit-action-execution', '*'],
-              ['access-control-condition-decryption', '*'],
-            ],
-          },
-          litClient: activeServices.litClient,
-        });
+        const authContext =
+          await activeServices.authManager.createPkpAuthContext({
+            authData,
+            pkpPublicKey: pkpInfo.pubkey,
+            authConfig: {
+              expiration: new Date(
+                Date.now() + 1000 * 60 * 60 * 24
+              ).toISOString(),
+              statement: '',
+              domain: '',
+              resources: [
+                ['pkp-signing', '*'],
+                ['lit-action-execution', '*'],
+                ['access-control-condition-decryption', '*'],
+              ],
+            },
+            litClient: activeServices.litClient,
+          });
 
         saveUser({
           authContext,
@@ -1001,7 +1038,8 @@ export function LitLoginModal({
       error: error ?? servicesError,
 
       services: servicesState,
-      isServicesReady: !!servicesState?.litClient && !!servicesState?.authManager,
+      isServicesReady:
+        !!servicesState?.litClient && !!servicesState?.authManager,
       isInitializingServices,
 
       currentNetworkName,
@@ -1047,7 +1085,8 @@ export function LitLoginModal({
 
   const PkpSelection = components.PkpSelection ?? DefaultPkpSelectionSection;
   const FundingPanel = components.FundingPanel ?? LedgerFundingPanel;
-  const hasExternalEoaWalletProvider = typeof eoa?.getWalletClient === 'function';
+  const hasExternalEoaWalletProvider =
+    typeof eoa?.getWalletClient === 'function';
   const allowEoaPrivateKey =
     eoa?.allowPrivateKey ?? !hasExternalEoaWalletProvider;
 
@@ -1100,7 +1139,12 @@ export function LitLoginModal({
 
     if (!servicesState) return null;
 
-    if (step === 'pkp-select' && pendingAuthData && pendingMethod && servicesState) {
+    if (
+      step === 'pkp-select' &&
+      pendingAuthData &&
+      pendingMethod &&
+      servicesState
+    ) {
       return (
         <div className="lit-login-modal__section">
           <div>
@@ -1209,7 +1253,9 @@ export function LitLoginModal({
               </div>
 
               {typeof eoa?.renderConnect === 'function' ? (
-                <div className="lit-login-modal__row">{eoa.renderConnect()}</div>
+                <div className="lit-login-modal__row">
+                  {eoa.renderConnect()}
+                </div>
               ) : null}
 
               {allowEoaPrivateKey ? (
@@ -1229,7 +1275,9 @@ export function LitLoginModal({
                 type="button"
                 onClick={() => void authenticateEoa()}
                 disabled={isAuthenticating}
-                className={`${getButtonClass('primary')} lit-login-modal__btn--block`}
+                className={`${getButtonClass(
+                  'primary'
+                )} lit-login-modal__btn--block`}
               >
                 Continue
               </button>
@@ -1243,17 +1291,23 @@ export function LitLoginModal({
                 <select
                   value={webAuthnMode}
                   onChange={(e) =>
-                    setWebAuthnMode(e.target.value as 'authenticate' | 'register')
+                    setWebAuthnMode(
+                      e.target.value as 'authenticate' | 'register'
+                    )
                   }
                   className="lit-login-modal__select"
                 >
                   <option value="authenticate">Use existing passkey</option>
-                  <option value="register">Register new passkey (mints PKP)</option>
+                  <option value="register">
+                    Register new passkey (mints PKP)
+                  </option>
                 </select>
               </label>
               {webAuthnMode === 'register' ? (
                 <label className="lit-login-modal__field">
-                  <span className="lit-login-modal__label">Username (optional)</span>
+                  <span className="lit-login-modal__label">
+                    Username (optional)
+                  </span>
                   <input
                     value={webAuthnUsername}
                     onChange={(e) => setWebAuthnUsername(e.target.value)}
@@ -1266,7 +1320,9 @@ export function LitLoginModal({
                 type="button"
                 onClick={() => void authenticateWebAuthn()}
                 disabled={isAuthenticating}
-                className={`${getButtonClass('primary')} lit-login-modal__btn--block`}
+                className={`${getButtonClass(
+                  'primary'
+                )} lit-login-modal__btn--block`}
               >
                 Continue
               </button>
@@ -1317,7 +1373,9 @@ export function LitLoginModal({
                     type="button"
                     onClick={() => void sendStytchOtp()}
                     disabled={isAuthenticating}
-                    className={`${getButtonClass('primary')} lit-login-modal__btn--block`}
+                    className={`${getButtonClass(
+                      'primary'
+                    )} lit-login-modal__btn--block`}
                   >
                     Send OTP
                   </button>
@@ -1326,7 +1384,9 @@ export function LitLoginModal({
                     type="button"
                     onClick={() => void verifyStytchOtp()}
                     disabled={isAuthenticating}
-                    className={`${getButtonClass('primary')} lit-login-modal__btn--block`}
+                    className={`${getButtonClass(
+                      'primary'
+                    )} lit-login-modal__btn--block`}
                   >
                     Verify
                   </button>
@@ -1359,7 +1419,9 @@ export function LitLoginModal({
                 type="button"
                 onClick={() => void authenticateStytchTotp()}
                 disabled={isAuthenticating}
-                className={`${getButtonClass('primary')} lit-login-modal__btn--block`}
+                className={`${getButtonClass(
+                  'primary'
+                )} lit-login-modal__btn--block`}
               >
                 Continue
               </button>
@@ -1446,7 +1508,9 @@ export function LitLoginModal({
           >
             Cancel
           </button>
-          {isTestnetNetwork(currentNetworkName) && features.funding && faucetUrl ? (
+          {isTestnetNetwork(currentNetworkName) &&
+          features.funding &&
+          faucetUrl ? (
             <a
               href={faucetUrl}
               target="_blank"
@@ -1489,7 +1553,9 @@ export function LitLoginModal({
               <div className="lit-login-modal lit-login-modal__overlayCard">
                 {servicesError ? (
                   <div className="lit-login-modal__section">
-                    <h3 className="lit-login-modal__overlayTitle">⚠️ Setup Failed</h3>
+                    <h3 className="lit-login-modal__overlayTitle">
+                      ⚠️ Setup Failed
+                    </h3>
                     <div className="lit-login-modal__muted">
                       Network:{' '}
                       <span className="lit-login-modal__mono">
@@ -1563,7 +1629,9 @@ export function LitLoginModal({
                 <div className="lit-login-modal__settingsButton">
                   <button
                     type="button"
-                    className={`${getButtonClass('secondary')} lit-login-modal__btn--icon`}
+                    className={`${getButtonClass(
+                      'secondary'
+                    )} lit-login-modal__btn--icon`}
                     aria-label="Settings"
                     onClick={() => setShowSettingsView(true)}
                   >

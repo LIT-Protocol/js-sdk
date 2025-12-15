@@ -39,7 +39,8 @@ export function DefaultPkpSelectionSection({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
-  const [useAuthServiceMintForEoa, setUseAuthServiceMintForEoa] = useState(false);
+  const [useAuthServiceMintForEoa, setUseAuthServiceMintForEoa] =
+    useState(false);
 
   const isEoa = useMemo(
     () => authMethod === 'eoa' || Number(authData.authMethodType) === 1,
@@ -124,7 +125,9 @@ export function DefaultPkpSelectionSection({
     <div className="lit-login-modal__section">
       <div>
         <div className="lit-login-modal__h3">Select a PKP</div>
-        <div className="lit-login-modal__muted">Auth method: {authMethodName}</div>
+        <div className="lit-login-modal__muted">
+          Auth method: {authMethodName}
+        </div>
       </div>
 
       {error ? (
@@ -177,7 +180,9 @@ export function DefaultPkpSelectionSection({
       ) : null}
 
       {pkps.length === 0 && !isLoading ? (
-        <div className="lit-login-modal__muted">No PKPs found for this auth method.</div>
+        <div className="lit-login-modal__muted">
+          No PKPs found for this auth method.
+        </div>
       ) : null}
 
       <ul className="lit-login-modal__list">

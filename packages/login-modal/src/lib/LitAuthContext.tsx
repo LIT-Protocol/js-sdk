@@ -15,4 +15,3 @@ export function useLitAuth(): LitAuthContextValue {
 export function useOptionalLitAuth(): LitAuthContextValue | null {
   return useContext(LitAuthContext);
 }
-

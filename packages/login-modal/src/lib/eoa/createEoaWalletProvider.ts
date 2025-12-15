@@ -1,10 +1,5 @@
 import type { ReactNode } from 'react';
-import {
-  createWalletClient,
-  custom,
-  getAddress,
-  type Chain,
-} from 'viem';
+import { createWalletClient, custom, getAddress, type Chain } from 'viem';
 
 import type { LitEoaWalletProvider } from '../types';
 
@@ -52,7 +47,9 @@ export function createEoaWalletProvider(params: {
 
       const provider = await params.getEip1193Provider();
       const method =
-        params.requestAccounts === false ? 'eth_accounts' : 'eth_requestAccounts';
+        params.requestAccounts === false
+          ? 'eth_accounts'
+          : 'eth_requestAccounts';
 
       const accounts = (await provider.request({
         method,

@@ -11,7 +11,9 @@ export function LedgerFundingPanel({
   return (
     <div className="lit-login-modal__section">
       <div className="lit-login-modal__panel">
-        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>PKP Address</div>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+          PKP Address
+        </div>
         <div style={{ fontSize: 12 }} className="lit-login-modal__mono">
           {pkpAddress}
         </div>

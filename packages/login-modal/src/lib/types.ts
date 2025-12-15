@@ -3,7 +3,11 @@ import type { AuthData, PKPData } from '@lit-protocol/schemas';
 import type { ReactNode } from 'react';
 import type { ExpectedAccountOrWalletClient } from '@lit-protocol/networks';
 
-export type SupportedNetworkName = 'naga-dev' | 'naga-test' | 'naga-proto' | 'naga';
+export type SupportedNetworkName =
+  | 'naga-dev'
+  | 'naga-test'
+  | 'naga-proto'
+  | 'naga';
 
 export type AuthMethod =
   | 'eoa'
@@ -25,10 +29,10 @@ export interface AuthUser {
 
 export interface LitServices {
   litClient: Awaited<
-    ReturnType<(typeof import('@lit-protocol/lit-client'))['createLitClient']>
+    ReturnType<typeof import('@lit-protocol/lit-client')['createLitClient']>
   >;
   authManager: Awaited<
-    ReturnType<(typeof import('@lit-protocol/auth'))['createAuthManager']>
+    ReturnType<typeof import('@lit-protocol/auth')['createAuthManager']>
   >;
 }
 

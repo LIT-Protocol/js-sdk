@@ -6,16 +6,12 @@
   "targets": {
     "build-esm": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/login-modal",
         "main": "packages/login-modal/src/index.ts",
         "tsConfig": "packages/login-modal/tsconfig.lib.json",
-        "assets": [
-          "packages/login-modal/*.md"
-        ],
+        "assets": ["packages/login-modal/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
@@ -48,13 +44,9 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/login-modal/**/*.{ts,tsx}"
-        ]
+        "lintFilePatterns": ["packages/login-modal/**/*.{ts,tsx}"]
       }
     }
   },

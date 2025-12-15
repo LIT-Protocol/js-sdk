@@ -13,4 +13,3 @@ export function LitAuth({
   if (!auth?.isAuthenticated) return fallback;
   return children;
 }
-

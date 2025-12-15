@@ -39,9 +39,16 @@ export function AuthSettingsPanel({
 }: AuthSettingsPanelProps): ReactNode {
   return (
     <div className="lit-login-modal__section">
-      <div className="lit-login-modal__row" style={{ justifyContent: 'space-between' }}>
+      <div
+        className="lit-login-modal__row"
+        style={{ justifyContent: 'space-between' }}
+      >
         <h3 className="lit-login-modal__h3">Settings</h3>
-        <button type="button" onClick={onClose} className="lit-login-modal__btn lit-login-modal__btn--ghost">
+        <button
+          type="button"
+          onClick={onClose}
+          className="lit-login-modal__btn lit-login-modal__btn--ghost"
+        >
           ← Back
         </button>
       </div>
@@ -64,7 +71,9 @@ export function AuthSettingsPanel({
               <button
                 type="button"
                 className="lit-login-modal__btn lit-login-modal__btn--secondary"
-                onClick={() => setLoginServiceBaseUrl(defaultLoginServiceBaseUrl)}
+                onClick={() =>
+                  setLoginServiceBaseUrl(defaultLoginServiceBaseUrl)
+                }
               >
                 Reset to default
               </button>
@@ -110,7 +119,9 @@ export function AuthSettingsPanel({
                 <button
                   key={networkName}
                   type="button"
-                  className={`lit-login-modal__tab ${isActive ? 'lit-login-modal__tab--active' : ''}`}
+                  className={`lit-login-modal__tab ${
+                    isActive ? 'lit-login-modal__tab--active' : ''
+                  }`}
                   onClick={() => onSelectNetwork(networkName)}
                 >
                   {networkName}
@@ -154,4 +165,3 @@ export function AuthSettingsPanel({
     </div>
   );
 }
-
