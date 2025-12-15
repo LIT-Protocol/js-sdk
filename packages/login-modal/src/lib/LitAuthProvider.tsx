@@ -688,7 +688,7 @@ export function LitLoginModal({
         authData = await ViemAccountAuthenticator.authenticate(account);
       } else if (typeof eoa?.getWalletClient === 'function') {
         const walletClient = await eoa.getWalletClient();
-        authData = await WalletClientAuthenticator.authenticate(walletClient);
+        authData = await WalletClientAuthenticator.authenticate(walletClient as any);
       } else {
         const walletClient = await getInjectedWalletClient();
         authData = await WalletClientAuthenticator.authenticate(walletClient);
@@ -712,7 +712,7 @@ export function LitLoginModal({
       }
 
       if (typeof eoa?.getWalletClient === 'function') {
-        return await eoa.getWalletClient();
+        return (await eoa.getWalletClient()) as any;
       }
 
       const chain = servicesRef.current?.litClient?.getChainConfig()
@@ -1127,6 +1127,7 @@ export function LitLoginModal({
             services={servicesState}
             disabled={isAuthenticating}
             authServiceBaseUrl={authServiceBaseUrl}
+            authServiceApiKey={services?.authServiceApiKey}
             getEoaMintAccount={getEoaMintAccount}
             currentNetworkName={currentNetworkName}
           />

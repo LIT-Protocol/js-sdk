@@ -2,7 +2,6 @@
 import type { AuthData, PKPData } from '@lit-protocol/schemas';
 import type { ReactNode } from 'react';
 import type { ExpectedAccountOrWalletClient } from '@lit-protocol/networks';
-import type { WalletClient } from 'viem';
 
 export type SupportedNetworkName = 'naga-dev' | 'naga-test' | 'naga-proto' | 'naga';
 
@@ -52,7 +51,7 @@ export interface LitEoaWalletProvider {
    * Return a connected wallet client (e.g. Wagmi's `useWalletClient().data`).
    * The login modal will use this to generate the EOA AuthData (SIWE / AuthSig).
    */
-  getWalletClient: () => Promise<WalletClient>;
+  getWalletClient: () => Promise<unknown>;
   /**
    * Optional UI to render in the EOA step (e.g. a RainbowKit connect button).
    */
@@ -72,6 +71,7 @@ export interface PkpSelectionSectionProps {
   services: LitServices;
   disabled?: boolean;
   authServiceBaseUrl: string;
+  authServiceApiKey?: string;
   singlePkpMessaging?: boolean;
   currentNetworkName?: SupportedNetworkName;
   /**

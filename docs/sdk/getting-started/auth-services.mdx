@@ -16,6 +16,14 @@ The Lit Protocol Auth Services package helps you run the infrastructure required
 - `Auth Service`: Handles PKP minting for supported auth methods and exposes APIs consumed by the Lit JS SDK.
 - `Login Server`: Manages OAuth flows (Google, Discord, etc.) and issues short-lived session tokens that the Auth Service consumes.
 
+## When You Need An Auth Service
+
+You **do not** need an Auth Service for EOA-only flows, unless you want to sponsor EOA minting.
+
+- **EOA / EthWallet (no Auth Service)**: mint PKPs on-chain using `litClient.mintWithAuth` (or `mintWithEoa`) and a funded wallet account. See [EOA (External Owned Account)](/sdk/auth/pkp-native-auth/pkp-eoa-auth) and [EOA Authentication](/sdk/auth/eoa/eoa-auth).
+- **EOA sponsored mint (optional)**: if you run an Auth Service, you can mint via `POST /pkp/mint` (SDK: `litClient.authService.mintWithAuth`) so users don’t need gas. This is useful for UX, but it does mean you’re relying on the Auth Service for minting.
+- **Google / Discord / WebAuthn / Stytch / etc.**: these flows use the Auth Service for minting (`POST /pkp/mint`), so you must run (or use Lit-hosted) Auth Services.
+
 ## Hosted Auth Services
 
 Lit hosts default Auth Service instances so you can build without deploying infrastructure on day one. Point your application to the URL that matches the network you're targeting:

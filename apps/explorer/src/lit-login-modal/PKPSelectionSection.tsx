@@ -57,6 +57,9 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
   const [status, setStatus] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
+  const [eoaMintMode, setEoaMintMode] = useState<"on-chain" | "auth-service">(
+    "on-chain"
+  );
   const [fundingTokenId, setFundingTokenId] = useState<string | null>(null);
 
   // Pagination state
@@ -79,6 +82,8 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
   const ledgerTokenSymbol = isTestnetNetwork(currentNetworkName)
     ? "tstLPX"
     : "LITKEY";
+  const isEoaAuth = authMethod === "eoa" || Number(authData?.authMethodType) === 1;
+  const canSponsorEoaMint = isEoaAuth && Boolean(authServiceBaseUrl);
 
   // Debug logging
   useEffect(() => {
@@ -469,11 +474,17 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
     setStatus("Minting new PKP...");
     // console.log("authServiceBaseUrl:", authServiceBaseUrl);
     try {
-      const isEoa =
-        authMethod === "eoa" || Number(authData?.authMethodType) === 1;
+      const shouldUseAuthServiceForMint =
+        !isEoaAuth || (canSponsorEoaMint && eoaMintMode === "auth-service");
 
-      const result = isEoa
-        ? await (async () => {
+      const result = shouldUseAuthServiceForMint
+        ? await services.litClient.authService.mintWithAuth({
+            authData,
+            authServiceBaseUrl: authServiceBaseUrl,
+            scopes: ["sign-anything"],
+            apiKey: APP_INFO.litAuthServerApiKey,
+          })
+        : await (async () => {
             if (!getEoaMintAccount) {
               throw new Error(
                 "EOA mint requires a connected wallet. Provide an EOA wallet provider to the login modal."
@@ -485,13 +496,7 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
               authData,
               scopes: ["sign-anything"],
             } as any);
-          })()
-        : await services.litClient.authService.mintWithAuth({
-            authData,
-            authServiceBaseUrl: authServiceBaseUrl,
-            scopes: ["sign-anything"],
-            apiKey: APP_INFO.litAuthServerApiKey,
-          });
+          })();
 
       if (result?.data) {
         const newPkp: UIPKP = {
@@ -521,6 +526,24 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
     } finally {
       setIsMinting(false);
     }
+  };
+
+  const renderEoaSponsoredMintToggle = () => {
+    if (!canSponsorEoaMint) return null;
+    return (
+      <label className="flex items-center gap-2 text-[12px] text-gray-600 mt-3">
+        <input
+          type="checkbox"
+          checked={eoaMintMode === "auth-service"}
+          onChange={(e) =>
+            setEoaMintMode(e.target.checked ? "auth-service" : "on-chain")
+          }
+          disabled={disabled || isMinting}
+          className="accent-blue-600"
+        />
+        Sponsor mint via Auth Service (no gas needed)
+      </label>
+    );
   };
 
   const formatPublicKey = (pubKey: string) => {
@@ -670,6 +693,7 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
               <p className="m-0 text-[13px] text-gray-500">
                 Select a PKP wallet to continue. Click any address to copy it.
               </p>
+              {renderEoaSponsoredMintToggle()}
             </div>
           )}
 
@@ -1112,6 +1136,9 @@ const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
                   )}
                   {isMinting ? "Minting PKP..." : "⚡ Mint Your First PKP"}
                 </button>
+                <div className="flex justify-center">
+                  {renderEoaSponsoredMintToggle()}
+                </div>
               </div>
             )}
           </div>

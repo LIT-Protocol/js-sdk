@@ -32,12 +32,19 @@ export function DefaultPkpSelectionSection({
   services,
   disabled = false,
   authServiceBaseUrl,
+  authServiceApiKey,
   getEoaMintAccount,
 }: PkpSelectionSectionProps): ReactNode {
   const [pkps, setPkps] = useState<PKPData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [useAuthServiceMintForEoa, setUseAuthServiceMintForEoa] = useState(false);
+
+  const isEoa = useMemo(
+    () => authMethod === 'eoa' || Number(authData.authMethodType) === 1,
+    [authData.authMethodType, authMethod]
+  );
 
   const authLookup = useMemo(
     () => ({
@@ -68,7 +75,28 @@ export function DefaultPkpSelectionSection({
     setIsMinting(true);
     setError(null);
     try {
-      if (authMethod === 'eoa') {
+      const scopes = ['sign-anything'];
+
+      if (!isEoa) {
+        await services.litClient.authService.mintWithAuth({
+          authData,
+          scopes,
+          authServiceBaseUrl,
+          apiKey: authServiceApiKey,
+        });
+      } else if (useAuthServiceMintForEoa) {
+        if (!authServiceBaseUrl) {
+          throw new Error(
+            'Auth Service URL is not configured. Set `services.authServiceUrls` (or enable settings) to mint via the Auth Service.'
+          );
+        }
+        await services.litClient.authService.mintWithAuth({
+          authData,
+          scopes,
+          authServiceBaseUrl,
+          apiKey: authServiceApiKey,
+        });
+      } else {
         if (!getEoaMintAccount) {
           throw new Error('EOA mint requires a wallet account to be provided.');
         }
@@ -76,14 +104,8 @@ export function DefaultPkpSelectionSection({
         await services.litClient.mintWithAuth({
           account,
           authData,
-          scopes: ['sign-anything'],
+          scopes,
         } as any);
-      } else {
-        await services.litClient.authService.mintWithAuth({
-          authData,
-          scopes: ['sign-anything'],
-          authServiceBaseUrl,
-        });
       }
       await refresh();
     } catch (err) {
@@ -125,8 +147,10 @@ export function DefaultPkpSelectionSection({
           onClick={() => void mint()}
           disabled={disabled || isLoading || isMinting}
           title={
-            authMethod === 'eoa'
-              ? 'Mints on chain using your connected wallet'
+            isEoa
+              ? useAuthServiceMintForEoa
+                ? 'Mints via the Auth Service (sponsored)'
+                : 'Mints on chain using your connected wallet'
               : 'Requires an auth service'
           }
           className="lit-login-modal__btn lit-login-modal__btn--primary"
@@ -137,6 +161,20 @@ export function DefaultPkpSelectionSection({
           <span className="lit-login-modal__muted">Loading…</span>
         ) : null}
       </div>
+
+      {isEoa && authServiceBaseUrl ? (
+        <label className="lit-login-modal__row" style={{ gap: 10 }}>
+          <input
+            type="checkbox"
+            checked={useAuthServiceMintForEoa}
+            onChange={(e) => setUseAuthServiceMintForEoa(e.target.checked)}
+            disabled={disabled || isLoading || isMinting}
+          />
+          <span className="lit-login-modal__muted">
+            Sponsor mint via Auth Service (no gas needed)
+          </span>
+        </label>
+      ) : null}
 
       {pkps.length === 0 && !isLoading ? (
         <div className="lit-login-modal__muted">No PKPs found for this auth method.</div>

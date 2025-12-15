@@ -86,6 +86,8 @@ export function Root() {
           "naga-proto": "https://naga-proto-auth-service.getlit.dev",
           naga: "https://naga-auth-service.getlit.dev",
         },
+        // Optional: required only if your Auth Service gates requests.
+        authServiceApiKey: "YOUR_OPTIONAL_API_KEY",
         loginServerUrl: "https://login.litgateway.com",
         discordClientId: "YOUR_DISCORD_CLIENT_ID",
       }}
@@ -126,6 +128,38 @@ export function Root() {
 }
 ```
 
+### Any EIP-1193 provider (WalletConnect / Web3Modal / Privy / Dynamic, etc.)
+
+If your connection layer gives you an EIP-1193 provider, you can adapt it to the modal using `createEoaWalletProvider`.
+
+```tsx
+import { LitAuthProvider, createEoaWalletProvider } from "@lit-protocol/login-modal";
+
+export function Root() {
+  const eoa = createEoaWalletProvider({
+    getEip1193Provider: async () => {
+      // Return the connected EIP-1193 provider from your wallet stack.
+      // For injected wallets, this could be `window.ethereum`.
+      return window.ethereum!;
+    },
+    // Optional connect UI:
+    // renderConnect: () => <YourConnectButton />,
+  });
+
+  return (
+    <LitAuthProvider appName="my-app" enabledAuthMethods={["eoa"]} eoa={eoa}>
+      {/* ... */}
+    </LitAuthProvider>
+  );
+}
+```
+
+## Minting PKPs (EOA vs Auth Service)
+
+- **EOA (`enabledAuthMethods` includes `eoa`)**: minting is **on-chain by default** (no Auth Service). The user’s connected wallet signs the transaction, so it must have gas / test tokens.
+  - **Optional**: if you run an Auth Service, the modal can also do a **sponsored mint** via `POST /pkp/mint` (useful when the user has no gas). This requires `services.authServiceUrls` (and `services.authServiceApiKey` if your Auth Service gates requests).
+- **Non-EOA methods (Google/Discord/WebAuthn/Stytch, etc.)**: minting happens via the **Auth Service** (`POST /pkp/mint`), so you must provide `services.authServiceUrls` (and any required API key configuration).
+
 ## Custom UI
 
 Use <code>components</code> to override specific parts of the modal:
@@ -134,4 +168,3 @@ Use <code>components</code> to override specific parts of the modal:
 - <code>components.FundingPanel</code>: replace the default Ledger funding UI
 
 This is how the Explorer app customises the PKP selection and funding experiences.
-
