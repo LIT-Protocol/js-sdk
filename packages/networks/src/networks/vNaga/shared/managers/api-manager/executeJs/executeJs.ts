@@ -19,6 +19,7 @@ import { NodeError } from '@lit-protocol/constants';
 import { getChildLogger } from '@lit-protocol/logger';
 import {
   ExecuteJsResponse,
+  LitActionPaymentDetail,
   LitActionResponseStrategy,
 } from '@lit-protocol/types';
 import { z } from 'zod';
@@ -26,7 +27,6 @@ import { combineExecuteJSSignatures } from '../helper/get-signatures';
 import {
   ExecuteJsValueResponse,
   LitActionClaimData,
-  LitActionPaymentDetail,
 } from '../types';
 import { ExecuteJsResponseDataSchema } from './executeJs.ResponseDataSchema';
 import { _sumPaymentDetails } from './sumPaymentDetails';

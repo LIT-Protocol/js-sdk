@@ -3,7 +3,7 @@ import {
   EcdsaSigType,
   FrostSigType,
 } from '@lit-protocol/constants';
-import { Hex } from '@lit-protocol/types';
+import { Hex, LitActionPaymentDetail } from '@lit-protocol/types';
 
 // See src/p2p_comms/web/models.rs > BlsSignedMessageShare
 // Example output:
@@ -111,16 +111,6 @@ export interface LitActionSignedData {
   signatureShare: string; // JSON.stringify(SignatureShare)
   sigName: string;
   sigType: EcdsaSigType;
-}
-
-export interface LitActionPaymentDetail {
-  component: string;
-  quantity: number;
-  /**
-   * Price in wei for this component.
-   * Use bigint to avoid precision loss.
-   */
-  price: bigint;
 }
 
 /**

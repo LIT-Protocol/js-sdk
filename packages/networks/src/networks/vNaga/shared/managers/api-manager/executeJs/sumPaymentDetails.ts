@@ -1,4 +1,5 @@
-import type { ExecuteJsValueResponse, LitActionPaymentDetail } from '../types';
+import type { LitActionPaymentDetail } from '@lit-protocol/types';
+import type { ExecuteJsValueResponse } from '../types';
 
 /**
  * Sum payment details across multiple node responses.
