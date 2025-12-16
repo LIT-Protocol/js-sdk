@@ -1,0 +1,48 @@
+---
+title: "Current Prices"
+---
+import { CurrentPricesTable } from "/snippets/CurrentPricesTable.jsx";
+import { PriceProvider } from "/snippets/PriceProvider.jsx";
+
+The following table shows the current pricing for Lit Protocol services on the **Naga Prod / Mainnet V1** network. Prices are displayed in both $LITKEY tokens and USD (based on current market rates).
+
+<Note>
+Most prices update dynamically based on network usage. The values shown below reflect real-time prices fetched from the blockchain. Note that PKP Minting cost is static and does not change with network utilization.
+</Note>
+
+<PriceProvider component={CurrentPricesTable} />
+
+## Understanding the Price Table
+
+### Base vs Max Prices
+
+- **Base Price**: The minimum price when network usage is low
+- **Max Price**: The maximum price when the network is at full capacity
+- **Current Price**: The actual price at this moment, which varies between base and max based on usage
+
+### Product Types
+
+- **PKP Sign**: Signing operations using your Programmable Key Pair
+- **Decryption and Access Control**: Decrypting data and enforcing access control conditions
+- **Lit Action**: Executing serverless JavaScript functions (pricing varies by component)
+- **Sign Session Key**: Session-based signing operations
+- **PKP Minting**: Creating a new Programmable Key Pair (static price, does not vary with network usage)
+
+### Lit Action Pricing Components
+
+Lit Actions have multiple pricing components that are charged based on resource usage:
+
+- **Base Amount**: Fixed cost per Lit Action execution
+- **Runtime Length**: Cost per second of execution time
+- **Memory Usage**: Cost per megabyte of memory used
+- **Code Length**: Cost based on the size of your Lit Action code
+- **Response Length**: Cost based on the size of the response data
+- **Signatures**: Cost per signature generated
+- **Broadcasts**: Cost per broadcast operation
+- **Contract Calls**: Cost per smart contract call
+- **Call Depth**: Cost based on call stack depth
+- **Decrypts**: Cost per decryption operation
+- **Fetches**: Cost per HTTP fetch request
+
+The total cost of a Lit Action is calculated by summing all applicable components based on your action's actual resource usage.
+
