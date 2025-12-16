@@ -504,13 +504,16 @@ export interface SigResponse {
   dataSigned: string;
 }
 
+/**
+ * @typedef {object} LitActionPaymentDetail
+ * @description Represents the payment details for a specific component in a Lit Action.
+ * @property {string} component - The name or identifier of the component being paid for.
+ * @property {number} quantity - The number of units of the component.
+ * @property {bigint} price - Price in wei for this component. Use bigint to avoid precision loss.
+ */
 export interface LitActionPaymentDetail {
   component: string;
   quantity: number;
-  /**
-   * Price in wei for this component.
-   * Use bigint to avoid precision loss.
-   */
   price: bigint;
 }
 
