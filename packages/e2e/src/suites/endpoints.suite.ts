@@ -373,10 +373,22 @@ export function registerEndpointSuite(
           account: aliceAccount.account,
         });
 
-        const userAddress =
-          authContext.wallet?.account?.address ||
-          authContext.account?.address ||
-          aliceAccount.account.address;
+        // Extract address from authContext if it's an EOA auth context
+        // For EOA: account can be Account (has address) or WalletClient (has account.address)
+        // For PKP: account doesn't exist, fall back to aliceAccount
+        let userAddress: string;
+        if ('account' in authContext && authContext.account) {
+          const account = authContext.account as any;
+          if ('address' in account && account.address) {
+            userAddress = account.address;
+          } else if (account.account?.address) {
+            userAddress = account.account.address;
+          } else {
+            userAddress = aliceAccount.account.address;
+          }
+        } else {
+          userAddress = aliceAccount.account.address;
+        }
 
         const depositAmount = '0.00001';
         const depositResult = await paymentManager.deposit({
