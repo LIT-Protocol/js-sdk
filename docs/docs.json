@@ -32,8 +32,7 @@
             "group": "Pricing",
             "pages": [
               "learning-lit/pricing/payment-model",
-              "learning-lit/pricing/current-prices",
-              "learning-lit/pricing/example-lit-action-costs"
+              "learning-lit/pricing/current-prices"
             ]
           }
         ]
