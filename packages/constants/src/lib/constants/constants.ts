@@ -93,7 +93,6 @@ export const LIT_CHAINS_KEYS = [
   'waevEclipseDevnet',
   'verifyTestnet',
   'fuse',
-  'campNetwork',
   'vanar',
   'lisk',
   'chilizMainnet',
@@ -111,6 +110,7 @@ export const LIT_CHAINS_KEYS = [
   'bitTorrentTestnet',
   'storyOdyssey',
   'campTestnet',
+  'campMainnet',
   'hushedNorthstar',
   'amoy',
   'matchain',
@@ -739,19 +739,6 @@ export const LIT_CHAINS: LITChain<LitEVMChainKeys, LITEVMChain> = {
     type: null,
     vmType: VMTYPE.EVM,
   },
-  campNetwork: {
-    contractAddress: null,
-    chainId: 325000,
-    name: 'Camp Network',
-    symbol: 'ETH',
-    decimals: 18,
-    rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'],
-    blockExplorerUrls: [
-      'https://explorer.camp-network-testnet.gelato.digital/',
-    ],
-    type: null,
-    vmType: VMTYPE.EVM,
-  },
   vanar: {
     contractAddress: null,
     chainId: 78600,
@@ -946,12 +933,23 @@ export const LIT_CHAINS: LITChain<LitEVMChainKeys, LITEVMChain> = {
   },
   campTestnet: {
     contractAddress: null,
-    chainId: 325000,
+    chainId: 123420001114,
     name: 'Camp Testnet',
-    symbol: 'ETH',
+    symbol: 'CAMP',
     decimals: 18,
-    rpcUrls: ['https://rpc.camp-network-testnet.gelato.digital'],
-    blockExplorerUrls: ['https://camp-network-testnet.blockscout.com'],
+    rpcUrls: ['https://rpc.basecamp.t.raas.gelato.cloud'],
+    blockExplorerUrls: ['https://basecamp.cloud.blockscout.com/'],
+    type: null,
+    vmType: VMTYPE.EVM,
+  },
+  campMainnet: {
+    contractAddress: null,
+    chainId: 484,
+    name: 'Camp Mainnet',
+    symbol: 'CAMP',
+    decimals: 18,
+    rpcUrls: ['https://rpc.camp.raas.gelato.cloud'],
+    blockExplorerUrls: ['https://camp.cloud.blockscout.com/'],
     type: null,
     vmType: VMTYPE.EVM,
   },
@@ -1070,6 +1068,7 @@ export const LIT_EVM_CHAINS = LIT_CHAINS;
  */
 export const LIT_NETWORK = {
   NagaDev: 'naga-dev',
+  NagaTest: 'naga-test',
   Custom: 'custom',
 } as const;
 
@@ -1091,53 +1090,12 @@ export type LIT_NETWORK_VALUES = ConstantValues<typeof LIT_NETWORK>;
  */
 export const RPC_URL_BY_NETWORK: Record<LIT_NETWORK_VALUES, LIT_RPC_VALUES> = {
   [LIT_NETWORK.NagaDev]: LIT_RPC.CHRONICLE_YELLOWSTONE,
+  [LIT_NETWORK.NagaTest]: LIT_RPC.CHRONICLE_YELLOWSTONE,
   [LIT_NETWORK.Custom]: LIT_RPC.LOCAL_ANVIL,
-} as const;
-
-/**
- * Mapping of network names to their corresponding relayer URLs.
- * @deprecated - use naga doesn't use these urls anymore.
- */
-export const RELAYER_URL_BY_NETWORK: Record<LIT_NETWORK_VALUES, string> = {
-  [LIT_NETWORK.NagaDev]: 'https://naga-dev-relayer.getlit.dev',
-  [LIT_NETWORK.Custom]: 'http://localhost:3000',
-} as const;
-
-/**
- * Mapping of network values to corresponding Metamask chain info.
- */
-export const METAMASK_CHAIN_INFO_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
-  typeof METAMASK_CHAIN_INFO.yellowstone
-> = {
-  [LIT_NETWORK.NagaDev]: METAMASK_CHAIN_INFO.yellowstone,
-  [LIT_NETWORK.Custom]: METAMASK_CHAIN_INFO.yellowstone,
 } as const;
 
 export const HTTP = 'http://';
 export const HTTPS = 'https://';
-
-/**
- * Mapping of network values to corresponding http protocol.
- */
-export const HTTP_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
-  typeof HTTP | typeof HTTPS
-> = {
-  [LIT_NETWORK.NagaDev]: HTTPS,
-  [LIT_NETWORK.Custom]: HTTP, // default, can be changed by config
-} as const;
-
-/**
- * Mapping of network values to their corresponding centralisation status.
- */
-export const CENTRALISATION_BY_NETWORK: Record<
-  LIT_NETWORK_VALUES,
-  'centralised' | 'decentralised' | 'unknown'
-> = {
-  [LIT_NETWORK.NagaDev]: 'centralised',
-  [LIT_NETWORK.Custom]: 'unknown',
-} as const;
 
 /**
  * Solana Chains supported by the LIT protocol.  Use the chain name as a key in this object.
@@ -1270,6 +1228,7 @@ export const LOCAL_STORAGE_KEYS = {
  */
 export const LIT_NETWORKS: Record<LIT_NETWORK_VALUES, string[]> = {
   [LIT_NETWORK.NagaDev]: [],
+  [LIT_NETWORK.NagaTest]: [],
   [LIT_NETWORK.Custom]: [],
 } as const;
 

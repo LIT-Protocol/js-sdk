@@ -1,0 +1,58 @@
+---
+title: generatePrivateKey
+---
+
+# Function
+
+> **generatePrivateKey**(`params`)
+
+Generates a new wrapped key inside a Lit Action, stores the encrypted payload, and returns the wrapped-key identifier together with the generated public key.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required>
+  Session signatures produced for the PKP that should own the wrapped key.
+</ParamField>
+
+<ParamField path="params.litClient" type="LitClient" required>
+  The Lit client instance used to execute the Lit Action and resolve the target network cluster.
+</ParamField>
+
+<ParamField path="params.network" type="'evm' | 'solana'" required>
+  Determines which Lit Action to run and which key type to generate.
+</ParamField>
+
+<ParamField path="params.memo" type="string" required>
+  Free-form description stored alongside the encrypted key metadata.
+</ParamField>
+
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional cap on the price you are willing to pay for the underlying `executeJs` request.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="GeneratePrivateKeyResult">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="id" type="string" required>
+      Wrapped-key identifier that can be used to fetch or sign with the stored key.
+    </ResponseField>
+    <ResponseField name="pkpAddress" type="string" required>
+      PKP address associated with the wrapped key (derived from the session signatures).
+    </ResponseField>
+    <ResponseField name="generatedPublicKey" type="string" required>
+      Public key for the newly generated private key.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example
+
+```ts
+const { id, generatedPublicKey } = await wrappedKeysApi.generatePrivateKey({
+  pkpSessionSigs,
+  litClient,
+  network: 'evm',
+  memo: 'relayer wallet',
+});
+```

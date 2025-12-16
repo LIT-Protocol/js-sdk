@@ -1,4 +1,8 @@
-import { getFirstSessionSig, getPkpAddressFromSessionSig } from './utils';
+import {
+  getFirstSessionSig,
+  getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
+} from './utils';
 import { storePrivateKeyBatch } from '../service-client';
 import { StoreKeyBatchParams } from '../service-client/types';
 import {
@@ -15,9 +19,10 @@ import {
 export async function storeEncryptedKeyBatch(
   params: StoreEncryptedKeyBatchParams
 ): Promise<StoreEncryptedKeyBatchResult> {
-  const { pkpSessionSigs, litNodeClient, keyBatch } = params;
+  const { pkpSessionSigs, litClient, keyBatch } = params;
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+  const litNetwork = getLitNetworkFromClient(litClient);
 
   const storedKeyMetadataBatch: StoreKeyBatchParams['storedKeyMetadataBatch'] =
     keyBatch.map(
@@ -48,6 +53,6 @@ export async function storeEncryptedKeyBatch(
   return storePrivateKeyBatch({
     storedKeyMetadataBatch,
     sessionSig,
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
   });
 }

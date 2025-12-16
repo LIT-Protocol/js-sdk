@@ -16,11 +16,7 @@ function composeAuthHeader(sessionSig: AuthSig) {
   ).toString('base64')}`;
 }
 
-const supportedNetworks: SupportedNetworks[] = [
-  'datil-dev',
-  'datil-test',
-  'datil',
-];
+const supportedNetworks: SupportedNetworks[] = ['naga-dev', 'naga-test'];
 
 function isSupportedLitNetwork(
   litNetwork: LIT_NETWORK_VALUES

@@ -45,6 +45,8 @@ import {
   LitNodeSignature,
   PkpIdentifierRaw,
   RequestItem,
+  AuthSig,
+  ExecuteJsResponse,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -68,6 +70,10 @@ import {
   MintWithCustomAuthSchema,
 } from './schemas/MintWithCustomAuthSchema';
 import { NagaNetworkModule } from './type';
+import type {
+  NagaLitClient,
+  NagaLitClientContext,
+} from './types/NagaLitClient.type';
 
 const _logger = getChildLogger({
   module: 'createLitClient',
@@ -170,7 +176,7 @@ export const createLitClient = async ({
  */
 export const _createNagaLitClient = async (
   networkModule: NagaNetworkModule
-) => {
+): Promise<NagaLitClient> => {
   const _stateManager = await networkModule.createStateManager<
     Awaited<ReturnType<typeof orchestrateHandshake>>,
     NagaNetworkModule
@@ -317,13 +323,12 @@ export const _createNagaLitClient = async (
   async function _signSessionKey(params: {
     nodeUrls: string[];
     requestBody: z.infer<typeof JsonSignSessionKeyRequestForPkpReturnSchema>;
-  }) {
+  }): Promise<AuthSig> {
     return await executeWithHandshake({
       operation: 'signSessionKey',
       buildContext: buildHandshakeExecutionContext,
       refreshContext: refreshHandshakeExecutionContext,
-      runner: async ({ handshakeResult, connectionInfo, jitContext }) => {
-        // 2. 🟪 Create requests
+      runner: async ({ handshakeResult, jitContext }) => {
         const requestArray =
           await networkModule.api.signSessionKey.createRequest(
             params.requestBody,
@@ -334,14 +339,12 @@ export const _createNagaLitClient = async (
 
         const requestId = requestArray[0].requestId;
 
-        // 3. 🟩 Dispatch requests
         const result = await dispatchRequests<any, any>(
           requestArray,
           requestId,
           handshakeResult.threshold
         );
 
-        // 4. 🟪 Handle response
         return await networkModule.api.signSessionKey.handleResponse(
           result as any,
           params.requestBody.pkpPublicKey,
@@ -357,7 +360,7 @@ export const _createNagaLitClient = async (
     requestBody: z.infer<
       typeof JsonSignCustomSessionKeyRequestForPkpReturnSchema
     >;
-  }) {
+  }): Promise<AuthSig> {
     return await executeWithHandshake({
       operation: 'signCustomSessionKey',
       buildContext: buildHandshakeExecutionContext,
@@ -391,7 +394,7 @@ export const _createNagaLitClient = async (
 
   async function _executeJs(
     params: z.infer<typeof networkModule.api.executeJs.schemas.Input>
-  ) {
+  ): Promise<ExecuteJsResponse> {
     _logger.info(`🔥 executing JS with ${params.code ? 'code' : 'ipfsId'}`);
 
     return await executeWithHandshake({
@@ -399,14 +402,19 @@ export const _createNagaLitClient = async (
       buildContext: buildHandshakeExecutionContext,
       refreshContext: refreshHandshakeExecutionContext,
       runner: async ({ handshakeResult, connectionInfo, jitContext }) => {
-        const requestArray = (await networkModule.api.executeJs.createRequest({
-          pricingContext: {
-            product: 'LIT_ACTION',
-            userMaxPrice: params.userMaxPrice,
-            nodePrices: jitContext.nodePrices,
-            threshold: handshakeResult.threshold,
-          },
-          authContext: params.authContext,
+        type ExecuteJsCreateRequestParams = Parameters<
+          typeof networkModule.api.executeJs.createRequest
+        >[0];
+
+        const pricingContext: ExecuteJsCreateRequestParams['pricingContext'] = {
+          product: 'LIT_ACTION',
+          userMaxPrice: params.userMaxPrice,
+          nodePrices: jitContext.nodePrices,
+          threshold: handshakeResult.threshold,
+        };
+
+        const baseExecuteJsParams = {
+          pricingContext,
           executionContext: {
             code: params.code,
             ipfsId: params.ipfsId,
@@ -417,7 +425,22 @@ export const _createNagaLitClient = async (
           useSingleNode: params.useSingleNode,
           responseStrategy: params.responseStrategy,
           jitContext,
-        })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
+        };
+
+        const executeJsParams: ExecuteJsCreateRequestParams =
+          'sessionSigs' in params && params.sessionSigs
+            ? {
+                ...baseExecuteJsParams,
+                sessionSigs: params.sessionSigs,
+              }
+            : {
+                ...baseExecuteJsParams,
+                authContext: params.authContext,
+              };
+
+        const requestArray = (await networkModule.api.executeJs.createRequest(
+          executeJsParams
+        )) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
         const requestId = requestArray[0].requestId;
 
@@ -595,10 +618,17 @@ export const _createNagaLitClient = async (
     );
 
     // ========== Encrypt ==========
+    const encryptionPayload =
+      dataAsUint8Array instanceof Uint8Array
+        ? dataAsUint8Array
+        : new Uint8Array(dataAsUint8Array);
+
+    const identityBytes = uint8arrayFromString(identityParam, 'utf8');
+
     const ciphertext = await blsEncrypt(
       currentHandshakeResult.coreNodeConfig.subnetPubKey,
-      dataAsUint8Array,
-      uint8arrayFromString(identityParam, 'utf8')
+      encryptionPayload,
+      identityBytes
     );
 
     return {
@@ -642,6 +672,12 @@ export const _createNagaLitClient = async (
           },
         },
         'Handshake result is not available from state manager at the time of decrypt.'
+      );
+    }
+
+    if (!currentConnectionInfo) {
+      throw new Error(
+        'Connection info is not available from state manager at the time of decrypt.'
       );
     }
 
@@ -776,13 +812,14 @@ export const _createNagaLitClient = async (
     return response;
   }
 
-  const litClient = {
+  const litClient: NagaLitClient = {
+    networkName: networkModule.getNetworkName(),
     // This function is likely be used by another module to get the current context, eg. auth manager
     // only adding what is required by other modules for now.
     // maybe you will need connectionInfo: _stateManager.getLatestConnectionInfo(),
     encrypt: _encrypt,
     decrypt: _decrypt,
-    getContext: async () => {
+    getContext: async (): Promise<NagaLitClientContext> => {
       return {
         latestBlockhash: await _stateManager.getLatestBlockhash(),
         latestConnectionInfo: _stateManager.getLatestConnectionInfo(),

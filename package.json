@@ -5,10 +5,12 @@
   "scripts": {
     "sync:contracts": "nx run contracts:sync",
     "sync:docs-changelog": "node tools/sync-docs-changelog.js",
+    "sync:wk": "node packages/wrapped-keys-lit-actions/sync-actions-to-ipfs.js",
     "sync:check": "sh -c 'if [ -n \"$PKG\" ]; then pnpm syncpack list-mismatches --types prod,dev,peer --filter \"$PKG\"; else pnpm syncpack list-mismatches --types prod,dev,peer; fi'",
     "sync:fix": "sh -c 'if [ -n \"$PKG\" ]; then pnpm syncpack fix-mismatches --types prod,dev,peer --filter \"$PKG\"; else pnpm syncpack fix-mismatches --types prod,dev,peer; fi'",
+    "generate:lit-actions": "pnpm --filter @lit-protocol/wrapped-keys-lit-actions generate-lit-actions",
     "reset": "rimraf dist pnpm-lock.yaml node_modules tmp yarn-error.log yarn.lock package-lock.json learn-debug.log .nx lit-auth-storage pkp-tokens lit-auth-local ./e2e/dist ./e2e/node_modules",
-    "build": "nx run-many --parallel=false --target=build --all --exclude=wrapped-keys,wrapped-keys-lit-actions",
+    "build": "nx run-many --parallel=false --target=build --all",
     "gen:local-network-context": "dotenvx run --env-file=.env -- node --conditions=import --import tsx packages/networks/src/networks/vNaga/shared/scripts/generate-abi-signatures.ts",
     "prettier": "npx nx format:write --all",
     "lint": "npx nx run-many --target=lint --all",
@@ -17,6 +19,9 @@
     "test:e2e": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000 --runTestsByPath packages/e2e/src/e2e.spec.ts",
     "test:target": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000",
     "test:e2e:ci": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} npx jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000 --runTestsByPath",
+    "pretest:e2e": "pnpm run generate:lit-actions",
+    "pretest:e2e:ci": "pnpm run generate:lit-actions",
+    "pretest:custom": "pnpm run generate:lit-actions",
     "test:health": "LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- tsx packages/e2e/src/health/index.ts",
     "ci:health": "LOG_LEVEL=${LOG_LEVEL:-silent} tsx packages/e2e/src/health/index.ts"
   },
@@ -58,7 +63,8 @@
     "viem": "2.38.3",
     "wagmi": "2.18.1",
     "zod": "3.24.3",
-    "zod-validation-error": "3.4.0"
+    "zod-validation-error": "3.4.0",
+    "@solana/kit": "4.0.0"
   },
   "devDependencies": {
     "@changesets/cli": "2.29.4",
@@ -100,6 +106,7 @@
     "prettier": "2.8.8",
     "rimraf": "6.0.1",
     "ts-jest": "29.2.5",
+    "tweetnacl": "1.0.3",
     "ts-node": "10.9.2",
     "tsx": "4.20.5",
     "typedoc": "0.28.12",

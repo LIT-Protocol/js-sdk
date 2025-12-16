@@ -89,6 +89,33 @@ export { getAuthIdByAuthMethod } from './lib/authenticators/helper/utils';
  * @returns {SessionKeyPair} The generated session key pair.
  */
 export { generateSessionKeyPair } from './lib/AuthManager/utils/generateSessionKeyPair';
+export { validateDelegationAuthSig } from './lib/AuthManager/utils/validateDelegationAuthSig';
+
+/**
+ * Utility function to generate a PKP delegation auth signature for a given session key pair.
+ * The PKP will sign the session key delegation message via Lit nodes.
+ * This function is useful for server-side scenarios where you want to pre-generate
+ * PKP session materials and reuse them across multiple requests.
+ */
+export { generatePkpDelegationAuthSig } from './lib/AuthManager/authAdapters/generatePkpDelegationAuthSig';
+
+/**
+ * Utility function to generate an EOA delegation auth signature for a given session key pair.
+ * The EOA wallet will sign the session key delegation message directly.
+ * This function is useful for server-side scenarios where you want to pre-generate
+ * EOA session materials and reuse them across multiple requests.
+ */
+export { generateEoaDelegationAuthSig } from './lib/AuthManager/authAdapters/generateEoaDelegationAuthSig';
+
+/**
+ * Utility function to create a PKP auth context from pre-generated session materials.
+ * This is a streamlined API for server-side scenarios where session materials
+ * are generated once and reused across multiple requests.
+ *
+ * This function only requires the essential parameters (pkpPublicKey, sessionKeyPair, delegationAuthSig)
+ * and extracts auth config information from the delegation signature automatically.
+ */
+export { getPkpAuthContextFromPreGeneratedAdapter } from './lib/AuthManager/authAdapters/getPkpAuthContextFromPreGeneratedAdapter';
 
 // ============================== Authenticators ==============================
 export {

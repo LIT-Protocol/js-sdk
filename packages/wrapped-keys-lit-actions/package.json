@@ -24,9 +24,12 @@
     "genReact": false
   },
   "scripts": {
-    "generate-lit-actions": "yarn node ./esbuild.config.js"
+    "generate-lit-actions": "node ./esbuild.config.js"
   },
   "version": "8.0.1",
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "devDependencies": {
+    "buffer": "^6.0.3"
+  }
 }

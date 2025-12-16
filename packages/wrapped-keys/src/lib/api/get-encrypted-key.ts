@@ -1,4 +1,8 @@
-import { getFirstSessionSig, getPkpAddressFromSessionSig } from './utils';
+import {
+  getFirstSessionSig,
+  getPkpAddressFromSessionSig,
+  getLitNetworkFromClient,
+} from './utils';
 import { fetchPrivateKey } from '../service-client';
 import { GetEncryptedKeyDataParams, StoredKeyData } from '../types';
 
@@ -11,15 +15,16 @@ import { GetEncryptedKeyDataParams, StoredKeyData } from '../types';
 export async function getEncryptedKey(
   params: GetEncryptedKeyDataParams
 ): Promise<StoredKeyData> {
-  const { pkpSessionSigs, litNodeClient, id } = params;
+  const { pkpSessionSigs, litClient, id } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
+  const litNetwork = getLitNetworkFromClient(litClient);
 
   return fetchPrivateKey({
     pkpAddress,
     id,
     sessionSig,
-    litNetwork: litNodeClient.config.litNetwork,
+    litNetwork,
   });
 }

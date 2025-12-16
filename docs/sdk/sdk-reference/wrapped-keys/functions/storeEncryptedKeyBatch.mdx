@@ -1,0 +1,39 @@
+---
+title: storeEncryptedKeyBatch
+---
+
+# Function
+
+> **storeEncryptedKeyBatch**(`params`)
+
+Stores multiple encrypted keys in a single request.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required />
+<ParamField path="params.litClient" type="LitClient" required />
+<ParamField path="params.keyBatch" type="Array<StoredKeyData-like>" required>
+  Array of objects containing `ciphertext`, `dataToEncryptHash`, `publicKey`, `keyType`, and `memo`.
+</ParamField>
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional price cap for the Lit Action.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="StoreEncryptedKeyBatchResult">
+  <Expandable title="properties" defaultOpen={true}>
+    <ResponseField name="pkpAddress" type="string" required />
+    <ResponseField name="ids" type="string[]" required />
+  </Expandable>
+</ResponseField>
+
+## Example
+
+```ts
+const { ids } = await wrappedKeysApi.storeEncryptedKeyBatch({
+  pkpSessionSigs,
+  litClient,
+  keyBatch,
+});
+```

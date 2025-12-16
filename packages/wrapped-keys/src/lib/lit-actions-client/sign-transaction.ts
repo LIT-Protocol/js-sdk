@@ -1,9 +1,4 @@
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
-import {
-  AccessControlConditions,
-  ILitNodeClient,
-  SessionSigsMap,
-} from '@lit-protocol/types';
+import { AccessControlConditions, SessionSigsMap } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
 import {
@@ -11,9 +6,10 @@ import {
   SerializedTransaction,
   StoredKeyData,
 } from '../types';
+import type { LitClient } from '../types';
 
 interface SignTransactionWithLitActionParams {
-  litNodeClient: ILitNodeClient;
+  litClient: LitClient;
   pkpSessionSigs: SessionSigsMap;
   litActionIpfsCid?: string;
   litActionCode?: string;
@@ -22,6 +18,7 @@ interface SignTransactionWithLitActionParams {
   accessControlConditions: AccessControlConditions;
   broadcast: boolean;
   versionedTransaction?: boolean;
+  userMaxPrice?: bigint;
 }
 
 export async function signTransactionWithLitAction({
@@ -29,16 +26,18 @@ export async function signTransactionWithLitAction({
   broadcast,
   litActionIpfsCid,
   litActionCode,
-  litNodeClient,
+  litClient,
   pkpSessionSigs,
   storedKeyMetadata: { ciphertext, dataToEncryptHash, pkpAddress },
   unsignedTransaction,
   versionedTransaction,
+  userMaxPrice,
 }: SignTransactionWithLitActionParams): Promise<string> {
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
+    userMaxPrice,
     jsParams: {
       pkpAddress,
       ciphertext,
@@ -47,10 +46,15 @@ export async function signTransactionWithLitAction({
       broadcast,
       accessControlConditions,
       versionedTransaction,
-    },
-    ipfsOptions: {
-      overwriteCode:
-        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
+      jsParams: {
+        pkpAddress,
+        ciphertext,
+        dataToEncryptHash,
+        unsignedTransaction,
+        broadcast,
+        accessControlConditions,
+        versionedTransaction,
+      },
     },
   });
 

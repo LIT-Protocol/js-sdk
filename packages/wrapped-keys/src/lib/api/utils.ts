@@ -1,5 +1,4 @@
-import { ethers } from 'ethers';
-
+import { LIT_NETWORK, LIT_NETWORK_VALUES } from '@lit-protocol/constants';
 import { logger } from '@lit-protocol/logger';
 import {
   AccsDefaultParams,
@@ -9,7 +8,8 @@ import {
 } from '@lit-protocol/types';
 
 import { CHAIN_ETHEREUM, NETWORK_EVM, NETWORK_SOLANA } from '../constants';
-import { KeyType, Network } from '../types';
+import { ethers } from 'ethers';
+import { KeyType, Network, LitClient } from '../types';
 
 export function getKeyTypeFromNetwork(network: Network): KeyType {
   if (network === NETWORK_EVM) {
@@ -107,4 +107,22 @@ export function getPkpAccessControlCondition(
       value: pkpAddress,
     },
   };
+}
+
+export function getLitNetworkFromClient(
+  litClient: LitClient
+): LIT_NETWORK_VALUES {
+  const networkName = litClient.networkName;
+
+  if (!networkName) {
+    throw new Error(
+      'Unable to resolve litNetwork from the provided Lit client.'
+    );
+  }
+
+  if (!Object.values(LIT_NETWORK).includes(networkName as LIT_NETWORK_VALUES)) {
+    throw new Error(`Unsupported litNetwork value: ${networkName}`);
+  }
+
+  return networkName as LIT_NETWORK_VALUES;
 }

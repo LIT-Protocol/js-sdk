@@ -1,4 +1,3 @@
-import { GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK } from '@lit-protocol/constants';
 import { AccessControlConditions } from '@lit-protocol/types';
 
 import { postLitActionValidation } from './utils';
@@ -9,6 +8,7 @@ interface GeneratePrivateKeyLitActionParams extends GeneratePrivateKeyParams {
   accessControlConditions: AccessControlConditions;
   litActionIpfsCid?: string;
   litActionCode?: string;
+  userMaxPrice?: bigint;
 }
 
 interface GeneratePrivateKeyLitActionResult {
@@ -18,25 +18,23 @@ interface GeneratePrivateKeyLitActionResult {
 }
 
 export async function generateKeyWithLitAction({
-  litNodeClient,
+  litClient,
   pkpSessionSigs,
   litActionIpfsCid,
   litActionCode,
   accessControlConditions,
   pkpAddress,
+  userMaxPrice,
 }: GeneratePrivateKeyLitActionParams): Promise<GeneratePrivateKeyLitActionResult> {
-  const result = await litNodeClient.executeJs({
+  const result = await litClient.executeJs({
     useSingleNode: true,
     sessionSigs: pkpSessionSigs,
     ipfsId: litActionIpfsCid,
     code: litActionCode,
+    userMaxPrice,
     jsParams: {
       pkpAddress,
       accessControlConditions,
-    },
-    ipfsOptions: {
-      overwriteCode:
-        GLOBAL_OVERWRITE_IPFS_CODE_BY_NETWORK[litNodeClient.config.litNetwork],
     },
   });
 

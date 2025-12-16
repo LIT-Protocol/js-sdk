@@ -123,6 +123,7 @@ export function createEnvVars(): EnvVars {
   });
 
   console.log('✅ Env Vars:', clone);
+  console.log("When RPC URL is undefined, module's default RPC will be used.");
 
   return result;
 }

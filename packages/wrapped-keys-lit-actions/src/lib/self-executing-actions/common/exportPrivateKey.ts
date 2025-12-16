@@ -3,16 +3,6 @@ import { exportPrivateKey } from '../../raw-action-functions/common/exportPrivat
 
 import type { ExportPrivateKeyParams } from '../../raw-action-functions/common/exportPrivateKey';
 
-// Using local declarations to avoid _every file_ thinking these are always in scope
-declare const ciphertext: ExportPrivateKeyParams['ciphertext'];
-declare const dataToEncryptHash: ExportPrivateKeyParams['dataToEncryptHash'];
-declare const accessControlConditions: ExportPrivateKeyParams['accessControlConditions'];
+declare const jsParams: ExportPrivateKeyParams;
 
-(async () =>
-  litActionHandler(async () =>
-    exportPrivateKey({
-      accessControlConditions,
-      ciphertext,
-      dataToEncryptHash,
-    })
-  ))();
+(async () => litActionHandler(async () => exportPrivateKey(jsParams)))();
