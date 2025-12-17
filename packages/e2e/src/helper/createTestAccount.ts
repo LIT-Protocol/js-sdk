@@ -27,6 +27,11 @@ type CreateTestAccountOpts = {
     };
     userAddresses: string[] | `0x${string}`[];
   };
+  /**
+   * Optional: Use a fixed private key instead of generating a new random one.
+   * This allows reusing the same test account across multiple test runs.
+   */
+  privateKey?: `0x${string}`;
 };
 
 export type CreateTestAccountResult = {
@@ -49,8 +54,9 @@ export async function createTestAccount(
 ): Promise<CreateTestAccountResult> {
   console.log(`--- ${`[${opts.label}]`} Creating test account ---`);
   // 1. store result
+  const privateKey = opts.privateKey ?? generatePrivateKey();
   let person: CreateTestAccountResult = {
-    account: privateKeyToAccount(generatePrivateKey()),
+    account: privateKeyToAccount(privateKey),
     pkp: undefined,
     eoaAuthContext: undefined,
     pkpAuthContext: undefined,
@@ -66,7 +72,10 @@ export async function createTestAccount(
   person.authData = personAccountAuthData;
 
   console.log(`Address`, person.account.address);
-  console.log(`opts:`, opts);
+  console.log(`opts:`, {
+    ...opts,
+    privateKey: opts.privateKey ? (opts.privateKey.slice(0, 6) + '...') : undefined,
+  });
 
   // 3. fund it
   if (opts.fundAccount) {

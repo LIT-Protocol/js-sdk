@@ -1,0 +1,39 @@
+export const DECRYPT_WITHIN_LIT_ACTION = `
+(async () => {
+  const { accessControlConditions, ciphertext, dataToEncryptHash } = jsParams;
+
+  // Decrypt the API key
+  const decryptedApiKey = await Lit.Actions.decryptAndCombine({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+    authSig: null,
+    chain: "ethereum",
+  });
+
+  // Parse the decrypted API key
+  const apiKey = JSON.parse(decryptedApiKey);
+
+  // Use the API key in a fetch request
+  const response = await fetch("https://api.coingecko.com/api/v3/ping", {
+    method: "GET",
+    headers: {
+      "Authorization": \`Bearer \${apiKey.key}\`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const responseData = await response.json();
+
+  // Simulate runtime of 5 seconds
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  Lit.Actions.setResponse({
+    response: JSON.stringify({
+      success: true,
+      data: responseData,
+      // Note: We don't expose the actual API key in the response
+    }),
+  });
+})();
+`;
