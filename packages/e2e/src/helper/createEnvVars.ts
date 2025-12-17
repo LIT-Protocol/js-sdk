@@ -46,7 +46,9 @@ export function createEnvVars(): EnvVars {
     !SUPPORTED_NETWORKS.includes(networkEnv as SupportedNetwork)
   ) {
     throw new Error(
-      `❌ NETWORK env var is not set or not supported. Found: ${networkEnvRaw ?? 'undefined'}`
+      `❌ NETWORK env var is not set or not supported. Found: ${
+        networkEnvRaw ?? 'undefined'
+      }`
     );
   }
 
@@ -60,13 +62,11 @@ export function createEnvVars(): EnvVars {
   if (network.includes('local')) {
     Object.assign(testEnv.local, { type: 'local' });
     privateKeyEnvKey = testEnv.local.key;
-    privateKey = (process.env[privateKeyEnvKey] ?? '')
-      .trim() as `0x${string}`;
+    privateKey = (process.env[privateKeyEnvKey] ?? '').trim() as `0x${string}`;
   } else {
     Object.assign(testEnv.live, { type: 'live' });
     privateKeyEnvKey = testEnv.live.key;
-    privateKey = (process.env[privateKeyEnvKey] ?? '')
-      .trim() as `0x${string}`;
+    privateKey = (process.env[privateKeyEnvKey] ?? '').trim() as `0x${string}`;
   }
 
   if (!privateKey) {
@@ -82,7 +82,7 @@ export function createEnvVars(): EnvVars {
   }
 
   if (!privateKey.startsWith('0x')) {
-    privateKey = (`0x${privateKey}` as unknown) as `0x${string}`;
+    privateKey = `0x${privateKey}` as unknown as `0x${string}`;
   }
 
   // 3. Get RPC URL
