@@ -43,6 +43,7 @@ export type ListEncryptedKeyMetadataParams = BaseApiParams;
  */
 export type GetEncryptedKeyDataParams = BaseApiParams & {
   id: string;
+  includeVersions?: boolean;
 };
 
 /** Metadata for a key that has been stored, encrypted, on the wrapped keys backend service
@@ -56,6 +57,8 @@ export type GetEncryptedKeyDataParams = BaseApiParams & {
  * @property { string } memo A (typically) user-provided descriptor for the encrypted private key
  * @property { string } id The unique identifier (UUID V4) of the encrypted private key
  * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the client who stored the key was connected to
+ * @property { string } [updatedAt] ISO 8601 timestamp of when the key was last updated
+ * @property { WrappedKeyVersion[] } [versions] Historical versions of the key (only included when requested)
  */
 export interface StoredKeyMetadata {
   publicKey: string;
@@ -64,6 +67,8 @@ export interface StoredKeyMetadata {
   litNetwork: LIT_NETWORKS_KEYS;
   memo: string;
   id: string;
+  updatedAt?: string;
+  versions?: WrappedKeyVersion[];
 }
 
 /** Complete encrypted private key data, including the `ciphertext` and `dataToEncryptHash` necessary to decrypt the key
@@ -75,6 +80,35 @@ export interface StoredKeyMetadata {
 export interface StoredKeyData extends StoredKeyMetadata {
   ciphertext: string;
   dataToEncryptHash: string;
+}
+
+/** Represents a historical version of a wrapped key after an update operation
+ * Contains the previous state of the key including ciphertext and metadata
+ *
+ * @typedef WrappedKeyVersion
+ * @property { string } id The unique identifier (UUID V4) of this version
+ * @property { string } ciphertext The base64 encoded, salted & encrypted private key for this version
+ * @property { string } dataToEncryptHash SHA-256 hash of the ciphertext for this version
+ * @property { KeyType } keyType The type of key (e.g. ed25519, K256)
+ * @property { LIT_NETWORKS_KEYS } litNetwork The LIT network that the client was connected to
+ * @property { string } memo The user-provided descriptor for this version
+ * @property { string } publicKey The public key of the encrypted private key
+ * @property { string } [evmContractConditions] Optional EVM contract conditions
+ * @property { string } updatedAt ISO 8601 timestamp of when this version was created
+ */
+export interface WrappedKeyVersion
+  extends Pick<
+    StoredKeyData,
+    | 'ciphertext'
+    | 'dataToEncryptHash'
+    | 'keyType'
+    | 'litNetwork'
+    | 'memo'
+    | 'publicKey'
+  > {
+  id: string;
+  evmContractConditions?: string;
+  updatedAt: string;
 }
 
 /** Properties required to persist an encrypted key into the wrapped-keys backend storage service
@@ -124,6 +158,35 @@ export type StoreEncryptedKeyBatchParams = BaseApiParams & {
 export interface StoreEncryptedKeyBatchResult {
   ids: string[];
   pkpAddress: string;
+}
+
+/** Properties required to update an existing encrypted key in the wrapped-keys backend storage service
+ *
+ * @typedef UpdateEncryptedKeyParams
+ * @extends BaseApiParams
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key to update
+ * @property { string } ciphertext The new base64 encoded, salted & encrypted private key
+ * @property { string } [evmContractConditions] Optional EVM contract conditions
+ * @property { string } [memo] Optional updated user-provided descriptor for the encrypted private key
+ */
+export type UpdateEncryptedKeyParams = BaseApiParams & {
+  id: string;
+  ciphertext: string;
+  evmContractConditions?: string;
+  memo?: string;
+};
+
+/** Result of updating a private key in the wrapped keys backend service
+ *
+ * @typedef UpdateEncryptedKeyResult
+ * @property { string } id The unique identifier (UUID V4) of the encrypted private key
+ * @property { string } pkpAddress The LIT PKP Address that the key is linked to
+ * @property { string } updatedAt ISO 8601 timestamp of when the key was updated
+ */
+export interface UpdateEncryptedKeyResult {
+  id: string;
+  pkpAddress: string;
+  updatedAt: string;
 }
 
 /** Exporting a previously persisted key only requires valid pkpSessionSigs and a LIT Node Client instance configured for the appropriate network.
