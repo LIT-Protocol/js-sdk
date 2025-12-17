@@ -87,6 +87,47 @@ export const PriceProvider = ({ children, component: Component }) => {
       type: 'function',
     },
     {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'productId',
+          type: 'uint256',
+        },
+      ],
+      name: 'prices',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'stakerAddress',
+              type: 'address',
+            },
+            {
+              internalType: 'uint256',
+              name: 'price',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'productId',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'timestamp',
+              type: 'uint256',
+            },
+          ],
+          internalType: 'struct LibPriceFeedStorage.NodePriceData[]',
+          name: '',
+          type: 'tuple[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
       inputs: [],
       name: 'getLitActionPriceConfigs',
       outputs: [
@@ -218,9 +259,21 @@ export const PriceProvider = ({ children, component: Component }) => {
         const basePricesResult = await contract.baseNetworkPrices(PRODUCT_IDS);
         const maxPricesResult = await contract.maxNetworkPrices(PRODUCT_IDS);
 
-        const estimatedUsage = 50;
-        setUsagePercent(estimatedUsage);
-        const currentPricesResult = await contract.usagePercentToPrices(estimatedUsage, PRODUCT_IDS);
+        // Get actual current price to calculate usage percent
+        // Using PkpSign (productId 0) as reference
+        const nodePriceData = await contract.prices(ProductId.PkpSign);
+        const basePrice = basePricesResult[0];
+        const maxPrice = maxPricesResult[0];
+        
+        // Calculate usage percent: (current - base) / (max - base) * 100
+        // Average the prices from all nodes
+        let calculatedUsage = 0;
+        if (nodePriceData.length > 0 && !maxPrice.eq(basePrice)) {
+          const avgPrice = nodePriceData.reduce((sum, node) => sum.add(node.price), ethers.BigNumber.from(0)).div(nodePriceData.length);
+          calculatedUsage = avgPrice.sub(basePrice).mul(100).div(maxPrice.sub(basePrice)).toNumber();
+        }
+        setUsagePercent(calculatedUsage);
+        const currentPricesResult = await contract.usagePercentToPrices(calculatedUsage, PRODUCT_IDS);
 
         const litActionConfigsResult = await contract.getLitActionPriceConfigs();
 
