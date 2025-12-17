@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 export const PriceProvider = ({ children, component: Component }) => {
   // Constants - defined inside component for Mintlify compatibility
   const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
-  const NAGA_PROD_PKP_ADDRESS = '0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168';
+  const NAGA_PROD_PKP_ADDRESS = '0x11eBfFeab32f6cb5775BeF83E09124B9322E4026';
   const RPC_URL = 'https://lit-chain-rpc.litprotocol.com/';
 
   // Product IDs
