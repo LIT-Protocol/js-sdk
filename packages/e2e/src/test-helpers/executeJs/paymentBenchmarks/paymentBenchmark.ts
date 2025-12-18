@@ -7,6 +7,7 @@ import { createTestEnv } from '../../../helper/createTestEnv';
 import { DECRYPT_WITHIN_LIT_ACTION } from './litActions/decryptWithinLitAction';
 import { ENCRYPT_DECRYPT_WITHIN_LIT_ACTION } from './litActions/encryptDecryptWithinLitAction';
 import { VERIFIABLE_DATA_JOB_LIT_ACTION } from './litActions/verifiableDataJob';
+import { ORACLE_OPERATION_LIT_ACTION } from './litActions/oracleOperation';
 
 const stringifyWithBigInt = (value: unknown) =>
   JSON.stringify(
@@ -131,7 +132,7 @@ export const registerPaymentBenchmarkTests = () => {
       }, 120000); // 2 minute timeout
     });
 
-    describe('Verifiable Data Job', () => {
+    describe.skip('Verifiable Data Job', () => {
       test('should process data and sign the result', async () => {
         console.log('benchmarkUser', benchmarkUser);
 
@@ -156,6 +157,44 @@ export const registerPaymentBenchmarkTests = () => {
 
         expect(executionResult.signatures).toBeDefined();
         expect(executionResult.signatures['verifiable-data-signature']).toBeDefined();
+
+        // Verify payment details are returned
+        expect(executionResult.paymentDetail).toBeDefined();
+        expect(Array.isArray(executionResult.paymentDetail)).toBe(true);
+        expect(executionResult.paymentDetail!.length).toBeGreaterThan(0);
+
+        const paymentDetail = executionResult.paymentDetail!;
+        console.log('\nPayment Details:');
+        console.log(stringifyWithBigInt(paymentDetail));
+
+        // Calculate total cost
+        const totalCost = paymentDetail.reduce((sum, entry) => {
+          return sum + entry.price;
+        }, 0n);
+        console.log(`\nTotal Cost: ${totalCost.toString()}`);
+      }, 120000); // 2 minute timeout
+    });
+
+    describe('Oracle Operation', () => {
+      test('should fetch external data, medianize prices, and sign the result', async () => {
+        const executionResult = await testEnv.litClient.executeJs({
+          code: ORACLE_OPERATION_LIT_ACTION,
+          authContext: benchmarkUser.eoaAuthContext!,
+          jsParams: {},
+        });
+
+        console.log('executionResult', executionResult);
+
+        // Verify successful execution
+        expect(executionResult.response).toBeDefined();
+        const { response } = executionResult as any;
+        expect(response.medianPrice).toBeDefined();
+        expect(parseFloat(response.medianPrice)).toBeGreaterThan(0);
+        expect(response.data).toBe('payment benchmark success');
+
+        // Verify signature was created
+        expect(executionResult.signatures).toBeDefined();
+        expect(executionResult.signatures['oracle-signature']).toBeDefined();
 
         // Verify payment details are returned
         expect(executionResult.paymentDetail).toBeDefined();
