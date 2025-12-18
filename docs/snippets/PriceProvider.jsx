@@ -266,36 +266,49 @@ export const PriceProvider = ({ children, component: Component }) => {
         const maxPrice = maxPricesResult[0];
         
         // Calculate usage percent by finding which usage percentage produces the current price
-        // Average the prices from all nodes to get current market price
+        // Use median price from all nodes to get current market price
         let calculatedUsage = 0;
         if (nodePriceData.length > 0 && !maxPrice.eq(basePrice)) {
-          // Sum all node prices and calculate average
-          const priceSum = nodePriceData.reduce((sum, node) => {
-            const price = ethers.BigNumber.from(node.price);
-            return sum.add(price);
-          }, ethers.BigNumber.from(0));
-          const avgPrice = priceSum.div(nodePriceData.length);
+          // Extract and sort all node prices
+          const prices = nodePriceData.map(node => ethers.BigNumber.from(node.price));
+          prices.sort((a, b) => {
+            if (a.lt(b)) return -1;
+            if (a.gt(b)) return 1;
+            return 0;
+          });
+          
+          // Calculate median
+          let medianPrice;
+          const mid = Math.floor(prices.length / 2);
+          if (prices.length % 2 === 0) {
+            // Even number of prices: average the two middle values
+            medianPrice = prices[mid - 1].add(prices[mid]).div(2);
+          } else {
+            // Odd number of prices: use the middle value
+            medianPrice = prices[mid];
+          }
           
           // Debug: log values to understand why calculation might fail
           console.log('Usage calculation:', {
             nodePrices: nodePriceData.map(n => n.price.toString()),
-            avgPrice: avgPrice.toString(),
+            sortedPrices: prices.map(p => p.toString()),
+            medianPrice: medianPrice.toString(),
             basePrice: basePrice.toString(),
             maxPrice: maxPrice.toString(),
-            avgVsBase: avgPrice.lt(basePrice) ? 'avg < base' : avgPrice.eq(basePrice) ? 'avg = base' : 'avg > base',
+            medianVsBase: medianPrice.lt(basePrice) ? 'median < base' : medianPrice.eq(basePrice) ? 'median = base' : 'median > base',
           });
           
-          // If avgPrice equals basePrice, usage is 0%
-          if (avgPrice.lte(basePrice)) {
+          // If medianPrice equals basePrice, usage is 0%
+          if (medianPrice.lte(basePrice)) {
             calculatedUsage = 0;
           } 
-          // If avgPrice equals or exceeds maxPrice, usage is 100%
-          else if (avgPrice.gte(maxPrice)) {
+          // If medianPrice equals or exceeds maxPrice, usage is 100%
+          else if (medianPrice.gte(maxPrice)) {
             calculatedUsage = 100;
           }
-          // Otherwise, calculate: (avgPrice - basePrice) * 100 / (maxPrice - basePrice)
+          // Otherwise, calculate: (medianPrice - basePrice) * 100 / (maxPrice - basePrice)
           else {
-            const priceDiff = avgPrice.sub(basePrice);
+            const priceDiff = medianPrice.sub(basePrice);
             const maxBaseDiff = maxPrice.sub(basePrice);
             // Multiply by 10000 first to preserve precision, then divide by 100
             calculatedUsage = priceDiff.mul(10000).div(maxBaseDiff).div(100).toNumber();
