@@ -265,13 +265,45 @@ export const PriceProvider = ({ children, component: Component }) => {
         const basePrice = basePricesResult[0];
         const maxPrice = maxPricesResult[0];
         
-        // Calculate usage percent: (current - base) / (max - base) * 100
-        // Average the prices from all nodes
+        // Calculate usage percent by finding which usage percentage produces the current price
+        // Average the prices from all nodes to get current market price
         let calculatedUsage = 0;
         if (nodePriceData.length > 0 && !maxPrice.eq(basePrice)) {
-          const avgPrice = nodePriceData.reduce((sum, node) => sum.add(node.price), ethers.BigNumber.from(0)).div(nodePriceData.length);
-          calculatedUsage = avgPrice.sub(basePrice).mul(100).div(maxPrice.sub(basePrice)).toNumber();
+          // Sum all node prices and calculate average
+          const priceSum = nodePriceData.reduce((sum, node) => {
+            const price = ethers.BigNumber.from(node.price);
+            return sum.add(price);
+          }, ethers.BigNumber.from(0));
+          const avgPrice = priceSum.div(nodePriceData.length);
+          
+          // Debug: log values to understand why calculation might fail
+          console.log('Usage calculation:', {
+            nodePrices: nodePriceData.map(n => n.price.toString()),
+            avgPrice: avgPrice.toString(),
+            basePrice: basePrice.toString(),
+            maxPrice: maxPrice.toString(),
+            avgVsBase: avgPrice.lt(basePrice) ? 'avg < base' : avgPrice.eq(basePrice) ? 'avg = base' : 'avg > base',
+          });
+          
+          // If avgPrice equals basePrice, usage is 0%
+          if (avgPrice.lte(basePrice)) {
+            calculatedUsage = 0;
+          } 
+          // If avgPrice equals or exceeds maxPrice, usage is 100%
+          else if (avgPrice.gte(maxPrice)) {
+            calculatedUsage = 100;
+          }
+          // Otherwise, calculate: (avgPrice - basePrice) * 100 / (maxPrice - basePrice)
+          else {
+            const priceDiff = avgPrice.sub(basePrice);
+            const maxBaseDiff = maxPrice.sub(basePrice);
+            // Multiply by 10000 first to preserve precision, then divide by 100
+            calculatedUsage = priceDiff.mul(10000).div(maxBaseDiff).div(100).toNumber();
+            // Ensure it's between 0 and 100
+            calculatedUsage = Math.max(0, Math.min(100, calculatedUsage));
+          }
         }
+        console.log('Calculated usage:', calculatedUsage);
         setUsagePercent(calculatedUsage);
         const currentPricesResult = await contract.usagePercentToPrices(calculatedUsage, PRODUCT_IDS);
 
