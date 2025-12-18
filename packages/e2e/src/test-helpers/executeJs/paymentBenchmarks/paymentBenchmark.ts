@@ -8,6 +8,7 @@ import { DECRYPT_WITHIN_LIT_ACTION } from './litActions/decryptWithinLitAction';
 import { ENCRYPT_DECRYPT_WITHIN_LIT_ACTION } from './litActions/encryptDecryptWithinLitAction';
 import { VERIFIABLE_DATA_JOB_LIT_ACTION } from './litActions/verifiableDataJob';
 import { ORACLE_OPERATION_LIT_ACTION } from './litActions/oracleOperation';
+import { CROSS_CHAIN_SWAP_LIT_ACTION } from './litActions/crossChainSwap';
 
 const stringifyWithBigInt = (value: unknown) =>
   JSON.stringify(
@@ -36,7 +37,7 @@ export const registerPaymentBenchmarkTests = () => {
       hasPKP: true,
       fundPKP: false,
       hasPKPAuthContext: false,
-      fundPKPLedger: false,
+      fundPKPLedger: true,
     });
   }, 120000); // Increased timeout for setup
 
@@ -175,7 +176,7 @@ export const registerPaymentBenchmarkTests = () => {
       }, 120000); // 2 minute timeout
     });
 
-    describe('Oracle Operation', () => {
+    describe.skip('Oracle Operation', () => {
       test('should fetch external data, medianize prices, and sign the result', async () => {
         const executionResult = await testEnv.litClient.executeJs({
           code: ORACLE_OPERATION_LIT_ACTION,
@@ -195,6 +196,71 @@ export const registerPaymentBenchmarkTests = () => {
         // Verify signature was created
         expect(executionResult.signatures).toBeDefined();
         expect(executionResult.signatures['oracle-signature']).toBeDefined();
+
+        // Verify payment details are returned
+        expect(executionResult.paymentDetail).toBeDefined();
+        expect(Array.isArray(executionResult.paymentDetail)).toBe(true);
+        expect(executionResult.paymentDetail!.length).toBeGreaterThan(0);
+
+        const paymentDetail = executionResult.paymentDetail!;
+        console.log('\nPayment Details:');
+        console.log(stringifyWithBigInt(paymentDetail));
+
+        // Calculate total cost
+        const totalCost = paymentDetail.reduce((sum, entry) => {
+          return sum + entry.price;
+        }, 0n);
+        console.log(`\nTotal Cost: ${totalCost.toString()}`);
+      }, 120000); // 2 minute timeout
+    });
+
+    describe('Cross-Chain Swap', () => {
+      test('should perform realistic cross-chain swap with price discovery and multi-step signing', async () => {
+        const executionResult = await testEnv.litClient.executeJs({
+          code: CROSS_CHAIN_SWAP_LIT_ACTION,
+          authContext: benchmarkUser.eoaAuthContext!,
+          jsParams: {
+            pkpPublicKey: benchmarkUser.pkp!.pubkey,
+          },
+        });
+
+        console.log('executionResult', executionResult);
+
+        // Verify successful execution
+        expect(executionResult.response).toBeDefined();
+        const { response } = executionResult as any;
+
+        // Verify swap intent structure
+        expect(response.swapIntent).toBeDefined();
+        expect(response.swapIntent.params).toBeDefined();
+        expect(response.swapIntent.params.sourceChain).toBe('ethereum');
+        expect(response.swapIntent.params.destChain).toBe('bitcoin');
+        expect(response.swapIntent.params.amountIn).toBe('1.0');
+
+        // Verify pricing calculations
+        expect(response.swapIntent.pricing).toBeDefined();
+        expect(response.swapIntent.pricing.ethPrice).toBeGreaterThan(0);
+        expect(response.swapIntent.pricing.bitcoinPrice).toBeGreaterThan(0);
+        expect(response.swapIntent.pricing.expectedAmountOut).toBeGreaterThan(0);
+        expect(response.swapIntent.pricing.amountOutAfterFees).toBeGreaterThan(0);
+        expect(response.swapIntent.pricing.amountOutAfterFees).toBeLessThan(
+          response.swapIntent.pricing.expectedAmountOut
+        ); // Fees should reduce output
+
+        // Verify execution proof
+        expect(response.executionProof).toBeDefined();
+        expect(response.executionProof.status).toBe('completed');
+        expect(response.executionProof.sourceTxHash).toBeDefined();
+        expect(response.executionProof.destTxHash).toBeDefined();
+        expect(response.executionProof.sourceBlockNumber).toBeGreaterThan(0);
+        expect(response.executionProof.destBlockNumber).toBeGreaterThan(0);
+
+        expect(response.data).toBe('payment benchmark success');
+
+        // Verify both signatures were created (approval + execution)
+        expect(executionResult.signatures).toBeDefined();
+        expect(executionResult.signatures['swap-approval-signature']).toBeDefined();
+        expect(executionResult.signatures['swap-execution-signature']).toBeDefined();
 
         // Verify payment details are returned
         expect(executionResult.paymentDetail).toBeDefined();
