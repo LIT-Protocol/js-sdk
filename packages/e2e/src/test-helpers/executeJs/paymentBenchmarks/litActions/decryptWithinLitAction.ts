@@ -1,5 +1,13 @@
-export const DECRYPT_WITHIN_LIT_ACTION = `
-(async () => {
+declare const Lit: any;
+declare const jsParams: any;
+
+/**
+ * Lit Action: Decrypt within the Lit Action
+ *
+ * Decrypts an API key and makes a fetch request within the Lit Action.
+ * Runtime: ~5 seconds, Fetches: 1, Decrypts: 1
+ */
+async function decryptWithinLitAction() {
   const { accessControlConditions, ciphertext, dataToEncryptHash } = jsParams;
 
   // Decrypt the API key
@@ -18,7 +26,7 @@ export const DECRYPT_WITHIN_LIT_ACTION = `
   const response = await fetch("https://api.coingecko.com/api/v3/ping", {
     method: "GET",
     headers: {
-      "Authorization": \`Bearer \${apiKey.key}\`,
+      "Authorization": `Bearer ${apiKey.key}`,
       "Content-Type": "application/json",
     },
   });
@@ -35,5 +43,6 @@ export const DECRYPT_WITHIN_LIT_ACTION = `
       // Note: We don't expose the actual API key in the response
     }),
   });
-})();
-`;
+}
+
+export const DECRYPT_WITHIN_LIT_ACTION = `(${decryptWithinLitAction.toString()})();`;

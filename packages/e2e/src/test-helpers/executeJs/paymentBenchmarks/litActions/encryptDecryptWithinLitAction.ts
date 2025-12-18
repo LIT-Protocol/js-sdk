@@ -1,6 +1,12 @@
 declare const Lit: any;
 declare const ethers: any;
 
+/**
+ * Lit Action: Encrypt and Decrypt within the Lit Action
+ *
+ * Encrypts an API key and decrypts it within the Lit Action.
+ * Runtime: ~5 seconds, Fetches: 1, Encrypts: 1, Decrypts: 1
+ */
 async function encryptDecryptWithinLitAction() {
     // First, encrypt an API key (simulating a stored encrypted API key)
     // In a real scenario, this would already be encrypted and stored
