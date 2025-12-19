@@ -40,10 +40,10 @@ const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
 // Configurations
-const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
+const LIVE_NETWORK_FUNDING_AMOUNT = '0.2';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '1';
-const MAINNET_NETWORK_FUNDING_AMOUNT = '0.01';
+const MAINNET_NETWORK_FUNDING_AMOUNT = '0.2';
 const MAINNET_LEDGER_DEPOSIT_AMOUNT = '0.01';
 
 const EVE_VALIDATION_IPFS_CID =

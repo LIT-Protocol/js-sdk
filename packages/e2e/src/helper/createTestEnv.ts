@@ -27,7 +27,7 @@ export const CONFIG = {
     },
   },
   LIVE: {
-    nativeFundingAmount: '0.1',
+    nativeFundingAmount: '0.2',
     ledgerDepositAmount: '10',
     sponsorshipLimits: {
       totalMaxPriceInWei: '50000000000000000',
@@ -35,7 +35,7 @@ export const CONFIG = {
     },
   },
   MAINNET: {
-    nativeFundingAmount: '0.01',
+    nativeFundingAmount: '0.2',
     ledgerDepositAmount: '0.01',
     sponsorshipLimits: {
       totalMaxPriceInWei: '10000000000000000',
