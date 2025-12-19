@@ -150,7 +150,7 @@ export const registerPaymentBenchmarkTests = () => {
 
         // Add to summary
         paymentSummaries.push({
-          testName: 'Decrypt within Lit Action (5s, 3 fetches, 3 decrypts)',
+          testName: 'Decrypt within Lit Action',
           components: paymentDetail.map(entry => ({
             component: entry.component,
             quantity: entry.quantity,
@@ -191,7 +191,7 @@ export const registerPaymentBenchmarkTests = () => {
 
         // Add to summary
         paymentSummaries.push({
-          testName: 'Encrypt & Decrypt within Lit Action (5s, 3 fetches, 1 encrypt, 3 decrypts)',
+          testName: 'Encrypt & Decrypt within Lit Action',
           components: paymentDetail.map(entry => ({
             component: entry.component,
             quantity: entry.quantity,
@@ -242,7 +242,7 @@ export const registerPaymentBenchmarkTests = () => {
 
         // Add to summary
         paymentSummaries.push({
-          testName: 'Verifiable Data Job (45s, 0 fetches, 1 signature)',
+          testName: 'Verifiable Data Job',
           components: paymentDetail.map(entry => ({
             component: entry.component,
             quantity: entry.quantity,
@@ -290,7 +290,7 @@ export const registerPaymentBenchmarkTests = () => {
 
         // Add to summary
         paymentSummaries.push({
-          testName: 'Oracle Operation (10s, 3 fetches, 3 signatures)',
+          testName: 'Oracle Operation',
           components: paymentDetail.map(entry => ({
             component: entry.component,
             quantity: entry.quantity,
@@ -366,7 +366,7 @@ export const registerPaymentBenchmarkTests = () => {
 
         // Add to summary
         paymentSummaries.push({
-          testName: 'Cross-Chain Swap (20s, 4 fetches, 6 signatures)',
+          testName: 'Cross-Chain Swap',
           components: paymentDetail.map(entry => ({
             component: entry.component,
             quantity: entry.quantity,
