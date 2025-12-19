@@ -152,7 +152,7 @@ async function initInternal(
       ): module is NagaLocalModule =>
         !!module &&
         typeof (module as { withLocalContext?: unknown }).withLocalContext ===
-        'function';
+          'function';
 
       if (supportsLocalContext(networkModule)) {
         const localContextName = process.env['NETWORK'];
@@ -193,8 +193,8 @@ async function initInternal(
   const fundingAmount = isLocal
     ? LOCAL_NETWORK_FUNDING_AMOUNT
     : isMainnet
-      ? MAINNET_NETWORK_FUNDING_AMOUNT
-      : LIVE_NETWORK_FUNDING_AMOUNT;
+    ? MAINNET_NETWORK_FUNDING_AMOUNT
+    : LIVE_NETWORK_FUNDING_AMOUNT;
   const ledgerDepositAmount = isMainnet
     ? MAINNET_LEDGER_DEPOSIT_AMOUNT
     : LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT;
