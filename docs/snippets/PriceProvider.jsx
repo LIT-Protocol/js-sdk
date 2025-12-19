@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 export const PriceProvider = ({ children, component: Component }) => {
   // Constants - defined inside component for Mintlify compatibility
   const NAGA_PROD_PRICE_FEED_ADDRESS = '0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C';
-  const NAGA_PROD_PKP_ADDRESS = '0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168';
+  const NAGA_PROD_PKP_ADDRESS = '0x11eBfFeab32f6cb5775BeF83E09124B9322E4026';
   const RPC_URL = 'https://lit-chain-rpc.litprotocol.com/';
 
   // Product IDs
@@ -81,6 +81,47 @@ export const PriceProvider = ({ children, component: Component }) => {
           internalType: 'uint256[]',
           name: '',
           type: 'uint256[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'productId',
+          type: 'uint256',
+        },
+      ],
+      name: 'prices',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'stakerAddress',
+              type: 'address',
+            },
+            {
+              internalType: 'uint256',
+              name: 'price',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'productId',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'timestamp',
+              type: 'uint256',
+            },
+          ],
+          internalType: 'struct LibPriceFeedStorage.NodePriceData[]',
+          name: '',
+          type: 'tuple[]',
         },
       ],
       stateMutability: 'view',
@@ -218,9 +259,21 @@ export const PriceProvider = ({ children, component: Component }) => {
         const basePricesResult = await contract.baseNetworkPrices(PRODUCT_IDS);
         const maxPricesResult = await contract.maxNetworkPrices(PRODUCT_IDS);
 
-        const estimatedUsage = 50;
-        setUsagePercent(estimatedUsage);
-        const currentPricesResult = await contract.usagePercentToPrices(estimatedUsage, PRODUCT_IDS);
+        // Get actual current price to calculate usage percent
+        // Using PkpSign (productId 0) as reference
+        const nodePriceData = await contract.prices(ProductId.PkpSign);
+        const basePrice = basePricesResult[0];
+        const maxPrice = maxPricesResult[0];
+        
+        // Calculate usage percent: (current - base) / (max - base) * 100
+        // Average the prices from all nodes
+        let calculatedUsage = 0;
+        if (nodePriceData.length > 0 && !maxPrice.eq(basePrice)) {
+          const avgPrice = nodePriceData.reduce((sum, node) => sum.add(node.price), ethers.BigNumber.from(0)).div(nodePriceData.length);
+          calculatedUsage = avgPrice.sub(basePrice).mul(100).div(maxPrice.sub(basePrice)).toNumber();
+        }
+        setUsagePercent(calculatedUsage);
+        const currentPricesResult = await contract.usagePercentToPrices(calculatedUsage, PRODUCT_IDS);
 
         const litActionConfigsResult = await contract.getLitActionPriceConfigs();
 
