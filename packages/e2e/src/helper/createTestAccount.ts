@@ -74,7 +74,9 @@ export async function createTestAccount(
   console.log(`Address`, person.account.address);
   console.log(`opts:`, {
     ...opts,
-    privateKey: opts.privateKey ? (opts.privateKey.slice(0, 6) + '...') : undefined,
+    privateKey: opts.privateKey
+      ? opts.privateKey.slice(0, 6) + '...'
+      : undefined,
   });
 
   // 3. fund it

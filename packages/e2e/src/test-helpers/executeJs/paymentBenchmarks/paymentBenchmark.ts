@@ -37,7 +37,9 @@ export const registerPaymentBenchmarkTests = () => {
     testEnv = await createTestEnv(envVars);
 
     // Use TEST_ALICE_PRIVATE_KEY if available to reuse the same account across test runs
-    const privateKey = process.env['TEST_ALICE_PRIVATE_KEY'] as `0x${string}` | undefined;
+    const privateKey = process.env['TEST_ALICE_PRIVATE_KEY'] as
+      | `0x${string}`
+      | undefined;
 
     benchmarkUser = await createTestAccount(testEnv, {
       label: 'Payment Benchmark User',
@@ -59,7 +61,7 @@ export const registerPaymentBenchmarkTests = () => {
         const tableTitle = `${summary.testName}`;
 
         // Create table data
-        const tableData = summary.components.map(comp => ({
+        const tableData = summary.components.map((comp) => ({
           Component: comp.component,
           Quantity: comp.quantity,
           'Price (wei)': comp.price.toString(),
@@ -82,9 +84,14 @@ export const registerPaymentBenchmarkTests = () => {
       });
 
       // Grand total
-      const grandTotal = paymentSummaries.reduce((sum, s) => sum + s.totalCost, 0n);
+      const grandTotal = paymentSummaries.reduce(
+        (sum, s) => sum + s.totalCost,
+        0n
+      );
       const grandTotalInTstLPX = (Number(grandTotal) / 1e18).toFixed(10);
-      console.log(`GRAND TOTAL (ALL TESTS): ${grandTotal.toString()} wei (${grandTotalInTstLPX} tstLPX)`);
+      console.log(
+        `GRAND TOTAL (ALL TESTS): ${grandTotal.toString()} wei (${grandTotalInTstLPX} tstLPX)`
+      );
     }
   });
 
@@ -92,19 +99,19 @@ export const registerPaymentBenchmarkTests = () => {
     describe('Secure API Key Usage', () => {
       test('should encrypt outside the Lit Action, and decrypt and make a fetch request inside the Lit Action', async () => {
         // Encrypt the API key outside the Lit Action (simulating a pre-encrypted stored API key)
-        const apiKeyData = JSON.stringify({ key: "example-api-key-12345" });
+        const apiKeyData = JSON.stringify({ key: 'example-api-key-12345' });
 
         // Create always-true access control conditions for the benchmark
         const accessControlConditions = [
           {
-            contractAddress: "",
-            standardContractType: "" as const,
-            chain: "ethereum" as const,
-            method: "",
-            parameters: ["1"],
+            contractAddress: '',
+            standardContractType: '' as const,
+            chain: 'ethereum' as const,
+            method: '',
+            parameters: ['1'],
             returnValueTest: {
-              comparator: "=" as const,
-              value: "1",
+              comparator: '=' as const,
+              value: '1',
             },
           },
         ];
@@ -151,7 +158,7 @@ export const registerPaymentBenchmarkTests = () => {
         // Add to summary
         paymentSummaries.push({
           testName: 'Decrypt within Lit Action',
-          components: paymentDetail.map(entry => ({
+          components: paymentDetail.map((entry) => ({
             component: entry.component,
             quantity: entry.quantity,
             price: entry.price,
@@ -192,7 +199,7 @@ export const registerPaymentBenchmarkTests = () => {
         // Add to summary
         paymentSummaries.push({
           testName: 'Encrypt & Decrypt within Lit Action',
-          components: paymentDetail.map(entry => ({
+          components: paymentDetail.map((entry) => ({
             component: entry.component,
             quantity: entry.quantity,
             price: entry.price,
@@ -223,7 +230,9 @@ export const registerPaymentBenchmarkTests = () => {
         expect(response.aggregatedData.timestamp).toBeGreaterThan(0);
 
         expect(executionResult.signatures).toBeDefined();
-        expect(executionResult.signatures['verifiable-data-signature']).toBeDefined();
+        expect(
+          executionResult.signatures['verifiable-data-signature']
+        ).toBeDefined();
 
         // Verify payment details are returned
         expect(executionResult.paymentDetail).toBeDefined();
@@ -243,7 +252,7 @@ export const registerPaymentBenchmarkTests = () => {
         // Add to summary
         paymentSummaries.push({
           testName: 'Verifiable Data Job',
-          components: paymentDetail.map(entry => ({
+          components: paymentDetail.map((entry) => ({
             component: entry.component,
             quantity: entry.quantity,
             price: entry.price,
@@ -291,7 +300,7 @@ export const registerPaymentBenchmarkTests = () => {
         // Add to summary
         paymentSummaries.push({
           testName: 'Oracle Operation',
-          components: paymentDetail.map(entry => ({
+          components: paymentDetail.map((entry) => ({
             component: entry.component,
             quantity: entry.quantity,
             price: entry.price,
@@ -328,8 +337,12 @@ export const registerPaymentBenchmarkTests = () => {
         expect(response.swapIntent.pricing).toBeDefined();
         expect(response.swapIntent.pricing.ethPrice).toBeGreaterThan(0);
         expect(response.swapIntent.pricing.bitcoinPrice).toBeGreaterThan(0);
-        expect(response.swapIntent.pricing.expectedAmountOut).toBeGreaterThan(0);
-        expect(response.swapIntent.pricing.amountOutAfterFees).toBeGreaterThan(0);
+        expect(response.swapIntent.pricing.expectedAmountOut).toBeGreaterThan(
+          0
+        );
+        expect(response.swapIntent.pricing.amountOutAfterFees).toBeGreaterThan(
+          0
+        );
         expect(response.swapIntent.pricing.amountOutAfterFees).toBeLessThan(
           response.swapIntent.pricing.expectedAmountOut
         ); // Fees should reduce output
@@ -346,8 +359,12 @@ export const registerPaymentBenchmarkTests = () => {
 
         // Verify both signatures were created (approval + execution)
         expect(executionResult.signatures).toBeDefined();
-        expect(executionResult.signatures['swap-approval-signature']).toBeDefined();
-        expect(executionResult.signatures['swap-execution-signature']).toBeDefined();
+        expect(
+          executionResult.signatures['swap-approval-signature']
+        ).toBeDefined();
+        expect(
+          executionResult.signatures['swap-execution-signature']
+        ).toBeDefined();
 
         // Verify payment details are returned
         expect(executionResult.paymentDetail).toBeDefined();
@@ -367,7 +384,7 @@ export const registerPaymentBenchmarkTests = () => {
         // Add to summary
         paymentSummaries.push({
           testName: 'Cross-Chain Swap',
-          components: paymentDetail.map(entry => ({
+          components: paymentDetail.map((entry) => ({
             component: entry.component,
             quantity: entry.quantity,
             price: entry.price,

@@ -11,19 +11,21 @@ async function oracleOperation() {
   const median = (arr: number[]) => {
     const arrSorted = arr.sort((a, b) => a - b);
     return arrSorted.length % 2 === 0
-      ? (arrSorted[arrSorted.length / 2 - 1] + arrSorted[arrSorted.length / 2]) / 2
+      ? (arrSorted[arrSorted.length / 2 - 1] +
+          arrSorted[arrSorted.length / 2]) /
+          2
       : arrSorted[Math.floor(arrSorted.length / 2)];
   };
 
   // Fetch external data (e.g., price oracle data from Coinbase)
   const response = await fetch(
-    "https://api.coinbase.com/v2/prices/ETH-USD/spot"
+    'https://api.coinbase.com/v2/prices/ETH-USD/spot'
   );
   const data = await response.json();
 
   // Collect prices from all the nodes
   const allPrices = await Lit.Actions.broadcastAndCollect({
-    name: "ethPrice",
+    name: 'ethPrice',
     value: data.data.amount,
   });
 
@@ -39,8 +41,8 @@ async function oracleOperation() {
   const toSign = ethers.utils.arrayify(priceHash);
   await Lit.Actions.signAsAction({
     toSign,
-    signingScheme: "EcdsaK256Sha256",
-    sigName: "oracle-signature",
+    signingScheme: 'EcdsaK256Sha256',
+    sigName: 'oracle-signature',
   });
 
   // Simulate runtime of 10 seconds

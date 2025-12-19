@@ -10,7 +10,7 @@ declare const jsParams: any;
 async function verifiableDataJob() {
   // Generate and process data locally (using runOnce to ensure it only runs on one node)
   const dataResult = await Lit.Actions.runOnce(
-    { waitForResponse: true, name: "generateData" },
+    { waitForResponse: true, name: 'generateData' },
     async () => {
       const dataPoints = [];
       for (let i = 0; i < 1000; i++) {
@@ -19,16 +19,19 @@ async function verifiableDataJob() {
         dataPoints.push({
           index: i,
           value: processedValue,
-          hash: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(processedValue.toString())),
+          hash: ethers.utils.keccak256(
+            ethers.utils.toUtf8Bytes(processedValue.toString())
+          ),
         });
       }
 
       // Aggregate the processed data
       const aggregatedData = {
         totalPoints: dataPoints.length,
-        averageValue: dataPoints.reduce((sum, p) => sum + p.value, 0) / dataPoints.length,
+        averageValue:
+          dataPoints.reduce((sum, p) => sum + p.value, 0) / dataPoints.length,
         dataHash: ethers.utils.keccak256(
-          ethers.utils.toUtf8Bytes(dataPoints.map(p => p.hash).join(""))
+          ethers.utils.toUtf8Bytes(dataPoints.map((p) => p.hash).join(''))
         ),
         timestamp: Date.now(),
       };
@@ -50,7 +53,7 @@ async function verifiableDataJob() {
   await Lit.Actions.signEcdsa({
     toSign: ethers.utils.arrayify(dataHash),
     publicKey: jsParams.pkpPublicKey,
-    sigName: "verifiable-data-signature",
+    sigName: 'verifiable-data-signature',
   });
 
   Lit.Actions.setResponse({

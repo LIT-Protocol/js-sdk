@@ -7,71 +7,71 @@ declare const ethers: any;
  * Encrypts an API key and decrypts it within the Lit Action.
  */
 async function encryptDecryptWithinLitAction() {
-    // First, encrypt an API key (simulating a stored encrypted API key)
-    // In a real scenario, this would already be encrypted and stored
-    const apiKeyData = JSON.stringify({ key: "example-api-key-12345" });
-    const currentCid = Lit.Auth.actionIpfsIdStack[0];
+  // First, encrypt an API key (simulating a stored encrypted API key)
+  // In a real scenario, this would already be encrypted and stored
+  const apiKeyData = JSON.stringify({ key: 'example-api-key-12345' });
+  const currentCid = Lit.Auth.actionIpfsIdStack[0];
 
-    const accessControlConditions = [
-        {
-            contractAddress: "",
-            standardContractType: "",
-            chain: "ethereum",
-            method: "",
-            parameters: [":currentActionIpfsId"],
-            returnValueTest: {
-                comparator: "=",
-                value: currentCid,
-            },
-        },
-    ];
+  const accessControlConditions = [
+    {
+      contractAddress: '',
+      standardContractType: '',
+      chain: 'ethereum',
+      method: '',
+      parameters: [':currentActionIpfsId'],
+      returnValueTest: {
+        comparator: '=',
+        value: currentCid,
+      },
+    },
+  ];
 
-    // Encrypt the API key (using runOnce to ensure it only runs on one node)
-    const encryptResult = await Lit.Actions.runOnce(
-        { waitForResponse: true, name: "encryptApiKey" },
-        async () => {
-            const result = await Lit.Actions.encrypt({
-                accessControlConditions,
-                to_encrypt: ethers.utils.toUtf8Bytes(apiKeyData),
-            });
-            return JSON.stringify(result);
-        }
-    );
-    const { ciphertext, dataToEncryptHash } = JSON.parse(encryptResult);
-
-    // Now decrypt the API key (this is the actual decrypt operation we're counting)
-    const decryptedApiKey = await Lit.Actions.decryptAndCombine({
+  // Encrypt the API key (using runOnce to ensure it only runs on one node)
+  const encryptResult = await Lit.Actions.runOnce(
+    { waitForResponse: true, name: 'encryptApiKey' },
+    async () => {
+      const result = await Lit.Actions.encrypt({
         accessControlConditions,
-        ciphertext,
-        dataToEncryptHash,
-        authSig: null,
-        chain: "ethereum",
-    });
+        to_encrypt: ethers.utils.toUtf8Bytes(apiKeyData),
+      });
+      return JSON.stringify(result);
+    }
+  );
+  const { ciphertext, dataToEncryptHash } = JSON.parse(encryptResult);
 
-    // Parse the decrypted API key
-    const apiKey = JSON.parse(decryptedApiKey);
+  // Now decrypt the API key (this is the actual decrypt operation we're counting)
+  const decryptedApiKey = await Lit.Actions.decryptAndCombine({
+    accessControlConditions,
+    ciphertext,
+    dataToEncryptHash,
+    authSig: null,
+    chain: 'ethereum',
+  });
 
-    // Use the API key in a fetch request (using Coinbase public API)
-    const response = await fetch("https://api.coinbase.com/v2/time", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            // "Authorization": `Bearer ${apiKey.key}`,
-        },
-    });
+  // Parse the decrypted API key
+  const apiKey = JSON.parse(decryptedApiKey);
 
-    const responseData = await response.json();
+  // Use the API key in a fetch request (using Coinbase public API)
+  const response = await fetch('https://api.coinbase.com/v2/time', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      // "Authorization": `Bearer ${apiKey.key}`,
+    },
+  });
 
-    // Simulate runtime of 5 seconds
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+  const responseData = await response.json();
 
-    Lit.Actions.setResponse({
-        response: JSON.stringify({
-            success: true,
-            data: responseData,
-            // Note: We don't expose the actual API key in the response
-        }),
-    });
+  // Simulate runtime of 5 seconds
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  Lit.Actions.setResponse({
+    response: JSON.stringify({
+      success: true,
+      data: responseData,
+      // Note: We don't expose the actual API key in the response
+    }),
+  });
 }
 
 // Convert the function to a string and wrap it in an IIFE

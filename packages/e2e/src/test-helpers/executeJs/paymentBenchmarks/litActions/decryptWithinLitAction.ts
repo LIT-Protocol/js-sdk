@@ -15,17 +15,17 @@ async function decryptWithinLitAction() {
     ciphertext,
     dataToEncryptHash,
     authSig: null,
-    chain: "ethereum",
+    chain: 'ethereum',
   });
 
   // Parse the decrypted API key
   const apiKey = JSON.parse(decryptedApiKey);
 
   // Use the API key in a fetch request (using Coinbase public API)
-  const response = await fetch("https://api.coinbase.com/v2/time", {
-    method: "GET",
+  const response = await fetch('https://api.coinbase.com/v2/time', {
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       // "Authorization": `Bearer ${apiKey.key}`,
     },
   });
