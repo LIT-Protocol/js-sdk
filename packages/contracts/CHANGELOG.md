@@ -1,5 +1,12 @@
 # @lit-protocol/contracts
 
+## 0.9.0
+
+### Minor Changes
+
+- 0a80342: Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
+- edf1099: Add `naga` and `naga-proto` networks. Create per-network entrypoints and subpath exports (naga, naga-production, naga-proto, naga-staging, naga-test, naga-dev, naga-local) for better tree-shaking
+
 ## 0.8.2
 
 ### Patch Changes
