@@ -5,7 +5,6 @@ declare const ethers: any;
  * Lit Action: Encrypt and Decrypt within the Lit Action
  *
  * Encrypts an API key and decrypts it within the Lit Action.
- * Runtime: ~5 seconds, Fetches: 1, Encrypts: 1, Decrypts: 1
  */
 async function encryptDecryptWithinLitAction() {
     // First, encrypt an API key (simulating a stored encrypted API key)
@@ -52,12 +51,12 @@ async function encryptDecryptWithinLitAction() {
     // Parse the decrypted API key
     const apiKey = JSON.parse(decryptedApiKey);
 
-    // Use the API key in a fetch request
-    const response = await fetch("https://api.coingecko.com/api/v3/ping", {
+    // Use the API key in a fetch request (using Coinbase public API)
+    const response = await fetch("https://api.coinbase.com/v2/time", {
         method: "GET",
         headers: {
-            "Authorization": `Bearer ${apiKey.key}`,
             "Content-Type": "application/json",
+            // "Authorization": `Bearer ${apiKey.key}`,
         },
     });
 

@@ -5,7 +5,6 @@ declare const ethers: any;
  * Lit Action: Oracle Operation
  *
  * Fetches external data and signs the result using broadcastAndCollect to medianize prices.
- * Runtime: ~10 seconds, Fetches: 1, Signatures: 1, Decrypts: 0
  */
 async function oracleOperation() {
   // Helper function to calculate median
@@ -16,16 +15,16 @@ async function oracleOperation() {
       : arrSorted[Math.floor(arrSorted.length / 2)];
   };
 
-  // Fetch external data (e.g., price oracle data)
+  // Fetch external data (e.g., price oracle data from Coinbase)
   const response = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+    "https://api.coinbase.com/v2/prices/ETH-USD/spot"
   );
   const data = await response.json();
 
   // Collect prices from all the nodes
   const allPrices = await Lit.Actions.broadcastAndCollect({
     name: "ethPrice",
-    value: data.ethereum.usd.toString(),
+    value: data.data.amount,
   });
 
   // Medianize the price, so that outliers don't skew the result

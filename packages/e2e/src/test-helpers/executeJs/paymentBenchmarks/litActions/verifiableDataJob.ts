@@ -6,7 +6,6 @@ declare const jsParams: any;
  * Lit Action: Verifiable Data Job
  *
  * Processes data locally and signs the result to create a verifiable attestation.
- * Runtime: ~45 seconds, Fetches: 0, Signatures: 1, Decrypts: 0
  */
 async function verifiableDataJob() {
   // Generate and process data locally (using runOnce to ensure it only runs on one node)
@@ -42,14 +41,14 @@ async function verifiableDataJob() {
   console.log('aggregatedData', aggregatedData);
 
   // Simulate processing time
-  await new Promise((resolve) => setTimeout(resolve, 45000));
+  await new Promise((resolve) => setTimeout(resolve, 25000));
 
-  // Sign the processed result
-  const toSign = ethers.utils.arrayify(
-    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(aggregatedData)))
+  // Sign the processed result - hash the data first, then convert to bytes
+  const dataHash = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes(JSON.stringify(aggregatedData))
   );
   await Lit.Actions.signEcdsa({
-    toSign,
+    toSign: ethers.utils.arrayify(dataHash),
     publicKey: jsParams.pkpPublicKey,
     sigName: "verifiable-data-signature",
   });

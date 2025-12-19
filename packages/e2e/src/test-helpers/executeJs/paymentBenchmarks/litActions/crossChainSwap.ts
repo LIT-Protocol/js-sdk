@@ -7,7 +7,6 @@ declare const jsParams: any;
  *
  * Simulates a realistic cross-chain swap flow with price discovery,
  * liquidity checks, slippage calculation, and multi-step signing.
- * Runtime: ~20 seconds, Fetches: 4, Signatures: 2, Decrypts: 0
  */
 async function crossChainSwap() {
   // Swap parameters (in a real scenario, these would come from jsParams)
@@ -25,40 +24,56 @@ async function crossChainSwap() {
   const priceDataResult = await Lit.Actions.runOnce(
     { waitForResponse: true, name: "fetchPriceData" },
     async () => {
-      // Fetch 1: Get source token price (ETH)
-      const ethPriceResponse = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-      );
-      const ethPriceData = await ethPriceResponse.json();
-      const ethPrice = ethPriceData.ethereum.usd;
+      try {
+        // Fetch 1: Get source token price (ETH) from Coinbase
+        const ethPriceResponse = await fetch(
+          "https://api.coinbase.com/v2/prices/ETH-USD/buy"
+        );
+        const ethPriceData = await ethPriceResponse.json();
+        console.log('ethPriceData', ethPriceData);
+        const ethPrice = parseFloat(ethPriceData.data.amount);
 
-      // Fetch 2: Get destination token price (BTC)
-      const bitcoinPriceResponse = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
-      );
-      const bitcoinPriceData = await bitcoinPriceResponse.json();
-      const bitcoinPrice = bitcoinPriceData["bitcoin"].usd;
+        // Fetch 2: Get destination token price (BTC) from Coinbase
+        const bitcoinPriceResponse = await fetch(
+          "https://api.coinbase.com/v2/prices/BTC-USD/buy"
+        );
+        const bitcoinPriceData = await bitcoinPriceResponse.json();
+        console.log('bitcoinPriceData', bitcoinPriceData);
+        const bitcoinPrice = parseFloat(bitcoinPriceData.data.amount);
 
-      // Fetch 3: Check source chain status (simulated via CoinGecko API health)
-      const sourceChainStatusResponse = await fetch("https://api.coingecko.com/api/v3/ping");
-      const sourceChainStatusData = await sourceChainStatusResponse.json();
-      const sourceChainStatus = sourceChainStatusData["gecko_says"];
+        // Fetch 3: Check source chain status (simulated via Coinbase system status)
+        const sourceChainStatusResponse = await fetch("https://api.coinbase.com/v2/time");
+        const sourceChainStatusData = await sourceChainStatusResponse.json();
+        const sourceChainStatus = sourceChainStatusData.data ? "healthy" : "error";
 
-      // Fetch 4: Check destination chain status (simulated via CoinGecko API health)
-      const destChainStatusResponse = await fetch("https://api.coingecko.com/api/v3/ping");
-      const destChainStatusData = await destChainStatusResponse.json();
-      const destChainStatus = destChainStatusData["gecko_says"];
+        // Fetch 4: Check destination chain status (simulated via Coinbase system status)
+        const destChainStatusResponse = await fetch("https://api.coinbase.com/v2/time");
+        const destChainStatusData = await destChainStatusResponse.json();
+        const destChainStatus = destChainStatusData.data ? "healthy" : "error";
 
-      return JSON.stringify({
-        ethPrice,
-        bitcoinPrice,
-        sourceChainStatus,
-        destChainStatus,
-      });
+        return JSON.stringify({
+          ethPrice,
+          bitcoinPrice,
+          sourceChainStatus,
+          destChainStatus,
+        });
+      } catch (error) {
+        console.error('Error fetching price data:', error);
+        return JSON.stringify({
+          error: error.message || "Failed to fetch price data",
+        });
+      }
     }
   );
 
-  const { ethPrice, bitcoinPrice, sourceChainStatus, destChainStatus } = JSON.parse(priceDataResult);
+  const { ethPrice, bitcoinPrice, sourceChainStatus, destChainStatus, error } = JSON.parse(priceDataResult);
+
+  if (error !== undefined) {
+    Lit.Actions.setResponse({
+      response: JSON.stringify({ error }),
+    });
+    return;
+  }
 
   // Calculate swap amounts based on real prices
   const amountInUsd = parseFloat(swapParams.amountIn) * ethPrice;
@@ -88,7 +103,7 @@ async function crossChainSwap() {
       source: sourceChainStatus,
       destination: destChainStatus,
     },
-    timestamp: Date.now(),
+    timestamp: 1718000000000,
     nonce: 123456789,
   };
 
@@ -114,7 +129,7 @@ async function crossChainSwap() {
     sourceBlockNumber: 18500000,
     destBlockNumber: 50000000,
     status: "completed",
-    executedAt: Date.now(),
+    executedAt: 1718000000000,
   };
 
   // Sign 2: Sign the execution proof (like attesting the swap completed on dest chain)

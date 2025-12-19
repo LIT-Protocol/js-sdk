@@ -89,27 +89,27 @@ export async function createTestAccount(
         thenFund: testEnv.config.nativeFundingAmount,
       }
     );
+  }
 
-    // -- create EOA auth context
-    if (opts.hasEoaAuthContext) {
-      person.eoaAuthContext = await testEnv.authManager.createEoaAuthContext({
-        config: {
-          account: person.account,
-        },
-        authConfig: {
-          statement: 'I authorize the Lit Protocol to execute this Lit Action.',
-          domain: 'example.com',
-          resources: [
-            ['lit-action-execution', '*'],
-            ['pkp-signing', '*'],
-            ['access-control-condition-decryption', '*'],
-          ],
-          expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-        },
-        litClient: testEnv.litClient,
-      });
-    }
-  } // ... end if fundAccount
+  // -- create EOA auth context
+  if (opts.hasEoaAuthContext) {
+    person.eoaAuthContext = await testEnv.authManager.createEoaAuthContext({
+      config: {
+        account: person.account,
+      },
+      authConfig: {
+        statement: 'I authorize the Lit Protocol to execute this Lit Action.',
+        domain: 'example.com',
+        resources: [
+          ['lit-action-execution', '*'],
+          ['pkp-signing', '*'],
+          ['access-control-condition-decryption', '*'],
+        ],
+        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+      },
+      litClient: testEnv.litClient,
+    });
+  }
 
   // 4. also fund the ledger
   if (opts.fundLedger) {

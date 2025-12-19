@@ -17,9 +17,20 @@ const stringifyWithBigInt = (value: unknown) =>
     2
   );
 
+type PaymentSummary = {
+  testName: string;
+  components: Array<{
+    component: string;
+    quantity: number;
+    price: bigint;
+  }>;
+  totalCost: bigint;
+};
+
 export const registerPaymentBenchmarkTests = () => {
   let testEnv: Awaited<ReturnType<typeof createTestEnv>>;
   let benchmarkUser: CreateTestAccountResult;
+  const paymentSummaries: PaymentSummary[] = [];
 
   beforeAll(async () => {
     const envVars = createEnvVars();
@@ -37,12 +48,48 @@ export const registerPaymentBenchmarkTests = () => {
       hasPKP: true,
       fundPKP: false,
       hasPKPAuthContext: false,
-      fundPKPLedger: true,
+      fundPKPLedger: false,
     });
   }, 120000); // Increased timeout for setup
 
+  afterAll(() => {
+    if (paymentSummaries.length > 0) {
+      paymentSummaries.forEach((summary, index) => {
+        // Use a single console.log with console.table to title the table
+        const tableTitle = `${summary.testName}`;
+
+        // Create table data
+        const tableData = summary.components.map(comp => ({
+          Component: comp.component,
+          Quantity: comp.quantity,
+          'Price (wei)': comp.price.toString(),
+          'Price (tstLPX)': (Number(comp.price) / 1e18).toFixed(10),
+        }));
+
+        // Add total row
+        const totalInTstLPX = (Number(summary.totalCost) / 1e18).toFixed(10);
+        tableData.push({
+          Component: '**TOTAL**',
+          Quantity: 0,
+          'Price (wei)': summary.totalCost.toString(),
+          'Price (tstLPX)': totalInTstLPX,
+        });
+
+        // Title above table and table itself in one group for readability
+        console.group(tableTitle);
+        console.table(tableData);
+        console.groupEnd();
+      });
+
+      // Grand total
+      const grandTotal = paymentSummaries.reduce((sum, s) => sum + s.totalCost, 0n);
+      const grandTotalInTstLPX = (Number(grandTotal) / 1e18).toFixed(10);
+      console.log(`GRAND TOTAL (ALL TESTS): ${grandTotal.toString()} wei (${grandTotalInTstLPX} tstLPX)`);
+    }
+  });
+
   describe('Payment Benchmark Tests', () => {
-    describe.skip('Secure API Key Usage', () => {
+    describe('Secure API Key Usage', () => {
       test('should encrypt outside the Lit Action, and decrypt and make a fetch request inside the Lit Action', async () => {
         // Encrypt the API key outside the Lit Action (simulating a pre-encrypted stored API key)
         const apiKeyData = JSON.stringify({ key: "example-api-key-12345" });
@@ -100,6 +147,17 @@ export const registerPaymentBenchmarkTests = () => {
           return sum + entry.price;
         }, 0n);
         console.log(`\nTotal Cost: ${totalCost.toString()}`);
+
+        // Add to summary
+        paymentSummaries.push({
+          testName: 'Decrypt within Lit Action (5s, 3 fetches, 3 decrypts)',
+          components: paymentDetail.map(entry => ({
+            component: entry.component,
+            quantity: entry.quantity,
+            price: entry.price,
+          })),
+          totalCost,
+        });
       }, 120000); // 2 minute timeout
 
       test('should encrypt, decrypt and make a fetch request within the Lit Action', async () => {
@@ -130,13 +188,22 @@ export const registerPaymentBenchmarkTests = () => {
           return sum + entry.price;
         }, 0n);
         console.log(`\nTotal Cost: ${totalCost.toString()}`);
+
+        // Add to summary
+        paymentSummaries.push({
+          testName: 'Encrypt & Decrypt within Lit Action (5s, 3 fetches, 1 encrypt, 3 decrypts)',
+          components: paymentDetail.map(entry => ({
+            component: entry.component,
+            quantity: entry.quantity,
+            price: entry.price,
+          })),
+          totalCost,
+        });
       }, 120000); // 2 minute timeout
     });
 
-    describe.skip('Verifiable Data Job', () => {
+    describe('Verifiable Data Job', () => {
       test('should process data and sign the result', async () => {
-        console.log('benchmarkUser', benchmarkUser);
-
         const executionResult = await testEnv.litClient.executeJs({
           code: VERIFIABLE_DATA_JOB_LIT_ACTION,
           authContext: benchmarkUser.eoaAuthContext!,
@@ -144,7 +211,6 @@ export const registerPaymentBenchmarkTests = () => {
             pkpPublicKey: benchmarkUser.pkp!.pubkey,
           },
         });
-
         console.log('executionResult', executionResult);
 
         // Verify successful execution
@@ -173,17 +239,27 @@ export const registerPaymentBenchmarkTests = () => {
           return sum + entry.price;
         }, 0n);
         console.log(`\nTotal Cost: ${totalCost.toString()}`);
+
+        // Add to summary
+        paymentSummaries.push({
+          testName: 'Verifiable Data Job (45s, 0 fetches, 1 signature)',
+          components: paymentDetail.map(entry => ({
+            component: entry.component,
+            quantity: entry.quantity,
+            price: entry.price,
+          })),
+          totalCost,
+        });
       }, 120000); // 2 minute timeout
     });
 
-    describe.skip('Oracle Operation', () => {
+    describe('Oracle Operation', () => {
       test('should fetch external data, medianize prices, and sign the result', async () => {
         const executionResult = await testEnv.litClient.executeJs({
           code: ORACLE_OPERATION_LIT_ACTION,
           authContext: benchmarkUser.eoaAuthContext!,
           jsParams: {},
         });
-
         console.log('executionResult', executionResult);
 
         // Verify successful execution
@@ -211,6 +287,17 @@ export const registerPaymentBenchmarkTests = () => {
           return sum + entry.price;
         }, 0n);
         console.log(`\nTotal Cost: ${totalCost.toString()}`);
+
+        // Add to summary
+        paymentSummaries.push({
+          testName: 'Oracle Operation (10s, 3 fetches, 3 signatures)',
+          components: paymentDetail.map(entry => ({
+            component: entry.component,
+            quantity: entry.quantity,
+            price: entry.price,
+          })),
+          totalCost,
+        });
       }, 120000); // 2 minute timeout
     });
 
@@ -276,7 +363,18 @@ export const registerPaymentBenchmarkTests = () => {
           return sum + entry.price;
         }, 0n);
         console.log(`\nTotal Cost: ${totalCost.toString()}`);
-      }, 120000); // 2 minute timeout
+
+        // Add to summary
+        paymentSummaries.push({
+          testName: 'Cross-Chain Swap (20s, 4 fetches, 6 signatures)',
+          components: paymentDetail.map(entry => ({
+            component: entry.component,
+            quantity: entry.quantity,
+            price: entry.price,
+          })),
+          totalCost,
+        });
+      }, 240000); // 4 minute timeout
     });
   });
 };
