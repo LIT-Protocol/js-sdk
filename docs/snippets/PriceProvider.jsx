@@ -310,8 +310,8 @@ export const PriceProvider = ({ children, component: Component }) => {
           else {
             const priceDiff = medianPrice.sub(basePrice);
             const maxBaseDiff = maxPrice.sub(basePrice);
-            // Multiply by 10000 first to preserve precision, then divide by 100
-            calculatedUsage = priceDiff.mul(10000).div(maxBaseDiff).div(100).toNumber();
+            // Calculate percentage (0-100) with integer precision
+            calculatedUsage = priceDiff.mul(100).div(maxBaseDiff).toNumber();
             // Ensure it's between 0 and 100
             calculatedUsage = Math.max(0, Math.min(100, calculatedUsage));
           }
