@@ -32,6 +32,32 @@ export const registerPaymentBenchmarkTests = () => {
   let benchmarkUser: CreateTestAccountResult;
   const paymentSummaries: PaymentSummary[] = [];
 
+  // Helper function to process and log payment details
+  const logAndSavePaymentDetails = (
+    testName: string,
+    paymentDetail: Array<{ component: string; quantity: number; price: bigint }>
+  ) => {
+    console.log('\nPayment Details:');
+    console.log(stringifyWithBigInt(paymentDetail));
+
+    // Calculate total cost
+    const totalCost = paymentDetail.reduce((sum, entry) => {
+      return sum + entry.price;
+    }, 0n);
+    console.log(`\nTotal Cost: ${totalCost.toString()}`);
+
+    // Add to summary
+    paymentSummaries.push({
+      testName,
+      components: paymentDetail.map((entry) => ({
+        component: entry.component,
+        quantity: entry.quantity,
+        price: entry.price,
+      })),
+      totalCost,
+    });
+  };
+
   beforeAll(async () => {
     const envVars = createEnvVars();
     testEnv = await createTestEnv(envVars);
@@ -146,25 +172,7 @@ export const registerPaymentBenchmarkTests = () => {
 
         const paymentDetail = executionResult.paymentDetail!;
         console.log(executionResult);
-        console.log('\nPayment Details:');
-        console.log(stringifyWithBigInt(paymentDetail));
-
-        // Calculate total cost
-        const totalCost = paymentDetail.reduce((sum, entry) => {
-          return sum + entry.price;
-        }, 0n);
-        console.log(`\nTotal Cost: ${totalCost.toString()}`);
-
-        // Add to summary
-        paymentSummaries.push({
-          testName: 'Decrypt within Lit Action',
-          components: paymentDetail.map((entry) => ({
-            component: entry.component,
-            quantity: entry.quantity,
-            price: entry.price,
-          })),
-          totalCost,
-        });
+        logAndSavePaymentDetails('Decrypt within Lit Action', paymentDetail);
       }, 120000); // 2 minute timeout
 
       test('should encrypt, decrypt and make a fetch request within the Lit Action', async () => {
@@ -187,25 +195,10 @@ export const registerPaymentBenchmarkTests = () => {
         expect(executionResult.paymentDetail!.length).toBeGreaterThan(0);
 
         const paymentDetail = executionResult.paymentDetail!;
-        console.log('\nPayment Details:');
-        console.log(stringifyWithBigInt(paymentDetail));
-
-        // Calculate total cost
-        const totalCost = paymentDetail.reduce((sum, entry) => {
-          return sum + entry.price;
-        }, 0n);
-        console.log(`\nTotal Cost: ${totalCost.toString()}`);
-
-        // Add to summary
-        paymentSummaries.push({
-          testName: 'Encrypt & Decrypt within Lit Action',
-          components: paymentDetail.map((entry) => ({
-            component: entry.component,
-            quantity: entry.quantity,
-            price: entry.price,
-          })),
-          totalCost,
-        });
+        logAndSavePaymentDetails(
+          'Encrypt & Decrypt within Lit Action',
+          paymentDetail
+        );
       }, 120000); // 2 minute timeout
     });
 
@@ -240,25 +233,7 @@ export const registerPaymentBenchmarkTests = () => {
         expect(executionResult.paymentDetail!.length).toBeGreaterThan(0);
 
         const paymentDetail = executionResult.paymentDetail!;
-        console.log('\nPayment Details:');
-        console.log(stringifyWithBigInt(paymentDetail));
-
-        // Calculate total cost
-        const totalCost = paymentDetail.reduce((sum, entry) => {
-          return sum + entry.price;
-        }, 0n);
-        console.log(`\nTotal Cost: ${totalCost.toString()}`);
-
-        // Add to summary
-        paymentSummaries.push({
-          testName: 'Verifiable Data Job',
-          components: paymentDetail.map((entry) => ({
-            component: entry.component,
-            quantity: entry.quantity,
-            price: entry.price,
-          })),
-          totalCost,
-        });
+        logAndSavePaymentDetails('Verifiable Data Job', paymentDetail);
       }, 120000); // 2 minute timeout
     });
 
@@ -288,25 +263,7 @@ export const registerPaymentBenchmarkTests = () => {
         expect(executionResult.paymentDetail!.length).toBeGreaterThan(0);
 
         const paymentDetail = executionResult.paymentDetail!;
-        console.log('\nPayment Details:');
-        console.log(stringifyWithBigInt(paymentDetail));
-
-        // Calculate total cost
-        const totalCost = paymentDetail.reduce((sum, entry) => {
-          return sum + entry.price;
-        }, 0n);
-        console.log(`\nTotal Cost: ${totalCost.toString()}`);
-
-        // Add to summary
-        paymentSummaries.push({
-          testName: 'Oracle Operation',
-          components: paymentDetail.map((entry) => ({
-            component: entry.component,
-            quantity: entry.quantity,
-            price: entry.price,
-          })),
-          totalCost,
-        });
+        logAndSavePaymentDetails('Oracle Operation', paymentDetail);
       }, 120000); // 2 minute timeout
     });
 
@@ -372,25 +329,7 @@ export const registerPaymentBenchmarkTests = () => {
         expect(executionResult.paymentDetail!.length).toBeGreaterThan(0);
 
         const paymentDetail = executionResult.paymentDetail!;
-        console.log('\nPayment Details:');
-        console.log(stringifyWithBigInt(paymentDetail));
-
-        // Calculate total cost
-        const totalCost = paymentDetail.reduce((sum, entry) => {
-          return sum + entry.price;
-        }, 0n);
-        console.log(`\nTotal Cost: ${totalCost.toString()}`);
-
-        // Add to summary
-        paymentSummaries.push({
-          testName: 'Cross-Chain Swap',
-          components: paymentDetail.map((entry) => ({
-            component: entry.component,
-            quantity: entry.quantity,
-            price: entry.price,
-          })),
-          totalCost,
-        });
+        logAndSavePaymentDetails('Cross-Chain Swap', paymentDetail);
       }, 240000); // 4 minute timeout
     });
   });
