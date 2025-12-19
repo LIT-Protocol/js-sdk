@@ -17,7 +17,6 @@ export const CurrentPricesTable = ({ priceData }) => {
   const PRODUCT_IDS = [
     ProductId.PkpSign,
     ProductId.EncSign,
-    ProductId.LitAction,
     ProductId.SignSessionKey,
   ];
 
