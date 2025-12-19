@@ -17,7 +17,7 @@ export type ListKeysParams = BaseApiParams & { pkpAddress: string };
 
 export type SupportedNetworks = Extract<
   LIT_NETWORK_VALUES,
-  'naga-dev' | 'naga-test'
+  'naga' | 'naga-dev' | 'naga-test'
 >;
 
 export interface StoreKeyParams extends BaseApiParams {

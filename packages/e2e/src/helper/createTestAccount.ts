@@ -4,6 +4,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { AuthContext } from '../types';
 import { TestEnv } from './createTestEnv';
 import { fundAccount } from './fundAccount';
+import { persistGeneratedAccount } from './generated-accounts';
 import { getOrCreatePkp } from './pkp-utils';
 
 type CreateTestAccountOpts = {
@@ -49,8 +50,17 @@ export async function createTestAccount(
 ): Promise<CreateTestAccountResult> {
   console.log(`--- ${`[${opts.label}]`} Creating test account ---`);
   // 1. store result
+  const privateKey = generatePrivateKey();
+  persistGeneratedAccount({
+    label: `createTestAccount:${opts.label}`,
+    privateKey,
+    network:
+      typeof testEnv.networkModule.getNetworkName === 'function'
+        ? testEnv.networkModule.getNetworkName()
+        : process.env['NETWORK'],
+  });
   let person: CreateTestAccountResult = {
-    account: privateKeyToAccount(generatePrivateKey()),
+    account: privateKeyToAccount(privateKey),
     pkp: undefined,
     eoaAuthContext: undefined,
     pkpAuthContext: undefined,
