@@ -265,13 +265,58 @@ export const PriceProvider = ({ children, component: Component }) => {
         const basePrice = basePricesResult[0];
         const maxPrice = maxPricesResult[0];
         
-        // Calculate usage percent: (current - base) / (max - base) * 100
-        // Average the prices from all nodes
+        // Calculate usage percent by finding which usage percentage produces the current price
+        // Use median price from all nodes to get current market price
         let calculatedUsage = 0;
         if (nodePriceData.length > 0 && !maxPrice.eq(basePrice)) {
-          const avgPrice = nodePriceData.reduce((sum, node) => sum.add(node.price), ethers.BigNumber.from(0)).div(nodePriceData.length);
-          calculatedUsage = avgPrice.sub(basePrice).mul(100).div(maxPrice.sub(basePrice)).toNumber();
+          // Extract and sort all node prices
+          const prices = nodePriceData.map(node => ethers.BigNumber.from(node.price));
+          prices.sort((a, b) => {
+            if (a.lt(b)) return -1;
+            if (a.gt(b)) return 1;
+            return 0;
+          });
+          
+          // Calculate median
+          let medianPrice;
+          const mid = Math.floor(prices.length / 2);
+          if (prices.length % 2 === 0) {
+            // Even number of prices: average the two middle values
+            medianPrice = prices[mid - 1].add(prices[mid]).div(2);
+          } else {
+            // Odd number of prices: use the middle value
+            medianPrice = prices[mid];
+          }
+          
+          // Debug: log values to understand why calculation might fail
+          console.log('Usage calculation:', {
+            nodePrices: nodePriceData.map(n => n.price.toString()),
+            sortedPrices: prices.map(p => p.toString()),
+            medianPrice: medianPrice.toString(),
+            basePrice: basePrice.toString(),
+            maxPrice: maxPrice.toString(),
+            medianVsBase: medianPrice.lt(basePrice) ? 'median < base' : medianPrice.eq(basePrice) ? 'median = base' : 'median > base',
+          });
+          
+          // If medianPrice equals basePrice, usage is 0%
+          if (medianPrice.lte(basePrice)) {
+            calculatedUsage = 0;
+          } 
+          // If medianPrice equals or exceeds maxPrice, usage is 100%
+          else if (medianPrice.gte(maxPrice)) {
+            calculatedUsage = 100;
+          }
+          // Otherwise, calculate: (medianPrice - basePrice) * 100 / (maxPrice - basePrice)
+          else {
+            const priceDiff = medianPrice.sub(basePrice);
+            const maxBaseDiff = maxPrice.sub(basePrice);
+            // Calculate percentage (0-100) with integer precision
+            calculatedUsage = priceDiff.mul(100).div(maxBaseDiff).toNumber();
+            // Ensure it's between 0 and 100
+            calculatedUsage = Math.max(0, Math.min(100, calculatedUsage));
+          }
         }
+        console.log('Calculated usage:', calculatedUsage);
         setUsagePercent(calculatedUsage);
         const currentPricesResult = await contract.usagePercentToPrices(calculatedUsage, PRODUCT_IDS);
 
