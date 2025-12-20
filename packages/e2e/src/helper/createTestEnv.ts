@@ -27,8 +27,8 @@ export const CONFIG = {
     },
   },
   LIVE: {
-    nativeFundingAmount: '0.8',
-    ledgerDepositAmount: '12',
+    nativeFundingAmount: '0.01',
+    ledgerDepositAmount: '0.01',
     sponsorshipLimits: {
       totalMaxPriceInWei: '50000000000000000',
       userMaxPrice: 50000000000000000n,
