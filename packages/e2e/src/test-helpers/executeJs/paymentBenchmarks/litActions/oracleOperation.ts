@@ -9,7 +9,7 @@ declare const ethers: any;
 async function oracleOperation() {
   // Helper function to calculate median
   const median = (arr: number[]) => {
-    const arrSorted = arr.sort((a, b) => a - b);
+    const arrSorted = [...arr].sort((a, b) => a - b);
     return arrSorted.length % 2 === 0
       ? (arrSorted[arrSorted.length / 2 - 1] +
           arrSorted[arrSorted.length / 2]) /

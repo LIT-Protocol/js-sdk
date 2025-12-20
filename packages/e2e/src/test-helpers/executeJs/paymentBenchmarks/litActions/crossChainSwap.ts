@@ -16,7 +16,7 @@ async function crossChainSwap() {
     sourceToken: 'ETH',
     destToken: 'BTC',
     amountIn: '1.0', // 1 ETH
-    userAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb', // Example address
+    userAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0', // Example address
     slippageTolerance: 0.5, // 0.5%
   };
 
