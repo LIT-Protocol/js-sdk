@@ -13,7 +13,10 @@ export type GeneratedAccountRecord = {
 };
 
 const DEFAULT_E2E_DIR = path.resolve(process.cwd(), '.e2e');
-const DEFAULT_ACCOUNTS_FILE = path.join(DEFAULT_E2E_DIR, 'generated-accounts.jsonl');
+const DEFAULT_ACCOUNTS_FILE = path.join(
+  DEFAULT_E2E_DIR,
+  'generated-accounts.jsonl'
+);
 
 export const E2E_RUN_ID: string =
   process.env['E2E_RUN_ID'] ??
