@@ -113,16 +113,31 @@ export interface LitActionSignedData {
   sigType: EcdsaSigType;
 }
 
+export interface LitActionPaymentDetail {
+  component: string;
+  quantity: number;
+  /**
+   * Price in wei for this component.
+   * Use bigint to avoid precision loss.
+   */
+  price: bigint;
+}
+
 /**
  * This is what the /web/execute/v2 endpoint returns
  */
 export interface ExecuteJsValueResponse {
+  /**
+   * Node URL that returned this value (injected client-side)
+   */
+  nodeUrl?: string;
   claimData: Record<string, LitActionClaimData>;
   decryptedData: any; // TODO check
   logs: string;
   response: string;
   signedData: Record<string, LitActionSignedData>;
   success: boolean;
+  paymentDetail?: LitActionPaymentDetail[];
 }
 
 /**
