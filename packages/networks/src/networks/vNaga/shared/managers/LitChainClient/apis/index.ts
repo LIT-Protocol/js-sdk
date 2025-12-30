@@ -8,6 +8,7 @@ import { addPermittedAddress } from './rawContractApis/permissions/write/addPerm
 import { removePermittedAction } from './rawContractApis/permissions/write/removePermittedAction';
 import { removePermittedAddress } from './rawContractApis/permissions/write/removePermittedAddress';
 import { tokenOfOwnerByIndex } from './rawContractApis/pkp/read/tokenOfOwnerByIndex';
+import { claimAndMint } from './rawContractApis/pkp/write/claimAndMint';
 import { claimAndMintNextAndAddAuthMethodsWithTypes } from './rawContractApis/pkp/write/claimAndMintNextAndAddAuthMethodsWithTypes';
 import { mintNextAndAddAuthMethods } from './rawContractApis/pkp/write/mintNextAndAddAuthMethods';
 import {
@@ -64,6 +65,7 @@ export const rawApi = {
       tokenOfOwnerByIndex,
     },
     write: {
+      claimAndMint,
       claimAndMintNextAndAddAuthMethodsWithTypes,
       mintNextAndAddAuthMethods,
     },

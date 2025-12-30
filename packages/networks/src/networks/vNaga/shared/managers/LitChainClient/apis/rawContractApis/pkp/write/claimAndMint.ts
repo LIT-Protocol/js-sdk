@@ -30,12 +30,16 @@ export async function claimAndMint(
   const mintCost = await pkpNftContract.read.mintCost();
   const ECDSA_SECP256K1 = 2n;
 
+  // Default key set ID for naga networks
+  const DEFAULT_KEY_SET_ID = 'naga-keyset1';
+
   const hash = await callWithAdjustedOverrides(
     pkpNftContract,
     'claimAndMint',
     [
       networkCtx.networkSpecificConfigs.realmId,
       ECDSA_SECP256K1,
+      DEFAULT_KEY_SET_ID,
       derivedKeyId,
       signatures,
       stakingContract.address,

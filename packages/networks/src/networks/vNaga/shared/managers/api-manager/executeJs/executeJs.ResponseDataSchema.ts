@@ -11,9 +11,10 @@ const LitActionSignedDataSchema = z.any();
 
 /**
  * Schema for Lit Action claim data
+ * Each node returns a single signature, which gets combined into signatures array later
  */
 const LitActionClaimDataSchema = z.object({
-  signatures: z.array(z.any()),
+  signature: z.string().optional(),
   derivedKeyId: z.string(),
 });
 

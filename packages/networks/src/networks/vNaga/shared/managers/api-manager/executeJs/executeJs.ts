@@ -347,7 +347,7 @@ export const handleResponse = async (
         claimData: Object.entries(value.claimData || {}).reduce(
           (acc, [key, claimData]) => {
             acc[key] = {
-              signature: '', // Convert from signatures array to single signature for compatibility
+              signature: claimData.signature || '', // Extract signature from node response
               derivedKeyId: claimData.derivedKeyId || '',
             };
             return acc;
@@ -557,16 +557,49 @@ export const handleResponse = async (
       'executeJs:handleResponse: Processing claims data'
     );
 
-    // Convert claim data to expected format
-    claims = Object.entries(mostCommonResponse.claimData).reduce(
-      (acc, [key, claimData]) => {
-        acc[key] = {
-          signatures: [claimData.signature], // Convert single signature to array format
-          derivedKeyId: claimData.derivedKeyId || '',
-        };
-        return acc;
+    // Collect signatures from ALL nodes that returned claim data
+    const claimSignaturesByKey: Record<
+      string,
+      { signatures: string[]; derivedKeyId: string }
+    > = {};
+
+    // Iterate through all valid responses to collect claim signatures
+    for (const response of dataToProcess) {
+      if (response.claimData && Object.keys(response.claimData).length > 0) {
+        for (const [claimKey, claimData] of Object.entries(
+          response.claimData
+        )) {
+          if (!claimSignaturesByKey[claimKey]) {
+            claimSignaturesByKey[claimKey] = {
+              signatures: [],
+              derivedKeyId: claimData.derivedKeyId || '',
+            };
+          }
+          // Add this node's signature if it exists
+          if (claimData.signature) {
+            claimSignaturesByKey[claimKey].signatures.push(
+              claimData.signature
+            );
+          }
+        }
+      }
+    }
+
+    claims = claimSignaturesByKey;
+
+    _logger.info(
+      {
+        requestId,
+        claimKeys: Object.keys(claims),
+        signatureCounts: Object.entries(claims).reduce(
+          (acc, [key, data]) => {
+            acc[key] = data.signatures.length;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
       },
-      {} as Record<string, { signatures: any[]; derivedKeyId: string }>
+      'executeJs:handleResponse: Collected claim signatures from all nodes'
     );
   }
 

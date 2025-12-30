@@ -23,7 +23,10 @@ import { z } from 'zod';
 
 // Base types
 import { LitNetworkModuleBase } from '../../../types';
-import type { INetworkConfig } from '../interfaces/NetworkContext';
+import type {
+  DefaultNetworkConfig,
+  INetworkConfig,
+} from '../interfaces/NetworkContext';
 import type { ExpectedAccountOrWalletClient } from '../managers/contract-manager/createContractsManager';
 import { createChainManagerFactory } from './BaseChainManagerFactory';
 
@@ -302,6 +305,10 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
     getChainConfig: () => networkConfig.chainConfig,
     getDefaultLoginBaseUrl: () => networkConfig.services.loginServiceBaseUrl,
     getMinimumThreshold: () => networkConfig.minimumThreshold,
+
+    // Get full network config for raw contract APIs
+    // This returns the complete DefaultNetworkConfig that can be used with functions like claimAndMint
+    getNetworkConfig: () => networkConfig as unknown as DefaultNetworkConfig,
 
     // State management - shared implementation
     createStateManager: async <StateT, ModuleT>(params: {
