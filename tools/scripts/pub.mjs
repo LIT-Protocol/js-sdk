@@ -12,6 +12,7 @@ import {
   redLog,
   question,
   writeJsonFile,
+  yellowLog,
 } from './utils.mjs';
 
 const args = getArgs();
@@ -108,7 +109,13 @@ const type =
     ? `TAG => ${VALUE}
 
   You will need to install like this: yarn add @lit-protocol/lit-node-client@${VALUE}`
-    : 'PRODUCTION';
+    : `PRODUCTION${
+        OPTION === '--prod' && TAG_OVERRIDES.size > 0
+          ? ` (overrides: ${LEGACY_TAG} for ${[...TAG_OVERRIDES.keys()].join(
+              ', '
+            )})`
+          : ''
+      }`;
 
 greenLog(
   `
@@ -124,6 +131,7 @@ await question('Are you sure you want to publish to? (y/n)', {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     let counter = 0;
+    const failures = [];
 
     await asyncForEach(dirs, async (dir) => {
       // read the package.json file
@@ -173,8 +181,11 @@ await question('Are you sure you want to publish to? (y/n)', {
           },
           {
             logExit: false,
-            exitCallback: () => {
+            exitCallback: (code) => {
               counter++;
+              if (code !== 0) {
+                failures.push({ dir, code, tag: VALUE });
+              }
               // console.log(`${dir} published with tag ${VALUE}`)
             },
           }
@@ -197,8 +208,11 @@ await question('Are you sure you want to publish to? (y/n)', {
           },
           {
             logExit: false,
-            exitCallback: () => {
+            exitCallback: (code) => {
               counter++;
+              if (code !== 0) {
+                failures.push({ dir, code, tag: publishTag ?? 'latest' });
+              }
               // console.log(`${dir} published with tag ${VALUE}`)
             },
           }
@@ -210,8 +224,21 @@ await question('Are you sure you want to publish to? (y/n)', {
       // wait a few secs to check again if all packages are published
       await new Promise((resolve) => setTimeout(resolve, 2000));
       if (counter >= dirs.length) {
-        greenLog('🎉 Publish complete!', true);
-        exit(0);
+        if (failures.length > 0) {
+          redLog(
+            `Publish finished with ${failures.length} failure(s):\n${failures
+              .map(
+                (failure) =>
+                  `- ${failure.dir} (tag ${failure.tag}, exit ${failure.code})`
+              )
+              .join('\n')}`,
+            true
+          );
+          exit(1);
+        } else {
+          greenLog('🎉 Publish complete!', true);
+          exit(0);
+        }
       }
     }
   },
