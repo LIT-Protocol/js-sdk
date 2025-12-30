@@ -18,6 +18,17 @@ const args = getArgs();
 const OPTION = args[0];
 const VALUE = args[1];
 
+const LEGACY_TAG = 'v7';
+const TAG_OVERRIDES = new Map(
+  [
+    '@lit-protocol/access-control-conditions',
+    '@lit-protocol/logger',
+    '@lit-protocol/types',
+    '@lit-protocol/crypto',
+    '@lit-protocol/wasm',
+  ].map((pkgName) => [pkgName, LEGACY_TAG])
+);
+
 if (!OPTION || OPTION === '' || OPTION === '--help') {
   greenLog(
     `
@@ -43,6 +54,18 @@ if (OPTION) {
     console.log('Publishing to production');
   }
 }
+
+const resolvePublishTag = (pkgName) => {
+  if (OPTION === '--tag') {
+    return VALUE;
+  }
+
+  if (OPTION === '--prod') {
+    return TAG_OVERRIDES.get(pkgName) || null;
+  }
+
+  return null;
+};
 
 // read lerna.json version
 const lerna = await readJsonFile('lerna.json');
@@ -159,9 +182,16 @@ await question('Are you sure you want to publish to? (y/n)', {
       }
 
       if (OPTION === '--prod') {
+        const publishTag = resolvePublishTag(pkg.name);
+        if (publishTag) {
+          greenLog(`Publishing ${dir} with tag ${publishTag}`);
+        }
+
         spawnCommand(
           'npm',
-          ['publish', '--access', 'public'],
+          publishTag
+            ? ['publish', '--access', 'public', '--tag', publishTag]
+            : ['publish', '--access', 'public'],
           {
             cwd: dir,
           },

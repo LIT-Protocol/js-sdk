@@ -1,10 +1,28 @@
+const fs = require('fs');
+const path = require('path');
+
 const axios = require('axios');
 const FormData = require('form-data');
+
+const resolveIndexPath = () => {
+  const candidates = [
+    path.join(__dirname, 'dist', 'src', 'index.js'),
+    path.join(__dirname, 'dist', 'src', 'index.cjs'),
+    path.join(__dirname, 'src', 'index.js'),
+  ];
+
+  const found = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!found) {
+    throw new Error('Cannot find wrapped-keys-lit-actions index build output.');
+  }
+
+  return found;
+};
 
 const {
   litActionRepository,
   litActionRepositoryCommon,
-} = require('./dist/src/index');
+} = require(resolveIndexPath());
 
 /** Usage:
  * 1. Ensure you have a valid Pinata IPFS JWT in `LIT_IPFS_JWT` env var
