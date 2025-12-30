@@ -4,6 +4,7 @@
 import { exit } from 'process';
 import {
   asyncForEach,
+  childRunCommand,
   greenLog,
   listDirsRecursive,
   getArgs,
@@ -19,15 +20,20 @@ const args = getArgs();
 const OPTION = args[0];
 const VALUE = args[1];
 
-const LEGACY_TAG = 'v7';
+const TEMP_TAG = 'temp-7';
+const REMOVE_TEMP_TAG = true;
 const TAG_OVERRIDES = new Map(
   [
     '@lit-protocol/access-control-conditions',
+    '@lit-protocol/auth-helpers',
+    '@lit-protocol/constants',
     '@lit-protocol/logger',
     '@lit-protocol/types',
     '@lit-protocol/crypto',
     '@lit-protocol/wasm',
-  ].map((pkgName) => [pkgName, LEGACY_TAG])
+    '@lit-protocol/wrapped-keys-lit-actions',
+    '@lit-protocol/wrapped-keys',
+  ].map((pkgName) => [pkgName, TEMP_TAG])
 );
 
 if (!OPTION || OPTION === '' || OPTION === '--help') {
@@ -67,6 +73,9 @@ const resolvePublishTag = (pkgName) => {
 
   return null;
 };
+
+const shouldRemoveTempTag = (pkgName, tag) =>
+  REMOVE_TEMP_TAG && tag === TEMP_TAG && TAG_OVERRIDES.has(pkgName);
 
 // read lerna.json version
 const lerna = await readJsonFile('lerna.json');
@@ -111,9 +120,9 @@ const type =
   You will need to install like this: yarn add @lit-protocol/lit-node-client@${VALUE}`
     : `PRODUCTION${
         OPTION === '--prod' && TAG_OVERRIDES.size > 0
-          ? ` (overrides: ${LEGACY_TAG} for ${[...TAG_OVERRIDES.keys()].join(
-              ', '
-            )})`
+          ? ` (overrides: ${TEMP_TAG}${
+              REMOVE_TEMP_TAG ? ', will remove tag after publish' : ''
+            } for ${[...TAG_OVERRIDES.keys()].join(', ')})`
           : ''
       }`;
 
@@ -132,6 +141,7 @@ await question('Are you sure you want to publish to? (y/n)', {
 
     let counter = 0;
     const failures = [];
+    const tempTagRemovals = [];
 
     await asyncForEach(dirs, async (dir) => {
       // read the package.json file
@@ -185,6 +195,8 @@ await question('Are you sure you want to publish to? (y/n)', {
               counter++;
               if (code !== 0) {
                 failures.push({ dir, code, tag: VALUE });
+              } else if (shouldRemoveTempTag(pkg.name, VALUE)) {
+                tempTagRemovals.push({ pkgName: pkg.name, tag: VALUE });
               }
               // console.log(`${dir} published with tag ${VALUE}`)
             },
@@ -212,6 +224,11 @@ await question('Are you sure you want to publish to? (y/n)', {
               counter++;
               if (code !== 0) {
                 failures.push({ dir, code, tag: publishTag ?? 'latest' });
+              } else if (shouldRemoveTempTag(pkg.name, publishTag)) {
+                tempTagRemovals.push({
+                  pkgName: pkg.name,
+                  tag: publishTag,
+                });
               }
               // console.log(`${dir} published with tag ${VALUE}`)
             },
@@ -224,6 +241,21 @@ await question('Are you sure you want to publish to? (y/n)', {
       // wait a few secs to check again if all packages are published
       await new Promise((resolve) => setTimeout(resolve, 2000));
       if (counter >= dirs.length) {
+        if (tempTagRemovals.length > 0) {
+          greenLog(`Removing temporary tags...`);
+          await asyncForEach(tempTagRemovals, async ({ pkgName, tag }) => {
+            try {
+              await childRunCommand(`npm dist-tag rm ${pkgName} ${tag}`);
+            } catch (error) {
+              failures.push({
+                dir: pkgName,
+                code: 'dist-tag-rm-failed',
+                tag,
+              });
+            }
+          });
+        }
+
         if (failures.length > 0) {
           redLog(
             `Publish finished with ${failures.length} failure(s):\n${failures
