@@ -4,6 +4,7 @@
 import { exit } from 'process';
 import {
   asyncForEach,
+  childRunCommand,
   greenLog,
   listDirsRecursive,
   getArgs,
@@ -12,11 +13,28 @@ import {
   redLog,
   question,
   writeJsonFile,
+  yellowLog,
 } from './utils.mjs';
 
 const args = getArgs();
 const OPTION = args[0];
 const VALUE = args[1];
+
+const TEMP_TAG = 'temp-7';
+const REMOVE_TEMP_TAG = true;
+const TAG_OVERRIDES = new Map(
+  [
+    '@lit-protocol/access-control-conditions',
+    '@lit-protocol/auth-helpers',
+    '@lit-protocol/constants',
+    '@lit-protocol/logger',
+    '@lit-protocol/types',
+    '@lit-protocol/crypto',
+    '@lit-protocol/wasm',
+    '@lit-protocol/wrapped-keys-lit-actions',
+    '@lit-protocol/wrapped-keys',
+  ].map((pkgName) => [pkgName, TEMP_TAG])
+);
 
 if (!OPTION || OPTION === '' || OPTION === '--help') {
   greenLog(
@@ -43,6 +61,21 @@ if (OPTION) {
     console.log('Publishing to production');
   }
 }
+
+const resolvePublishTag = (pkgName) => {
+  if (OPTION === '--tag') {
+    return VALUE;
+  }
+
+  if (OPTION === '--prod') {
+    return TAG_OVERRIDES.get(pkgName) || null;
+  }
+
+  return null;
+};
+
+const shouldRemoveTempTag = (pkgName, tag) =>
+  REMOVE_TEMP_TAG && tag === TEMP_TAG && TAG_OVERRIDES.has(pkgName);
 
 // read lerna.json version
 const lerna = await readJsonFile('lerna.json');
@@ -85,7 +118,13 @@ const type =
     ? `TAG => ${VALUE}
 
   You will need to install like this: yarn add @lit-protocol/lit-node-client@${VALUE}`
-    : 'PRODUCTION';
+    : `PRODUCTION${
+        OPTION === '--prod' && TAG_OVERRIDES.size > 0
+          ? ` (overrides: ${TEMP_TAG}${
+              REMOVE_TEMP_TAG ? ', will remove tag after publish' : ''
+            } for ${[...TAG_OVERRIDES.keys()].join(', ')})`
+          : ''
+      }`;
 
 greenLog(
   `
@@ -101,6 +140,8 @@ await question('Are you sure you want to publish to? (y/n)', {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     let counter = 0;
+    const failures = [];
+    const tempTagRemovals = [];
 
     await asyncForEach(dirs, async (dir) => {
       // read the package.json file
@@ -150,8 +191,13 @@ await question('Are you sure you want to publish to? (y/n)', {
           },
           {
             logExit: false,
-            exitCallback: () => {
+            exitCallback: (code) => {
               counter++;
+              if (code !== 0) {
+                failures.push({ dir, code, tag: VALUE });
+              } else if (shouldRemoveTempTag(pkg.name, VALUE)) {
+                tempTagRemovals.push({ pkgName: pkg.name, tag: VALUE });
+              }
               // console.log(`${dir} published with tag ${VALUE}`)
             },
           }
@@ -159,16 +205,31 @@ await question('Are you sure you want to publish to? (y/n)', {
       }
 
       if (OPTION === '--prod') {
+        const publishTag = resolvePublishTag(pkg.name);
+        if (publishTag) {
+          greenLog(`Publishing ${dir} with tag ${publishTag}`);
+        }
+
         spawnCommand(
           'npm',
-          ['publish', '--access', 'public'],
+          publishTag
+            ? ['publish', '--access', 'public', '--tag', publishTag]
+            : ['publish', '--access', 'public'],
           {
             cwd: dir,
           },
           {
             logExit: false,
-            exitCallback: () => {
+            exitCallback: (code) => {
               counter++;
+              if (code !== 0) {
+                failures.push({ dir, code, tag: publishTag ?? 'latest' });
+              } else if (shouldRemoveTempTag(pkg.name, publishTag)) {
+                tempTagRemovals.push({
+                  pkgName: pkg.name,
+                  tag: publishTag,
+                });
+              }
               // console.log(`${dir} published with tag ${VALUE}`)
             },
           }
@@ -180,8 +241,36 @@ await question('Are you sure you want to publish to? (y/n)', {
       // wait a few secs to check again if all packages are published
       await new Promise((resolve) => setTimeout(resolve, 2000));
       if (counter >= dirs.length) {
-        greenLog('🎉 Publish complete!', true);
-        exit(0);
+        if (tempTagRemovals.length > 0) {
+          greenLog(`Removing temporary tags...`);
+          await asyncForEach(tempTagRemovals, async ({ pkgName, tag }) => {
+            try {
+              await childRunCommand(`npm dist-tag rm ${pkgName} ${tag}`);
+            } catch (error) {
+              failures.push({
+                dir: pkgName,
+                code: 'dist-tag-rm-failed',
+                tag,
+              });
+            }
+          });
+        }
+
+        if (failures.length > 0) {
+          redLog(
+            `Publish finished with ${failures.length} failure(s):\n${failures
+              .map(
+                (failure) =>
+                  `- ${failure.dir} (tag ${failure.tag}, exit ${failure.code})`
+              )
+              .join('\n')}`,
+            true
+          );
+          exit(1);
+        } else {
+          greenLog('🎉 Publish complete!', true);
+          exit(0);
+        }
       }
     }
   },

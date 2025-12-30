@@ -24,6 +24,8 @@
         "tsConfig": "packages/wrapped-keys-lit-actions/tsconfig.lib.json",
         "assets": [
           "packages/wrapped-keys-lit-actions/*.md",
+          "packages/wrapped-keys-lit-actions/buffer.shim.js",
+          "packages/wrapped-keys-lit-actions/sync-actions-to-ipfs.js",
           {
             "glob": "**/*",
             "input": "packages/wrapped-keys-lit-actions/src/generated",

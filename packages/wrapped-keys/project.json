@@ -19,7 +19,10 @@
         "outputPath": "dist/packages/wrapped-keys",
         "main": "packages/wrapped-keys/src/index.ts",
         "tsConfig": "packages/wrapped-keys/tsconfig.lib.json",
-        "assets": ["packages/wrapped-keys/*.md"],
+        "assets": [
+          "packages/wrapped-keys/*.md",
+          "packages/wrapped-keys/update-ipfs-cids.js"
+        ],
         "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": ["prebuild", "^build"]
