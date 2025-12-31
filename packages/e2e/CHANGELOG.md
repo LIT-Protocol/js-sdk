@@ -1,5 +1,12 @@
 # @lit-protocol/e2e
 
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies [191bbee]
+  - @lit-protocol/auth@8.2.1
+
 ## 5.0.0
 
 ### Minor Changes
