@@ -62,17 +62,20 @@ export async function generateEoaDelegationAuthSig(
     authMethodType: AUTH_METHOD_TYPE.EthWallet,
   };
 
-  // Determine the authenticator based on account type
+  // Determine the authenticator and address based on account type
   let authenticatorClass;
+  let authenticatorAddress: string;
   if (
     'account' in params.account &&
     params.account.account?.type === 'json-rpc'
   ) {
     // WalletClient
     authenticatorClass = WalletClientAuthenticator;
+    authenticatorAddress = params.account.account!.address;
   } else {
     // Viem Account
     authenticatorClass = ViemAccountAuthenticator;
+    authenticatorAddress = (params.account as { address: string }).address;
   }
 
   // Create auth config for validation
@@ -92,6 +95,8 @@ export async function generateEoaDelegationAuthSig(
     deps: {
       nonce: litClientCtx.latestBlockhash,
       authData: litAuthData,
+      storage: upstreamParams.storage,
+      address: authenticatorAddress,
     },
   });
 
