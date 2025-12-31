@@ -78,7 +78,7 @@ export const getEoaAuthContext = async (
     nonce: _params.deps.nonce,
   });
 
-  // Use tryGetCachedDelegationAuthSig to cache AuthSig in localStorage like PKP flow
+  // Use tryGetCachedDelegationAuthSig to cache AuthSig in localStorage
   const authSig: AuthSig = await tryGetCachedDelegationAuthSig({
     cache: _params.cache?.delegationAuthSig,
     storage: _params.deps.storage,
