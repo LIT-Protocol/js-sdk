@@ -1,5 +1,11 @@
 # @lit-protocol/auth
 
+## 8.2.1
+
+### Patch Changes
+
+- 191bbee: Users will see fewer wallet signature prompts during EOA auth because the existing AuthSig is reused when present, with no new usage required and a smoother auth flow.
+
 ## 8.2.0
 
 ### Minor Changes

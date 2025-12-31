@@ -1,5 +1,12 @@
 # @lit-protocol/wrapped-keys
 
+## 8.1.1
+
+### Patch Changes
+
+- Updated dependencies [191bbee]
+  - @lit-protocol/auth@8.2.1
+
 ## 8.1.0
 
 ### Minor Changes
