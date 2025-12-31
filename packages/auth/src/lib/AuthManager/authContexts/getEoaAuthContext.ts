@@ -1,5 +1,6 @@
 import { createSiweMessageWithResources } from '@lit-protocol/auth-helpers';
 import {
+  AuthData,
   EoaAuthContextSchema,
   SessionKeyUriSchema,
 } from '@lit-protocol/schemas';
@@ -65,16 +66,20 @@ export const getEoaAuthContext = async (
     toSign
   );
 
-  // Reuse the AuthSig generated during authenticate to avoid a second signature.
-  let authSig: AuthSig;
-  try {
-    authSig = JSON.parse(authData.accessToken) as AuthSig;
-  } catch (err) {
-    authSig = await _params.authentication.authenticator.createAuthSig(
+  // const authMethodId = await _params.authentication.authenticator.authMethodId(
+  //   authMethod
+  // );
+
+  // const authData: AuthData = {
+  //   ...authMethod,
+  //   authMethodId,
+  // };
+
+  const authSig: AuthSig =
+    await _params.authentication.authenticator.createAuthSig(
       _params.authentication.account as any,
       toSign
     );
-  }
 
   return EoaAuthContextSchema.parse({
     account: _params.authentication.account,
