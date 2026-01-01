@@ -1,5 +1,11 @@
 # @lit-protocol/auth
 
+## 8.2.2
+
+### Patch Changes
+
+- 0c1fb51: EOA users will see fewer signature prompts during EOA auth, since a cached AuthSig will be reused if one is present.
+
 ## 8.2.1
 
 ### Patch Changes
