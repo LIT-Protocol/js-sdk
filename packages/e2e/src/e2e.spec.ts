@@ -1,317 +1,149 @@
-import type { AuthContext } from '@lit-protocol/e2e';
+import { createEnvVars } from './helper/createEnvVars';
+import { createTestEnv } from './helper/createTestEnv';
+import { getNetworkConfig } from './helper/network';
+import type { ResolvedNetwork } from './helper/network';
+import type { AuthContext } from './types';
+
+/**
+ * How to run:
+ * - Full revamped suite (canonical):
+ *   `NETWORK=naga-dev pnpm run test:e2e`
+ *
+ * - Just this file:
+ *   `NETWORK=naga-dev pnpm exec dotenvx run --env-file=.env -- jest --runInBand --config ./jest.e2e.config.ts --cacheDirectory .jest-cache --runTestsByPath packages/e2e/src/e2e.spec.ts`
+ *
+ * - Single test / suite (use Jest name filtering):
+ *   `NETWORK=naga-dev pnpm exec dotenvx run --env-file=.env -- jest --runInBand --config ./jest.e2e.config.ts --cacheDirectory .jest-cache --runTestsByPath packages/e2e/src/e2e.spec.ts --testNamePattern "EOA auth.*pkpSign"`
+ *
+ * - Alternative local workflow:
+ *   add `.only` to a `describe` or `it` block temporarily.
+ */
 import {
-  createCustomAuthContext,
-  createEncryptDecryptFlowTest,
-  createEoaNativeAuthFlowTest,
-  createExecuteJsTest,
-  createPaymentDelegationFlowTest,
-  createPaymentManagerFlowTest,
-  createPkpAuthContextWithPreGeneratedMaterials,
-  createPkpEncryptDecryptTest,
-  createPkpPermissionsManagerFlowTest,
-  createPkpSignTest,
-  createPregenDelegationServerReuseTest,
-  createViemSignMessageTest,
-  createViemSignTransactionTest,
-  createViemSignTypedDataTest,
-  createViewPKPsByAddressTest,
-  createViewPKPsByAuthDataTest,
-  init,
-  registerPaymentDelegationTicketSuite,
-} from '@lit-protocol/e2e';
-import { registerWrappedKeysTests } from './test-helpers/executeJs/wrappedKeys';
+  createTestAccount,
+  CreateTestAccountResult,
+} from './helper/createTestAccount';
+import { registerEndpointSuite } from './suites/endpoints.suite';
+import { registerViemSuite } from './suites/viem.suite';
+import { registerPkpPreGeneratedMaterialsSuite } from './suites/pkp-pre-generated-materials.suite';
+import { registerEoaNativeSuite } from './suites/eoa-native.suite';
+import { registerWrappedKeysSuite } from './suites/wrapped-keys.suite';
+import { registerCustomAuthSuite } from './suites/custom-auth.suite';
+import { registerPaymentDelegationTicketSuite } from './tickets/delegation.suite';
 
 const SELECTED_NETWORK = process.env['NETWORK'];
 const IS_PAID_NETWORK = SELECTED_NETWORK !== 'naga-dev';
-const RPC_OVERRIDE_ENV_VAR =
-  SELECTED_NETWORK === 'naga' || SELECTED_NETWORK === 'naga-proto'
-    ? 'LIT_MAINNET_RPC_URL'
-    : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL';
 const describeIfPaid = IS_PAID_NETWORK ? describe : describe.skip;
-const RPC_OVERRIDE = process.env[RPC_OVERRIDE_ENV_VAR];
-if (RPC_OVERRIDE) {
-  console.log(
-    `🧪 E2E: Using RPC override (${RPC_OVERRIDE_ENV_VAR}):`,
-    RPC_OVERRIDE
-  );
-}
 
-describe('all', () => {
-  describe('full alice, bob, and eve', () => {
-    let ctx: Awaited<ReturnType<typeof init>>;
+describe('revamped e2e suite', () => {
+  let envVars: ReturnType<typeof createEnvVars>;
+  let testEnv: Awaited<ReturnType<typeof createTestEnv>>;
+  let resolvedNetwork: ResolvedNetwork;
+  let alice: CreateTestAccountResult;
+  let bob: CreateTestAccountResult;
 
-    // Auth contexts for testing
-    let eveCustomAuthContext: AuthContext;
+  beforeAll(async () => {
+    envVars = createEnvVars();
+    testEnv = await createTestEnv(envVars);
+    const { name, importName, type } = getNetworkConfig(envVars.network);
+    resolvedNetwork = {
+      name,
+      importName,
+      type,
+      networkModule: testEnv.networkModule,
+    };
 
-    beforeAll(async () => {
-      try {
-        ctx = await init();
-        // Replenish ledger balances for the Alice EOA + PKP before the suite runs.
-        await ctx.masterDepositForUser(ctx.aliceViemAccount.address);
-        await ctx.masterDepositForUser(ctx.aliceViemAccountPkp.ethAddress);
-        eveCustomAuthContext = await createCustomAuthContext(ctx);
-      } catch (e) {
-        console.error('❌ Failed to initialise E2E test context', e);
-        process.exit(1);
-      }
+    alice = await createTestAccount(testEnv, {
+      label: 'Alice',
+      fundAccount: true,
+      hasEoaAuthContext: true,
+      fundLedger: true,
+      hasPKP: true,
+      fundPKP: true,
+      hasPKPAuthContext: true,
+      fundPKPLedger: true,
     });
 
-    describe('EOA Auth', () => {
-      console.log('🔐 Testing using Externally Owned Account authentication');
-
-      describe('endpoints', () => {
-        it('pkpSign', () =>
-          createPkpSignTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('executeJs', () =>
-          createExecuteJsTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
-        it('viewPKPsByAuthData', () =>
-          createViewPKPsByAuthDataTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('pkpEncryptDecrypt', () =>
-          createPkpEncryptDecryptTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('encryptDecryptFlow', () =>
-          createEncryptDecryptFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('pkpPermissionsManagerFlow', () =>
-          createPkpPermissionsManagerFlowTest(
-            ctx,
-            () => ctx.aliceEoaAuthContext
-          )());
-        it('paymentManagerFlow', () =>
-          createPaymentManagerFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
-        it('paymentDelegationFlow', () =>
-          createPaymentDelegationFlowTest(
-            ctx,
-            () => ctx.aliceEoaAuthContext
-          )());
-
-        describe('integrations', () => {
-          describe('pkp viem account', () => {
-            it('sign message', () =>
-              createViemSignMessageTest(ctx, () => ctx.aliceEoaAuthContext)());
-            it('sign transaction', () =>
-              createViemSignTransactionTest(
-                ctx,
-                () => ctx.aliceEoaAuthContext
-              )());
-            it('sign typed data', () =>
-              createViemSignTypedDataTest(
-                ctx,
-                () => ctx.aliceEoaAuthContext
-              )());
-          });
-        });
-      });
-
-      describe('PKP Auth', () => {
-        console.log('🔐 Testing using Programmable Key Pair authentication');
-
-        describe('endpoints', () => {
-          it('pkpSign', () =>
-            createPkpSignTest(ctx, () => ctx.alicePkpAuthContext)());
-          it('executeJs', () =>
-            createExecuteJsTest(ctx, () => ctx.alicePkpAuthContext)());
-          it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
-          it('viewPKPsByAuthData', () =>
-            createViewPKPsByAuthDataTest(ctx, () => ctx.alicePkpAuthContext)());
-          it('pkpEncryptDecrypt', () =>
-            createPkpEncryptDecryptTest(ctx, () => ctx.alicePkpAuthContext)());
-          it('encryptDecryptFlow', () =>
-            createEncryptDecryptFlowTest(ctx, () => ctx.alicePkpAuthContext)());
-          it('pkpPermissionsManagerFlow', () =>
-            createPkpPermissionsManagerFlowTest(
-              ctx,
-              () => ctx.alicePkpAuthContext
-            )());
-        });
-
-        describe('integrations', () => {
-          describe('pkp viem account', () => {
-            it('sign message', () =>
-              createViemSignMessageTest(ctx, () => ctx.alicePkpAuthContext)());
-            it('sign transaction', () =>
-              createViemSignTransactionTest(
-                ctx,
-                () => ctx.alicePkpAuthContext
-              )());
-            it('sign typed data', () =>
-              createViemSignTypedDataTest(
-                ctx,
-                () => ctx.alicePkpAuthContext
-              )());
-          });
-        });
-      });
-
-      describe('Custom Auth', () => {
-        console.log('🔐 Testing using Custom authentication method');
-
-        describe('endpoints', () => {
-          it('pkpSign', () =>
-            createPkpSignTest(
-              ctx,
-              () => eveCustomAuthContext,
-              ctx.eveViemAccountPkp.pubkey
-            )());
-          it('executeJs', () =>
-            createExecuteJsTest(
-              ctx,
-              () => eveCustomAuthContext,
-              ctx.eveViemAccountPkp.pubkey
-            )());
-          it('viewPKPsByAddress', () => createViewPKPsByAddressTest(ctx)());
-          it('viewPKPsByAuthData', () =>
-            createViewPKPsByAuthDataTest(ctx, () => eveCustomAuthContext)());
-          it('pkpEncryptDecrypt', () =>
-            createPkpEncryptDecryptTest(ctx, () => ctx.aliceEoaAuthContext)());
-          it('encryptDecryptFlow', () =>
-            createEncryptDecryptFlowTest(ctx, () => ctx.aliceEoaAuthContext)());
-
-          // Disable for now because it requires a different flow
-          // it('pkpPermissionsManagerFlow', () =>
-          //   createPkpPermissionsManagerFlowTest(
-          //     ctx,
-          //     () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey
-          //   )());
-        });
-
-        // describe('integrations', () => {
-        //   describe('pkp viem account', () => {
-        //     it('sign message', () =>
-        //       createViemSignMessageTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey)());
-        //     it('sign transaction', () =>
-        //       createViemSignTransactionTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey)());
-        //     it('sign typed data', () =>
-        //       createViemSignTypedDataTest(ctx, () => eveCustomAuthContext, ctx.eveViemAccountPkp.pubkey)());
-        //   });
-        // });
-      });
-
-      describe('PKP Auth with Pre-generated Materials', () => {
-        console.log('🔐 Testing PKP auth with pre-generated session materials');
-
-        let preGeneratedAuthContext: any;
-
-        beforeAll(async () => {
-          try {
-            preGeneratedAuthContext =
-              await createPkpAuthContextWithPreGeneratedMaterials(ctx);
-          } catch (e) {
-            console.error('Failed to create pre-generated auth context:', e);
-            throw e;
-          }
-        });
-
-        describe('endpoints', () => {
-          it('pkpSign with pre-generated materials', () =>
-            createPkpSignTest(ctx, () => preGeneratedAuthContext)());
-
-          it('executeJs with pre-generated materials', () =>
-            createExecuteJsTest(ctx, () => preGeneratedAuthContext)());
-
-          it('pkpEncryptDecrypt with pre-generated materials', () =>
-            createPkpEncryptDecryptTest(ctx, () => preGeneratedAuthContext)());
-        });
-
-        describe('error handling', () => {
-          it('should reject when only sessionKeyPair is provided', async () => {
-            const tempAuthContext = await ctx.authManager.createPkpAuthContext({
-              authData: ctx.aliceViemAccountAuthData,
-              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-              authConfig: {
-                resources: [['pkp-signing', '*']],
-                expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-              },
-              litClient: ctx.litClient,
-            });
-
-            const sessionKeyPair = tempAuthContext.sessionKeyPair;
-
-            await expect(
-              ctx.authManager.createPkpAuthContext({
-                authData: ctx.aliceViemAccountAuthData,
-                pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-                authConfig: {
-                  resources: [['pkp-signing', '*']],
-                  expiration: new Date(
-                    Date.now() + 1000 * 60 * 15
-                  ).toISOString(),
-                },
-                litClient: ctx.litClient,
-                sessionKeyPair, // Only providing sessionKeyPair
-                // delegationAuthSig is missing
-              })
-            ).rejects.toThrow(
-              'Both sessionKeyPair and delegationAuthSig must be provided together, or neither should be provided'
-            );
-          });
-
-          it('should reject when only delegationAuthSig is provided', async () => {
-            const tempAuthContext = await ctx.authManager.createPkpAuthContext({
-              authData: ctx.aliceViemAccountAuthData,
-              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-              authConfig: {
-                resources: [['pkp-signing', '*']],
-                expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-              },
-              litClient: ctx.litClient,
-            });
-
-            const delegationAuthSig =
-              await tempAuthContext.authNeededCallback();
-
-            await expect(
-              ctx.authManager.createPkpAuthContext({
-                authData: ctx.aliceViemAccountAuthData,
-                pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-                authConfig: {
-                  resources: [['pkp-signing', '*']],
-                  expiration: new Date(
-                    Date.now() + 1000 * 60 * 15
-                  ).toISOString(),
-                },
-                litClient: ctx.litClient,
-                // sessionKeyPair is missing
-                delegationAuthSig, // Only providing delegationAuthSig
-              })
-            ).rejects.toThrow(
-              'Both sessionKeyPair and delegationAuthSig must be provided together, or neither should be provided'
-            );
-          });
-        });
-
-        /**
-         * This scenario mirrors the client/server hand-off used in production:
-         * 1. A client generates session materials and a delegation auth sig.
-         * 2. The bundle travels over the wire (simulated via JSON serialisation).
-         * 3. A server restores those materials with a fresh AuthManager instance and
-         *    proves it can sign with the delegated PKP using an independently created LitClient.
-         * Keeping this in the main e2e suite ensures we catch regressions in CI without
-         * relying on the ad-hoc ticket test.
-         */
-        describe('server reuse flow', () => {
-          it('should sign using materials shipped over the wire', () =>
-            createPregenDelegationServerReuseTest({
-              authManager: ctx.authManager,
-              authData: ctx.aliceViemAccountAuthData,
-              pkpPublicKey: ctx.aliceViemAccountPkp.pubkey,
-              clientLitClient: ctx.litClient,
-              resolvedNetwork: ctx.resolvedNetwork,
-            })());
-        });
-      });
-
-      describe('EOA Native', () => {
-        console.log('🔐 Testing EOA native authentication and PKP minting');
-        it('eoaNativeAuthFlow', () => createEoaNativeAuthFlowTest(ctx)());
-      });
-    });
-    describe('wrapped keys', () => {
-      registerWrappedKeysTests();
+    bob = await createTestAccount(testEnv, {
+      label: 'Bob',
+      fundAccount: true,
+      hasEoaAuthContext: true,
+      fundLedger: true,
+      hasPKP: false,
+      fundPKP: false,
+      fundPKPLedger: false,
+      hasPKPAuthContext: false,
     });
   });
+
+  const authModes = [
+    {
+      label: 'EOA',
+      getAuthContext: () => alice.eoaAuthContext!,
+      includePaymentFlows: true,
+      getAccsAddress: (_authContext: AuthContext) => alice.account.address,
+    },
+    {
+      label: 'PKP',
+      getAuthContext: () => alice.pkpAuthContext!,
+      includePaymentFlows: false,
+    },
+  ] satisfies Array<{
+    label: string;
+    getAuthContext: () => AuthContext;
+    includePaymentFlows: boolean;
+    getAccsAddress?: (authContext: AuthContext) => string;
+  }>;
+
+  authModes.forEach((mode) => {
+    describe(`${mode.label} auth`, () => {
+      const getTestEnv = () => testEnv;
+      const getAliceAccount = () => alice;
+      const getBobAccount = () => bob;
+      const getPkpPublicKey = () => {
+        if (!alice.pkp) {
+          throw new Error('Alice is missing a PKP');
+        }
+        return alice.pkp.pubkey;
+      };
+      const getPkpEthAddress = () => {
+        if (!alice.pkp) {
+          throw new Error('Alice is missing a PKP');
+        }
+        return alice.pkp.ethAddress as `0x${string}`;
+      };
+
+      registerEndpointSuite(getTestEnv, mode.getAuthContext, {
+        getPkpPublicKey,
+        getPkpEthAddress,
+        getAliceAccount,
+        getBobAccount,
+        includePaymentFlows: mode.includePaymentFlows,
+        getAccsAddress: mode.getAccsAddress,
+      });
+
+      registerViemSuite(getTestEnv, mode.getAuthContext, getPkpPublicKey);
+    });
+  });
+
+  registerPkpPreGeneratedMaterialsSuite(
+    () => testEnv,
+    () => alice,
+    () => resolvedNetwork
+  );
+
+  registerEoaNativeSuite(
+    () => testEnv,
+    () => alice
+  );
+
+  registerWrappedKeysSuite();
+
+  registerCustomAuthSuite(
+    () => testEnv,
+    () => bob
+  );
 });
 
-// ====== These tests only run on paid networks ======
 describeIfPaid('Paid networks tests', () => {
   registerPaymentDelegationTicketSuite();
 });

@@ -61,8 +61,10 @@ jobs:
             privateKey: LIVE_MASTER_ACCOUNT_NAGA_TEST
     env:
       LOG_LEVEL: debug2
+      NETWORK: ${{ matrix.network }}
       LIVE_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
       LOCAL_MASTER_ACCOUNT: ${{ secrets[matrix.privateKey] }}
+      LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -101,8 +103,8 @@ jobs:
             echo "LOCAL_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
             exit 1
           fi
-      - name: Run health check (${{ matrix.network }})
-        run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci -- packages/e2e/src/e2e.spec.ts --testNamePattern "^all "
+      - name: Run e2e tests (${{ matrix.network }})
+        run: pnpm run test:e2e:ci -- packages/e2e/src/e2e.spec.ts
         timeout-minutes: 10
 
   release:

@@ -14,6 +14,7 @@ import {
 } from './helper/network';
 import { z } from 'zod';
 import { fundAccount } from './helper/fundAccount';
+import { EVE_VALIDATION_IPFS_CID } from './helper/constants';
 import { getOrCreatePkp } from './helper/pkp-utils';
 import { PKPData, AuthData, CustomAuthData } from '@lit-protocol/schemas';
 import {
@@ -45,9 +46,6 @@ const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '0.01';
 const MAINNET_NETWORK_FUNDING_AMOUNT = '0.01';
 const MAINNET_LEDGER_DEPOSIT_AMOUNT = '0.01';
-
-const EVE_VALIDATION_IPFS_CID =
-  'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
 
 type BaseInitResult = {
   litClient: LitClientInstance;

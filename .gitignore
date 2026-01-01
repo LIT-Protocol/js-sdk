@@ -99,3 +99,4 @@ alice-auth-manager-data
 !/packages/contracts/dist/
 !/packages/contracts/dist/dev
 .secret
+.jest-cache
