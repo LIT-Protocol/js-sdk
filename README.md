@@ -59,6 +59,26 @@ When `NETWORK` is set to `naga-proto` or `naga`, the test helpers only top up ge
 NETWORK=<network-name> pnpm run test:e2e all
 ```
 
+## Rust E2E Tests
+
+Rust parity tests live in `crates/lit-e2e` and load the same `.env` file.
+
+```bash
+# Defaults to NETWORK_NAME (then NETWORK) from .env
+cargo test -p lit-e2e
+
+# Run against a paid live network (pricing + delegation billing enabled)
+NETWORK_NAME=naga-test cargo test -p lit-e2e
+
+# Run against naga-dev (non-paid network; billing tests are skipped like the JS suite)
+NETWORK_NAME=naga-dev cargo test -p lit-e2e
+
+# Run only the paid "delegation billing" ticket test
+NETWORK_NAME=naga-test cargo test -p lit-e2e payment_delegation_flow -- --nocapture
+```
+
+Note: live networks may require capacity/payment delegation; local `naga-local` runs are recommended for now.
+
 ### Target a specific spec
 
 Use `test:target` when you only need to exercise one file:

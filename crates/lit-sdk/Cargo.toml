@@ -1,0 +1,46 @@
+[package]
+name = "lit-sdk"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Rust SDK for the Lit Protocol Naga network"
+
+[features]
+default = []
+# Enable BLS encryption/decryption via the upstream `lit-bls-wasm` crate.
+# This is optional because the upstream crate currently fails to compile
+# on some native toolchains.
+bls-wasm = ["dep:lit-bls-wasm"]
+
+[dependencies]
+tokio = { version = "1.40", features = ["macros", "rt-multi-thread", "time"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+thiserror = "1.0"
+sha2 = "0.10"
+sha3 = "0.10"
+hex = "0.4"
+base64ct = { version = "=1.5.3", features = ["alloc"] }
+rand = "0.8"
+futures = "0.3"
+sev = { version = "7.1", default-features = false, features = ["snp", "crypto_nossl"] }
+# Match the upstream lit-bls-wasm dependency to ensure signature-share compatibility.
+blsful = { version = "=3.0.0-pre8" }
+blsful2 = { version = "2.5.7", package = "blsful", default-features = false, features = ["rust"] }
+http = "0.2"
+iri-string = "0.6"
+lit-bls-wasm = { git = "https://github.com/LIT-Protocol/lit-bls-wasm", optional = true }
+sodalite = "0.4"
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+siwe = "0.5"
+siwe-recap = "0.2"
+ethers = { version = "2", default-features = false, features = ["rustls", "abigen"] }
+lit-utilities-wasm = { path = "../../packages/wasm/rust", default-features = false, features = ["verify-only"] }
+chrono = { version = "0.4", features = ["serde"] }
+async-trait = "0.1"
+bs58 = "0.5"
+
+[dev-dependencies]
+tokio = { version = "1.40", features = ["macros", "rt-multi-thread"] }
+dotenvy = "0.15"
