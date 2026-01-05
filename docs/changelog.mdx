@@ -6,77 +6,95 @@ rss: true
 
 | Package | Latest version | Summary |
 | ------- | -------------- | ------- |
-| [@lit-protocol/lit-client](#lit-client) | [8.2.3](https://www.npmjs.com/package/%40lit-protocol%2Flit-client) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
-| [@lit-protocol/auth](#auth) | [8.1.2](https://www.npmjs.com/package/%40lit-protocol%2Fauth) | update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test. |
-| [@lit-protocol/networks](#networks) | [8.3.2](https://www.npmjs.com/package/%40lit-protocol%2Fnetworks) | Updated dependencies |
-| [@lit-protocol/auth-services](#auth-services) | [2.0.8](https://www.npmjs.com/package/%40lit-protocol%2Fauth-services) | Updated dependencies |
+| [@lit-protocol/lit-client](#lit-client) | [8.3.0](https://www.npmjs.com/package/%40lit-protocol%2Flit-client) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
+| [@lit-protocol/auth](#auth) | [8.2.2](https://www.npmjs.com/package/%40lit-protocol%2Fauth) | EOA users will see fewer signature prompts during EOA auth, since a cached AuthSig will be reused if one is present. |
+| [@lit-protocol/networks](#networks) | [8.4.0](https://www.npmjs.com/package/%40lit-protocol%2Fnetworks) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
+| [@lit-protocol/auth-services](#auth-services) | [2.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fauth-services) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
 | [@lit-protocol/access-control-conditions](#access-control-conditions) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions) | - |
 | [@lit-protocol/access-control-conditions-schemas](#access-control-conditions-schemas) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions-schemas) | - |
-| [@lit-protocol/artillery](#artillery) | [0.0.10](https://www.npmjs.com/package/%40lit-protocol%2Fartillery) | @lit-protocol/e2e@4.0.2 |
-| [@lit-protocol/auth-helpers](#auth-helpers) | [8.1.1](https://www.npmjs.com/package/%40lit-protocol%2Fauth-helpers) | Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network. |
-| [@lit-protocol/constants](#constants) | [8.0.8](https://www.npmjs.com/package/%40lit-protocol%2Fconstants) | Updated dependencies |
-| [@lit-protocol/contracts](#contracts) | [0.8.2](https://www.npmjs.com/package/%40lit-protocol%2Fcontracts) | Provide a browser-only stub for `custom-network-signatures` so web builds skip the Node-specific implementation |
-| [@lit-protocol/crypto](#crypto) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fcrypto) | - |
-| [@lit-protocol/e2e](#e2e) | [4.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fe2e) | Updated dependencies |
+| [@lit-protocol/artillery](#artillery) | [0.1.2](https://www.npmjs.com/package/%40lit-protocol%2Fartillery) | @lit-protocol/e2e@5.0.2 |
+| [@lit-protocol/auth-helpers](#auth-helpers) | [8.2.0](https://www.npmjs.com/package/%40lit-protocol%2Fauth-helpers) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
+| [@lit-protocol/constants](#constants) | [9.0.0](https://www.npmjs.com/package/%40lit-protocol%2Fconstants) | Remove deprecated campNetwork config from EVM network constants, update RPC and block explorer URLs for campTestnet, and add campMainnet network config. |
+| [@lit-protocol/contracts](#contracts) | [0.9.0](https://www.npmjs.com/package/%40lit-protocol%2Fcontracts) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
+| [@lit-protocol/crypto](#crypto) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fcrypto) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
+| [@lit-protocol/e2e](#e2e) | [5.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fe2e) | Updated dependencies |
 | [@lit-protocol/logger](#logger) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Flogger) | - |
 | [@lit-protocol/schemas](#schemas) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Fschemas) | - |
 | [@lit-protocol/types](#types) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Ftypes) | - |
 | [@lit-protocol/wasm](#wasm) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fwasm) | Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before. |
-| [@lit-protocol/wrapped-keys](#wrapped-keys) | [8.0.1](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys) | fix package metadata so bundlers load the CommonJS builds again |
-| [@lit-protocol/wrapped-keys-lit-actions](#wrapped-keys-lit-actions) | [8.0.1](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys-lit-actions) | fix package metadata so bundlers load the CommonJS builds again |
+| [@lit-protocol/wrapped-keys](#wrapped-keys) | [8.1.2](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys) | Updated dependencies |
+| [@lit-protocol/wrapped-keys-lit-actions](#wrapped-keys-lit-actions) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys-lit-actions) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
 
 <Update
   label="lit-client"
-  description="v8.2.3"
-  tags={["Patch Changes"]}
-  rss={{ title: "lit-client", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
+  description="v8.3.0"
+  tags={["Minor Changes", "Patch Changes"]}
+  rss={{ title: "lit-client", description: "Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)" }}
   id="lit-client"
 >
 
+  ## Minor Changes
+
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
+
   ## Patch Changes
 
-  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
+  - SDK exposes typed Shiva env helpers (`createShivaEnvVars`, `waitForTestnetInfo`, `SUPPORTED_NETWORKS`) so QA suites can spin up testnets without bespoke env plumbing, and the new `executeWithHandshake` runner automatically retry failures for more stable Lit action execution.
 </Update>
 
 <Update
   label="auth"
-  description="v8.1.2"
+  description="v8.2.2"
   tags={["Patch Changes"]}
-  rss={{ title: "auth", description: "update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test." }}
+  rss={{ title: "auth", description: "EOA users will see fewer signature prompts during EOA auth, since a cached AuthSig will be reused if one is present." }}
   id="auth"
 >
 
   ## Patch Changes
 
-  - update naga-test contract addresses. Users are expected to update and reinstall the SDK to continue using naga-test.
+  - EOA users will see fewer signature prompts during EOA auth, since a cached AuthSig will be reused if one is present.
 </Update>
 
 <Update
   label="networks"
-  description="v8.3.2"
-  tags={["Patch Changes"]}
-  rss={{ title: "networks", description: "Updated dependencies" }}
+  description="v8.4.0"
+  tags={["Minor Changes", "Patch Changes"]}
+  rss={{ title: "networks", description: "Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)" }}
   id="networks"
 >
 
+  ## Minor Changes
+
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
+  - Add `naga` and `naga-proto` networks. Create per-network entrypoints and subpath exports (naga, naga-production, naga-proto, naga-staging, naga-test, naga-dev, naga-local) for better tree-shaking
+  - Expose and aggregate payment details returned by Lit nodes from Lit Action execution requests.
+
   ## Patch Changes
 
+  - PKP signing now auto-hashes Cosmos payloads, exposes a documented bypassAutoHashing option, and ships with a new e2e suite plus docs so builders can rely on every listed curve working out of the box.
+  - SDK exposes typed Shiva env helpers (`createShivaEnvVars`, `waitForTestnetInfo`, `SUPPORTED_NETWORKS`) so QA suites can spin up testnets without bespoke env plumbing, and the new `executeWithHandshake` runner automatically retry failures for more stable Lit action execution.
   - Updated dependencies
-  - @lit-protocol/contracts@0.8.2
+  - Updated dependencies
+  - @lit-protocol/contracts@0.9.0
 </Update>
 
 <Update
   label="auth-services"
-  description="v2.0.8"
-  tags={["Patch Changes"]}
-  rss={{ title: "auth-services", description: "Updated dependencies" }}
+  description="v2.1.0"
+  tags={["Minor Changes", "Patch Changes"]}
+  rss={{ title: "auth-services", description: "Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)" }}
   id="auth-services"
 >
+
+  ## Minor Changes
+
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
 
   ## Patch Changes
 
   - Updated dependencies
-  - @lit-protocol/contracts@0.8.2
+  - Updated dependencies
+  - @lit-protocol/contracts@0.9.0
 </Update>
 
 <Update
@@ -103,71 +121,83 @@ rss: true
 
 <Update
   label="artillery"
-  description="v0.0.10"
+  description="v0.1.2"
   tags={["Patch Changes"]}
-  rss={{ title: "artillery", description: "@lit-protocol/e2e@4.0.2" }}
+  rss={{ title: "artillery", description: "@lit-protocol/e2e@5.0.2" }}
   id="artillery"
 >
 
   ## Patch Changes
 
-  - @lit-protocol/e2e@4.0.2
+  - @lit-protocol/e2e@5.0.2
 </Update>
 
 <Update
   label="auth-helpers"
-  description="v8.1.1"
-  tags={["Patch Changes"]}
-  rss={{ title: "auth-helpers", description: "Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network." }}
+  description="v8.2.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "auth-helpers", description: "Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)" }}
   id="auth-helpers"
 >
 
-  ## Patch Changes
+  ## Minor Changes
 
-  - Update the naga-dev staking address. users are expected to reinstall the SDK to apply this patch to continue using the naga-dev network.
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
 </Update>
 
 <Update
   label="constants"
-  description="v8.0.8"
-  tags={["Patch Changes"]}
-  rss={{ title: "constants", description: "Updated dependencies" }}
+  description="v9.0.0"
+  tags={["Major Changes", "Minor Changes", "Patch Changes"]}
+  rss={{ title: "constants", description: "Remove deprecated campNetwork config from EVM network constants, update RPC and block explorer URLs for campTestnet, and add campMainnet network config." }}
   id="constants"
 >
+
+  ## Major Changes
+
+  - Remove deprecated campNetwork config from EVM network constants, update RPC and block explorer URLs for campTestnet, and add campMainnet network config.
+
+  ## Minor Changes
+
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
 
   ## Patch Changes
 
   - Updated dependencies
-  - @lit-protocol/contracts@0.8.2
+  - Updated dependencies
+  - @lit-protocol/contracts@0.9.0
 </Update>
 
 <Update
   label="contracts"
-  description="v0.8.2"
-  tags={["Patch Changes"]}
-  rss={{ title: "contracts", description: "Provide a browser-only stub for `custom-network-signatures` so web builds skip the Node-specific implementation" }}
+  description="v0.9.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "contracts", description: "Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)" }}
   id="contracts"
 >
 
-  ## Patch Changes
+  ## Minor Changes
 
-  - Provide a browser-only stub for `custom-network-signatures` so web builds skip the Node-specific implementation
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
+  - Add `naga` and `naga-proto` networks. Create per-network entrypoints and subpath exports (naga, naga-production, naga-proto, naga-staging, naga-test, naga-dev, naga-local) for better tree-shaking
 </Update>
 
 <Update
   label="crypto"
-  description="v8.0.2"
-  tags={["Release"]}
-  rss={{ title: "crypto", description: "No release notes provided yet." }}
+  description="v8.1.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "crypto", description: "Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)" }}
   id="crypto"
 >
 
-  No release notes available.
+  ## Minor Changes
+
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
 </Update>
 
 <Update
   label="e2e"
-  description="v4.0.2"
+  description="v5.0.2"
   tags={["Patch Changes"]}
   rss={{ title: "e2e", description: "Updated dependencies" }}
   id="e2e"
@@ -176,9 +206,7 @@ rss: true
   ## Patch Changes
 
   - Updated dependencies
-  - @lit-protocol/contracts@0.8.2
-  - @lit-protocol/constants@8.0.8
-  - @lit-protocol/networks@8.3.2
+  - @lit-protocol/auth@8.2.2
 </Update>
 
 <Update
@@ -229,26 +257,27 @@ rss: true
 
 <Update
   label="wrapped-keys"
-  description="v8.0.1"
+  description="v8.1.2"
   tags={["Patch Changes"]}
-  rss={{ title: "wrapped-keys", description: "fix package metadata so bundlers load the CommonJS builds again" }}
+  rss={{ title: "wrapped-keys", description: "Updated dependencies" }}
   id="wrapped-keys"
 >
 
   ## Patch Changes
 
-  - fix package metadata so bundlers load the CommonJS builds again
+  - Updated dependencies
+  - @lit-protocol/auth@8.2.2
 </Update>
 
 <Update
   label="wrapped-keys-lit-actions"
-  description="v8.0.1"
-  tags={["Patch Changes"]}
-  rss={{ title: "wrapped-keys-lit-actions", description: "fix package metadata so bundlers load the CommonJS builds again" }}
+  description="v8.1.0"
+  tags={["Minor Changes"]}
+  rss={{ title: "wrapped-keys-lit-actions", description: "Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)" }}
   id="wrapped-keys-lit-actions"
 >
 
-  ## Patch Changes
+  ## Minor Changes
 
-  - fix package metadata so bundlers load the CommonJS builds again
+  - Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
 </Update>

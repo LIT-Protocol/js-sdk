@@ -41,7 +41,6 @@ const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
 // Configurations
-const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '1';
 // Mainnet-style networks have separate knobs so `naga-proto` can remain cheap while
@@ -55,6 +54,8 @@ const NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT =
   process.env['NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT'] ?? '0.01';
 const NAGA_PROTO_LEDGER_DEPOSIT_AMOUNT =
   process.env['NAGA_PROTO_LEDGER_DEPOSIT_AMOUNT'] ?? '0.01';
+
+const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 
 const EVE_VALIDATION_IPFS_CID =
   'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';

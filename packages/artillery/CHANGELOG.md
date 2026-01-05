@@ -1,5 +1,17 @@
 # @lit-protocol/artillery
 
+## 0.1.2
+
+### Patch Changes
+
+- @lit-protocol/e2e@5.0.2
+
+## 0.1.1
+
+### Patch Changes
+
+- @lit-protocol/e2e@5.0.1
+
 ## 0.1.0
 
 ### Minor Changes

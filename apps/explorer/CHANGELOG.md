@@ -1,5 +1,19 @@
 # @lit-protocol/explorer
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [0c1fb51]
+  - @lit-protocol/auth@8.2.2
+
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [191bbee]
+  - @lit-protocol/auth@8.2.1
+
 ## 0.0.1
 
 ### Patch Changes
