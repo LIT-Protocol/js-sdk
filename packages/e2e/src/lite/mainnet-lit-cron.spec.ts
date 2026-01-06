@@ -19,10 +19,9 @@ type LitStatusSdk = typeof import('@lit-protocol/lit-status-sdk');
 
 const importLitStatusSdk = async (): Promise<LitStatusSdk> => {
   // Use runtime import to avoid Babel's CJS transform for ESM-only packages.
-  const importer = new Function(
-    'specifier',
-    'return import(specifier);'
-  ) as (specifier: string) => Promise<LitStatusSdk>;
+  const importer = new Function('specifier', 'return import(specifier);') as (
+    specifier: string
+  ) => Promise<LitStatusSdk>;
   return importer('@lit-protocol/lit-status-sdk');
 };
 
