@@ -217,9 +217,11 @@ async function initInternal(
     : isNagaMainnet && mainnetMasterKey
     ? 'LIVE_MASTER_ACCOUNT_NAGA'
     : 'LIVE_MASTER_ACCOUNT';
-  const masterPrivateKey = (isNagaMainnet && mainnetMasterKey
-    ? mainnetMasterKey
-    : process.env[masterAccountEnvVar]) as `0x${string}` | undefined;
+  const masterPrivateKey = (
+    isNagaMainnet && mainnetMasterKey
+      ? mainnetMasterKey
+      : process.env[masterAccountEnvVar]
+  ) as `0x${string}` | undefined;
 
   if (!masterPrivateKey) {
     throw new Error(
