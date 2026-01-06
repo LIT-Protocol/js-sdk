@@ -41,7 +41,6 @@ const LogLevelSchema = z.enum(['silent', 'info', 'debug']);
 type LogLevel = z.infer<typeof LogLevelSchema>;
 
 // Configurations
-const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LOCAL_NETWORK_FUNDING_AMOUNT = '1';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '1';
 // Mainnet-style networks have separate knobs so `naga-proto` can remain cheap while
@@ -55,6 +54,8 @@ const NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT =
   process.env['NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT'] ?? '0.01';
 const NAGA_PROTO_LEDGER_DEPOSIT_AMOUNT =
   process.env['NAGA_PROTO_LEDGER_DEPOSIT_AMOUNT'] ?? '0.01';
+
+const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 
 const EVE_VALIDATION_IPFS_CID =
   'QmcxWmo3jefFsPUnskJXYBwsJYtiFuMAH1nDQEs99AwzDe';
@@ -208,12 +209,19 @@ async function initInternal(
   const isLocal = networkType === 'local';
   const isNagaMainnet = resolvedNetworkName === 'naga';
   const isNagaProto = resolvedNetworkName === 'naga-proto';
-  const masterAccountEnvVar = isLocal
-    ? 'LOCAL_MASTER_ACCOUNT'
-    : 'LIVE_MASTER_ACCOUNT';
-  const masterPrivateKey = process.env[masterAccountEnvVar] as
+  const mainnetMasterKey = process.env['LIVE_MASTER_ACCOUNT_NAGA'] as
     | `0x${string}`
     | undefined;
+  const masterAccountEnvVar = isLocal
+    ? 'LOCAL_MASTER_ACCOUNT'
+    : isNagaMainnet && mainnetMasterKey
+    ? 'LIVE_MASTER_ACCOUNT_NAGA'
+    : 'LIVE_MASTER_ACCOUNT';
+  const masterPrivateKey = (
+    isNagaMainnet && mainnetMasterKey
+      ? mainnetMasterKey
+      : process.env[masterAccountEnvVar]
+  ) as `0x${string}` | undefined;
 
   if (!masterPrivateKey) {
     throw new Error(

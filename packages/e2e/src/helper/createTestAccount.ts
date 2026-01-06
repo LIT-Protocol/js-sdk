@@ -28,6 +28,11 @@ type CreateTestAccountOpts = {
     };
     userAddresses: string[] | `0x${string}`[];
   };
+  /**
+   * Optional: Use a fixed private key instead of generating a new random one.
+   * This allows reusing the same test account across multiple test runs.
+   */
+  privateKey?: `0x${string}`;
 };
 
 export type CreateTestAccountResult = {
@@ -76,7 +81,12 @@ export async function createTestAccount(
   person.authData = personAccountAuthData;
 
   console.log(`Address`, person.account.address);
-  console.log(`opts:`, opts);
+  console.log(`opts:`, {
+    ...opts,
+    privateKey: opts.privateKey
+      ? opts.privateKey.slice(0, 6) + '...'
+      : undefined,
+  });
 
   // 3. fund it
   if (opts.fundAccount) {
@@ -90,27 +100,27 @@ export async function createTestAccount(
         thenFund: testEnv.config.nativeFundingAmount,
       }
     );
+  }
 
-    // -- create EOA auth context
-    if (opts.hasEoaAuthContext) {
-      person.eoaAuthContext = await testEnv.authManager.createEoaAuthContext({
-        config: {
-          account: person.account,
-        },
-        authConfig: {
-          statement: 'I authorize the Lit Protocol to execute this Lit Action.',
-          domain: 'example.com',
-          resources: [
-            ['lit-action-execution', '*'],
-            ['pkp-signing', '*'],
-            ['access-control-condition-decryption', '*'],
-          ],
-          expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-        },
-        litClient: testEnv.litClient,
-      });
-    }
-  } // ... end if fundAccount
+  // -- create EOA auth context
+  if (opts.hasEoaAuthContext) {
+    person.eoaAuthContext = await testEnv.authManager.createEoaAuthContext({
+      config: {
+        account: person.account,
+      },
+      authConfig: {
+        statement: 'I authorize the Lit Protocol to execute this Lit Action.',
+        domain: 'example.com',
+        resources: [
+          ['lit-action-execution', '*'],
+          ['pkp-signing', '*'],
+          ['access-control-condition-decryption', '*'],
+        ],
+        expiration: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
+      },
+      litClient: testEnv.litClient,
+    });
+  }
 
   // 4. also fund the ledger
   if (opts.fundLedger) {
