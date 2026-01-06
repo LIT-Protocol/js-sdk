@@ -19,7 +19,6 @@ on:
         options:
           - naga-dev
           - naga-test
-          - naga
 
 env:
   LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
@@ -32,13 +31,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        network: [naga-dev, naga-test, naga]
+        network: [naga-dev, naga-test]
     env:
       NETWORK: ${{ matrix.network }}
-      LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || matrix.network == 'naga-test' && secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST || secrets.LIVE_MASTER_ACCOUNT_NAGA || secrets.LIVE_MASTER_ACCOUNT }}
-      LIVE_MASTER_ACCOUNT_NAGA: ${{ secrets.LIVE_MASTER_ACCOUNT_NAGA }}
+      LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST }}
       LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
-      LIT_MAINNET_RPC_URL: ${{ vars.LIT_MAINNET_RPC_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -78,16 +75,9 @@ jobs:
       - name: Verify required environment variables
         run: |
           echo "Checking environment variables for ${{ matrix.network }}..."
-          if [ "${{ matrix.network }}" = "naga" ]; then
-            if [ -z "${LIVE_MASTER_ACCOUNT_NAGA}" ] && [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
-              echo "❌ LIVE_MASTER_ACCOUNT_NAGA or LIVE_MASTER_ACCOUNT is not set for naga"
-              exit 1
-            fi
-          else
-            if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
-              echo "❌ LIVE_MASTER_ACCOUNT is not set for ${{ matrix.network }}"
-              exit 1
-            fi
+          if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
+            echo "❌ LIVE_MASTER_ACCOUNT is not set for ${{ matrix.network }}"
+            exit 1
           fi
           if [ -z "${LIT_STATUS_WRITE_KEY}" ]; then
             echo "❌ LIT_STATUS_WRITE_KEY is not set"
@@ -100,32 +90,15 @@ jobs:
           echo "✅ All required environment variables are set"
 
       - name: Run health check for ${{ matrix.network }}
-        if: ${{ (github.event_name != 'workflow_dispatch' || github.event.inputs.network == '' || github.event.inputs.network == matrix.network) && matrix.network != 'naga' }}
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.network == '' || github.event.inputs.network == matrix.network }}
         run: pnpm run ci:health
         timeout-minutes: 10
         env:
           NETWORK: ${{ matrix.network }}
-          LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || matrix.network == 'naga-test' && secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST || secrets.LIVE_MASTER_ACCOUNT_NAGA || secrets.LIVE_MASTER_ACCOUNT }}
-          LIVE_MASTER_ACCOUNT_NAGA: ${{ secrets.LIVE_MASTER_ACCOUNT_NAGA }}
+          LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST }}
           LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
           LIT_STATUS_BACKEND_URL: ${{ vars.LIT_STATUS_BACKEND_URL }}
           LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
-          LIT_MAINNET_RPC_URL: ${{ vars.LIT_MAINNET_RPC_URL }}
-          LOG_LEVEL: info
-
-      - name: Run lite mainnet e2e for ${{ matrix.network }}
-        if: ${{ (github.event_name != 'workflow_dispatch' || github.event.inputs.network == '' || github.event.inputs.network == matrix.network) && matrix.network == 'naga' }}
-        run: pnpm run test:e2e:ci -- packages/e2e/src/lite/mainnet-lite.spec.ts
-        timeout-minutes: 10
-        env:
-          NETWORK: ${{ matrix.network }}
-          RUN_LITE_MAINNET_E2E: '1'
-          LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || matrix.network == 'naga-test' && secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST || secrets.LIVE_MASTER_ACCOUNT_NAGA || secrets.LIVE_MASTER_ACCOUNT }}
-          LIVE_MASTER_ACCOUNT_NAGA: ${{ secrets.LIVE_MASTER_ACCOUNT_NAGA }}
-          LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
-          LIT_STATUS_BACKEND_URL: ${{ vars.LIT_STATUS_BACKEND_URL }}
-          LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
-          LIT_MAINNET_RPC_URL: ${{ vars.LIT_MAINNET_RPC_URL }}
           LOG_LEVEL: info
 
       - name: Health check summary
