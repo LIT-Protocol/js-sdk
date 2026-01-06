@@ -27,6 +27,13 @@
               "learning-lit/backup-and-recovery",
               "learning-lit/threshold-cryptography"
             ]
+          },
+          {
+            "group": "Pricing",
+            "pages": [
+              "learning-lit/pricing/payment-model",
+              "learning-lit/pricing/current-prices"
+            ]
           }
         ]
       },

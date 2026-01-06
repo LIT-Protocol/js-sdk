@@ -21,10 +21,11 @@
   "tags": [
     "universal"
   ],
-  "version": "8.0.2",
+  "version": "8.1.0",
   "main": "./cjs/index.js",
   "module": "./src/index.js",
   "types": "./src/index.d.ts",
+  "typings": "./src/index.d.ts",
   "exports": {
     ".": {
       "types": "./src/index.d.ts",

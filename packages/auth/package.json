@@ -44,10 +44,11 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.1.2",
+  "version": "8.2.2",
   "main": "./cjs/index.js",
   "module": "./index.js",
   "types": "./index.d.ts",
+  "typings": "./index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",

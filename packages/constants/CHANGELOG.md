@@ -1,5 +1,21 @@
 # @lit-protocol/constants
 
+## 9.0.0
+
+### Major Changes
+
+- 42e5151: Remove deprecated campNetwork config from EVM network constants, update RPC and block explorer URLs for campTestnet, and add campMainnet network config.
+
+### Minor Changes
+
+- 0a80342: Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
+
+### Patch Changes
+
+- Updated dependencies [0a80342]
+- Updated dependencies [edf1099]
+  - @lit-protocol/contracts@0.9.0
+
 ## 8.0.8
 
 ### Patch Changes

@@ -25,10 +25,11 @@
     "crypto": false,
     "stream": false
   },
-  "version": "8.1.1",
+  "version": "8.2.0",
   "main": "./cjs/index.js",
   "module": "./src/index.js",
   "types": "./src/index.d.ts",
+  "typings": "./src/index.d.ts",
   "exports": {
     ".": {
       "types": "./src/index.d.ts",

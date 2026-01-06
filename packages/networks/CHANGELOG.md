@@ -1,5 +1,21 @@
 # @lit-protocol/networks
 
+## 8.4.0
+
+### Minor Changes
+
+- 0a80342: Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
+- edf1099: Add `naga` and `naga-proto` networks. Create per-network entrypoints and subpath exports (naga, naga-production, naga-proto, naga-staging, naga-test, naga-dev, naga-local) for better tree-shaking
+- b5258b7: Expose and aggregate payment details returned by Lit nodes from Lit Action execution requests.
+
+### Patch Changes
+
+- d2ff969: PKP signing now auto-hashes Cosmos payloads, exposes a documented bypassAutoHashing option, and ships with a new e2e suite plus docs so builders can rely on every listed curve working out of the box.
+- fd9544d: SDK exposes typed Shiva env helpers (`createShivaEnvVars`, `waitForTestnetInfo`, `SUPPORTED_NETWORKS`) so QA suites can spin up testnets without bespoke env plumbing, and the new `executeWithHandshake` runner automatically retry failures for more stable Lit action execution.
+- Updated dependencies [0a80342]
+- Updated dependencies [edf1099]
+  - @lit-protocol/contracts@0.9.0
+
 ## 8.3.2
 
 ### Patch Changes

@@ -504,6 +504,19 @@ export interface SigResponse {
   dataSigned: string;
 }
 
+/**
+ * @typedef {object} LitActionPaymentDetail
+ * @description Represents the payment details for a specific component in a Lit Action.
+ * @property {string} component - The name or identifier of the component being paid for.
+ * @property {number} quantity - The number of units of the component.
+ * @property {bigint} price - Price in wei for this component. Use bigint to avoid precision loss.
+ */
+export interface LitActionPaymentDetail {
+  component: string;
+  quantity: number;
+  price: bigint;
+}
+
 export interface ExecuteJsResponseBase {
   signatures:
     | {
@@ -511,6 +524,7 @@ export interface ExecuteJsResponseBase {
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | any;
+  paymentDetail?: LitActionPaymentDetail[];
 }
 
 /**
@@ -527,13 +541,17 @@ export interface ExecuteJsResponse extends ExecuteJsResponseBase {
   logs: string;
   claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
-    allNodeResponses: NodeResponse[];
-    allNodeLogs: {
+    allNodeResponses?: NodeResponse[];
+    allNodeLogs?: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logs: any;
     }[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rawNodeHTTPResponses: any;
+    rawNodeHTTPResponses?: any;
+    paymentDetailByNode?: {
+      nodeUrl: string;
+      paymentDetail: LitActionPaymentDetail[];
+    }[];
   };
 }
 

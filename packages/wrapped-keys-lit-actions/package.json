@@ -26,10 +26,11 @@
   "scripts": {
     "generate-lit-actions": "node ./esbuild.config.cjs"
   },
-  "version": "8.0.1",
+  "version": "8.1.0",
   "main": "./cjs/index.js",
   "module": "./src/index.js",
   "types": "./src/index.d.ts",
+  "typings": "./src/index.d.ts",
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
