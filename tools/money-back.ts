@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
+import { pathToFileURL } from 'node:url';
 import { createPublicClient, createWalletClient, formatEther, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { createLitClient } from '@lit-protocol/lit-client';
@@ -187,14 +188,32 @@ async function sweepNativeBalance(params: {
     transport: http(rpcUrl),
   });
 
-  const hash = await walletClient.sendTransaction({
-    to: destination,
-    value,
-    gas,
-    ...(gasPrice ? { gasPrice } : {}),
-    ...(maxFeePerGas ? { maxFeePerGas } : {}),
-    ...(maxPriorityFeePerGas ? { maxPriorityFeePerGas } : {}),
-  });
+  let hash: `0x${string}`;
+  if (gasPrice) {
+    hash = await walletClient.sendTransaction({
+      account,
+      to: destination,
+      value,
+      gas,
+      gasPrice,
+      type: 'legacy',
+    });
+  } else if (maxFeePerGas) {
+    const priorityFee = maxPriorityFeePerGas ?? maxFeePerGas;
+    const cappedPriorityFee =
+      priorityFee > maxFeePerGas ? maxFeePerGas : priorityFee;
+    hash = await walletClient.sendTransaction({
+      account,
+      to: destination,
+      value,
+      gas,
+      maxFeePerGas,
+      maxPriorityFeePerGas: cappedPriorityFee,
+      type: 'eip1559',
+    });
+  } else {
+    throw new Error('Unable to determine fee model for native sweep.');
+  }
 
   await publicClient.waitForTransactionReceipt({ hash });
 
@@ -203,12 +222,14 @@ async function sweepNativeBalance(params: {
   );
 }
 
-async function main(): Promise<void> {
+export async function runMoneyBack(
+  argv: string[] = process.argv.slice(2)
+): Promise<void> {
   if (!process.env['LOG_LEVEL']) {
     process.env['LOG_LEVEL'] = 'silent';
   }
 
-  const flags = parseFlags(process.argv.slice(2));
+  const flags = parseFlags(argv);
 
   if (flags.help) {
     console.log(`Usage: tsx tools/money-back.ts [--withdraw] [--yes]
@@ -502,7 +523,13 @@ Environment:
   }
 }
 
-main().catch((error) => {
-  console.error('money-back failed:', error);
-  process.exit(1);
-});
+const entrypoint = process.argv[1];
+const isMain =
+  entrypoint && import.meta.url === pathToFileURL(entrypoint).href;
+
+if (isMain) {
+  runMoneyBack().catch((error) => {
+    console.error('money-back failed:', error);
+    process.exit(1);
+  });
+}

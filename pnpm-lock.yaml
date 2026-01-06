@@ -25,6 +25,9 @@ importers:
       '@lit-protocol/contracts':
         specifier: workspace:*
         version: link:dist/packages/contracts
+      '@lit-protocol/lit-status-sdk':
+        specifier: 0.1.8
+        version: 0.1.8(typescript@5.8.3)
       '@lit-protocol/nacl':
         specifier: 7.1.1
         version: 7.1.1

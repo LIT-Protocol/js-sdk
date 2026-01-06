@@ -17,6 +17,7 @@ Set the same environment variables the in-repo test harness expects **before** r
 ```bash
 # Accounts that sponsor users on live and local networks
 LIVE_MASTER_ACCOUNT=0x...
+LIVE_MASTER_ACCOUNT_NAGA=0x...  # optional override for NETWORK=naga
 LOCAL_MASTER_ACCOUNT=0x...
 
 # General configuration (can also be passed to init())
