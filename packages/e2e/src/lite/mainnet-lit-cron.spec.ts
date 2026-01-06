@@ -15,6 +15,17 @@ const describeIfUptime =
 
 type LiteStatusFunctions = Record<LiteFunctionName, { id: string }>;
 
+type LitStatusSdk = typeof import('@lit-protocol/lit-status-sdk');
+
+const importLitStatusSdk = async (): Promise<LitStatusSdk> => {
+  // Use runtime import to avoid Babel's CJS transform for ESM-only packages.
+  const importer = new Function(
+    'specifier',
+    'return import(specifier);'
+  ) as (specifier: string) => Promise<LitStatusSdk>;
+  return importer('@lit-protocol/lit-status-sdk');
+};
+
 const sleep = (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -85,9 +96,7 @@ const initStatusClient = async () => {
     );
   }
 
-  const { createLitStatusClient } = await import(
-    '@lit-protocol/lit-status-sdk'
-  );
+  const { createLitStatusClient } = await importLitStatusSdk();
   const client = createLitStatusClient({
     url: statusUrl,
     apiKey: statusKey,
