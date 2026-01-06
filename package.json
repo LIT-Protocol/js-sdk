@@ -37,6 +37,7 @@
     "@dotenvx/dotenvx": "1.6.4",
     "@ethersproject/contracts": "5.7.0",
     "@lit-protocol/contracts": "workspace:*",
+    "@lit-protocol/lit-status-sdk": "0.1.8",
     "@lit-protocol/nacl": "7.1.1",
     "@lit-protocol/uint8arrays": "7.1.1",
     "@metamask/eth-sig-util": "5.0.2",
@@ -44,6 +45,7 @@
     "@openagenda/verror": "3.1.4",
     "@simplewebauthn/browser": "7.2.0",
     "@simplewebauthn/typescript-types": "7.0.0",
+    "@solana/kit": "4.0.0",
     "@wagmi/core": "2.22.1",
     "ajv": "8.12.0",
     "babel-jest": "30.2.0",
@@ -67,8 +69,7 @@
     "viem": "2.38.3",
     "wagmi": "2.18.1",
     "zod": "3.24.3",
-    "zod-validation-error": "3.4.0",
-    "@solana/kit": "4.0.0"
+    "zod-validation-error": "3.4.0"
   },
   "devDependencies": {
     "@changesets/cli": "2.29.4",
@@ -110,9 +111,9 @@
     "prettier": "2.8.8",
     "rimraf": "6.0.1",
     "ts-jest": "29.2.5",
-    "tweetnacl": "1.0.3",
     "ts-node": "10.9.2",
     "tsx": "4.20.5",
+    "tweetnacl": "1.0.3",
     "typedoc": "0.28.12",
     "typescript": "5.8.3"
   },
