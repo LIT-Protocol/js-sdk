@@ -109,7 +109,8 @@ export const initHealthCheck = async (
    * ====================================
    */
   const mainnetMasterAccount =
-    process.env['LIVE_MASTER_ACCOUNT_NAGA'] || process.env['LIVE_MASTER_ACCOUNT'];
+    process.env['LIVE_MASTER_ACCOUNT_NAGA'] ||
+    process.env['LIVE_MASTER_ACCOUNT'];
   const masterPrivateKey = isNagaMainnet
     ? mainnetMasterAccount
     : process.env['LIVE_MASTER_ACCOUNT'];
@@ -123,9 +124,7 @@ export const initHealthCheck = async (
     );
   }
 
-  const masterAccount = privateKeyToAccount(
-    masterPrivateKey as `0x${string}`
-  );
+  const masterAccount = privateKeyToAccount(masterPrivateKey as `0x${string}`);
 
   // Create a single test account
   const aliceViemAccount = privateKeyToAccount(generatePrivateKey());

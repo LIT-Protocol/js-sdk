@@ -67,9 +67,12 @@ function validateEnvironment(): void {
   }
 
   const mainnetMasterAccount =
-    process.env['LIVE_MASTER_ACCOUNT_NAGA'] || process.env['LIVE_MASTER_ACCOUNT'];
+    process.env['LIVE_MASTER_ACCOUNT_NAGA'] ||
+    process.env['LIVE_MASTER_ACCOUNT'];
   const masterAccount =
-    NETWORK === 'naga' ? mainnetMasterAccount : process.env['LIVE_MASTER_ACCOUNT'];
+    NETWORK === 'naga'
+      ? mainnetMasterAccount
+      : process.env['LIVE_MASTER_ACCOUNT'];
 
   if (!masterAccount) {
     const requiredEnvVar =

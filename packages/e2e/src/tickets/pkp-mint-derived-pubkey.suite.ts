@@ -6,12 +6,7 @@ import {
   nagaTestSignatures,
 } from '@lit-protocol/contracts';
 import { buildSignaturesFromContext } from '@lit-protocol/contracts/custom-network-signatures';
-import {
-  createPublicClient,
-  http,
-  isAddress,
-  type Hex,
-} from 'viem';
+import { createPublicClient, http, isAddress, type Hex } from 'viem';
 
 import { createEnvVars, type EnvVars } from '../helper/createEnvVars';
 import { createTestEnv } from '../helper/createTestEnv';
@@ -116,7 +111,9 @@ const requireAddress = (
   }
   if (!isAddress(address)) {
     throw new Error(
-      `[pkp-mint-derived-pubkey] invalid ${String(key)} address for ${network}: ${address}`
+      `[pkp-mint-derived-pubkey] invalid ${String(
+        key
+      )} address for ${network}: ${address}`
     );
   }
   return address;
