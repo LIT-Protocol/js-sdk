@@ -209,12 +209,17 @@ async function initInternal(
   const isLocal = networkType === 'local';
   const isNagaMainnet = resolvedNetworkName === 'naga';
   const isNagaProto = resolvedNetworkName === 'naga-proto';
-  const masterAccountEnvVar = isLocal
-    ? 'LOCAL_MASTER_ACCOUNT'
-    : 'LIVE_MASTER_ACCOUNT';
-  const masterPrivateKey = process.env[masterAccountEnvVar] as
+  const mainnetMasterKey = process.env['LIVE_MASTER_ACCOUNT_NAGA'] as
     | `0x${string}`
     | undefined;
+  const masterAccountEnvVar = isLocal
+    ? 'LOCAL_MASTER_ACCOUNT'
+    : isNagaMainnet && mainnetMasterKey
+    ? 'LIVE_MASTER_ACCOUNT_NAGA'
+    : 'LIVE_MASTER_ACCOUNT';
+  const masterPrivateKey = (isNagaMainnet && mainnetMasterKey
+    ? mainnetMasterKey
+    : process.env[masterAccountEnvVar]) as `0x${string}` | undefined;
 
   if (!masterPrivateKey) {
     throw new Error(

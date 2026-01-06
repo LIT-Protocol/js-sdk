@@ -4,6 +4,7 @@ import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { createPublicClient, createWalletClient, formatEther, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { parseExpression } from 'cron-parser';
 import { createLitClient } from '@lit-protocol/lit-client';
 import {
   readGeneratedAccounts,
@@ -32,6 +33,7 @@ type CliFlags = {
   withdraw: boolean;
   yes: boolean;
   help: boolean;
+  cron?: string;
 };
 
 const ACCOUNTS_FILE = path.resolve(
@@ -46,11 +48,32 @@ const STATE_FILE = path.resolve(
 );
 
 function parseFlags(argv: string[]): CliFlags {
-  return {
-    withdraw: argv.includes('--withdraw'),
-    yes: argv.includes('--yes'),
-    help: argv.includes('--help') || argv.includes('-h'),
+  const flags: CliFlags = {
+    withdraw: false,
+    yes: false,
+    help: false,
+    cron: undefined,
   };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+
+    if (arg === '--withdraw') {
+      flags.withdraw = true;
+    } else if (arg === '--yes') {
+      flags.yes = true;
+    } else if (arg === '--help' || arg === '-h') {
+      flags.help = true;
+    } else if (arg === '--cron') {
+      const value = argv[i + 1];
+      flags.cron = value ?? '';
+      i += 1;
+    } else if (arg.startsWith('--cron=')) {
+      flags.cron = arg.slice('--cron='.length);
+    }
+  }
+
+  return flags;
 }
 
 function formatWei(wei: bigint): string {
@@ -123,6 +146,10 @@ async function confirmDestination(
   if (answer.trim().toLowerCase() !== 'yes') {
     throw new Error('Aborted by user.');
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function sweepNativeBalance(params: {
@@ -203,24 +230,7 @@ async function sweepNativeBalance(params: {
   );
 }
 
-async function main(): Promise<void> {
-  if (!process.env['LOG_LEVEL']) {
-    process.env['LOG_LEVEL'] = 'silent';
-  }
-
-  const flags = parseFlags(process.argv.slice(2));
-
-  if (flags.help) {
-    console.log(`Usage: tsx tools/money-back.ts [--withdraw] [--yes]
-
-Environment:
-  NETWORK (required)
-  LIVE_MASTER_ACCOUNT (required)
-  LIT_MAINNET_RPC_URL (required)
-`);
-    return;
-  }
-
+async function runOnce(flags: CliFlags): Promise<void> {
   const networkInput = process.env['NETWORK'];
   if (!networkInput) {
     throw new Error('NETWORK is required.');
@@ -500,6 +510,63 @@ Environment:
       `Saved withdrawal state (${pendingEntries.length} pending) to ${STATE_FILE}.`
     );
   }
+}
+
+async function runWithCron(flags: CliFlags): Promise<void> {
+  const expression = flags.cron;
+  if (!expression) {
+    await runOnce(flags);
+    return;
+  }
+
+  let iterator;
+  try {
+    iterator = parseExpression(expression);
+  } catch (error) {
+    throw new Error(
+      `Invalid cron expression "${expression}": ${(error as Error).message}`
+    );
+  }
+  console.log(`Cron schedule: ${expression}`);
+
+  await runOnce(flags);
+
+  while (true) {
+    const nextRun = iterator.next().toDate();
+    const delayMs = Math.max(nextRun.getTime() - Date.now(), 0);
+    console.log(`Next run at ${nextRun.toISOString()}`);
+    await sleep(delayMs);
+    try {
+      await runOnce(flags);
+    } catch (error) {
+      console.error('money-back failed:', error);
+    }
+  }
+}
+
+async function main(): Promise<void> {
+  if (!process.env['LOG_LEVEL']) {
+    process.env['LOG_LEVEL'] = 'silent';
+  }
+
+  const flags = parseFlags(process.argv.slice(2));
+
+  if (flags.help) {
+    console.log(`Usage: tsx tools/money-back.ts [--withdraw] [--yes] [--cron "<expression>"]
+
+Environment:
+  NETWORK (required)
+  LIVE_MASTER_ACCOUNT (required)
+  LIT_MAINNET_RPC_URL (required)
+`);
+    return;
+  }
+
+  if (flags.cron === '') {
+    throw new Error('--cron requires a cron expression.');
+  }
+
+  await runWithCron(flags);
 }
 
 main().catch((error) => {
