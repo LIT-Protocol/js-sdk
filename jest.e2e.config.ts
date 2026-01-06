@@ -39,6 +39,7 @@ const config: Config = {
       '<rootDir>/packages/$1/src/lib/$2',
     [`^@lit-protocol/(${localPackages.join('|')})(/.*)?$`]:
       '<rootDir>/packages/$1/src$2',
+    '^@wagmi/core$': '<rootDir>/packages/e2e/src/testing/wagmi-core.ts',
   },
 
   // this is to avoid duplicate module resolution errors
