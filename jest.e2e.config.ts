@@ -20,6 +20,15 @@ const localPackages = [
   'wrapped-keys-lit-actions',
 ];
 
+const useVmModules = process.env['NODE_OPTIONS']?.includes(
+  '--experimental-vm-modules'
+);
+const transformIgnorePatterns = useVmModules
+  ? [
+      '/node_modules/(?:\\.pnpm/[^/]+/node_modules/)?@lit-protocol/lit-status-sdk/',
+    ]
+  : [];
+
 const config: Config = {
   testEnvironment: 'node',
   testMatch: ['<rootDir>/packages/e2e/src/**/*.spec.ts'],
@@ -30,7 +39,7 @@ const config: Config = {
   },
 
   // Allow transforms for node_modules so ESM deps work
-  transformIgnorePatterns: [],
+  transformIgnorePatterns,
 
   // Resolve monorepo packages to sources
   moduleNameMapper: {
@@ -39,6 +48,7 @@ const config: Config = {
       '<rootDir>/packages/$1/src/lib/$2',
     [`^@lit-protocol/(${localPackages.join('|')})(/.*)?$`]:
       '<rootDir>/packages/$1/src$2',
+    '^@wagmi/core$': '<rootDir>/packages/e2e/src/testing/wagmi-core.ts',
   },
 
   // this is to avoid duplicate module resolution errors

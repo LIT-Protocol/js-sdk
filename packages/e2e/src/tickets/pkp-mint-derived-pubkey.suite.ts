@@ -6,7 +6,7 @@ import {
   nagaTestSignatures,
 } from '@lit-protocol/contracts';
 import { buildSignaturesFromContext } from '@lit-protocol/contracts/custom-network-signatures';
-import { createPublicClient, getContract, http, type Hex } from 'viem';
+import { createPublicClient, http, isAddress, type Hex } from 'viem';
 
 import { createEnvVars, type EnvVars } from '../helper/createEnvVars';
 import { createTestEnv } from '../helper/createTestEnv';
@@ -102,11 +102,18 @@ const requireAddress = (
   signatures: RequiredSignatures,
   key: keyof RequiredSignatures,
   network: EnvVars['network']
-) => {
+): `0x${string}` => {
   const address = signatures[key]?.address;
   if (!address) {
     throw new Error(
       `[pkp-mint-derived-pubkey] missing ${String(key)} address for ${network}`
+    );
+  }
+  if (!isAddress(address)) {
+    throw new Error(
+      `[pkp-mint-derived-pubkey] invalid ${String(
+        key
+      )} address for ${network}: ${address}`
     );
   }
   return address;
@@ -157,27 +164,29 @@ export function registerPkpMintDerivedPubkeyTicketSuite() {
         transport: http(rpcUrl),
       });
 
-      const pkpNft = getContract({
-        address: requireAddress(signatures, 'PKPNFT', envVars.network),
-        abi: PKP_NFT_ABI,
-        client: { public: publicClient },
-      });
-
-      const pubkeyRouter = getContract({
-        address: requireAddress(signatures, 'PubkeyRouter', envVars.network),
-        abi: PUBKEY_ROUTER_ABI,
-        client: { public: publicClient },
-      });
-
       const stakingAddress = requireAddress(
         signatures,
         'Staking',
         envVars.network
       );
-      const rootKeys = await pubkeyRouter.read.getRootKeys([
-        stakingAddress,
-        KEY_SET_ID,
-      ]);
+      const pkpNftAddress = requireAddress(
+        signatures,
+        'PKPNFT',
+        envVars.network
+      );
+      const pubkeyRouterAddress = requireAddress(
+        signatures,
+        'PubkeyRouter',
+        envVars.network
+      );
+      const readOverrides = { authorizationList: undefined };
+      const rootKeys = await publicClient.readContract({
+        ...readOverrides,
+        address: pubkeyRouterAddress,
+        abi: PUBKEY_ROUTER_ABI,
+        functionName: 'getRootKeys',
+        args: [stakingAddress, KEY_SET_ID],
+      });
 
       console.log(
         '[pkp-mint-derived-pubkey] root keys total:',
@@ -194,13 +203,21 @@ export function registerPkpMintDerivedPubkeyTicketSuite() {
         );
       }
 
-      const derivedKeyId = await pkpNft.read.getNextDerivedKeyId();
+      const derivedKeyId = await publicClient.readContract({
+        ...readOverrides,
+        address: pkpNftAddress,
+        abi: PKP_NFT_ABI,
+        functionName: 'getNextDerivedKeyId',
+        args: [],
+      });
       console.log('[pkp-mint-derived-pubkey] derived key id:', derivedKeyId);
-      const derivedPubkey = await pubkeyRouter.read.getDerivedPubkey([
-        stakingAddress,
-        KEY_SET_ID,
-        derivedKeyId,
-      ]);
+      const derivedPubkey = await publicClient.readContract({
+        ...readOverrides,
+        address: pubkeyRouterAddress,
+        abi: PUBKEY_ROUTER_ABI,
+        functionName: 'getDerivedPubkey',
+        args: [stakingAddress, KEY_SET_ID, derivedKeyId],
+      });
       const derivedPubkeyBytes = (derivedPubkey.length - 2) / 2;
       const hasK256Roots = rootKeys.some((rootKey) => rootKey.keyType === 2n);
 
@@ -226,9 +243,13 @@ export function registerPkpMintDerivedPubkeyTicketSuite() {
       }
 
       try {
-        const ethAddress = await pubkeyRouter.read.deriveEthAddressFromPubkey([
-          derivedPubkey,
-        ]);
+        const ethAddress = await publicClient.readContract({
+          ...readOverrides,
+          address: pubkeyRouterAddress,
+          abi: PUBKEY_ROUTER_ABI,
+          functionName: 'deriveEthAddressFromPubkey',
+          args: [derivedPubkey],
+        });
         console.log(
           '[pkp-mint-derived-pubkey] derived eth address:',
           ethAddress
