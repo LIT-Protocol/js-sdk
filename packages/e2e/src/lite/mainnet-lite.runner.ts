@@ -12,6 +12,7 @@ import {
 import { Wallet } from 'ethers';
 import { createPublicClient, formatEther, http, parseEther } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { createLitClient } from '@lit-protocol/lit-client';
 
 import { createEnvVars } from '../helper/createEnvVars';
 import type { CreateTestAccountResult } from '../helper/createTestAccount';
@@ -543,10 +544,23 @@ const LITE_EXECUTE_JS_CODE = `
 /**
  * Test 1: Handshake
  *
- * Confirms the client handshake returns server keys and meets threshold.
+ * Confirms a fresh client handshake returns server keys and meets threshold,
+ * while timing the client creation for latency tracking.
  */
 export const runHandshakeTest = async (ctx: LiteContext) => {
-  const clientContext = await ctx.testEnv.litClient.getContext();
+  const initStart = Date.now();
+  const litClient = await createLitClient({
+    network: ctx.testEnv.networkModule,
+  });
+  const initDurationMs = Date.now() - initStart;
+
+  const handshakeStart = Date.now();
+  const clientContext = await litClient.getContext();
+  const handshakeDurationMs = Date.now() - handshakeStart;
+
+  console.log(
+    `[lite-mainnet] createLitClient=${initDurationMs}ms getContext=${handshakeDurationMs}ms`
+  );
 
   expect(clientContext?.handshakeResult).toBeDefined();
 
