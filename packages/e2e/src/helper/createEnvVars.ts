@@ -58,12 +58,22 @@ export function createEnvVars(): EnvVars {
     privateKey = process.env[testEnv.local.key]!! as `0x${string}`;
   } else {
     Object.assign(testEnv.live, { type: 'live' });
-    privateKey = process.env[testEnv.live.key]!! as `0x${string}`;
+    const liveKey =
+      network === 'naga' && process.env['LIVE_MASTER_ACCOUNT_NAGA']
+        ? 'LIVE_MASTER_ACCOUNT_NAGA'
+        : testEnv.live.key;
+    privateKey = process.env[liveKey]!! as `0x${string}`;
   }
 
   if (!privateKey) {
+    const expectedKey =
+      network === 'naga'
+        ? 'LIVE_MASTER_ACCOUNT_NAGA or LIVE_MASTER_ACCOUNT'
+        : selectedNetwork === 'local'
+        ? 'LOCAL_MASTER_ACCOUNT'
+        : 'LIVE_MASTER_ACCOUNT';
     throw new Error(
-      `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting  `
+      `❌ ${expectedKey} env var is not set for NETWORK=${network}.`
     );
   }
 

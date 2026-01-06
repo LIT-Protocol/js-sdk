@@ -30,7 +30,7 @@ import {
   ViemAccount,
 } from '../types';
 
-const SupportedNetworkSchema = z.enum(['naga-dev', 'naga-test']);
+const SupportedNetworkSchema = z.enum(['naga-dev', 'naga-test', 'naga']);
 
 type SupportedNetwork = z.infer<typeof SupportedNetworkSchema>;
 
@@ -40,6 +40,10 @@ type LogLevel = z.infer<typeof LogLevelSchema>;
 // Configuration constants
 const LIVE_NETWORK_FUNDING_AMOUNT = '0.01';
 const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
+const NAGA_MAINNET_NETWORK_FUNDING_AMOUNT =
+  process.env['NAGA_MAINNET_NETWORK_FUNDING_AMOUNT'] ?? '0.01';
+const NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT =
+  process.env['NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT'] ?? '0.01';
 
 /**
  * Initialize the health check environment with minimal setup
@@ -50,7 +54,7 @@ const LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT = '2';
  * 3. Creates one PKP for testing
  * 4. Sets up auth context for endpoint testing
  *
- * @param network - The network to run health checks on (naga-dev or naga-test)
+ * @param network - The network to run health checks on (naga-dev, naga-test, or naga)
  * @param logLevel - Logging level for the health check run
  * @returns Initialized components needed for health checks
  */
@@ -92,6 +96,8 @@ export const initHealthCheck = async (
       )}`
     );
   }
+  const resolvedNetwork = parsedNetwork.data;
+  const isNagaMainnet = resolvedNetwork === 'naga';
 
   console.log('🔍 Health Check Configuration:');
   console.log('  Network:', _network);
@@ -102,8 +108,23 @@ export const initHealthCheck = async (
    * Account Setup (Minimal)
    * ====================================
    */
+  const mainnetMasterAccount =
+    process.env['LIVE_MASTER_ACCOUNT_NAGA'] || process.env['LIVE_MASTER_ACCOUNT'];
+  const masterPrivateKey = isNagaMainnet
+    ? mainnetMasterAccount
+    : process.env['LIVE_MASTER_ACCOUNT'];
+
+  if (!masterPrivateKey) {
+    const requiredEnvVar = isNagaMainnet
+      ? 'LIVE_MASTER_ACCOUNT_NAGA or LIVE_MASTER_ACCOUNT'
+      : 'LIVE_MASTER_ACCOUNT';
+    throw new Error(
+      `❌ ${requiredEnvVar} is not set (required for NETWORK=${resolvedNetwork}).`
+    );
+  }
+
   const masterAccount = privateKeyToAccount(
-    process.env['LIVE_MASTER_ACCOUNT'] as `0x${string}`
+    masterPrivateKey as `0x${string}`
   );
 
   // Create a single test account
@@ -120,9 +141,10 @@ export const initHealthCheck = async (
   const networkConfig = {
     'naga-dev': { importName: 'nagaDev' },
     'naga-test': { importName: 'nagaTest' },
+    naga: { importName: 'naga' },
   } as const;
 
-  const config = networkConfig[_network as keyof typeof networkConfig];
+  const config = networkConfig[resolvedNetwork];
   if (!config) {
     throw new Error(`❌ Invalid network configuration for: ${_network}`);
   }
@@ -132,7 +154,10 @@ export const initHealthCheck = async (
   const _baseNetworkModule = networksModule[config.importName];
 
   // Optional RPC override
-  const rpcOverride = process.env['LIT_YELLOWSTONE_PRIVATE_RPC_URL'];
+  const rpcOverrideEnvVar = isNagaMainnet
+    ? 'LIT_MAINNET_RPC_URL'
+    : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL';
+  const rpcOverride = process.env[rpcOverrideEnvVar];
   const _networkModule =
     rpcOverride && typeof _baseNetworkModule.withOverrides === 'function'
       ? _baseNetworkModule.withOverrides({ rpcUrl: rpcOverride })
@@ -147,9 +172,16 @@ export const initHealthCheck = async (
    * Fund Account (Minimal)
    * ====================================
    */
+  const fundingAmount = isNagaMainnet
+    ? NAGA_MAINNET_NETWORK_FUNDING_AMOUNT
+    : LIVE_NETWORK_FUNDING_AMOUNT;
+  const ledgerDepositAmount = isNagaMainnet
+    ? NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT
+    : LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT;
+
   await fundAccount(aliceViemAccount, masterAccount, _networkModule, {
-    ifLessThan: LIVE_NETWORK_FUNDING_AMOUNT,
-    thenFund: LIVE_NETWORK_FUNDING_AMOUNT,
+    ifLessThan: fundingAmount,
+    thenFund: fundingAmount,
   });
 
   /**
@@ -177,7 +209,7 @@ export const initHealthCheck = async (
   // Deposit for Alice
   await masterPaymentManager.depositForUser({
     userAddress: aliceViemAccount.address,
-    amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+    amountInEth: ledgerDepositAmount,
   });
 
   /**
@@ -188,7 +220,7 @@ export const initHealthCheck = async (
   const authManager = createAuthManager({
     storage: storagePlugins.localStorageNode({
       appName: 'lit-health-check',
-      networkName: _network,
+      networkName: resolvedNetwork,
       storagePath: './.health-check/lit-auth-local',
     }),
   });
@@ -207,7 +239,7 @@ export const initHealthCheck = async (
   // Deposit for Alice's PKP
   await masterPaymentManager.depositForUser({
     userAddress: aliceViemAccountPkp.ethAddress,
-    amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+    amountInEth: ledgerDepositAmount,
   });
 
   console.log('✅ PKP created and funded');
@@ -245,6 +277,6 @@ export const initHealthCheck = async (
     aliceViemAccountAuthData,
     aliceViemAccountPkp,
     aliceEoaAuthContext,
-    networkName: _network,
+    networkName: resolvedNetwork,
   };
 };
