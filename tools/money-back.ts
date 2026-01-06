@@ -188,15 +188,32 @@ async function sweepNativeBalance(params: {
     transport: http(rpcUrl),
   });
 
-  const hash = await walletClient.sendTransaction({
-    account,
-    to: destination,
-    value,
-    gas,
-    ...(gasPrice ? { gasPrice } : {}),
-    ...(maxFeePerGas ? { maxFeePerGas } : {}),
-    ...(maxPriorityFeePerGas ? { maxPriorityFeePerGas } : {}),
-  });
+  let hash: `0x${string}`;
+  if (gasPrice) {
+    hash = await walletClient.sendTransaction({
+      account,
+      to: destination,
+      value,
+      gas,
+      gasPrice,
+      type: 'legacy',
+    });
+  } else if (maxFeePerGas) {
+    const priorityFee = maxPriorityFeePerGas ?? maxFeePerGas;
+    const cappedPriorityFee =
+      priorityFee > maxFeePerGas ? maxFeePerGas : priorityFee;
+    hash = await walletClient.sendTransaction({
+      account,
+      to: destination,
+      value,
+      gas,
+      maxFeePerGas,
+      maxPriorityFeePerGas: cappedPriorityFee,
+      type: 'eip1559',
+    });
+  } else {
+    throw new Error('Unable to determine fee model for native sweep.');
+  }
 
   await publicClient.waitForTransactionReceipt({ hash });
 
