@@ -6,20 +6,18 @@
  * to the Lit Status backend for monitoring.
  *
  * Environment Variables Required:
- * - NETWORK: The network to test (naga-dev, naga-test, or naga)
- * - LIVE_MASTER_ACCOUNT: Private key of the master funding account (or LIVE_MASTER_ACCOUNT_NAGA for naga)
+ * - NETWORK: The network to test (naga-dev or naga-test)
+ * - LIVE_MASTER_ACCOUNT: Private key of the master funding account
  * - LIT_STATUS_BACKEND_URL: URL of the status backend
  * - LIT_STATUS_WRITE_KEY: API key for writing to status backend
  *
  * Optional:
  * - LOG_LEVEL: Logging verbosity (silent, info, debug)
  * - LIT_YELLOWSTONE_PRIVATE_RPC_URL: Override RPC URL
- * - LIT_MAINNET_RPC_URL: Override mainnet RPC URL
  *
  * Usage:
  *   NETWORK=naga-dev pnpm run ci:health
  *   NETWORK=naga-test pnpm run test:health
- *   NETWORK=naga pnpm run test:health
  */
 
 import { initHealthCheck } from './health-init';
@@ -47,10 +45,6 @@ function validateEnvironment(): void {
     '  LIVE_MASTER_ACCOUNT:',
     process.env['LIVE_MASTER_ACCOUNT'] ? '[SET]' : '[NOT SET]'
   );
-  console.log(
-    '  LIVE_MASTER_ACCOUNT_NAGA:',
-    process.env['LIVE_MASTER_ACCOUNT_NAGA'] ? '[SET]' : '[NOT SET]'
-  );
 
   if (!NETWORK) {
     throw new Error('❌ NETWORK environment variable is not set');
@@ -66,20 +60,8 @@ function validateEnvironment(): void {
     throw new Error('❌ LIT_STATUS_WRITE_KEY environment variable is not set');
   }
 
-  const mainnetMasterAccount =
-    process.env['LIVE_MASTER_ACCOUNT_NAGA'] ||
-    process.env['LIVE_MASTER_ACCOUNT'];
-  const masterAccount =
-    NETWORK === 'naga'
-      ? mainnetMasterAccount
-      : process.env['LIVE_MASTER_ACCOUNT'];
-
-  if (!masterAccount) {
-    const requiredEnvVar =
-      NETWORK === 'naga'
-        ? 'LIVE_MASTER_ACCOUNT_NAGA or LIVE_MASTER_ACCOUNT'
-        : 'LIVE_MASTER_ACCOUNT';
-    throw new Error(`❌ ${requiredEnvVar} environment variable is not set`);
+  if (!process.env['LIVE_MASTER_ACCOUNT']) {
+    throw new Error('❌ LIVE_MASTER_ACCOUNT environment variable is not set');
   }
 
   console.log('✅ All required environment variables are set\n');

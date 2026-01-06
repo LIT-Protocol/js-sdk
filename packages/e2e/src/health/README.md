@@ -64,8 +64,8 @@ Test health checks locally before deploying:
 
 ```bash
 # Set up environment variables in .env
-NETWORK=naga-dev # or naga-test/naga
-LIVE_MASTER_ACCOUNT=0x... # use LIVE_MASTER_ACCOUNT_NAGA for mainnet
+NETWORK=naga-dev
+LIVE_MASTER_ACCOUNT=0x...
 LIT_STATUS_BACKEND_URL=https://status.litprotocol.com
 LIT_STATUS_WRITE_KEY=your-api-key
 
@@ -81,9 +81,6 @@ Health checks run automatically via GitHub Actions:
 # Runs without .env file (uses GitHub secrets)
 pnpm run ci:health
 ```
-
-For `naga` mainnet, CI runs the lite mainnet e2e spec instead of the health runner:
-`packages/e2e/src/lite/mainnet-lite.spec.ts`.
 
 ### Manual GitHub Workflow Trigger
 
@@ -101,8 +98,8 @@ You can manually trigger health checks from GitHub:
 
 **Required:**
 
-- `NETWORK` - Network to test (`naga-dev`, `naga-test`, or `naga`)
-- `LIVE_MASTER_ACCOUNT` - Private key for funding test accounts (or fallback for `naga`)
+- `NETWORK` - Network to test (`naga-dev` or `naga-test`)
+- `LIVE_MASTER_ACCOUNT` - Private key for funding test accounts
 - `LIT_STATUS_BACKEND_URL` - URL of the status monitoring backend
 - `LIT_STATUS_WRITE_KEY` - API key for writing status updates
 
@@ -110,10 +107,6 @@ You can manually trigger health checks from GitHub:
 
 - `LOG_LEVEL` - Logging verbosity (`silent`, `info`, `debug`) - default: `silent`
 - `LIT_YELLOWSTONE_PRIVATE_RPC_URL` - Override RPC URL if needed
-- `LIVE_MASTER_ACCOUNT_NAGA` - Mainnet funding key (preferred when `NETWORK=naga`)
-- `LIT_MAINNET_RPC_URL` - Override mainnet RPC URL if needed
-- `NAGA_MAINNET_NETWORK_FUNDING_AMOUNT` - Override mainnet funding amount
-- `NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT` - Override mainnet ledger deposit amount
 
 ### GitHub Secrets
 
@@ -124,13 +117,11 @@ Configure these in your repository settings under `Settings → Secrets and vari
 - `LIT_STATUS_WRITE_KEY` - API key for status backend
 - `LIVE_MASTER_ACCOUNT_NAGA_DEV` - Funding account for naga-dev
 - `LIVE_MASTER_ACCOUNT_NAGA_TEST` - Funding account for naga-test
-- `LIVE_MASTER_ACCOUNT_NAGA` - Funding account for naga mainnet
 
 **Variables:**
 
 - `LIT_STATUS_BACKEND_URL` - Status backend URL
 - `LIT_YELLOWSTONE_PRIVATE_RPC_URL` - (Optional) Custom RPC URL
-- `LIT_MAINNET_RPC_URL` - (Optional) Custom mainnet RPC URL
 
 Environment: `Health Check` (create this environment in repository settings)
 
@@ -172,7 +163,7 @@ If health checks fail:
 
 **Error: "LIVE_MASTER_ACCOUNT is not set"**
 
-- Solution: Check that the appropriate secret is configured in GitHub (use `LIVE_MASTER_ACCOUNT_NAGA` for `naga`)
+- Solution: Check that the appropriate secret is configured in GitHub
 
 **Error: "Failed to get network information"**
 
@@ -192,8 +183,8 @@ pnpm build
 
 # 2. Set up .env file with required variables
 cat > .env << EOF
-NETWORK=naga-dev # or naga-test/naga
-LIVE_MASTER_ACCOUNT=0x...your-key... # use LIVE_MASTER_ACCOUNT_NAGA for mainnet
+NETWORK=naga-dev
+LIVE_MASTER_ACCOUNT=0x...your-key...
 LIT_STATUS_BACKEND_URL=https://status.litprotocol.com
 LIT_STATUS_WRITE_KEY=your-api-key
 LOG_LEVEL=info
