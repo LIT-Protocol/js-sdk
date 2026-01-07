@@ -42,7 +42,6 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
         userAddress: alice.account.address,
       });
 
-      const { latestBlockhash } = await testEnv.litClient.getContext();
       const maxDelegationPrice = 2n ** 128n - 1n;
 
       const paymentDelegationAuthSig = await createPaymentDelegationAuthSig({
@@ -51,7 +50,7 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
         delegateeAddresses: [bob.account.address],
         maxPrice: maxDelegationPrice,
         scopes: ['pkp_sign'],
-        nonce: latestBlockhash,
+        litClient: testEnv.litClient,
         expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
         domain: 'example.com',
         statement:

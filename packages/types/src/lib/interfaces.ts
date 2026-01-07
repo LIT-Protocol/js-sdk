@@ -18,6 +18,7 @@ import {
   SessionKeyPairSchema,
   NodeSetSchema,
   UrlSchema,
+  type DefinedJson,
 } from '@lit-protocol/schemas';
 
 import { SigType } from './EndpointResponses';
@@ -1212,7 +1213,8 @@ export type PaymentDelegationScope =
   | 'pkp_sign'
   | 'sign_session_key';
 
-export interface PaymentDelegationAuthSigData {
+export interface PaymentDelegationAuthSigData
+  extends Record<string, DefinedJson> {
   delegate_to: string[];
   max_price: string;
   scopes: PaymentDelegationScope[];
@@ -1232,7 +1234,12 @@ export interface PaymentDelegationAuthSigParams {
   delegateeAddresses: string[];
   maxPrice: string | number | bigint;
   scopes: PaymentDelegationScope[];
-  nonce: string;
+  nonce?: string;
+  litClient?: {
+    getContext: () => Promise<{
+      latestBlockhash?: string;
+    }>;
+  };
   expiration?: string;
   domain?: string;
   statement?: string;

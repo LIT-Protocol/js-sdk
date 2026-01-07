@@ -217,15 +217,13 @@ Scenario example:
 ```typescript
 import { createPaymentDelegationAuthSig } from '@lit-protocol/auth-helpers';
 
-const { latestBlockhash } = await litClient.getContext();
-
 const paymentDelegationAuthSig = await createPaymentDelegationAuthSig({
   signer: sponsorAccount,
   signerAddress: sponsorAccount.address,
   delegateeAddresses: [userAccount.address],
   maxPrice: '50000000000000000',
   scopes: ['pkp_sign'],
-  nonce: latestBlockhash,
+  litClient,
   expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
 });
 

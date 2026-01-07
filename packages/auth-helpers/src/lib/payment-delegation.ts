@@ -116,6 +116,43 @@ const normalizeMaxPrice = (
   );
 };
 
+const resolveNonce = async (params: PaymentDelegationAuthSigParams) => {
+  if (params.nonce !== undefined) {
+    if (typeof params.nonce !== 'string') {
+      throw new InvalidArgumentException(
+        { info: { nonce: params.nonce } },
+        'nonce must be a string'
+      );
+    }
+
+    const trimmed = params.nonce.trim();
+    if (!trimmed) {
+      throw new InvalidArgumentException(
+        { info: { nonce: params.nonce } },
+        'nonce must not be empty'
+      );
+    }
+    return trimmed;
+  }
+
+  if (params.litClient && typeof params.litClient.getContext === 'function') {
+    const context = await params.litClient.getContext();
+    if (context?.latestBlockhash) {
+      return context.latestBlockhash;
+    }
+
+    throw new InvalidArgumentException(
+      { info: { context } },
+      'litClient.getContext() did not return latestBlockhash'
+    );
+  }
+
+  throw new InvalidArgumentException(
+    { info: { nonce: params.nonce, hasLitClient: Boolean(params.litClient) } },
+    'nonce is required; provide nonce or litClient'
+  );
+};
+
 const resolveSignerAddress = async (params: PaymentDelegationAuthSigParams) => {
   if (params.signerAddress) {
     const prefixed = params.signerAddress.startsWith('0x')
@@ -156,13 +193,6 @@ export const createPaymentDelegationAuthSig = async (
     );
   }
 
-  if (!params.nonce) {
-    throw new InvalidArgumentException(
-      { info: { nonce: params.nonce } },
-      'nonce is required'
-    );
-  }
-
   if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
     throw new InvalidArgumentException(
       { info: { delegateeAddresses: params.delegateeAddresses } },
@@ -176,6 +206,7 @@ export const createPaymentDelegationAuthSig = async (
   );
   const scopes = normalizeScopes(params.scopes);
   const maxPrice = normalizeMaxPrice(params.maxPrice);
+  const nonce = await resolveNonce(params);
 
   const data: PaymentDelegationAuthSigData = {
     delegate_to: delegateeAddresses,
@@ -185,7 +216,7 @@ export const createPaymentDelegationAuthSig = async (
 
   const siweMessage = await createSiweMessage({
     walletAddress: signerAddress,
-    nonce: params.nonce,
+    nonce,
     expiration: params.expiration,
     domain: params.domain,
     statement: params.statement,
