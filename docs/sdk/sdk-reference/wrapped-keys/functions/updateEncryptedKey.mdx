@@ -1,0 +1,65 @@
+---
+title: updateEncryptedKey
+---
+
+# Function
+
+> **updateEncryptedKey**(`params`)
+
+Re-encrypts an existing wrapped key and appends the previous state to the `versions` array.
+
+## Parameters
+
+<ParamField path="params.pkpSessionSigs" type="SessionSigsMap" required>
+  Session signatures identifying the PKP that owns the wrapped key.
+</ParamField>
+
+<ParamField path="params.litClient" type="LitClient" required>
+  Lit client instance used to talk to the wrapped-keys service.
+</ParamField>
+
+<ParamField path="params.id" type="string" required>
+  Identifier of the wrapped key to update.
+</ParamField>
+
+<ParamField path="params.ciphertext" type="string" required>
+  New base64-encrypted ciphertext to store.
+</ParamField>
+
+<ParamField path="params.memo" type="string">
+  Optional updated memo for the wrapped key.
+</ParamField>
+
+<ParamField path="params.evmContractConditions" type="string">
+  Optional updated ACCs for EVM contract conditions.
+</ParamField>
+
+<ParamField path="params.userMaxPrice" type="bigint">
+  Optional price ceiling for the Lit Action.
+</ParamField>
+
+## Returns
+
+<ResponseField name="result" type="UpdateEncryptedKeyResult">
+  Returns `id`, `pkpAddress`, and `updatedAt` of the updated wrapped key.
+</ResponseField>
+
+## Example
+
+```ts
+const res = await wrappedKeysApi.updateEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  id,
+  ciphertext: 'base64-new',
+  memo: 'rotated memo',
+});
+
+const withHistory = await wrappedKeysApi.getEncryptedKey({
+  pkpSessionSigs,
+  litClient,
+  id,
+  includeVersions: true,
+});
+console.log(withHistory.versions); // [{ ciphertext: 'old', ... }]
+```
