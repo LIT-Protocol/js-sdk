@@ -34,6 +34,12 @@ const config: Config = {
 
   // Resolve monorepo packages to sources
   moduleNameMapper: {
+    '^@lit-protocol/contracts/custom-network-signatures$':
+      '<rootDir>/packages/contracts/dist/custom-network-signatures.cjs',
+    '^@lit-protocol/contracts$':
+      '<rootDir>/packages/contracts/dist/index.cjs',
+    '^@lit-protocol/contracts/(.*)$':
+      '<rootDir>/packages/contracts/dist/$1.cjs',
     // Local packages
     [`^@lit-protocol/(${localPackages.join('|')})/lib/(.*)$`]:
       '<rootDir>/packages/$1/src/lib/$2',

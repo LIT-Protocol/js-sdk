@@ -52,18 +52,27 @@ export function createEnvVars(): EnvVars {
   const selectedNetwork = network.includes('local') ? 'local' : 'live';
 
   // 2. Get private key
-  let privateKey: `0x${string}`;
+  let privateKey: `0x${string}` | undefined;
   if (network.includes('local')) {
     Object.assign(testEnv.local, { type: 'local' });
-    privateKey = process.env[testEnv.local.key]!! as `0x${string}`;
+    privateKey = process.env[testEnv.local.key] as `0x${string}`;
   } else {
     Object.assign(testEnv.live, { type: 'live' });
-    privateKey = process.env[testEnv.live.key]!! as `0x${string}`;
+    const legacyKey = testEnv.live.key;
+    const scopedKey = `LIVE_MASTER_ACCOUNT_${network
+      .toUpperCase()
+      .replace(/-/g, '_')}`;
+    privateKey =
+      (process.env[legacyKey] as `0x${string}` | undefined) ??
+      (process.env[scopedKey] as `0x${string}` | undefined);
   }
 
   if (!privateKey) {
+    const scopedKey = `LIVE_MASTER_ACCOUNT_${network
+      .toUpperCase()
+      .replace(/-/g, '_')}`;
     throw new Error(
-      `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting  `
+      `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${testEnv.live.key} or ${scopedKey} to be set.`
     );
   }
 

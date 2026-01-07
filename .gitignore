@@ -99,3 +99,6 @@ alice-auth-manager-data
 !/packages/contracts/dist/
 !/packages/contracts/dist/dev
 .secret
+
+.specs
+.codex
