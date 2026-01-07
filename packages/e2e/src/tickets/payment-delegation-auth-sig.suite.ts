@@ -43,7 +43,7 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
       });
 
       const { latestBlockhash } = await testEnv.litClient.getContext();
-      const maxDelegationPrice = (2n ** 128n) - 1n;
+      const maxDelegationPrice = 2n ** 128n - 1n;
 
       const paymentDelegationAuthSig = await createPaymentDelegationAuthSig({
         signer: alice.account,

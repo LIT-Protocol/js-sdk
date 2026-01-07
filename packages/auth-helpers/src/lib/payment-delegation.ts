@@ -60,7 +60,9 @@ const normalizeScopes = (scopes: PaymentDelegationScope[]) => {
   return normalizedScopes;
 };
 
-const normalizeMaxPrice = (maxPrice: PaymentDelegationAuthSigParams['maxPrice']) => {
+const normalizeMaxPrice = (
+  maxPrice: PaymentDelegationAuthSigParams['maxPrice']
+) => {
   if (maxPrice === null || maxPrice === undefined) {
     throw new InvalidArgumentException(
       { info: { maxPrice } },
@@ -122,7 +124,10 @@ const resolveSignerAddress = async (params: PaymentDelegationAuthSigParams) => {
     return ethers.utils.getAddress(prefixed);
   }
 
-  if ('getAddress' in params.signer && typeof params.signer.getAddress === 'function') {
+  if (
+    'getAddress' in params.signer &&
+    typeof params.signer.getAddress === 'function'
+  ) {
     return ethers.utils.getAddress(await params.signer.getAddress());
   }
 
@@ -130,7 +135,9 @@ const resolveSignerAddress = async (params: PaymentDelegationAuthSigParams) => {
     'address' in params.signer &&
     typeof (params.signer as { address?: string }).address === 'string'
   ) {
-    return ethers.utils.getAddress((params.signer as { address: string }).address);
+    return ethers.utils.getAddress(
+      (params.signer as { address: string }).address
+    );
   }
 
   throw new InvalidArgumentException(
