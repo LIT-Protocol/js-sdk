@@ -56,6 +56,9 @@ importers:
       '@lit-protocol/lit-client':
         specifier: workspace:*
         version: link:dist/packages/lit-client
+      '@lit-protocol/lit-status-sdk':
+        specifier: 0.1.8
+        version: 0.1.8(typescript@5.8.3)
       '@lit-protocol/logger':
         specifier: workspace:*
         version: link:dist/packages/logger
@@ -234,6 +237,9 @@ importers:
       axios:
         specifier: 1.6.0
         version: 1.6.0
+      cron-parser:
+        specifier: 4.9.0
+        version: 4.9.0
       esbuild:
         specifier: 0.19.2
         version: 0.19.2

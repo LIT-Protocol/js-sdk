@@ -9,6 +9,7 @@ const SERVICE_URL_BY_NETWORKTYPE: Record<NETWORK_TYPES, string> = {
 };
 
 export const SERVICE_URL_BY_LIT_NETWORK: Record<SupportedNetworks, string> = {
+  [LIT_NETWORK.Naga]: SERVICE_URL_BY_NETWORKTYPE.Production,
   [LIT_NETWORK.NagaDev]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
   [LIT_NETWORK.NagaTest]: SERVICE_URL_BY_NETWORKTYPE.TestNetworks,
 };
