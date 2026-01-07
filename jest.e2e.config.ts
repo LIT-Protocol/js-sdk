@@ -45,8 +45,7 @@ const config: Config = {
   moduleNameMapper: {
     '^@lit-protocol/contracts/custom-network-signatures$':
       '<rootDir>/packages/contracts/dist/custom-network-signatures.cjs',
-    '^@lit-protocol/contracts$':
-      '<rootDir>/packages/contracts/dist/index.cjs',
+    '^@lit-protocol/contracts$': '<rootDir>/packages/contracts/dist/index.cjs',
     '^@lit-protocol/contracts/(.*)$':
       '<rootDir>/packages/contracts/dist/$1.cjs',
     // Local packages
