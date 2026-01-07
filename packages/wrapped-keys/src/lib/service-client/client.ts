@@ -3,6 +3,7 @@ import {
   ListKeysParams,
   StoreKeyBatchParams,
   StoreKeyParams,
+  UpdateKeyParams,
 } from './types';
 import { generateRequestId, getBaseRequestParams, makeRequest } from './utils';
 import {
@@ -10,6 +11,7 @@ import {
   StoredKeyMetadata,
   StoreEncryptedKeyBatchResult,
   StoreEncryptedKeyResult,
+  UpdateEncryptedKeyResult,
 } from '../types';
 
 /** Fetches previously stored private key metadata from the wrapped keys service.
@@ -48,7 +50,7 @@ export async function listPrivateKeyMetadata(
 export async function fetchPrivateKey(
   params: FetchKeyParams
 ): Promise<StoredKeyData> {
-  const { litNetwork, sessionSig, id, pkpAddress } = params;
+  const { litNetwork, sessionSig, id, pkpAddress, includeVersions } = params;
 
   const requestId = generateRequestId();
   const { baseUrl, initParams } = getBaseRequestParams({
@@ -58,8 +60,9 @@ export async function fetchPrivateKey(
     requestId,
   });
 
+  const query = includeVersions ? '?includeVersions=true' : '';
   return makeRequest<StoredKeyData>({
-    url: `${baseUrl}/${pkpAddress}/${id}`,
+    url: `${baseUrl}/${pkpAddress}/${id}${query}`,
     init: initParams,
     requestId,
   });
@@ -123,4 +126,46 @@ export async function storePrivateKeyBatch(
   });
 
   return { pkpAddress, ids };
+}
+
+/** Updates an existing wrapped key and appends prior state to versions.
+ *
+ * @param { UpdateKeyParams } params Parameters required to update the private key metadata
+ * @returns { Promise<UpdateEncryptedKeyResult> } id/pkpAddress/updatedAt on successful update
+ */
+export async function updatePrivateKey(
+  params: UpdateKeyParams
+): Promise<UpdateEncryptedKeyResult> {
+  const {
+    litNetwork,
+    sessionSig,
+    pkpAddress,
+    id,
+    ciphertext,
+    evmContractConditions,
+    memo,
+  } = params;
+
+  const requestId = generateRequestId();
+  const { baseUrl, initParams } = getBaseRequestParams({
+    litNetwork,
+    sessionSig,
+    method: 'PUT',
+    requestId,
+  });
+
+  return makeRequest<UpdateEncryptedKeyResult>({
+    url: `${baseUrl}/${pkpAddress}/${id}`,
+    init: {
+      ...initParams,
+      body: JSON.stringify({
+        ciphertext,
+        ...(evmContractConditions !== undefined
+          ? { evmContractConditions }
+          : {}),
+        ...(memo !== undefined ? { memo } : {}),
+      }),
+    },
+    requestId,
+  });
 }

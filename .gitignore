@@ -7,6 +7,8 @@
 **/dist
 **/out-tsc
 local-tests/**/*.js
+.tmp
+.specs
 
 # dependencies
 node_modules
@@ -99,3 +101,5 @@ alice-auth-manager-data
 !/packages/contracts/dist/
 !/packages/contracts/dist/dev
 .secret
+.agents
+.vscode

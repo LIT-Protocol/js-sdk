@@ -23,8 +23,13 @@ import {
 } from '@lit-protocol/types';
 import { z } from 'zod';
 import { combineExecuteJSSignatures } from '../helper/get-signatures';
-import { ExecuteJsValueResponse, LitActionClaimData } from '../types';
+import {
+  ExecuteJsValueResponse,
+  LitActionClaimData,
+  LitActionPaymentDetail,
+} from '../types';
 import { ExecuteJsResponseDataSchema } from './executeJs.ResponseDataSchema';
+import { _sumPaymentDetails } from './sumPaymentDetails';
 
 const _logger = getChildLogger({
   module: 'executeJs-api',
@@ -325,24 +330,60 @@ export const handleResponse = async (
 
   // Convert to ExecuteJsValueResponse format for compatibility with old code
   const responseData: ExecuteJsValueResponse[] = successfulValues.map(
-    (value) => ({
-      success: value.success,
-      response: value.response,
-      logs: value.logs,
-      signedData: value.signedData || {},
-      claimData: Object.entries(value.claimData || {}).reduce(
-        (acc, [key, claimData]) => {
-          acc[key] = {
-            signature: '', // Convert from signatures array to single signature for compatibility
-            derivedKeyId: claimData.derivedKeyId || '',
-          };
-          return acc;
-        },
-        {} as Record<string, LitActionClaimData>
-      ),
-      decryptedData: value.decryptedData || {},
-    })
+    (value) => {
+      const paymentDetail: LitActionPaymentDetail[] | undefined =
+        value.paymentDetail?.map((detail) => ({
+          component: detail.component,
+          quantity: detail.quantity,
+          price: detail.price,
+        }));
+
+      return {
+        nodeUrl: value.nodeUrl,
+        success: value.success,
+        response: value.response,
+        logs: value.logs,
+        signedData: value.signedData || {},
+        claimData: Object.entries(value.claimData || {}).reduce(
+          (acc, [key, claimData]) => {
+            acc[key] = {
+              signature: '', // Convert from signatures array to single signature for compatibility
+              derivedKeyId: claimData.derivedKeyId || '',
+            };
+            return acc;
+          },
+          {} as Record<string, LitActionClaimData>
+        ),
+        decryptedData: value.decryptedData || {},
+        paymentDetail,
+      };
+    }
   );
+
+  // Log and expose per-node payment details
+  const paymentDetailByNode = responseData
+    .map((resp) => ({
+      nodeUrl: resp.nodeUrl,
+      paymentDetail: resp.paymentDetail,
+    }))
+    .filter(
+      (
+        entry
+      ): entry is {
+        nodeUrl: string;
+        paymentDetail: LitActionPaymentDetail[];
+      } =>
+        typeof entry.nodeUrl === 'string' &&
+        entry.nodeUrl.length > 0 &&
+        Array.isArray(entry.paymentDetail) &&
+        entry.paymentDetail.length > 0
+    );
+
+  const debug =
+    paymentDetailByNode.length > 0 ? { paymentDetailByNode } : undefined;
+
+  // Compute summed payment detail across nodes
+  const summedPaymentDetail = _sumPaymentDetails(responseData);
 
   // Check for signature data in responses and extract if found
   const { hasSignatureData, signatureShares, cleanedResponses } =
@@ -363,6 +404,7 @@ export const handleResponse = async (
 
   const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
   const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
+  const paymentDetail = summedPaymentDetail;
 
   // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
   if (!hasSignedData && !hasClaimData && !hasSignatureData) {
@@ -372,6 +414,8 @@ export const handleResponse = async (
       signatures: {},
       response: mostCommonResponse.response,
       logs: mostCommonResponse.logs,
+      ...(paymentDetail && { paymentDetail }),
+      ...(debug && { debug }),
     };
   }
 
@@ -547,6 +591,8 @@ export const handleResponse = async (
     response: processedResponse,
     logs: mostCommonResponse.logs || '',
     ...(Object.keys(claims).length > 0 && { claims }),
+    ...(paymentDetail && { paymentDetail }),
+    ...(debug && { debug }),
   };
 
   _logger.info(

@@ -1,5 +1,23 @@
 # @lit-protocol/auth
 
+## 8.2.2
+
+### Patch Changes
+
+- 0c1fb51: EOA users will see fewer signature prompts during EOA auth, since a cached AuthSig will be reused if one is present.
+
+## 8.2.1
+
+### Patch Changes
+
+- 191bbee: Users will see fewer wallet signature prompts during EOA auth because the existing AuthSig is reused when present, with no new usage required and a smoother auth flow.
+
+## 8.2.0
+
+### Minor Changes
+
+- 0a80342: Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972)
+
 ## 8.1.2
 
 ### Patch Changes

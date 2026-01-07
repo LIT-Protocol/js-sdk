@@ -8,6 +8,7 @@ import { signMessageWithEncryptedKey } from './sign-message-with-encrypted-key';
 import { signTransactionWithEncryptedKey } from './sign-transaction-with-encrypted-key';
 import { storeEncryptedKey } from './store-encrypted-key';
 import { storeEncryptedKeyBatch } from './store-encrypted-key-batch';
+import { updateEncryptedKey } from './update-encrypted-key';
 
 export {
   listEncryptedKeyMetadata,
@@ -20,4 +21,5 @@ export {
   storeEncryptedKeyBatch,
   getEncryptedKey,
   batchGeneratePrivateKeys,
+  updateEncryptedKey,
 };
