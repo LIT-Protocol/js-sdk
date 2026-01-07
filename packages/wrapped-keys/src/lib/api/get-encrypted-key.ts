@@ -15,7 +15,7 @@ import { GetEncryptedKeyDataParams, StoredKeyData } from '../types';
 export async function getEncryptedKey(
   params: GetEncryptedKeyDataParams
 ): Promise<StoredKeyData> {
-  const { pkpSessionSigs, litClient, id } = params;
+  const { pkpSessionSigs, litClient, id, includeVersions } = params;
 
   const sessionSig = getFirstSessionSig(pkpSessionSigs);
   const pkpAddress = getPkpAddressFromSessionSig(sessionSig);
@@ -26,5 +26,6 @@ export async function getEncryptedKey(
     id,
     sessionSig,
     litNetwork,
+    includeVersions,
   });
 }

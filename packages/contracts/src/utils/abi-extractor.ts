@@ -9,7 +9,7 @@
 
 import type { NetworkCache } from '../types/contracts';
 import { toFunctionSignature } from 'viem/utils';
-import { Interface } from 'ethers';
+import { utils } from 'ethers';
 
 /**
  * Represents a single contract method with its metadata
@@ -51,7 +51,7 @@ export function extractAbiMethods(
       ABI.forEach((abiItem) => {
         if (abiItem.type === 'function' && methodNames.includes(abiItem.name)) {
           try {
-            const iface = new Interface(ABI);
+            const iface = new utils.Interface(ABI);
 
             // Special case for safeTransferFrom - use the basic version to avoid ambiguity
             let functionFragment;

@@ -9,6 +9,7 @@ import {
   signTransactionWithEncryptedKey,
   storeEncryptedKey,
   storeEncryptedKeyBatch,
+  updateEncryptedKey,
 } from './lib/api';
 import {
   CHAIN_ETHEREUM,
@@ -43,6 +44,7 @@ export const api = {
   storeEncryptedKey,
   storeEncryptedKeyBatch,
   batchGeneratePrivateKeys,
+  updateEncryptedKey,
 };
 
 export const config = {
@@ -76,6 +78,9 @@ export type {
   StoreEncryptedKeyResult,
   StoredKeyData,
   StoredKeyMetadata,
+  UpdateEncryptedKeyParams,
+  UpdateEncryptedKeyResult,
+  WrappedKeyVersion,
 } from './lib/types';
 
 export type {
