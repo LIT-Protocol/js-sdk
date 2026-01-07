@@ -11,13 +11,14 @@ interface BaseApiParams {
 export type FetchKeyParams = BaseApiParams & {
   pkpAddress: string;
   id: string;
+  includeVersions?: boolean;
 };
 
 export type ListKeysParams = BaseApiParams & { pkpAddress: string };
 
 export type SupportedNetworks = Extract<
   LIT_NETWORK_VALUES,
-  'naga-dev' | 'naga-test'
+  'naga' | 'naga-dev' | 'naga-test'
 >;
 
 export interface StoreKeyParams extends BaseApiParams {
@@ -34,9 +35,17 @@ export interface StoreKeyBatchParams extends BaseApiParams {
   >[];
 }
 
+export interface UpdateKeyParams extends BaseApiParams {
+  pkpAddress: string;
+  id: string;
+  ciphertext: string;
+  evmContractConditions?: string;
+  memo?: string;
+}
+
 export interface BaseRequestParams {
   sessionSig: AuthSig;
-  method: 'GET' | 'POST';
+  method: 'GET' | 'POST' | 'PUT';
   litNetwork: LIT_NETWORKS_KEYS;
   requestId: string;
 }

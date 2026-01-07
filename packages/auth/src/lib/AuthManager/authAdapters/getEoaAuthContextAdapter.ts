@@ -99,6 +99,8 @@ export const getEoaAuthContextAdapter = async (
     deps: {
       authData: authData,
       nonce: litClientCtx.latestBlockhash,
+      storage: upstreamParams.storage,
+      address: authenticatorAddress,
     },
   });
 };

@@ -20,7 +20,11 @@ function composeAuthHeader(sessionSig: AuthSig) {
   ).toString('base64')}`;
 }
 
-const supportedNetworks: SupportedNetworks[] = ['naga-dev', 'naga-test'];
+const supportedNetworks: SupportedNetworks[] = [
+  'naga',
+  'naga-dev',
+  'naga-test',
+];
 
 function isSupportedLitNetwork(
   litNetwork: LIT_NETWORK_VALUES

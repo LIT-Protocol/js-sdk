@@ -3,6 +3,7 @@ import {
   storePrivateKey,
   storePrivateKeyBatch,
   listPrivateKeyMetadata,
+  updatePrivateKey,
 } from './client';
 
 export {
@@ -10,4 +11,5 @@ export {
   storePrivateKey,
   storePrivateKeyBatch,
   listPrivateKeyMetadata,
+  updatePrivateKey,
 };
