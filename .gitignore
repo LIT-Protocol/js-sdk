@@ -44,8 +44,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-.vscode
-
 # Next.js
 .next
 lerna-debug.log
@@ -97,12 +95,8 @@ alice-auth-manager-data
 
 .plans
 .e2e
-alice-auth-manager-data
 !/packages/contracts/dist/
 !/packages/contracts/dist/dev
 .secret
-
-.specs
 .codex
 .agents
-.vscode
