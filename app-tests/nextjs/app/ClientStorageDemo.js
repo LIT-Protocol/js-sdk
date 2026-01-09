@@ -1,82 +1,82 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { createAuthManager } from "@lit-protocol/auth";
-import { storagePlugins } from "@lit-protocol/auth/storage";
-import { createLitClient } from "@lit-protocol/lit-client";
-import { nagaDev, nagaTest } from "@lit-protocol/networks";
-import { createPublicClient, formatEther, http } from "viem";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { useState } from 'react';
+import { createAuthManager } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage';
+import { createLitClient } from '@lit-protocol/lit-client';
+import { nagaDev, nagaTest } from '@lit-protocol/networks';
+import { createPublicClient, formatEther, http } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 const NETWORKS = {
-  "naga-dev": nagaDev,
-  "naga-test": nagaTest,
+  'naga-dev': nagaDev,
+  'naga-test': nagaTest,
 };
 
 const DEFAULT_FAUCET_URL =
-  "https://chronicle-yellowstone-faucet.getlit.dev/naga";
+  'https://chronicle-yellowstone-faucet.getlit.dev/naga';
 
 export default function ClientStorageDemo() {
-  const [networkName, setNetworkName] = useState("naga-dev");
-  const [authStatus, setAuthStatus] = useState("idle");
+  const [networkName, setNetworkName] = useState('naga-dev');
+  const [authStatus, setAuthStatus] = useState('idle');
   const [authError, setAuthError] = useState(null);
   const [authSummary, setAuthSummary] = useState(null);
   const [authContext, setAuthContext] = useState(null);
   const [account, setAccount] = useState(null);
-  const [balanceStatus, setBalanceStatus] = useState("idle");
+  const [balanceStatus, setBalanceStatus] = useState('idle');
   const [balanceError, setBalanceError] = useState(null);
   const [nativeBalance, setNativeBalance] = useState(null);
   const [ledgerBalance, setLedgerBalance] = useState(null);
 
-  const [pkpStatus, setPkpStatus] = useState("idle");
+  const [pkpStatus, setPkpStatus] = useState('idle');
   const [pkpError, setPkpError] = useState(null);
   const [pkpInfo, setPkpInfo] = useState(null);
   const [pkps, setPkps] = useState([]);
-  const [pkpPublicKey, setPkpPublicKey] = useState("");
-  const [pkpMessage, setPkpMessage] = useState("Hello, world!");
+  const [pkpPublicKey, setPkpPublicKey] = useState('');
+  const [pkpMessage, setPkpMessage] = useState('Hello, world!');
   const [pkpSignature, setPkpSignature] = useState(null);
   const [faucetUrl, setFaucetUrl] = useState(DEFAULT_FAUCET_URL);
 
   const stringify = (value) =>
     JSON.stringify(
       value,
-      (_key, val) => (typeof val === "bigint" ? val.toString() : val),
+      (_key, val) => (typeof val === 'bigint' ? val.toString() : val),
       2
     );
 
   const buildFaucetLink = () => {
     if (!faucetUrl || !account?.address) {
-      return "";
+      return '';
     }
 
-    if (faucetUrl.includes("{address}") || faucetUrl.includes("{network}")) {
+    if (faucetUrl.includes('{address}') || faucetUrl.includes('{network}')) {
       return faucetUrl
-        .replace("{address}", account.address)
-        .replace("{network}", networkName);
+        .replace('{address}', account.address)
+        .replace('{network}', networkName);
     }
 
-    const separator = faucetUrl.includes("?") ? "&" : "?";
+    const separator = faucetUrl.includes('?') ? '&' : '?';
     return `${faucetUrl}${separator}address=${encodeURIComponent(
       account.address
     )}&network=${encodeURIComponent(networkName)}`;
   };
 
   const resetAuthState = () => {
-    setAuthStatus("idle");
+    setAuthStatus('idle');
     setAuthError(null);
     setAuthSummary(null);
     setAuthContext(null);
     setAccount(null);
-    setBalanceStatus("idle");
+    setBalanceStatus('idle');
     setBalanceError(null);
     setNativeBalance(null);
     setLedgerBalance(null);
     setPkpError(null);
     setPkpInfo(null);
     setPkps([]);
-    setPkpPublicKey("");
+    setPkpPublicKey('');
     setPkpSignature(null);
-    setPkpStatus("idle");
+    setPkpStatus('idle');
   };
 
   const handleNetworkChange = (event) => {
@@ -85,12 +85,12 @@ export default function ClientStorageDemo() {
   };
 
   const handleCreateAuthContext = async () => {
-    setAuthStatus("working");
+    setAuthStatus('working');
     setAuthError(null);
     setAuthSummary(null);
     setAuthContext(null);
     setAccount(null);
-    setBalanceStatus("idle");
+    setBalanceStatus('idle');
     setBalanceError(null);
     setNativeBalance(null);
     setLedgerBalance(null);
@@ -98,13 +98,13 @@ export default function ClientStorageDemo() {
     setPkpInfo(null);
     setPkps([]);
     setPkpSignature(null);
-    setPkpStatus("idle");
+    setPkpStatus('idle');
 
     try {
       const newAccount = privateKeyToAccount(generatePrivateKey());
       const authManager = createAuthManager({
         storage: storagePlugins.localStorage({
-          appName: "auth-nextjs-test",
+          appName: 'auth-nextjs-test',
           networkName,
         }),
       });
@@ -118,11 +118,11 @@ export default function ClientStorageDemo() {
           config: { account: newAccount },
           authConfig: {
             domain: window.location.origin,
-            statement: "EOA auth context demo",
+            statement: 'EOA auth context demo',
             expiration: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
             resources: [
-              ["lit-action-execution", "*"],
-              ["pkp-signing", "*"],
+              ['lit-action-execution', '*'],
+              ['pkp-signing', '*'],
             ],
           },
           litClient,
@@ -144,17 +144,17 @@ export default function ClientStorageDemo() {
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : String(err));
     } finally {
-      setAuthStatus("idle");
+      setAuthStatus('idle');
     }
   };
 
   const refreshBalances = async (targetAccount = account) => {
     if (!targetAccount?.address) {
-      setBalanceError("Create an EOA auth context first.");
+      setBalanceError('Create an EOA auth context first.');
       return;
     }
 
-    setBalanceStatus("working");
+    setBalanceStatus('working');
     setBalanceError(null);
     setNativeBalance(null);
     setLedgerBalance(null);
@@ -188,17 +188,17 @@ export default function ClientStorageDemo() {
       if (litClient) {
         await litClient.disconnect();
       }
-      setBalanceStatus("idle");
+      setBalanceStatus('idle');
     }
   };
 
   const handleFindPkps = async () => {
     if (!authContext || !account?.address) {
-      setPkpError("Create an EOA auth context first.");
+      setPkpError('Create an EOA auth context first.');
       return;
     }
 
-    setPkpStatus("working");
+    setPkpStatus('working');
     setPkpError(null);
     setPkpInfo(null);
 
@@ -216,7 +216,7 @@ export default function ClientStorageDemo() {
       if (!addressPkps || addressPkps.length === 0) {
         setPkpInfo({
           message:
-            "No PKPs found for this auth method. Mint one before signing.",
+            'No PKPs found for this auth method. Mint one before signing.',
         });
         return;
       }
@@ -230,17 +230,17 @@ export default function ClientStorageDemo() {
       if (litClient) {
         await litClient.disconnect();
       }
-      setPkpStatus("idle");
+      setPkpStatus('idle');
     }
   };
 
   const handleMintPkp = async () => {
     if (!account) {
-      setPkpError("Create an EOA auth context first.");
+      setPkpError('Create an EOA auth context first.');
       return;
     }
 
-    setPkpStatus("working");
+    setPkpStatus('working');
     setPkpError(null);
     setPkpSignature(null);
 
@@ -275,22 +275,22 @@ export default function ClientStorageDemo() {
       if (litClient) {
         await litClient.disconnect();
       }
-      setPkpStatus("idle");
+      setPkpStatus('idle');
     }
   };
 
   const handlePkpSign = async () => {
     if (!authContext) {
-      setPkpError("Create an EOA auth context first.");
+      setPkpError('Create an EOA auth context first.');
       return;
     }
 
     if (!pkpPublicKey.trim()) {
-      setPkpError("Provide a PKP public key to sign with.");
+      setPkpError('Provide a PKP public key to sign with.');
       return;
     }
 
-    setPkpStatus("working");
+    setPkpStatus('working');
     setPkpError(null);
     setPkpSignature(null);
 
@@ -313,7 +313,7 @@ export default function ClientStorageDemo() {
       if (litClient) {
         await litClient.disconnect();
       }
-      setPkpStatus("idle");
+      setPkpStatus('idle');
     }
   };
 
@@ -322,7 +322,7 @@ export default function ClientStorageDemo() {
   return (
     <section>
       <h2>Client storage plugins</h2>
-      <pre>{Object.keys(storagePlugins).join(", ")}</pre>
+      <pre>{Object.keys(storagePlugins).join(', ')}</pre>
 
       <h2>EOA auth context demo</h2>
       <p>
@@ -330,11 +330,8 @@ export default function ClientStorageDemo() {
         Manager.
       </p>
       <label>
-        Network:{" "}
-        <select
-          value={networkName}
-          onChange={handleNetworkChange}
-        >
+        Network:{' '}
+        <select value={networkName} onChange={handleNetworkChange}>
           <option value="naga-dev">naga-dev</option>
           <option value="naga-test">naga-test</option>
         </select>
@@ -343,11 +340,9 @@ export default function ClientStorageDemo() {
         <button
           type="button"
           onClick={handleCreateAuthContext}
-          disabled={authStatus === "working"}
+          disabled={authStatus === 'working'}
         >
-          {authStatus === "working"
-            ? "Creating..."
-            : "Create EOA Auth Context"}
+          {authStatus === 'working' ? 'Creating...' : 'Create EOA Auth Context'}
         </button>
       </div>
       {authError ? <pre>Error: {authError}</pre> : null}
@@ -363,7 +358,7 @@ export default function ClientStorageDemo() {
               type="text"
               value={faucetUrl}
               onChange={(event) => setFaucetUrl(event.target.value)}
-              style={{ width: "100%" }}
+              style={{ width: '100%' }}
             />
           </label>
           {faucetLink ? (
@@ -377,18 +372,20 @@ export default function ClientStorageDemo() {
             <button
               type="button"
               onClick={() => refreshBalances()}
-              disabled={balanceStatus === "working"}
+              disabled={balanceStatus === 'working'}
             >
-              {balanceStatus === "working" ? "Refreshing..." : "Refresh balances"}
+              {balanceStatus === 'working'
+                ? 'Refreshing...'
+                : 'Refresh balances'}
             </button>
           </div>
           <div>
-            <p>Native balance: {nativeBalance ?? "n/a"}</p>
+            <p>Native balance: {nativeBalance ?? 'n/a'}</p>
             <p>
-              Ledger balance:{" "}
+              Ledger balance:{' '}
               {ledgerBalance
                 ? `${ledgerBalance.availableBalance} (available) / ${ledgerBalance.totalBalance} (total)`
-                : "n/a"}
+                : 'n/a'}
             </p>
           </div>
           {balanceError ? <pre>Error: {balanceError}</pre> : null}
@@ -403,16 +400,16 @@ export default function ClientStorageDemo() {
         <button
           type="button"
           onClick={handleFindPkps}
-          disabled={pkpStatus === "working" || !authContext}
+          disabled={pkpStatus === 'working' || !authContext}
         >
-          {pkpStatus === "working" ? "Searching..." : "Find PKPs"}
+          {pkpStatus === 'working' ? 'Searching...' : 'Find PKPs'}
         </button>
         <button
           type="button"
           onClick={handleMintPkp}
-          disabled={pkpStatus === "working" || !authContext}
+          disabled={pkpStatus === 'working' || !authContext}
         >
-          {pkpStatus === "working" ? "Minting..." : "Mint PKP"}
+          {pkpStatus === 'working' ? 'Minting...' : 'Mint PKP'}
         </button>
       </div>
       {pkps.length ? (
@@ -423,9 +420,7 @@ export default function ClientStorageDemo() {
             onChange={(event) => {
               const selected = event.target.value;
               setPkpPublicKey(selected);
-              const selectedPkp = pkps.find(
-                (pkp) => pkp.pubkey === selected
-              );
+              const selectedPkp = pkps.find((pkp) => pkp.pubkey === selected);
               setPkpInfo(selectedPkp ?? null);
             }}
           >
@@ -446,7 +441,7 @@ export default function ClientStorageDemo() {
           value={pkpPublicKey}
           onChange={(event) => setPkpPublicKey(event.target.value)}
           placeholder="0x..."
-          style={{ width: "100%" }}
+          style={{ width: '100%' }}
         />
       </label>
       <label>
@@ -455,16 +450,16 @@ export default function ClientStorageDemo() {
           type="text"
           value={pkpMessage}
           onChange={(event) => setPkpMessage(event.target.value)}
-          style={{ width: "100%" }}
+          style={{ width: '100%' }}
         />
       </label>
       <div>
         <button
           type="button"
           onClick={handlePkpSign}
-          disabled={pkpStatus === "working" || !authContext}
+          disabled={pkpStatus === 'working' || !authContext}
         >
-          {pkpStatus === "working" ? "Signing..." : "PKP Sign Message"}
+          {pkpStatus === 'working' ? 'Signing...' : 'PKP Sign Message'}
         </button>
       </div>
       {pkpInfo ? <pre>{stringify(pkpInfo)}</pre> : null}

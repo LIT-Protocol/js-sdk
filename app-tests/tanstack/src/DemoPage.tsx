@@ -36,17 +36,20 @@ export default function DemoPage() {
   );
   const [authStatus, setAuthStatus] = useState('idle');
   const [authError, setAuthError] = useState<string | null>(null);
-  const [authSummary, setAuthSummary] = useState<Record<string, unknown> | null>(
-    null
-  );
+  const [authSummary, setAuthSummary] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [authContext, setAuthContext] = useState<any>(null);
-  const [account, setAccount] = useState<
-    ReturnType<typeof privateKeyToAccount> | null
-  >(null);
+  const [account, setAccount] = useState<ReturnType<
+    typeof privateKeyToAccount
+  > | null>(null);
   const [balanceStatus, setBalanceStatus] = useState('idle');
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [nativeBalance, setNativeBalance] = useState<string | null>(null);
-  const [ledgerBalance, setLedgerBalance] = useState<LedgerBalance | null>(null);
+  const [ledgerBalance, setLedgerBalance] = useState<LedgerBalance | null>(
+    null
+  );
 
   const [pkpStatus, setPkpStatus] = useState('idle');
   const [pkpError, setPkpError] = useState<string | null>(null);
@@ -341,8 +344,8 @@ export default function DemoPage() {
       <div>
         <h2>EOA auth context demo</h2>
         <p>
-          This uses a random EOA account and creates an auth context via the Auth
-          Manager.
+          This uses a random EOA account and creates an auth context via the
+          Auth Manager.
         </p>
         <label>
           Network:{' '}
@@ -402,9 +405,7 @@ export default function DemoPage() {
             <p>
               Ledger balance:{' '}
               {ledgerBalance
-                ? `${ledgerBalance.availableBalance} (available) / ${
-                    ledgerBalance.totalBalance
-                  } (total)`
+                ? `${ledgerBalance.availableBalance} (available) / ${ledgerBalance.totalBalance} (total)`
                 : 'n/a'}
             </p>
           </div>
@@ -441,9 +442,7 @@ export default function DemoPage() {
               onChange={(event) => {
                 const selected = event.target.value;
                 setPkpPublicKey(selected);
-                const selectedPkp = pkps.find(
-                  (pkp) => pkp.pubkey === selected
-                );
+                const selectedPkp = pkps.find((pkp) => pkp.pubkey === selected);
                 setPkpInfo(selectedPkp ?? null);
               }}
             >

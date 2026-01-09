@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const packagesToPack = [
@@ -13,10 +13,19 @@ const packagesToPack = [
   },
 ];
 
+const npmCacheDir = resolve('tmp/npm-cache');
+if (!existsSync(npmCacheDir)) {
+  mkdirSync(npmCacheDir, { recursive: true });
+}
+
 const packPackage = ({ distDir, name }) => {
   const packOutput = execSync('npm pack --json', {
     cwd: distDir,
     encoding: 'utf8',
+    env: {
+      ...process.env,
+      npm_config_cache: npmCacheDir,
+    },
   });
 
   const [packResult] = JSON.parse(packOutput);

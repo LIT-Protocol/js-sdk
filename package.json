@@ -12,7 +12,7 @@
     "reset": "rimraf dist pnpm-lock.yaml node_modules tmp yarn-error.log yarn.lock package-lock.json learn-debug.log .nx lit-auth-storage pkp-tokens lit-auth-local ./e2e/dist ./e2e/node_modules",
     "build": "nx run-many --parallel=false --target=build --all",
     "explorer:dev": "nx run explorer:dev",
-    "dev:apps": "npx concurrently -n nextjs,tanstack -c blue,green \"npm --prefix app-tests/nextjs run dev\" \"npm --prefix app-tests/tanstack run dev\"",
+    "dev:apps": "node tools/ensure-app-test-deps.mjs && npx concurrently -n nextjs,tanstack -c blue,green \"npm --prefix app-tests/nextjs run dev\" \"npm --prefix app-tests/tanstack run dev\"",
     "explorer:build": "nx run explorer:build",
     "explorer:lint": "nx run explorer:lint",
     "explorer:start": "nx run explorer:start",
