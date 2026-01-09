@@ -22,6 +22,10 @@ Fetches the encrypted ciphertext and metadata for a stored wrapped key without d
   Identifier of the wrapped key to retrieve.
 </ParamField>
 
+<ParamField path="params.includeVersions" type="boolean">
+  Optional flag to return the `versions` array of prior states.
+</ParamField>
+
 <ParamField path="params.userMaxPrice" type="bigint">
   Optional price ceiling for the Lit Action.
 </ParamField>
@@ -29,7 +33,7 @@ Fetches the encrypted ciphertext and metadata for a stored wrapped key without d
 ## Returns
 
 <ResponseField name="result" type="StoredKeyData">
-  Includes ciphertext, `dataToEncryptHash`, memo, key type, public key, and PKP address.
+  Includes ciphertext, `dataToEncryptHash`, memo, key type, public key, PKP address, and (when requested) `versions` + `updatedAt`.
 </ResponseField>
 
 ## Example
@@ -39,5 +43,6 @@ const storedKey = await wrappedKeysApi.getEncryptedKey({
   pkpSessionSigs,
   litClient,
   id,
+  includeVersions: true, // optional
 });
 ```

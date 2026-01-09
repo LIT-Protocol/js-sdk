@@ -1270,7 +1270,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             E2EERequestManager.decryptBatchResponse(
               result,
               jitContext,
-              (decryptedJson) => {
+              (decryptedJson, nodeUrl) => {
                 const executeJsData = decryptedJson.data;
                 if (!executeJsData) {
                   throw new NodeError(
@@ -1284,7 +1284,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
                     `JS execution failed for request ${requestId}. Decrypted response missing data field`
                   );
                 }
-                return executeJsData;
+                return { ...executeJsData, nodeUrl };
               },
               {
                 operationName: 'JS execution',

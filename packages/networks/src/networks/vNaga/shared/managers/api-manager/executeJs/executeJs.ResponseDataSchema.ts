@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { toBigInt } from '../../../../../shared/utils/z-transformers';
 
 /**
  * Schema for Lit Action signed data
@@ -25,6 +26,11 @@ export const ExecuteJsResponseDataSchema = z.object({
   success: z.boolean(),
   values: z.array(
     z.object({
+      /**
+       * Node URL that returned this value
+       */
+      nodeUrl: z.string().optional(),
+
       /**
        * Success status of the execution
        */
@@ -63,7 +69,7 @@ export const ExecuteJsResponseDataSchema = z.object({
           z.object({
             component: z.string(),
             quantity: z.number(),
-            price: z.number(),
+            price: toBigInt,
           })
         )
         .optional(),
