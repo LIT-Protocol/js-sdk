@@ -18,9 +18,9 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
+      "@lit-protocol/*": ["packages/*/src"],
       "@lit-protocol/auth/storage": ["packages/auth/src/storage.ts"],
       "@lit-protocol/auth/storage-node": ["packages/auth/src/storage-node.ts"],
-      "@lit-protocol/*": ["packages/*/src"],
       "@lit-protocol/contracts": ["packages/contracts/dist/index"],
       "@lit-protocol/contracts/*": ["packages/contracts/dist/*"]
     }
