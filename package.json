@@ -24,7 +24,7 @@
     "test:e2e:ci": "npx jest --clearCache --config ./jest.e2e.config.ts && LOG_LEVEL=${LOG_LEVEL:-silent} npx jest --runInBand --detectOpenHandles --forceExit --config ./jest.e2e.config.ts --testTimeout=50000000 --runTestsByPath",
     "pretest:e2e": "pnpm run generate:lit-actions",
     "pretest:e2e:ci": "pnpm run generate:lit-actions",
-    "e2e:money-back": "dotenvx run --env-file=.env -- tsx tools/money-back.ts",
+    "e2e:money-back": "LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- tsx tools/money-back.ts",
     "e2e:money-back-cron": "dotenvx run --env-file=.env -- tsx tools/money-back-cron.ts",
     "pretest:custom": "pnpm run generate:lit-actions",
     "test:health": "LOG_LEVEL=${LOG_LEVEL:-silent} dotenvx run --env-file=.env -- tsx packages/e2e/src/health/index.ts",
