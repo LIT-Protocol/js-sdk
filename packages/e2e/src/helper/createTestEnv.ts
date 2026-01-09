@@ -104,7 +104,7 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
       }
 
       networkModule = applyRpcOverride(
-        nagaLocal.withLocalContext({
+        await nagaLocal.withLocalContext({
           networkContextPath: envVars.localContextPath,
           networkName: 'naga-local',
         })

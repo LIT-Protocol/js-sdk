@@ -1,10 +1,7 @@
-import {
-  AUTH_METHOD_TYPE,
-  AUTH_METHOD_TYPE_VALUES,
-} from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import { z } from 'zod';
 import {
-  AuthMethodSchema,
+  AuthDataSchema,
   HexPrefixedSchema,
   NodeSetSchema,
   SessionKeyUriSchema,
@@ -17,20 +14,6 @@ export const CustomAuthDataSchema = z.object({
   authMethodId: HexPrefixedSchema,
   authMethodType: z.bigint(),
 });
-
-export const AuthDataSchema = z.object({
-  authMethodId: HexPrefixedSchema,
-  authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
-  accessToken: AuthMethodSchema.shape.accessToken,
-  publicKey: HexPrefixedSchema.optional(),
-
-  // any other auth specific data
-  // eg. stytch contains user_id
-  metadata: z.any().optional(),
-});
-
-export type AuthData = z.output<typeof AuthDataSchema>;
-export type AuthDataInput = z.input<typeof AuthDataSchema>;
 
 /**
  * Return Object Schema
