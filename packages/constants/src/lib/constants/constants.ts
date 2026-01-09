@@ -54,7 +54,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     decimals: 18,
     type: 'ERC1155',
     rpcUrls: [
-      'https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE',
+      'https://eth-mainnet.g.alchemy.com/v2/_J7v1gEI40Tiulq7rFh913Xjy2-C4L8T',
     ],
     blockExplorerUrls: ['https://etherscan.io'],
     vmType: 'EVM',
