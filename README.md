@@ -127,7 +127,7 @@ pnpm run sync:contracts  # requires GH_API_KEY in your environment
 Testing a custom local network? Point the runner at your generated `networkContext.json` and RPC URL. (/lit-assets/blockchain/contracts/networkContext.json)
 
 ```ts
-const networkModule = nagaLocal
+const networkModule = await nagaLocal
   .withLocalContext({
     networkContextPath:
       '/Users/<username>/Projects/lit-assets/blockchain/contracts/networkContext.json',

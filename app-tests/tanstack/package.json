@@ -1,0 +1,25 @@
+{
+  "name": "auth-tanstack-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@lit-protocol/auth": "file:../../dist/packages/auth/lit-protocol-auth-8.2.2.tgz",
+    "@lit-protocol/crypto": "file:../../dist/packages/crypto/lit-protocol-crypto-8.1.0.tgz",
+    "@lit-protocol/lit-client": "^8.3.0",
+    "@lit-protocol/networks": "^8.4.0",
+    "@tanstack/react-router": "^1.0.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "viem": "2.38.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.8.3",
+    "vite": "^5.4.0"
+  }
+}
