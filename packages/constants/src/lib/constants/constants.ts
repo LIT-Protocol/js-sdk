@@ -16,7 +16,9 @@ export const KEY_SET_IDENTIFIERS = {
   DATIL: 'datil',
   NAGA_KEYSET1: 'naga-keyset1',
 } as const;
-export type KEY_SET_IDENTIFIER_VALUES = ConstantValues<typeof KEY_SET_IDENTIFIERS>;
+export type KEY_SET_IDENTIFIER_VALUES = ConstantValues<
+  typeof KEY_SET_IDENTIFIERS
+>;
 
 /**
  * Lit Protocol Network Public Key

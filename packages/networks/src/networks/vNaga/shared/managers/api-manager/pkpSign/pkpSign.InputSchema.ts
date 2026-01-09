@@ -1,4 +1,7 @@
-import { KEY_SET_IDENTIFIERS, SigningSchemeSchema } from '@lit-protocol/constants';
+import {
+  KEY_SET_IDENTIFIERS,
+  SigningSchemeSchema,
+} from '@lit-protocol/constants';
 import {
   PKPAuthContextSchema,
   EoaAuthContextSchema,

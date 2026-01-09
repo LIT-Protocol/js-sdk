@@ -28,7 +28,10 @@ export async function resolveKeysetForPkp({
   // 3. Return undefined if not found anywhere.
 
   try {
-    logger.info({ pkpPublicKey }, 'Resolving keyset (Lit Chain first, then Yellowstone)');
+    logger.info(
+      { pkpPublicKey },
+      'Resolving keyset (Lit Chain first, then Yellowstone)'
+    );
 
     // TODO: query pubkey router on Lit Chain
     const foundOnLitChain = false;
@@ -42,7 +45,10 @@ export async function resolveKeysetForPkp({
       return 'datil';
     }
 
-    logger.warn({ pkpPublicKey }, 'Keyset not found on Lit Chain or Yellowstone');
+    logger.warn(
+      { pkpPublicKey },
+      'Keyset not found on Lit Chain or Yellowstone'
+    );
     return undefined;
   } catch (err) {
     logger.error({ pkpPublicKey, err }, 'Failed to resolve keyset for PKP');

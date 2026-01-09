@@ -22,11 +22,7 @@ export {
   nagaProto,
   naga,
 } from './networks/vNaga';
-export { 
-  datilDev, 
-  datilTest, 
-  datil 
-} from './networks/vDatil';
+export { datilDev, datilTest, datil } from './networks/vDatil';
 
 // Network module types
 export type { NagaLocalModule } from './networks/vNaga';

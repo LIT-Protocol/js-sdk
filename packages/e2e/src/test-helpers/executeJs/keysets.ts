@@ -156,9 +156,11 @@ export const registerKeysetTests = () => {
       expect(result.response).toBe('success');
     });
 
-    datilTest('Lit Action signEcdsa works with datil keySetIdentifier', async () => {
-      if (envVars.network === 'naga-local') return;
-      const code = `
+    datilTest(
+      'Lit Action signEcdsa works with datil keySetIdentifier',
+      async () => {
+        if (envVars.network === 'naga-local') return;
+        const code = `
         const go = async () => {
           const resp = await Lit.Actions.signEcdsa({
             toSign: new Uint8Array([5,6,7]),
@@ -171,13 +173,14 @@ export const registerKeysetTests = () => {
         go();
       `;
 
-      const result = await testEnv.litClient.executeJs({
-        sessionSigs: datilSessionSigs!,
-        useSingleNode: true,
-        code,
-      });
+        const result = await testEnv.litClient.executeJs({
+          sessionSigs: datilSessionSigs!,
+          useSingleNode: true,
+          code,
+        });
 
-      expect(result.response).toBe('success');
-    });
+        expect(result.response).toBe('success');
+      }
+    );
   });
 };

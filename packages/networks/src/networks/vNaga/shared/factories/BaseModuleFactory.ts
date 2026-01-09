@@ -645,17 +645,17 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               'pkpSign:createRequest: Generating request data'
             );
 
-          const _requestData = PKPSignRequestDataSchema.parse({
-            toSign: Array.from(params.signingContext.toSign),
-            signingScheme: params.signingContext.signingScheme,
-            pubkey: params.signingContext.pubKey,
-            authSig: sessionSigs[url],
-            nodeSet: urls,
-            chain: params.chain,
-            bypassAutoHashing: params.signingContext.bypassAutoHashing,
-            epoch: params.connectionInfo.epochState.currentNumber,
-            keySetIdentifier: params.keySetIdentifier,
-          });
+            const _requestData = PKPSignRequestDataSchema.parse({
+              toSign: Array.from(params.signingContext.toSign),
+              signingScheme: params.signingContext.signingScheme,
+              pubkey: params.signingContext.pubKey,
+              authSig: sessionSigs[url],
+              nodeSet: urls,
+              chain: params.chain,
+              bypassAutoHashing: params.signingContext.bypassAutoHashing,
+              epoch: params.connectionInfo.epochState.currentNumber,
+              keySetIdentifier: params.keySetIdentifier,
+            });
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
               _requestData,
