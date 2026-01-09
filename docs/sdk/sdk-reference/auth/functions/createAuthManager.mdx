@@ -12,7 +12,8 @@ title: createAuthManager
 <ParamField path="param.storage" type="LitAuthStorageProvider" required>
   The storage provider used by the Auth Manager.
   ```ts
-  import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
+  import { createAuthManager } from "@lit-protocol/auth";
+  import { storagePlugins } from "@lit-protocol/auth/storage-node";
   const authManager = createAuthManager({
     storage: storagePlugins.localStorageNode({
       appName: "my-app",
@@ -109,7 +110,8 @@ Create an EOA (Externally Owned Account) auth context adapter for signing and se
 #### Example
 
 ```ts
-import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
+import { createAuthManager } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 
 const authManager = createAuthManager({
   storage: storagePlugins.localStorageNode({

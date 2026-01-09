@@ -1,9 +1,9 @@
 import '../../e2e/src/helper/supressLogs';
 import {
   createAuthManager,
-  storagePlugins,
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 import * as StateManager from './StateManager';
 import { createLitClient } from '@lit-protocol/lit-client';
 import {

@@ -10,9 +10,9 @@ import { fundAccount } from '../helper/fundAccount';
 import { createLitClient } from '@lit-protocol/lit-client';
 import {
   createAuthManager,
-  storagePlugins,
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 
 // -- Configurations
 const { nagaLocal } = await import('@lit-protocol/networks');

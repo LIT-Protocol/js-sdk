@@ -1,4 +1,5 @@
-import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
+import { createAuthManager } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 import { createLitClient } from '@lit-protocol/lit-client';
 import { nagaDev } from '@lit-protocol/networks';
 import { privateKeyToAccount } from 'viem/accounts';
