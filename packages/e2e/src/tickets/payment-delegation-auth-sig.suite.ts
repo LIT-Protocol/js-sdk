@@ -43,6 +43,10 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
       });
 
       const maxDelegationPrice = 2n ** 128n - 1n;
+      const delegationExpiresAtMs = Date.now() + 10_000;
+      const delegationExpiration = new Date(
+        delegationExpiresAtMs
+      ).toISOString();
 
       const paymentDelegationAuthSig = await createPaymentDelegationAuthSig({
         signer: alice.account,
@@ -51,7 +55,7 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
         maxPrice: maxDelegationPrice,
         scopes: ['pkp_sign'],
         litClient: testEnv.litClient,
-        expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
+        expiration: delegationExpiration,
         domain: 'example.com',
         statement:
           'Authorize a single session to use my payment delegation balance.',
@@ -85,18 +89,33 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
         console.log(
           'ℹ️ Skipping ledger balance assertion on naga-dev (pricing not enforced).'
         );
-        return;
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance({
+          userAddress: alice.account.address,
+        });
+
+        expect(BigInt(aliceBalanceAfter.raw.availableBalance)).toBeLessThan(
+          BigInt(aliceBalanceBefore.raw.availableBalance)
+        );
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance({
-        userAddress: alice.account.address,
-      });
-
-      expect(BigInt(aliceBalanceAfter.raw.availableBalance)).toBeLessThan(
-        BigInt(aliceBalanceBefore.raw.availableBalance)
+      const waitForExpirationMs = Math.max(
+        0,
+        delegationExpiresAtMs - Date.now() + 1000
       );
+      if (waitForExpirationMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, waitForExpirationMs));
+      }
+
+      await expect(
+        testEnv.litClient.chain.ethereum.pkpSign({
+          authContext: bobAuthContext,
+          pubKey: bob.pkp.pubkey,
+          toSign: 'delegated payment via auth sig (expired)',
+        })
+      ).rejects.toThrow();
     });
   });
 }
