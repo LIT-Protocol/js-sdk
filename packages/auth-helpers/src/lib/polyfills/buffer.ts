@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer/index.js';
 
 const globalWithBuffer = globalThis as unknown as {
-  Buffer?: typeof Buffer;
+  Buffer?: unknown;
 };
 
 if (!globalWithBuffer.Buffer) {
