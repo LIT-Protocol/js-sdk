@@ -13,7 +13,12 @@ if (!existsSync(npmCacheDir)) {
   mkdirSync(npmCacheDir, { recursive: true });
 }
 
-const appPaths = [resolve('app-tests/nextjs'), resolve('app-tests/tanstack')];
+const appPaths = [
+  resolve('app-tests/nextjs'),
+  resolve('app-tests/tanstack'),
+  resolve('app-tests/vite-react'),
+  resolve('app-tests/svelte'),
+];
 
 const getTarballPaths = (dependencies, baseDir) =>
   Object.values(dependencies ?? {})

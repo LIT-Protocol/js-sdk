@@ -8,6 +8,14 @@ const packagesToPack = [
     distDir: resolve('dist/packages/auth'),
   },
   {
+    name: '@lit-protocol/auth-helpers',
+    distDir: resolve('dist/packages/auth-helpers'),
+  },
+  {
+    name: '@lit-protocol/schemas',
+    distDir: resolve('dist/packages/schemas'),
+  },
+  {
     name: '@lit-protocol/crypto',
     distDir: resolve('dist/packages/crypto'),
   },
@@ -46,6 +54,8 @@ for (const pkg of packagesToPack) {
 const appPackagePaths = [
   resolve('app-tests/nextjs/package.json'),
   resolve('app-tests/tanstack/package.json'),
+  resolve('app-tests/vite-react/package.json'),
+  resolve('app-tests/svelte/package.json'),
 ];
 
 for (const appPackagePath of appPackagePaths) {
