@@ -1,5 +1,5 @@
 {
-  "name": "auth-tanstack-test",
+  "name": "auth-vite-react-test",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,15 +9,14 @@
   },
   "dependencies": {
     "@lit-protocol/auth": "file:../../dist/packages/auth/lit-protocol-auth-8.2.2.tgz",
+    "@lit-protocol/auth-helpers": "file:../../dist/packages/auth-helpers/lit-protocol-auth-helpers-8.2.0.tgz",
     "@lit-protocol/crypto": "file:../../dist/packages/crypto/lit-protocol-crypto-8.1.0.tgz",
     "@lit-protocol/lit-client": "^8.3.0",
     "@lit-protocol/networks": "^8.4.0",
-    "@tanstack/react-router": "^1.0.0",
+    "@lit-protocol/schemas": "file:../../dist/packages/schemas/lit-protocol-schemas-8.0.2.tgz",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "viem": "2.38.3",
-    "@lit-protocol/auth-helpers": "file:../../dist/packages/auth-helpers/lit-protocol-auth-helpers-8.2.0.tgz",
-    "@lit-protocol/schemas": "file:../../dist/packages/schemas/lit-protocol-schemas-8.0.2.tgz"
+    "viem": "2.38.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",

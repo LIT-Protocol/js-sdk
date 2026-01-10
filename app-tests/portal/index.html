@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>App Tests Index</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0e16;
+        --bg-accent: #121826;
+        --card: #141a2a;
+        --card-border: #26304a;
+        --text: #f8f9ff;
+        --muted: #9ba7c7;
+        --accent: #38bdf8;
+        --accent-strong: #0ea5e9;
+      }
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(56, 189, 248, 0.2), transparent 45%),
+          radial-gradient(circle at 30% 10%, rgba(14, 165, 233, 0.15), transparent 50%),
+          var(--bg);
+        color: var(--text);
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+        display: grid;
+        gap: 1.5rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: 2rem;
+      }
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .card {
+        border: 1px solid var(--card-border);
+        background: var(--card);
+        border-radius: 12px;
+        padding: 1rem;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+        box-shadow: 0 12px 30px rgba(5, 8, 19, 0.35);
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-strong);
+      }
+      .label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.35rem;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .note {
+        border-left: 3px solid var(--accent);
+        padding-left: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <h1>App Tests Index</h1>
+        <p class="note">
+          These links assume you are running <code>pnpm dev:apps</code> (ports 5550-5553).
+        </p>
+      </div>
+
+      <div class="grid">
+        <a class="card" href="http://localhost:5550" target="_blank" rel="noreferrer">
+          <span class="label">Next.js (5550)</span>
+          <span class="meta">App Router demo</span>
+        </a>
+        <a class="card" href="http://localhost:5551" target="_blank" rel="noreferrer">
+          <span class="label">TanStack (5551)</span>
+          <span class="meta">React + TanStack Router</span>
+        </a>
+        <a class="card" href="http://localhost:5552" target="_blank" rel="noreferrer">
+          <span class="label">Vite React (5552)</span>
+          <span class="meta">React + Vite</span>
+        </a>
+        <a class="card" href="http://localhost:5553" target="_blank" rel="noreferrer">
+          <span class="label">Svelte (5553)</span>
+          <span class="meta">Svelte + Vite</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

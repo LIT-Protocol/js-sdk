@@ -2,9 +2,9 @@
   "name": "auth-next-test",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 5550",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p 5550"
   },
   "dependencies": {
     "@lit-protocol/auth": "file:../../dist/packages/auth/lit-protocol-auth-8.2.2.tgz",
@@ -14,6 +14,8 @@
     "next": "^16.1.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "viem": "2.38.3"
+    "viem": "2.38.3",
+    "@lit-protocol/auth-helpers": "file:../../dist/packages/auth-helpers/lit-protocol-auth-helpers-8.2.0.tgz",
+    "@lit-protocol/schemas": "file:../../dist/packages/schemas/lit-protocol-schemas-8.0.2.tgz"
   }
 }
