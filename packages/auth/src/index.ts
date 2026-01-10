@@ -1,3 +1,5 @@
+import './lib/polyfills/buffer';
+
 // -- imports
 // import { createAuthManager } from './lib/auth-manager';
 import * as authenticators from './lib/authenticators';

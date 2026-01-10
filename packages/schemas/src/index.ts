@@ -1,3 +1,5 @@
+import './lib/polyfills/buffer';
+
 export * from './lib/auth/auth-schemas';
 export * from './lib/auth/ScopeSchema';
 export * from './lib/encryption';
