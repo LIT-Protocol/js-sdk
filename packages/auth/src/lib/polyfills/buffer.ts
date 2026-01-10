@@ -1,6 +1,6 @@
-import { Buffer } from 'buffer';
+import { Buffer } from 'buffer/index.js';
 
-const globalWithBuffer = globalThis as typeof globalThis & {
+const globalWithBuffer = globalThis as unknown as {
   Buffer?: typeof Buffer;
 };
 
