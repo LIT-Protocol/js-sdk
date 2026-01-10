@@ -92,9 +92,11 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
       } else {
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance({
-          userAddress: alice.account.address,
-        });
+        const aliceBalanceAfter = await testEnv.masterPaymentManager.getBalance(
+          {
+            userAddress: alice.account.address,
+          }
+        );
 
         expect(BigInt(aliceBalanceAfter.raw.availableBalance)).toBeLessThan(
           BigInt(aliceBalanceBefore.raw.availableBalance)
@@ -106,7 +108,9 @@ export function registerPaymentDelegationAuthSigTicketSuite() {
         delegationExpiresAtMs - Date.now() + 1000
       );
       if (waitForExpirationMs > 0) {
-        await new Promise((resolve) => setTimeout(resolve, waitForExpirationMs));
+        await new Promise((resolve) =>
+          setTimeout(resolve, waitForExpirationMs)
+        );
       }
 
       await expect(
