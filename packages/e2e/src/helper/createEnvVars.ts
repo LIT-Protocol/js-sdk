@@ -68,12 +68,18 @@ export function createEnvVars(): EnvVars {
   }
 
   if (!privateKey) {
-    const scopedKey = `LIVE_MASTER_ACCOUNT_${network
-      .toUpperCase()
-      .replace(/-/g, '_')}`;
-    throw new Error(
-      `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${testEnv.live.key} or ${scopedKey} to be set.`
-    );
+    if (network.includes('local')) {
+      throw new Error(
+        `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${testEnv.local.key} to be set.`
+      );
+    } else {
+      const scopedKey = `LIVE_MASTER_ACCOUNT_${network
+        .toUpperCase()
+        .replace(/-/g, '_')}`;
+      throw new Error(
+        `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${testEnv.live.key} or ${scopedKey} to be set.`
+      );
+    }
   }
 
   // 3. Get RPC URL

@@ -1223,7 +1223,8 @@ export interface PaymentDelegationAuthSigData
 export type PaymentDelegationSigner =
   | SignerLike
   | {
-      signMessage: (message: string | any) => Promise<string>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      signMessage: (message: any) => Promise<string>;
       getAddress?: () => Promise<string>;
       address?: string;
     };
