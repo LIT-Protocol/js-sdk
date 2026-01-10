@@ -1,11 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>App Tests Index</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,10 +24,17 @@
       }
       body {
         margin: 0;
-        font-family: "Space Grotesk", "Segoe UI", sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(56, 189, 248, 0.2), transparent 45%),
-          radial-gradient(circle at 30% 10%, rgba(14, 165, 233, 0.15), transparent 50%),
+        font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+        background: radial-gradient(
+            circle at top left,
+            rgba(56, 189, 248, 0.2),
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 30% 10%,
+            rgba(14, 165, 233, 0.15),
+            transparent 50%
+          ),
           var(--bg);
         color: var(--text);
       }
@@ -88,24 +92,45 @@
       <div>
         <h1>App Tests Index</h1>
         <p class="note">
-          These links assume you are running <code>pnpm dev:apps</code> (ports 5550-5553).
+          These links assume you are running <code>pnpm dev:apps</code> (ports
+          5550-5553).
         </p>
       </div>
 
       <div class="grid">
-        <a class="card" href="http://localhost:5550" target="_blank" rel="noreferrer">
+        <a
+          class="card"
+          href="http://localhost:5550"
+          target="_blank"
+          rel="noreferrer"
+        >
           <span class="label">Next.js (5550)</span>
           <span class="meta">App Router demo</span>
         </a>
-        <a class="card" href="http://localhost:5551" target="_blank" rel="noreferrer">
+        <a
+          class="card"
+          href="http://localhost:5551"
+          target="_blank"
+          rel="noreferrer"
+        >
           <span class="label">TanStack (5551)</span>
           <span class="meta">React + TanStack Router</span>
         </a>
-        <a class="card" href="http://localhost:5552" target="_blank" rel="noreferrer">
+        <a
+          class="card"
+          href="http://localhost:5552"
+          target="_blank"
+          rel="noreferrer"
+        >
           <span class="label">Vite React (5552)</span>
           <span class="meta">React + Vite</span>
         </a>
-        <a class="card" href="http://localhost:5553" target="_blank" rel="noreferrer">
+        <a
+          class="card"
+          href="http://localhost:5553"
+          target="_blank"
+          rel="noreferrer"
+        >
           <span class="label">Svelte (5553)</span>
           <span class="meta">Svelte + Vite</span>
         </a>
