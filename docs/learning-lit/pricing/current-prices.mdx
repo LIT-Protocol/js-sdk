@@ -11,8 +11,6 @@ The following table shows the current pricing for Lit Protocol services on the *
 Most prices update dynamically based on network usage. The values shown below reflect real-time prices fetched from the blockchain. Note that PKP Minting cost is static and does not change with network utilization.
 </Note>
 
-<PriceProvider component={CurrentPricesTable} />
-
 ## Understanding the Price Table
 
 ### Base vs Max Prices
@@ -28,6 +26,8 @@ Most prices update dynamically based on network usage. The values shown below re
 - **Lit Action**: Executing serverless JavaScript functions (pricing varies by component)
 - **Sign Session Key**: Session-based signing operations
 - **PKP Minting**: Creating a new Programmable Key Pair (static price, does not vary with network usage)
+
+<PriceProvider component={CurrentPricesTable} />
 
 ### Lit Action Pricing Components
 
@@ -48,6 +48,8 @@ Lit Actions have multiple pricing components that are charged based on resource 
 The total cost of a Lit Action is calculated by summing all applicable components based on your action's actual resource usage.
 
 ## Price Calculator
+
+Enter your expected usage below to estimate the total cost. All prices reflect real-time network rates.
 
 <PriceProvider component={PriceCalculator} />
 

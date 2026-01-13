@@ -197,14 +197,6 @@ export const PriceCalculator = ({ priceData }) => {
       border: '1px solid var(--mint-border, #ddd)',
       borderRadius: '8px',
     }}>
-      <p style={{
-        fontSize: '0.9em',
-        color: 'var(--mint-text-secondary, #666)',
-        marginBottom: '20px'
-      }}>
-        Enter your expected usage below to estimate the total cost. All prices reflect real-time network rates.
-      </p>
-
       <h4 style={{ marginTop: 0, marginBottom: '15px', fontSize: '1em', color: 'var(--mint-text, inherit)' }}>Basic Network Operations</h4>
       <div style={{
         display: 'grid',
