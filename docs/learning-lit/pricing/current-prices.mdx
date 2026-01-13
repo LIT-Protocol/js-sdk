@@ -3,6 +3,7 @@ title: "Current Prices"
 ---
 import { CurrentPricesTable } from "/snippets/CurrentPricesTable.jsx";
 import { PriceProvider } from "/snippets/PriceProvider.jsx";
+import { PriceCalculator } from "/snippets/PriceCalculator.jsx";
 
 The following table shows the current pricing for Lit Protocol services on the **Naga Prod / Mainnet V1** network. Prices are displayed in both $LITKEY tokens and USD (based on current market rates).
 
@@ -45,4 +46,8 @@ Lit Actions have multiple pricing components that are charged based on resource 
 - **Fetches**: Cost per HTTP fetch request
 
 The total cost of a Lit Action is calculated by summing all applicable components based on your action's actual resource usage.
+
+## Price Calculator
+
+<PriceProvider component={PriceCalculator} />
 
