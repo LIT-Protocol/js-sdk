@@ -17,6 +17,7 @@ export const ExampleLitActionCosts = ({ priceData }) => {
     error,
     litActionConfigs,
     litKeyPriceUSD,
+    thresholdNodes,
     ethers,
   } = priceData;
 
@@ -31,7 +32,10 @@ export const ExampleLitActionCosts = ({ priceData }) => {
     );
     
     if (!config) return null;
-    return weiToTokens(config.price, ethers);
+    // Multiply by thresholdNodes since each node charges the product price
+    // and requests go to threshold nodes (2/3 of total, minimum 3)
+    const pricePerNode = weiToTokens(config.price, ethers);
+    return thresholdNodes ? pricePerNode * thresholdNodes : pricePerNode;
   };
 
   // Calculate cost for a Lit Action example

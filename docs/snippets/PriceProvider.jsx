@@ -203,6 +203,8 @@ export const PriceProvider = ({ children, component: Component }) => {
   const [litKeyPriceUSD, setLitKeyPriceUSD] = useState(null);
   const [usagePercent, setUsagePercent] = useState(null);
   const [pkpMintCost, setPkpMintCost] = useState(null);
+  const [numberOfNodes, setNumberOfNodes] = useState(null);
+  const [thresholdNodes, setThresholdNodes] = useState(null);
   const [ethersLoaded, setEthersLoaded] = useState(false);
 
   // Load ethers from CDN
@@ -262,6 +264,16 @@ export const PriceProvider = ({ children, component: Component }) => {
         // Get actual current price to calculate usage percent
         // Using PkpSign (productId 0) as reference
         const nodePriceData = await contract.prices(ProductId.PkpSign);
+        // Store number of nodes (length of prices array)
+        const totalNodes = nodePriceData.length;
+        setNumberOfNodes(totalNodes);
+        
+        // Calculate threshold: floor(numberOfNodes * 2/3), minimum 3
+        // Using integer math with truncation (Math.floor)
+        const calculatedThreshold = Math.floor(totalNodes * 2 / 3);
+        const threshold = Math.max(3, calculatedThreshold);
+        setThresholdNodes(threshold);
+        
         const basePrice = basePricesResult[0];
         const maxPrice = maxPricesResult[0];
         
@@ -351,6 +363,8 @@ export const PriceProvider = ({ children, component: Component }) => {
     litKeyPriceUSD,
     usagePercent,
     pkpMintCost,
+    numberOfNodes,
+    thresholdNodes,
     ethers: window.ethers,
   };
 

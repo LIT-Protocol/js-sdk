@@ -34,6 +34,18 @@ All services on Lit Protocol are priced in **[$LITKEY](/governance/litkey/overvi
 
 The network automatically deducts the appropriate amount of [$LITKEY](/governance/litkey/overview) tokens from your ledger balance based on the current dynamic price.
 
+<Note>
+**Understanding Per-Node vs Per-Request Pricing:**
+
+- **On-chain prices are per node**: The prices stored on-chain in the PriceFeedFacet contract represent the price charged by each individual node.
+- **Threshold calculation**: Requests are sent to a threshold number of nodes, calculated as `floor(total_nodes × 2/3)` using integer math (truncation), with a minimum of 3 nodes. For example:
+  - 8 nodes: `floor(8 × 2/3) = 5` threshold nodes
+  - 3 nodes: minimum is 3, so threshold = 3 nodes
+  - 6 nodes: `floor(6 × 2/3) = 4` threshold nodes
+- **Total cost per request**: When you make a request, it is sent to the threshold nodes. Each node charges you the product price, so your total cost per request is `product_price × threshold_nodes`.
+- **Documentation prices**: The prices shown in our documentation pages are already multiplied by the threshold number of nodes to show you the total cost per request, making it easier to understand what you'll actually pay.
+</Note>
+
 ### Automatic Deduction
 
 When you make a request to the network, the system:

@@ -32,16 +32,36 @@ export const PriceCalculator = ({ priceData }) => {
     litActionConfigs,
     litKeyPriceUSD,
     pkpMintCost,
+    numberOfNodes,
+    thresholdNodes,
     ethers,
   } = priceData || {};
 
+  // Show info about threshold nodes if available
+  const nodeInfo = thresholdNodes !== null && numberOfNodes !== null ? (
+    <p style={{ 
+      marginBottom: '15px', 
+      fontSize: '0.85em', 
+      color: 'var(--mint-text-secondary, #666)', 
+      fontStyle: 'italic' 
+    }}>
+      <strong>Note:</strong> Prices shown are per request (on-chain prices × {thresholdNodes} threshold nodes). 
+      On-chain prices are per node, but since your request goes to {thresholdNodes} nodes (2/3 of {numberOfNodes} total nodes, minimum 3) and each node charges the product price, 
+      the total cost per request is the product price multiplied by {thresholdNodes}.
+    </p>
+  ) : null;
+
   const totalTokens = useMemo(() => {
-    if (!currentPrices || !litActionConfigs || !ethers) return 0;
+    if (!currentPrices || !litActionConfigs || !ethers || !thresholdNodes) return 0;
 
     let total = 0;
 
     const addPrice = (price, count) => {
-      if (price != null) total += count * weiToTokens(price, ethers);
+      if (price != null) {
+        // Multiply by thresholdNodes since each node charges the product price
+        // and requests go to threshold nodes (2/3 of total, minimum 3)
+        total += count * weiToTokens(price, ethers) * thresholdNodes;
+      }
     };
 
     // Basic network operations (order must match PRODUCT_IDS in PriceProvider)
@@ -49,8 +69,10 @@ export const PriceCalculator = ({ priceData }) => {
     addPrice(currentPrices[1], encSignCount);     // EncSign
     addPrice(currentPrices[2], sessionKeyCount);  // SignSessionKey
 
-    // PKP minting
-    addPrice(pkpMintCost, pkpMintCount);
+    // PKP minting - this is a global on-chain operation, so don't multiply by thresholdNodes
+    if (pkpMintCost != null) {
+      total += pkpMintCount * weiToTokens(pkpMintCost, ethers);
+    }
 
     // Lit Action operations
     litActionConfigs.forEach(config => {
@@ -73,7 +95,7 @@ export const PriceCalculator = ({ priceData }) => {
     litActionCodeLength, litActionResponseLength, litActionSignatures,
     litActionBroadcasts, litActionContractCalls, litActionCallDepth,
     litActionDecrypts, litActionFetches, currentPrices, litActionConfigs,
-    pkpMintCost, ethers
+    pkpMintCost, thresholdNodes, ethers
   ]);
 
   const totalUSD = litKeyPriceUSD ? totalTokens * litKeyPriceUSD : null;
@@ -197,6 +219,7 @@ export const PriceCalculator = ({ priceData }) => {
       border: '1px solid var(--mint-border, #ddd)',
       borderRadius: '8px',
     }}>
+      {nodeInfo}
       <h4 style={{ marginTop: 0, marginBottom: '15px', fontSize: '1em', color: 'var(--mint-text, inherit)' }}>Basic Network Operations</h4>
       <div style={{
         display: 'grid',
