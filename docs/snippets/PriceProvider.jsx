@@ -203,6 +203,7 @@ export const PriceProvider = ({ children, component: Component }) => {
   const [litKeyPriceUSD, setLitKeyPriceUSD] = useState(null);
   const [usagePercent, setUsagePercent] = useState(null);
   const [pkpMintCost, setPkpMintCost] = useState(null);
+  const [numberOfNodes, setNumberOfNodes] = useState(null);
   const [ethersLoaded, setEthersLoaded] = useState(false);
 
   // Load ethers from CDN
@@ -262,6 +263,8 @@ export const PriceProvider = ({ children, component: Component }) => {
         // Get actual current price to calculate usage percent
         // Using PkpSign (productId 0) as reference
         const nodePriceData = await contract.prices(ProductId.PkpSign);
+        // Store number of nodes (length of prices array)
+        setNumberOfNodes(nodePriceData.length);
         const basePrice = basePricesResult[0];
         const maxPrice = maxPricesResult[0];
         
@@ -351,6 +354,7 @@ export const PriceProvider = ({ children, component: Component }) => {
     litKeyPriceUSD,
     usagePercent,
     pkpMintCost,
+    numberOfNodes,
     ethers: window.ethers,
   };
 

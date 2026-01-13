@@ -32,16 +32,34 @@ export const PriceCalculator = ({ priceData }) => {
     litActionConfigs,
     litKeyPriceUSD,
     pkpMintCost,
+    numberOfNodes,
     ethers,
   } = priceData || {};
 
+  // Show info about number of nodes if available
+  const nodeInfo = numberOfNodes !== null ? (
+    <p style={{ 
+      marginBottom: '15px', 
+      fontSize: '0.85em', 
+      color: 'var(--mint-text-secondary, #666)', 
+      fontStyle: 'italic' 
+    }}>
+      <strong>Note:</strong> Prices shown are per request (on-chain prices × {numberOfNodes} nodes). 
+      On-chain prices are per node, but since your request goes to {numberOfNodes} nodes and each node charges the product price, 
+      the total cost per request is the product price multiplied by {numberOfNodes}.
+    </p>
+  ) : null;
+
   const totalTokens = useMemo(() => {
-    if (!currentPrices || !litActionConfigs || !ethers) return 0;
+    if (!currentPrices || !litActionConfigs || !ethers || !numberOfNodes) return 0;
 
     let total = 0;
 
     const addPrice = (price, count) => {
-      if (price != null) total += count * weiToTokens(price, ethers);
+      if (price != null) {
+        // Multiply by numberOfNodes since each node charges the product price
+        total += count * weiToTokens(price, ethers) * numberOfNodes;
+      }
     };
 
     // Basic network operations (order must match PRODUCT_IDS in PriceProvider)
@@ -73,7 +91,7 @@ export const PriceCalculator = ({ priceData }) => {
     litActionCodeLength, litActionResponseLength, litActionSignatures,
     litActionBroadcasts, litActionContractCalls, litActionCallDepth,
     litActionDecrypts, litActionFetches, currentPrices, litActionConfigs,
-    pkpMintCost, ethers
+    pkpMintCost, numberOfNodes, ethers
   ]);
 
   const totalUSD = litKeyPriceUSD ? totalTokens * litKeyPriceUSD : null;
@@ -197,6 +215,7 @@ export const PriceCalculator = ({ priceData }) => {
       border: '1px solid var(--mint-border, #ddd)',
       borderRadius: '8px',
     }}>
+      {nodeInfo}
       <h4 style={{ marginTop: 0, marginBottom: '15px', fontSize: '1em', color: 'var(--mint-text, inherit)' }}>Basic Network Operations</h4>
       <div style={{
         display: 'grid',

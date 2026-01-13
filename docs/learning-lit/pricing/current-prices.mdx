@@ -11,6 +11,16 @@ The following table shows the current pricing for Lit Protocol services on the *
 Most prices update dynamically based on network usage. The values shown below reflect real-time prices fetched from the blockchain. Note that PKP Minting cost is static and does not change with network utilization.
 </Note>
 
+<Warning>
+**Important Pricing Information:**
+
+- **On-chain prices are per node**: The prices stored on-chain in the PriceFeedFacet contract represent the price charged by each individual node.
+- **Documentation prices are per request**: The prices shown in this documentation are multiplied by the number of nodes, since your request will be sent to N nodes and each node charges the product price. This gives you the total cost you'll pay per request.
+- **Total cost calculation**: When you make a request, the total cost is `product_price × number_of_nodes`, because each node charges you the product price.
+
+For example, if the on-chain price for PKP Sign is 0.01 LITKEY per node, and there are 10 nodes, the total cost per request shown here will be 0.1 LITKEY (0.01 × 10).
+</Warning>
+
 ## Understanding the Price Table
 
 ### Base vs Max Prices
