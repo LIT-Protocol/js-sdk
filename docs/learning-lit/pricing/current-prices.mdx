@@ -15,10 +15,14 @@ Most prices update dynamically based on network usage. The values shown below re
 **Important Pricing Information:**
 
 - **On-chain prices are per node**: The prices stored on-chain in the PriceFeedFacet contract represent the price charged by each individual node.
-- **Documentation prices are per request**: The prices shown in this documentation are multiplied by the number of nodes, since your request will be sent to N nodes and each node charges the product price. This gives you the total cost you'll pay per request.
-- **Total cost calculation**: When you make a request, the total cost is `product_price × number_of_nodes`, because each node charges you the product price.
+- **Documentation prices are per request**: The prices shown in this documentation are multiplied by the threshold number of nodes, since your request will be sent to the threshold nodes and each node charges the product price. This gives you the total cost you'll pay per request.
+- **Threshold calculation**: The threshold is calculated as `floor(total_nodes × 2/3)` using integer math (truncation), with a minimum of 3 nodes. For example:
+  - 8 nodes: `floor(8 × 2/3) = floor(5.333) = 5` threshold nodes
+  - 3 nodes: `floor(3 × 2/3) = 2`, but minimum is 3, so threshold = 3 nodes
+  - 6 nodes: `floor(6 × 2/3) = 4` threshold nodes
+- **Total cost calculation**: When you make a request, the total cost is `product_price × threshold_nodes`, because each threshold node charges you the product price.
 
-For example, if the on-chain price for PKP Sign is 0.01 LITKEY per node, and there are 10 nodes, the total cost per request shown here will be 0.1 LITKEY (0.01 × 10).
+For example, if the on-chain price for PKP Sign is 0.01 LITKEY per node, and there are 8 total nodes (5 threshold nodes), the total cost per request shown here will be 0.05 LITKEY (0.01 × 5).
 </Warning>
 
 ## Understanding the Price Table

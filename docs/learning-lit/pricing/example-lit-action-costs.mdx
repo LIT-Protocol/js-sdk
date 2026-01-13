@@ -9,7 +9,7 @@ This page demonstrates real-world cost estimates for common Lit Action operation
 <Note>
 These are estimates based on current prices and the specified resource usage. Actual costs may vary slightly based on network conditions and exact resource consumption.
 
-**Pricing Note:** The costs shown here are per request (already multiplied by the number of nodes). On-chain prices are per node, but since your request goes to N nodes and each node charges the product price, the total cost per request is `product_price × number_of_nodes`.
+**Pricing Note:** The costs shown here are per request (already multiplied by the threshold number of nodes). On-chain prices are per node, but since your request goes to threshold nodes (calculated as `floor(total_nodes × 2/3)` with a minimum of 3) and each node charges the product price, the total cost per request is `product_price × threshold_nodes`.
 </Note>
 
 <PriceProvider component={ExampleLitActionCosts} />

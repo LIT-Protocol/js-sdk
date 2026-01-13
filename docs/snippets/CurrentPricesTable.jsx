@@ -26,6 +26,7 @@ export const CurrentPricesTable = ({ priceData }) => {
     usagePercent,
     pkpMintCost,
     numberOfNodes,
+    thresholdNodes,
     ethers,
   } = priceData;
 
@@ -60,14 +61,19 @@ export const CurrentPricesTable = ({ priceData }) => {
           )}
           {numberOfNodes !== null && (
             <span style={{ marginLeft: '20px' }}>
-              <strong>Number of Nodes:</strong> {numberOfNodes}
+              <strong>Total Nodes:</strong> {numberOfNodes}
+            </span>
+          )}
+          {thresholdNodes !== null && (
+            <span style={{ marginLeft: '20px' }}>
+              <strong>Threshold Nodes:</strong> {thresholdNodes}
             </span>
           )}
         </p>
       )}
-      {numberOfNodes !== null && (
+      {thresholdNodes !== null && numberOfNodes !== null && (
         <p style={{ marginBottom: '20px', fontSize: '0.85em', color: 'var(--mint-text-secondary, #666)', fontStyle: 'italic' }}>
-          <strong>Note:</strong> Prices shown are per request (on-chain prices × {numberOfNodes} nodes). On-chain prices are per node, but since your request goes to {numberOfNodes} nodes and each node charges the product price, the total cost per request is the product price multiplied by {numberOfNodes}.
+          <strong>Note:</strong> Prices shown are per request (on-chain prices × {thresholdNodes} threshold nodes). On-chain prices are per node, but since your request goes to {thresholdNodes} nodes (2/3 of {numberOfNodes} total nodes, minimum 3) and each node charges the product price, the total cost per request is the product price multiplied by {thresholdNodes}.
         </p>
       )}
 
@@ -133,13 +139,14 @@ export const CurrentPricesTable = ({ priceData }) => {
           </thead>
           <tbody>
             {PRODUCT_IDS.map((productId, index) => {
-              // Multiply by numberOfNodes since each node charges the product price
+              // Multiply by thresholdNodes since each node charges the product price
+              // and requests go to threshold nodes (2/3 of total, minimum 3)
               const basePricePerNode = weiToTokens(basePrices[index], ethers);
               const maxPricePerNode = weiToTokens(maxPrices[index], ethers);
               const currentPricePerNode = weiToTokens(currentPrices[index], ethers);
-              const basePriceInTokens = numberOfNodes ? basePricePerNode * numberOfNodes : basePricePerNode;
-              const maxPriceInTokens = numberOfNodes ? maxPricePerNode * numberOfNodes : maxPricePerNode;
-              const currentPriceInTokens = numberOfNodes ? currentPricePerNode * numberOfNodes : currentPricePerNode;
+              const basePriceInTokens = thresholdNodes ? basePricePerNode * thresholdNodes : basePricePerNode;
+              const maxPriceInTokens = thresholdNodes ? maxPricePerNode * thresholdNodes : maxPricePerNode;
+              const currentPriceInTokens = thresholdNodes ? currentPricePerNode * thresholdNodes : currentPricePerNode;
               const basePriceInUSD = litKeyPriceUSD
                 ? basePriceInTokens * litKeyPriceUSD
                 : null;
@@ -325,9 +332,10 @@ export const CurrentPricesTable = ({ priceData }) => {
                 `Component ${priceComponentNum}`;
               const measurementName =
                 MEASUREMENT_NAMES[priceMeasurementNum] || '';
-              // Multiply by numberOfNodes since each node charges the product price
+              // Multiply by thresholdNodes since each node charges the product price
+              // and requests go to threshold nodes (2/3 of total, minimum 3)
               const pricePerNode = weiToTokens(config.price, ethers);
-              const priceInTokens = numberOfNodes ? pricePerNode * numberOfNodes : pricePerNode;
+              const priceInTokens = thresholdNodes ? pricePerNode * thresholdNodes : pricePerNode;
               const priceInUSD = litKeyPriceUSD
                 ? priceInTokens * litKeyPriceUSD
                 : null;
