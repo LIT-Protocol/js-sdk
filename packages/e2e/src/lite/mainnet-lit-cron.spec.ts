@@ -120,7 +120,11 @@ const runUptimeLoop = async () => {
 
   const { client, functions } = await initStatusClient();
   const runWithStatus: LiteUptimeRunner = async (name, fn) => {
-    await client.executeAndLog(functions[name].id, fn);
+    try {
+      await client.executeAndLog(functions[name].id, fn);
+    } catch (error) {
+      console.error(`[lite-mainnet-uptime] ${name} failed`, error);
+    }
   };
 
   let iteration = 0;
@@ -130,7 +134,14 @@ const runUptimeLoop = async () => {
       `[lite-mainnet-uptime] Run ${iteration} starting at ${new Date().toISOString()}`
     );
 
-    await runLiteMainnetOnce(runWithStatus);
+    try {
+      await runLiteMainnetOnce(runWithStatus);
+    } catch (error) {
+      console.error(
+        `[lite-mainnet-uptime] Run ${iteration} encountered an error`,
+        error
+      );
+    }
 
     const { delayMs, nextRun } = getNextCronDelay(CRON_EXPR, new Date());
     console.log(`[lite-mainnet-uptime] Next run at ${nextRun.toISOString()}`);
