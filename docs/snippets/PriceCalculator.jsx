@@ -1,16 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 export const PriceCalculator = ({ priceData }) => {
   const LitActionPriceComponent = window.LitPricingConstants?.LitActionPriceComponent || {};
+  const LIT_ACTION_COMPONENT_NAMES = window.LitPricingConstants?.LIT_ACTION_COMPONENT_NAMES || {};
+  const NodePriceMeasurement = window.LitPricingConstants?.NodePriceMeasurement || {};
+  const MEASUREMENT_NAMES = window.LitPricingConstants?.MEASUREMENT_NAMES || {};
   const weiToTokens = window.LitPricingConstants?.weiToTokens || (() => 0);
   const formatPrice = window.LitPricingConstants?.formatPrice || ((price) => String(price));
-
-  const ProductId = {
-    PkpSign: 0,
-    EncSign: 1,
-    LitAction: 2,
-    SignSessionKey: 3,
-  };
 
   const [pkpSignCount, setPkpSignCount] = useState(0);
   const [encSignCount, setEncSignCount] = useState(0);
@@ -29,14 +25,6 @@ export const PriceCalculator = ({ priceData }) => {
   const [litActionDecrypts, setLitActionDecrypts] = useState(0);
   const [litActionFetches, setLitActionFetches] = useState(0);
 
-  if (!priceData) {
-    return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <p>Price data not available. Please wrap this component with PriceProvider.</p>
-      </div>
-    );
-  }
-
   const {
     loading,
     error,
@@ -45,7 +33,58 @@ export const PriceCalculator = ({ priceData }) => {
     litKeyPriceUSD,
     pkpMintCost,
     ethers,
-  } = priceData;
+  } = priceData || {};
+
+  const totalTokens = useMemo(() => {
+    if (!currentPrices || !litActionConfigs || !ethers) return 0;
+
+    let total = 0;
+
+    const addPrice = (price, count) => {
+      if (price != null) total += count * weiToTokens(price, ethers);
+    };
+
+    // Basic network operations (order must match PRODUCT_IDS in PriceProvider)
+    addPrice(currentPrices[0], pkpSignCount);    // PkpSign
+    addPrice(currentPrices[1], encSignCount);     // EncSign
+    addPrice(currentPrices[2], sessionKeyCount);  // SignSessionKey
+
+    // PKP minting
+    addPrice(pkpMintCost, pkpMintCount);
+
+    // Lit Action operations
+    litActionConfigs.forEach(config => {
+      const component = Number(config.priceComponent);
+      const counts = [
+        litActionBaseCount, litActionRuntimeSeconds, litActionMemoryMB,
+        litActionCodeLength, litActionResponseLength, litActionSignatures,
+        litActionBroadcasts, litActionContractCalls, litActionCallDepth,
+        litActionDecrypts, litActionFetches
+      ];
+      if (component < counts.length) {
+        addPrice(config.price, counts[component]);
+      }
+    });
+
+    return total;
+  }, [
+    pkpSignCount, encSignCount, sessionKeyCount, pkpMintCount,
+    litActionBaseCount, litActionRuntimeSeconds, litActionMemoryMB,
+    litActionCodeLength, litActionResponseLength, litActionSignatures,
+    litActionBroadcasts, litActionContractCalls, litActionCallDepth,
+    litActionDecrypts, litActionFetches, currentPrices, litActionConfigs,
+    pkpMintCost, ethers
+  ]);
+
+  const totalUSD = litKeyPriceUSD ? totalTokens * litKeyPriceUSD : null;
+
+  if (!priceData) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <p>Price data not available. Please wrap this component with PriceProvider.</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -63,53 +102,10 @@ export const PriceCalculator = ({ priceData }) => {
     );
   }
 
-  const getProductPrice = (productId) => {
-    const index = [ProductId.PkpSign, ProductId.EncSign, ProductId.SignSessionKey].indexOf(productId);
-    if (index === -1) return 0;
-    return weiToTokens(currentPrices[index], ethers);
-  };
-
-  const getLitActionComponentPrice = (componentId) => {
-    const config = litActionConfigs.find(c => Number(c.priceComponent) === componentId);
-    if (!config) return 0;
-    return weiToTokens(config.price, ethers);
-  };
-
-  const calculateTotal = () => {
-    let totalTokens = 0;
-
-    totalTokens += pkpSignCount * getProductPrice(ProductId.PkpSign);
-    totalTokens += encSignCount * getProductPrice(ProductId.EncSign);
-    totalTokens += sessionKeyCount * getProductPrice(ProductId.SignSessionKey);
-
-    if (pkpMintCost) {
-      totalTokens += pkpMintCount * weiToTokens(pkpMintCost, ethers);
-    }
-
-    totalTokens += litActionBaseCount * getLitActionComponentPrice(LitActionPriceComponent.baseAmount);
-    totalTokens += litActionRuntimeSeconds * getLitActionComponentPrice(LitActionPriceComponent.runtimeLength);
-    totalTokens += litActionMemoryMB * getLitActionComponentPrice(LitActionPriceComponent.memoryUsage);
-    totalTokens += litActionCodeLength * getLitActionComponentPrice(LitActionPriceComponent.codeLength);
-    totalTokens += litActionResponseLength * getLitActionComponentPrice(LitActionPriceComponent.responseLength);
-    totalTokens += litActionSignatures * getLitActionComponentPrice(LitActionPriceComponent.signatures);
-    totalTokens += litActionBroadcasts * getLitActionComponentPrice(LitActionPriceComponent.broadcasts);
-    totalTokens += litActionContractCalls * getLitActionComponentPrice(LitActionPriceComponent.contractCalls);
-    totalTokens += litActionCallDepth * getLitActionComponentPrice(LitActionPriceComponent.callDepth);
-    totalTokens += litActionDecrypts * getLitActionComponentPrice(LitActionPriceComponent.decrypts);
-    totalTokens += litActionFetches * getLitActionComponentPrice(LitActionPriceComponent.fetches);
-
-    return totalTokens;
-  };
-
-  const totalTokens = calculateTotal();
-  const totalUSD = litKeyPriceUSD ? totalTokens * litKeyPriceUSD : null;
-
-  // Helper function to render number input - defined inline to avoid focus issues
   const renderNumberInput = (label, value, onChange, step = 1, min = 0, allowDecimals = false) => {
     const handleChange = (e) => {
       const newValue = e.target.value;
 
-      // Allow empty string temporarily
       if (newValue === '') {
         onChange(0);
         return;
@@ -120,6 +116,16 @@ export const PriceCalculator = ({ priceData }) => {
         const validated = Math.max(min, parsed);
         onChange(validated);
       }
+    };
+
+    const handleIncrement = () => {
+      const newValue = value + step;
+      onChange(Math.max(min, allowDecimals ? newValue : Math.round(newValue)));
+    };
+
+    const handleDecrement = () => {
+      const newValue = value - step;
+      onChange(Math.max(min, allowDecimals ? newValue : Math.round(newValue)));
     };
 
     return (
@@ -135,7 +141,7 @@ export const PriceCalculator = ({ priceData }) => {
         </label>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={() => onChange(Math.max(min, value - step))}
+            onClick={handleDecrement}
             style={{
               padding: '8px 12px',
               fontSize: '1em',
@@ -165,7 +171,7 @@ export const PriceCalculator = ({ priceData }) => {
             }}
           />
           <button
-            onClick={() => onChange(value + step)}
+            onClick={handleIncrement}
             style={{
               padding: '8px 12px',
               fontSize: '1em',
@@ -227,19 +233,19 @@ export const PriceCalculator = ({ priceData }) => {
       }}>
         {/* Lit Action Operations */}
         <div>
-          {renderNumberInput("Number of Executions", litActionBaseCount, setLitActionBaseCount)}
-          {renderNumberInput("Runtime (seconds)", litActionRuntimeSeconds, setLitActionRuntimeSeconds, 1, 0, true)}
-          {renderNumberInput("Memory Usage (MB)", litActionMemoryMB, setLitActionMemoryMB, 1, 0, true)}
-          {renderNumberInput("Code Length (MB)", litActionCodeLength, setLitActionCodeLength, 1, 0, true)}
-          {renderNumberInput("Response Length (MB)", litActionResponseLength, setLitActionResponseLength, 1, 0, true)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.baseAmount]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perCount]}`, litActionBaseCount, setLitActionBaseCount)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.runtimeLength]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perSecond]}`, litActionRuntimeSeconds, setLitActionRuntimeSeconds, 0.1, 0, true)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.memoryUsage]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perMegabyte]}`, litActionMemoryMB, setLitActionMemoryMB, 0.1, 0, true)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.codeLength]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perMegabyte]}`, litActionCodeLength, setLitActionCodeLength, 0.1, 0, true)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.responseLength]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perMegabyte]}`, litActionResponseLength, setLitActionResponseLength, 0.1, 0, true)}
         </div>
         <div>
-          {renderNumberInput("Signatures", litActionSignatures, setLitActionSignatures)}
-          {renderNumberInput("Broadcasts", litActionBroadcasts, setLitActionBroadcasts)}
-          {renderNumberInput("Contract Calls", litActionContractCalls, setLitActionContractCalls)}
-          {renderNumberInput("Call Depth", litActionCallDepth, setLitActionCallDepth)}
-          {renderNumberInput("Decrypts", litActionDecrypts, setLitActionDecrypts)}
-          {renderNumberInput("Fetches", litActionFetches, setLitActionFetches)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.signatures]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perCount]}`, litActionSignatures, setLitActionSignatures)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.broadcasts]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perCount]}`, litActionBroadcasts, setLitActionBroadcasts)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.contractCalls]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perCount]}`, litActionContractCalls, setLitActionContractCalls)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.callDepth]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perCount]}`, litActionCallDepth, setLitActionCallDepth)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.decrypts]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perCount]}`, litActionDecrypts, setLitActionDecrypts)}
+          {renderNumberInput(`${LIT_ACTION_COMPONENT_NAMES[LitActionPriceComponent.fetches]} ${MEASUREMENT_NAMES[NodePriceMeasurement.perCount]}`, litActionFetches, setLitActionFetches)}
         </div>
       </div>
 
