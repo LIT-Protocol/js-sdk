@@ -312,13 +312,13 @@ export const PriceProvider = ({ children, component: Component }) => {
         let calculatedUsage = 0;
         let medianPriceForReferenceProduct = null;
         if (nodePriceData.length > 0 && !maxPrice.eq(basePrice)) {
-          // Extract and sort all node prices
+          // Extract and sort all node prices from the cheapest `threshold` number of nodes
           const prices = nodePriceData.map(node => ethers.BigNumber.from(node.price));
           prices.sort((a, b) => {
             if (a.lt(b)) return -1;
             if (a.gt(b)) return 1;
             return 0;
-          });
+          }).slice(0, threshold);
           
           // Calculate median
           let medianPrice;
