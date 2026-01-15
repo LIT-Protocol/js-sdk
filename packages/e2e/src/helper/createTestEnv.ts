@@ -27,8 +27,8 @@ export const CONFIG = {
     },
   },
   LIVE: {
-    nativeFundingAmount: '0.1',
-    ledgerDepositAmount: '10',
+    nativeFundingAmount: '0.01',
+    ledgerDepositAmount: '0.01',
     sponsorshipLimits: {
       totalMaxPriceInWei: '50000000000000000',
       userMaxPrice: 50000000000000000n,
@@ -38,11 +38,22 @@ export const CONFIG = {
     nativeFundingAmount: '0.01',
     ledgerDepositAmount: '0.01',
     sponsorshipLimits: {
-      totalMaxPriceInWei: '10000000000000000',
-      userMaxPrice: 10000000000000000n,
+      // The mainnet payment delegation flow uses this as the per-request budget and
+      // must be large enough to cover the minimum estimated price for a PKP sign.
+      totalMaxPriceInWei: '60000000000000000000',
+      userMaxPrice: 60000000000000000000n,
     },
   },
 };
+
+const NAGA_MAINNET_NETWORK_FUNDING_AMOUNT =
+  process.env['NAGA_MAINNET_NETWORK_FUNDING_AMOUNT'] ?? '20';
+const NAGA_PROTO_NETWORK_FUNDING_AMOUNT =
+  process.env['NAGA_PROTO_NETWORK_FUNDING_AMOUNT'] ?? '0.01';
+const NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT =
+  process.env['NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT'] ?? '60';
+const NAGA_PROTO_LEDGER_DEPOSIT_AMOUNT =
+  process.env['NAGA_PROTO_LEDGER_DEPOSIT_AMOUNT'] ?? '0.01';
 
 export type TestEnvs = {
   address: `0x${string}`;
@@ -125,7 +136,18 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
       networkModule = applyRpcOverride(
         envVars.network === 'naga-proto' ? nagaProto : naga
       );
-      config = CONFIG.MAINNET;
+      config =
+        envVars.network === 'naga'
+          ? {
+              ...CONFIG.MAINNET,
+              nativeFundingAmount: NAGA_MAINNET_NETWORK_FUNDING_AMOUNT,
+              ledgerDepositAmount: NAGA_MAINNET_LEDGER_DEPOSIT_AMOUNT,
+            }
+          : {
+              ...CONFIG.MAINNET,
+              nativeFundingAmount: NAGA_PROTO_NETWORK_FUNDING_AMOUNT,
+              ledgerDepositAmount: NAGA_PROTO_LEDGER_DEPOSIT_AMOUNT,
+            };
       break;
     }
     default: {

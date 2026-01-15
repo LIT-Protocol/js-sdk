@@ -46,9 +46,7 @@ export function createEnvVars(): EnvVars {
     !SUPPORTED_NETWORKS.includes(networkEnv as SupportedNetwork)
   ) {
     throw new Error(
-      `❌ NETWORK env var is not set or not supported. Found: ${
-        networkEnvRaw ?? 'undefined'
-      }`
+      `❌ NETWORK env var is not set or not supported. Found: ${networkEnvRaw ?? 'undefined'}`
     );
   }
 
@@ -65,13 +63,23 @@ export function createEnvVars(): EnvVars {
     privateKey = (process.env[privateKeyEnvKey] ?? '').trim() as `0x${string}`;
   } else {
     Object.assign(testEnv.live, { type: 'live' });
-    privateKeyEnvKey = testEnv.live.key;
-    privateKey = (process.env[privateKeyEnvKey] ?? '').trim() as `0x${string}`;
+    const liveKey =
+      network === 'naga' && process.env['LIVE_MASTER_ACCOUNT_NAGA']
+        ? 'LIVE_MASTER_ACCOUNT_NAGA'
+        : testEnv.live.key;
+    privateKeyEnvKey = liveKey;
+    privateKey = (process.env[liveKey] ?? '').trim() as `0x${string}`;
   }
 
   if (!privateKey) {
+    const expectedKey =
+      network === 'naga'
+        ? 'LIVE_MASTER_ACCOUNT_NAGA or LIVE_MASTER_ACCOUNT'
+        : selectedNetwork === 'local'
+          ? 'LOCAL_MASTER_ACCOUNT'
+          : 'LIVE_MASTER_ACCOUNT';
     throw new Error(
-      `❌ Missing required env var ${privateKeyEnvKey} for "${selectedNetwork}" environment (${network}).`
+      `❌ ${expectedKey} env var is not set for NETWORK=${network}.`
     );
   }
 

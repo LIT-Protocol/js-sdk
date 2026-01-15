@@ -1,0 +1,94 @@
+---
+title: "Payment Model"
+---
+
+Lit Protocol uses a token-based payment system to ensure the decentralized network can sustain itself for providing cryptographic services.
+
+## How Network Usage Payments Work
+
+### Token Deposit System
+
+To use Lit Protocol's services, you must first load tokens into the **Ledger Contract** on Lit Chain. This contract acts as a prepaid account that holds your [$LITKEY](/governance/litkey/overview) tokens and automatically deducts fees as you use the network.
+
+### Dynamic Pricing Model
+
+Lit Protocol uses a dynamic pricing model that adjusts based on network usage:
+
+- **Base Price**: The minimum price for each service when the network has low usage
+- **Max Price**: The maximum price when the network is at full capacity
+- **Current Price**: The actual price at any given moment, which fluctuates between the base and max price based on current network usage
+
+This pricing mechanism ensures:
+- Fair pricing during low-usage periods (you pay less when demand is low)
+- Network stability during high-usage periods (prices increase to manage demand)
+- Market price discovery for Lit network capacity
+
+### Pricing in $LITKEY Tokens
+
+All services on Lit Protocol are priced in **[$LITKEY](/governance/litkey/overview) tokens**, the native token of Lit Chain. When you use network services such as:
+
+- **PKP Signing**: Generating signatures with your Programmable Key Pair
+- **Decryption and Access Control**: Decrypting data and enforcing access control conditions
+- **Lit Actions**: Executing serverless JavaScript functions
+- **Sign Session Key**: Session-based signing operations
+
+The network automatically deducts the appropriate amount of [$LITKEY](/governance/litkey/overview) tokens from your ledger balance based on the current dynamic price.
+
+## Understanding Per-Node vs Per-Request Pricing
+
+### On-Chain Prices Are Per Node
+
+The prices stored on-chain in the PriceFeedFacet contract represent the price charged by each individual node. When you query the blockchain directly, you'll see these per-node prices.
+
+### Threshold Calculation
+
+Requests are sent to a threshold number of nodes, not all nodes. The threshold is calculated as `floor(total_nodes × 2/3)` using integer math (truncation), with a minimum of 3 nodes. For example:
+
+- **8 nodes**: `floor(8 × 2/3) = floor(5.333) = 5` threshold nodes
+- **3 nodes**: `floor(3 × 2/3) = 2`, but minimum is 3, so threshold = 3 nodes
+- **6 nodes**: `floor(6 × 2/3) = 4` threshold nodes
+- **9 nodes**: `floor(9 × 2/3) = 6` threshold nodes
+
+### Total Cost Per Request
+
+When you make a request, it is sent to the threshold nodes. Each node charges you the product price, so your total cost per request is:
+
+```
+total_cost = product_price × threshold_nodes
+```
+
+For example, if the on-chain price for PKP Sign is 0.01 LITKEY per node, and there are 8 total nodes (5 threshold nodes), the total cost per request will be 0.05 LITKEY (0.01 × 5).
+
+### Documentation Prices
+
+The prices shown in our documentation pages (including the [Current Prices](/learning-lit/pricing/current-prices) page) are already multiplied by the threshold number of nodes to show you the total cost per request, making it easier to understand what you'll actually pay.
+
+**Note:** PKP Minting is a special case - it's a global on-chain operation, so the threshold calculation doesn't apply. PKP minting costs are shown as-is without multiplication.
+
+### Automatic Deduction
+
+When you make a request to the network, the system:
+1. Checks your ledger balance
+2. Calculates the current price for the requested service
+3. Deducts the required tokens from your balance
+4. Processes your request
+
+If your balance is insufficient, the request will fail. You can check your balance and deposit more tokens as needed using the [Payment Manager](/sdk/getting-started/payment-manager-setup).
+
+## Getting Started
+
+To start using Lit Protocol's paid services:
+
+1. **Acquire [$LITKEY](/governance/litkey/overview) tokens** - [Get tokens](/governance/litkey/getting-litkey) from exchanges or other sources
+2. **Set up Payment Manager** - Configure your payment system using the [Payment Manager Setup Guide](/sdk/getting-started/payment-manager-setup)
+3. **Deposit tokens** - Load tokens into the ledger contract
+4. **Use the network** - Start making requests; tokens will be deducted automatically
+
+For detailed information on current pricing, see the [Current Prices](/learning-lit/pricing/current-prices) page.
+
+## Additional Costs
+
+There are additional costs associated with using Lit Protocol's services that are not covered by the network usage payments. These include:
+
+- **Gas on Lit Chain** - Lit Chain is the database for Lit network.  When you make a transaction on Lit Chain, you will need to pay for the gas used by the transaction.  Examples of operations that would require a transaction on Lit Chain are things like changing PKP Permissions, transferring PKPs, and launching smart contracts on Lit Chain.  Lit Chain gas is priced in $LITKEY tokens and the gas price is very low compared to other chains.
+- **PKP Minting** - When you mint a new PKP, you will need to pay a specific fee for the minting operation.  This fee is not dynamic and is a fixed cost.  Check out the [Current Prices page](/learning-lit/pricing/current-prices) to see the price right now.

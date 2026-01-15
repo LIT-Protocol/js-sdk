@@ -1,0 +1,55 @@
+---
+title: "Current Prices"
+---
+import { CurrentPricesTable } from "/snippets/CurrentPricesTable.jsx";
+import { PriceProvider } from "/snippets/PriceProvider.jsx";
+import { PriceCalculator } from "/snippets/PriceCalculator.jsx";
+
+The following table shows the current pricing for Lit Protocol services on the **Naga Prod / Mainnet V1** network. Prices are displayed in both $LITKEY tokens and USD (based on current market rates).
+
+<Note>
+Most prices update dynamically based on network usage. The values shown below reflect real-time prices fetched from the blockchain. Note that PKP Minting cost is static and does not change with network utilization.
+</Note>
+
+## Understanding the Price Table
+
+### Base vs Max Prices
+
+- **Base Price**: The minimum price when network usage is low
+- **Max Price**: The maximum price when the network is at full capacity
+- **Current Price**: The actual price at this moment, which varies between base and max based on usage
+
+### Product Types
+
+- **PKP Sign**: Signing operations using your Programmable Key Pair
+- **Decryption and Access Control**: Decrypting data and enforcing access control conditions
+- **Lit Action**: Executing serverless JavaScript functions (pricing varies by component)
+- **Sign Session Key**: Session-based signing operations
+- **PKP Minting**: Creating a new Programmable Key Pair (static price, does not vary with network usage)
+
+<PriceProvider component={CurrentPricesTable} />
+
+### Lit Action Pricing Components
+
+Lit Actions have multiple pricing components that are charged based on resource usage:
+
+- **Base Amount**: Fixed cost per Lit Action execution.  You always pay this amount, regardless of the other components.
+- **Runtime Length**: Cost per second of execution time.  Max execution time is 5 minutes.
+- **Memory Usage**: Cost per megabyte of heap memory used.  Max memory usage is 256MB.
+- **Code Length**: Cost based on the size of your Lit Action code.  Max code length is 16MB.
+- **Response Length**: Cost based on the size of the response data.  Max response length is 1MB
+- **Signatures**: Cost per signature generated.  Max signatures is 30.
+- **Broadcasts**: Cost per `Lit.Actions.broadcastAndCollect` operation to share data between the nodes during action execution.  Max is 30.
+- **Contract Calls**: Cost per smart contract call using `Lit.Actions.callContract`.  Max is 50.
+- **Call Depth**: Cost per child Lit Action call stack depth when using `Lit.Actions.call`.  Max is 5.
+- **Decrypts**: Cost per decryption operation using `Lit.Actions.decryptAndCombine` or `Lit.Actions.decryptToSingleNode`.
+- **Fetches**: Cost per HTTP fetch request using `fetch()`.  Max is 75.
+
+The total cost of a Lit Action is calculated by summing all applicable components based on your action's actual resource usage.
+
+## Price Calculator
+
+Enter your expected usage below to estimate the total cost. All prices reflect real-time network rates.
+
+<PriceProvider component={PriceCalculator} />
+

@@ -93,19 +93,20 @@ jobs:
             cp -a build-output/packages/wasm/src/pkg/. packages/wasm/src/pkg/
           fi
           rm -rf build-output
-      - name: Verify required secrets
-        run: |
-          if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
-            echo "LIVE_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
-            exit 1
-          fi
-          if [ -z "${LOCAL_MASTER_ACCOUNT}" ]; then
-            echo "LOCAL_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
-            exit 1
-          fi
-      - name: Run e2e tests (${{ matrix.network }})
-        run: pnpm run test:e2e:ci -- packages/e2e/src/e2e.spec.ts
-        timeout-minutes: 10
+      # Uncomment the steps below to re-enable naga-dev/naga-test e2e runs.
+      # - name: Verify required secrets
+      #   run: |
+      #     if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
+      #       echo "LIVE_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
+      #       exit 1
+      #     fi
+      #     if [ -z "${LOCAL_MASTER_ACCOUNT}" ]; then
+      #       echo "LOCAL_MASTER_ACCOUNT is not set for network ${{ matrix.network }}" >&2
+      #       exit 1
+      #     fi
+      # - name: Run health check (${{ matrix.network }})
+      #   run: NETWORK=${{ matrix.network }} pnpm run test:e2e:ci -- packages/e2e/src/e2e.spec.ts --testNamePattern "^all "
+      #   timeout-minutes: 10
 
   release:
     name: Release

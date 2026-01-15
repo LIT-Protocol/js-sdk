@@ -152,7 +152,7 @@ export const LIT_CHAINS: LITChain<LitEVMChainKeys, LITEVMChain> = {
     decimals: 18,
     type: 'ERC1155',
     rpcUrls: [
-      'https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE',
+      'https://eth-mainnet.g.alchemy.com/v2/_J7v1gEI40Tiulq7rFh913Xjy2-C4L8T',
     ],
     blockExplorerUrls: ['https://etherscan.io'],
     vmType: VMTYPE.EVM,
@@ -1056,6 +1056,11 @@ export const LIT_RPC = {
    * More info: https://app.conduit.xyz/published/view/chronicle-yellowstone-testnet-9qgmzfcohk
    */
   CHRONICLE_YELLOWSTONE: 'https://yellowstone-rpc.litprotocol.com',
+
+  /**
+   * Lit Chain mainnet RPC endpoint.
+   */
+  LIT_CHAIN: 'https://lit-chain-rpc.litprotocol.com/',
 } as const;
 
 export type LIT_RPC_TYPE = ConstantKeys<typeof LIT_RPC>;
@@ -1067,6 +1072,7 @@ export const LIT_EVM_CHAINS = LIT_CHAINS;
  * Represents the Lit Network constants.
  */
 export const LIT_NETWORK = {
+  Naga: 'naga',
   NagaDev: 'naga-dev',
   NagaTest: 'naga-test',
   Custom: 'custom',
@@ -1089,6 +1095,7 @@ export type LIT_NETWORK_VALUES = ConstantValues<typeof LIT_NETWORK>;
  * A mapping of network names to their corresponding RPC URLs.
  */
 export const RPC_URL_BY_NETWORK: Record<LIT_NETWORK_VALUES, LIT_RPC_VALUES> = {
+  [LIT_NETWORK.Naga]: LIT_RPC.LIT_CHAIN,
   [LIT_NETWORK.NagaDev]: LIT_RPC.CHRONICLE_YELLOWSTONE,
   [LIT_NETWORK.NagaTest]: LIT_RPC.CHRONICLE_YELLOWSTONE,
   [LIT_NETWORK.Custom]: LIT_RPC.LOCAL_ANVIL,
@@ -1227,6 +1234,7 @@ export const LOCAL_STORAGE_KEYS = {
  * loaded from the chain during initialization
  */
 export const LIT_NETWORKS: Record<LIT_NETWORK_VALUES, string[]> = {
+  [LIT_NETWORK.Naga]: [],
   [LIT_NETWORK.NagaDev]: [],
   [LIT_NETWORK.NagaTest]: [],
   [LIT_NETWORK.Custom]: [],

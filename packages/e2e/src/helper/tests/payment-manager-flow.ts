@@ -12,22 +12,11 @@ export const createPaymentManagerFlowTest = (
       account: ctx.aliceViemAccount,
     });
 
-    // Extract address from authContext if it's an EOA auth context
-    // For EOA: account can be Account (has address) or WalletClient (has account.address)
-    // For PKP: account doesn't exist, fall back to aliceViemAccount
-    let userAddress: string;
-    if ('account' in authContext && authContext.account) {
-      const account = authContext.account as any;
-      if ('address' in account && account.address) {
-        userAddress = account.address;
-      } else if (account.account?.address) {
-        userAddress = account.account.address;
-      } else {
-        userAddress = ctx.aliceViemAccount.address;
-      }
-    } else {
-      userAddress = ctx.aliceViemAccount.address;
-    }
+    // Get the user's address from authContext (assuming it has a wallet or account)
+    const userAddress =
+      authContext.wallet?.account?.address ||
+      authContext.account?.address ||
+      ctx.aliceViemAccount.address;
 
     console.log('💰 Testing deposit functionality...');
     // Test deposit
