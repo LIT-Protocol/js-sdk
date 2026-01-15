@@ -34,6 +34,37 @@ All services on Lit Protocol are priced in **[$LITKEY](/governance/litkey/overvi
 
 The network automatically deducts the appropriate amount of [$LITKEY](/governance/litkey/overview) tokens from your ledger balance based on the current dynamic price.
 
+## Understanding Per-Node vs Per-Request Pricing
+
+### On-Chain Prices Are Per Node
+
+The prices stored on-chain in the PriceFeedFacet contract represent the price charged by each individual node. When you query the blockchain directly, you'll see these per-node prices.
+
+### Threshold Calculation
+
+Requests are sent to a threshold number of nodes, not all nodes. The threshold is calculated as `floor(total_nodes × 2/3)` using integer math (truncation), with a minimum of 3 nodes. For example:
+
+- **8 nodes**: `floor(8 × 2/3) = floor(5.333) = 5` threshold nodes
+- **3 nodes**: `floor(3 × 2/3) = 2`, but minimum is 3, so threshold = 3 nodes
+- **6 nodes**: `floor(6 × 2/3) = 4` threshold nodes
+- **9 nodes**: `floor(9 × 2/3) = 6` threshold nodes
+
+### Total Cost Per Request
+
+When you make a request, it is sent to the threshold nodes. Each node charges you the product price, so your total cost per request is:
+
+```
+total_cost = product_price × threshold_nodes
+```
+
+For example, if the on-chain price for PKP Sign is 0.01 LITKEY per node, and there are 8 total nodes (5 threshold nodes), the total cost per request will be 0.05 LITKEY (0.01 × 5).
+
+### Documentation Prices
+
+The prices shown in our documentation pages (including the [Current Prices](/learning-lit/pricing/current-prices) page) are already multiplied by the threshold number of nodes to show you the total cost per request, making it easier to understand what you'll actually pay.
+
+**Note:** PKP Minting is a special case - it's a global on-chain operation, so the threshold calculation doesn't apply. PKP minting costs are shown as-is without multiplication.
+
 ### Automatic Deduction
 
 When you make a request to the network, the system:
