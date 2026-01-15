@@ -25,6 +25,8 @@ export type EnvVars = {
   localContextPath?: string;
 };
 
+const PrivateKeySchema = /^(0x)?[0-9a-fA-F]{64}$/;
+
 // -- configure
 const testEnv: Record<
   EnvName,
@@ -36,14 +38,15 @@ const testEnv: Record<
 
 export function createEnvVars(): EnvVars {
   // 1. Get network string
-  const networkEnv = process.env['NETWORK'];
+  const networkEnvRaw = process.env['NETWORK'];
+  const networkEnv = networkEnvRaw?.trim();
 
   if (
     !networkEnv ||
     !SUPPORTED_NETWORKS.includes(networkEnv as SupportedNetwork)
   ) {
     throw new Error(
-      `❌ NETWORK env var is not set or not supported. Found. ${networkEnv}`
+      `❌ NETWORK env var is not set or not supported. Found: ${networkEnvRaw ?? 'undefined'}`
     );
   }
 
@@ -53,16 +56,19 @@ export function createEnvVars(): EnvVars {
 
   // 2. Get private key
   let privateKey: `0x${string}`;
+  let privateKeyEnvKey: (typeof testEnv)[EnvName]['key'];
   if (network.includes('local')) {
     Object.assign(testEnv.local, { type: 'local' });
-    privateKey = process.env[testEnv.local.key]!! as `0x${string}`;
+    privateKeyEnvKey = testEnv.local.key;
+    privateKey = (process.env[privateKeyEnvKey] ?? '').trim() as `0x${string}`;
   } else {
     Object.assign(testEnv.live, { type: 'live' });
     const liveKey =
       network === 'naga' && process.env['LIVE_MASTER_ACCOUNT_NAGA']
         ? 'LIVE_MASTER_ACCOUNT_NAGA'
         : testEnv.live.key;
-    privateKey = process.env[liveKey]!! as `0x${string}`;
+    privateKeyEnvKey = liveKey;
+    privateKey = (process.env[liveKey] ?? '').trim() as `0x${string}`;
   }
 
   if (!privateKey) {
@@ -70,11 +76,21 @@ export function createEnvVars(): EnvVars {
       network === 'naga'
         ? 'LIVE_MASTER_ACCOUNT_NAGA or LIVE_MASTER_ACCOUNT'
         : selectedNetwork === 'local'
-        ? 'LOCAL_MASTER_ACCOUNT'
-        : 'LIVE_MASTER_ACCOUNT';
+          ? 'LOCAL_MASTER_ACCOUNT'
+          : 'LIVE_MASTER_ACCOUNT';
     throw new Error(
       `❌ ${expectedKey} env var is not set for NETWORK=${network}.`
     );
+  }
+
+  if (!PrivateKeySchema.test(privateKey)) {
+    throw new Error(
+      `❌ Invalid private key format in ${privateKeyEnvKey}. Expected 32-byte hex string (64 chars) with optional 0x prefix.`
+    );
+  }
+
+  if (!privateKey.startsWith('0x')) {
+    privateKey = `0x${privateKey}` as unknown as `0x${string}`;
   }
 
   // 3. Get RPC URL

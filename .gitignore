@@ -102,4 +102,5 @@ alice-auth-manager-data
 !/packages/contracts/dist/dev
 .secret
 .agents
-.vscode
+.jest-cache
+
