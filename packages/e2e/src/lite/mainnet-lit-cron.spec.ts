@@ -149,11 +149,9 @@ const runUptimeLoop = async () => {
   }
 };
 
-describeIfUptime('lite mainnet e2e uptime bot', () => {
-  beforeAll(() => {
-    jest.setTimeout(0);
-  });
+jest.setTimeout(0);
 
+describeIfUptime('lite mainnet e2e uptime bot', () => {
   it('runs lite mainnet on cron schedule', async () => {
     await runUptimeLoop();
   });
