@@ -22,6 +22,22 @@ export const PriceProvider = ({ children, component: Component }) => {
     ProductId.SignSessionKey,
   ];
 
+  // Helpful for debugging: map productId -> human label
+  const PRODUCT_META = [
+    { id: ProductId.PkpSign, key: 'PkpSign', name: 'PKP Sign' },
+    { id: ProductId.EncSign, key: 'EncSign', name: 'Encrypted Sign' },
+    { id: ProductId.LitAction, key: 'LitAction', name: 'Lit Action' },
+    { id: ProductId.SignSessionKey, key: 'SignSessionKey', name: 'Sign Session Key' },
+  ];
+  const getProductMeta = (productId) =>
+    PRODUCT_META.find((p) => p.id === productId) || { id: productId, key: `Product_${productId}`, name: `Product ${productId}` };
+
+  // Debug logs (always on for the current prices page snippet)
+  const debugPricingLog = (label, data) => {
+    // eslint-disable-next-line no-console
+    console.log(`[pricing] ${label}`, data);
+  };
+
   // PriceFeed ABI (minimal - only functions we need)
   const PRICE_FEED_ABI = [
     {
@@ -261,9 +277,23 @@ export const PriceProvider = ({ children, component: Component }) => {
         const basePricesResult = await contract.baseNetworkPrices(PRODUCT_IDS);
         const maxPricesResult = await contract.maxNetworkPrices(PRODUCT_IDS);
 
+        debugPricingLog('Fetched network price bands', {
+          rpcUrl: RPC_URL,
+          priceFeedAddress: NAGA_PROD_PRICE_FEED_ADDRESS,
+          productIds: PRODUCT_IDS,
+          products: PRODUCT_IDS.map((id, i) => ({
+            productId: id,
+            ...getProductMeta(id),
+            basePriceWei: basePricesResult?.[i]?.toString?.(),
+            maxPriceWei: maxPricesResult?.[i]?.toString?.(),
+          })),
+        });
+
         // Get actual current price to calculate usage percent
         // Using PkpSign (productId 0) as reference
-        const nodePriceData = await contract.prices(ProductId.PkpSign);
+        const referenceProductId = ProductId.PkpSign;
+        const referenceProductMeta = getProductMeta(referenceProductId);
+        const nodePriceData = await contract.prices(referenceProductId);
         // Store number of nodes (length of prices array)
         const totalNodes = nodePriceData.length;
         setNumberOfNodes(totalNodes);
@@ -280,14 +310,15 @@ export const PriceProvider = ({ children, component: Component }) => {
         // Calculate usage percent by finding which usage percentage produces the current price
         // Use median price from all nodes to get current market price
         let calculatedUsage = 0;
+        let medianPriceForReferenceProduct = null;
         if (nodePriceData.length > 0 && !maxPrice.eq(basePrice)) {
-          // Extract and sort all node prices
+          // Extract and sort all node prices from the cheapest `threshold` number of nodes
           const prices = nodePriceData.map(node => ethers.BigNumber.from(node.price));
           prices.sort((a, b) => {
             if (a.lt(b)) return -1;
             if (a.gt(b)) return 1;
             return 0;
-          });
+          }).slice(0, threshold);
           
           // Calculate median
           let medianPrice;
@@ -299,15 +330,40 @@ export const PriceProvider = ({ children, component: Component }) => {
             // Odd number of prices: use the middle value
             medianPrice = prices[mid];
           }
+          medianPriceForReferenceProduct = medianPrice;
           
           // Debug: log values to understand why calculation might fail
+          // eslint-disable-next-line no-console
           console.log('Usage calculation:', {
+            referenceProduct: referenceProductMeta, // <-- which product basePrice/maxPrice/median are for
+            rpcUrl: RPC_URL,
+            priceFeedAddress: NAGA_PROD_PRICE_FEED_ADDRESS,
             nodePrices: nodePriceData.map(n => n.price.toString()),
             sortedPrices: prices.map(p => p.toString()),
             medianPrice: medianPrice.toString(),
             basePrice: basePrice.toString(),
             maxPrice: maxPrice.toString(),
+            maxEqualsBase: maxPrice.eq(basePrice),
+            totalNodes,
+            thresholdNodes: threshold,
             medianVsBase: medianPrice.lt(basePrice) ? 'median < base' : medianPrice.eq(basePrice) ? 'median = base' : 'median > base',
+            // quick glance stats
+            minNodePrice: prices[0]?.toString?.(),
+            maxNodePrice: prices[prices.length - 1]?.toString?.(),
+          });
+
+          debugPricingLog('Node price samples (reference product)', {
+            referenceProduct: referenceProductMeta,
+            totalNodes,
+            // include a few fields to validate the feed data shape
+            firstNodeSample: nodePriceData?.[0]
+              ? {
+                  stakerAddress: nodePriceData[0].stakerAddress,
+                  productId: nodePriceData[0].productId?.toString?.(),
+                  priceWei: nodePriceData[0].price?.toString?.(),
+                  timestamp: nodePriceData[0].timestamp?.toString?.(),
+                }
+              : null,
           });
           
           // If medianPrice equals basePrice, usage is 0%
@@ -328,9 +384,52 @@ export const PriceProvider = ({ children, component: Component }) => {
             calculatedUsage = Math.max(0, Math.min(100, calculatedUsage));
           }
         }
-        console.log('Calculated usage:', calculatedUsage);
+        // eslint-disable-next-line no-console
+        console.log('Calculated usage:', {
+          usagePercent: calculatedUsage,
+          referenceProduct: referenceProductMeta,
+        });
         setUsagePercent(calculatedUsage);
         const currentPricesResult = await contract.usagePercentToPrices(calculatedUsage, PRODUCT_IDS);
+
+        debugPricingLog('Derived current prices from usagePercentToPrices', {
+          usagePercent: calculatedUsage,
+          products: PRODUCT_IDS.map((id, i) => ({
+            productId: id,
+            ...getProductMeta(id),
+            currentPriceWei: currentPricesResult?.[i]?.toString?.(),
+          })),
+        });
+
+        // Extra debug: does the median node price for the reference product align with the derived "current" price?
+        // (If these diverge significantly, the usage estimation logic may not match how node prices are being set.)
+        try {
+          const derivedReferencePriceWei = currentPricesResult?.[0];
+          if (medianPriceForReferenceProduct && derivedReferencePriceWei) {
+            const diffWei = medianPriceForReferenceProduct.sub(derivedReferencePriceWei);
+            debugPricingLog('Median vs derived reference price', {
+              referenceProduct: referenceProductMeta,
+              usagePercent: calculatedUsage,
+              medianNodePriceWei: medianPriceForReferenceProduct.toString(),
+              derivedReferencePriceWei: derivedReferencePriceWei.toString(),
+              diffWei: diffWei.toString(),
+            });
+          } else {
+            debugPricingLog('Median vs derived reference price (skipped)', {
+              referenceProduct: referenceProductMeta,
+              usagePercent: calculatedUsage,
+              reason: !medianPriceForReferenceProduct
+                ? 'median price not available (no node prices or max==base)'
+                : 'derived reference price not available',
+            });
+          }
+        } catch (e) {
+          debugPricingLog('Median vs derived reference price (error)', {
+            referenceProduct: referenceProductMeta,
+            usagePercent: calculatedUsage,
+            error: e?.message || String(e),
+          });
+        }
 
         const litActionConfigsResult = await contract.getLitActionPriceConfigs();
 
