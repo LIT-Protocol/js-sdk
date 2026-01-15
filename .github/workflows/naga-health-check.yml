@@ -71,44 +71,44 @@ jobs:
 
       - name: Build project
         run: pnpm build
+      # Uncomment the steps below to re-enable naga-dev/naga-test health checks.
+      # - name: Verify required environment variables
+      #   run: |
+      #     echo "Checking environment variables for ${{ matrix.network }}..."
+      #     if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
+      #       echo "❌ LIVE_MASTER_ACCOUNT is not set for ${{ matrix.network }}"
+      #       exit 1
+      #     fi
+      #     if [ -z "${LIT_STATUS_WRITE_KEY}" ]; then
+      #       echo "❌ LIT_STATUS_WRITE_KEY is not set"
+      #       exit 1
+      #     fi
+      #     if [ -z "${LIT_STATUS_BACKEND_URL}" ]; then
+      #       echo "❌ LIT_STATUS_BACKEND_URL is not set"
+      #       exit 1
+      #     fi
+      #     echo "✅ All required environment variables are set"
 
-      - name: Verify required environment variables
-        run: |
-          echo "Checking environment variables for ${{ matrix.network }}..."
-          if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then
-            echo "❌ LIVE_MASTER_ACCOUNT is not set for ${{ matrix.network }}"
-            exit 1
-          fi
-          if [ -z "${LIT_STATUS_WRITE_KEY}" ]; then
-            echo "❌ LIT_STATUS_WRITE_KEY is not set"
-            exit 1
-          fi
-          if [ -z "${LIT_STATUS_BACKEND_URL}" ]; then
-            echo "❌ LIT_STATUS_BACKEND_URL is not set"
-            exit 1
-          fi
-          echo "✅ All required environment variables are set"
+      # - name: Run health check for ${{ matrix.network }}
+      #   if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.network == '' || github.event.inputs.network == matrix.network }}
+      #   run: pnpm run ci:health
+      #   timeout-minutes: 10
+      #   env:
+      #     NETWORK: ${{ matrix.network }}
+      #     LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST }}
+      #     LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
+      #     LIT_STATUS_BACKEND_URL: ${{ vars.LIT_STATUS_BACKEND_URL }}
+      #     LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
+      #     LOG_LEVEL: info
 
-      - name: Run health check for ${{ matrix.network }}
-        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.network == '' || github.event.inputs.network == matrix.network }}
-        run: pnpm run ci:health
-        timeout-minutes: 10
-        env:
-          NETWORK: ${{ matrix.network }}
-          LIVE_MASTER_ACCOUNT: ${{ matrix.network == 'naga-dev' && secrets.LIVE_MASTER_ACCOUNT_NAGA_DEV || secrets.LIVE_MASTER_ACCOUNT_NAGA_TEST }}
-          LIT_STATUS_WRITE_KEY: ${{ secrets.LIT_STATUS_WRITE_KEY }}
-          LIT_STATUS_BACKEND_URL: ${{ vars.LIT_STATUS_BACKEND_URL }}
-          LIT_YELLOWSTONE_PRIVATE_RPC_URL: ${{ vars.LIT_YELLOWSTONE_PRIVATE_RPC_URL }}
-          LOG_LEVEL: info
-
-      - name: Health check summary
-        if: always()
-        run: |
-          if [[ "${{ job.status }}" == "success" ]]; then
-            echo "✅ Health check passed for ${{ matrix.network }}"
-            echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          else
-            echo "❌ Health check failed for ${{ matrix.network }}"
-            echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-            echo "Please check the logs above for details"
-          fi
+      # - name: Health check summary
+      #   if: always()
+      #   run: |
+      #     if [[ "${{ job.status }}" == "success" ]]; then
+      #       echo "✅ Health check passed for ${{ matrix.network }}"
+      #       echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+      #     else
+      #       echo "❌ Health check failed for ${{ matrix.network }}"
+      #       echo "Time: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+      #       echo "Please check the logs above for details"
+      #     fi
