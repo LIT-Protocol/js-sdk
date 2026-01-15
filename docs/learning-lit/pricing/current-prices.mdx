@@ -41,7 +41,7 @@ Lit Actions have multiple pricing components that are charged based on resource 
 - **Signatures**: Cost per signature generated.  Max signatures is 30.
 - **Broadcasts**: Cost per `Lit.Actions.broadcastAndCollect` operation to share data between the nodes during action execution.  Max is 30.
 - **Contract Calls**: Cost per smart contract call using `Lit.Actions.callContract`.  Max is 50.
-- **Call Depth**: Cost based on call stack depth when using `Lit.Actions.call`.  Max is 5.
+- **Call Depth**: Cost per child Lit Action call stack depth when using `Lit.Actions.call`.  Max is 5.
 - **Decrypts**: Cost per decryption operation using `Lit.Actions.decryptAndCombine` or `Lit.Actions.decryptToSingleNode`.
 - **Fetches**: Cost per HTTP fetch request using `fetch()`.  Max is 75.
 
