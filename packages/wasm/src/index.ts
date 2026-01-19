@@ -13,7 +13,7 @@ let wasmSdkInstance: InitOutput | undefined;
 
 // Give us a promise that _just_ encapsulates initializing the modules so we can wrap it in other logic
 async function initWasm() {
-  return initSync(getModule());
+  return initSync({ module: getModule() });
 }
 
 export type BlsSignatureShareJsonString =
