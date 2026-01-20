@@ -20,6 +20,29 @@ function generateCurlCommand(url: string, req: any): string {
   return `curl -X ${req.method} ${headers} ${body} "${url}"`.trim();
 }
 
+const isDebugHttpEnabled = (): boolean => {
+  try {
+    if (
+      typeof process !== 'undefined' &&
+      typeof process.env === 'object' &&
+      process.env['DEBUG_HTTP'] === 'true'
+    ) {
+      return true;
+    }
+  } catch (e) {
+    // Ignore any errors - ensures browser compatibility
+  }
+
+  try {
+    const debugHttp = (globalThis as any).DEBUG_HTTP;
+    return debugHttp === true || debugHttp === 'true';
+  } catch (e) {
+    // Ignore any errors - ensures browser compatibility
+  }
+
+  return false;
+};
+
 export async function sendNodeRequest<T>(
   // Interface for common request parameters
   params: {
@@ -71,17 +94,7 @@ export async function sendNodeRequest<T>(
     const response = await fetch(_fullUrl, req);
 
     // Only log response details when DEBUG_HTTP is enabled
-    // Safely check for DEBUG_HTTP environment variable in both Node.js and browser
-    let isDebugMode = false;
-    try {
-      isDebugMode =
-        typeof process !== 'undefined' &&
-        typeof process.env === 'object' &&
-        process.env['DEBUG_HTTP'] === 'true';
-    } catch (e) {
-      // Ignore any errors - ensures browser compatibility
-      isDebugMode = false;
-    }
+    const isDebugMode = isDebugHttpEnabled();
 
     if (isDebugMode) {
       const timestamp = new Date().toISOString();
