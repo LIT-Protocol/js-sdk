@@ -1,6 +1,6 @@
 import type { LitActionExample } from "../types";
 
-const code = String.raw`const { sigName, toSign, publicKey, } = jsParams;
+const code = String.raw`const { sigName, toSign, publicKey, keySetIdentifier } = jsParams;
 const { keccak256, arrayify } = ethers.utils;
 
 (async () => {
@@ -12,6 +12,7 @@ const { keccak256, arrayify } = ethers.utils;
     toSign: toSignBytes32Array,
     publicKey,
     sigName,
+    keySetIdentifier,
   });  
 })();`;
 
@@ -24,5 +25,6 @@ export default {
   jsParams: {
     sigName: "sig1",
     toSign: "Hello from Lit Action",
+    keySetIdentifier: "naga-keyset1",
   },
 } satisfies LitActionExample;

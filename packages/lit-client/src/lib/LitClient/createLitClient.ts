@@ -292,6 +292,7 @@ export const _createNagaLitClient = async (
           version: networkModule.version,
           chain: params.chain,
           jitContext,
+          keySetIdentifier: params.keySetIdentifier,
         })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
         const requestId = requestArray[0].requestId;
@@ -774,6 +775,7 @@ export const _createNagaLitClient = async (
       version: networkModule.version,
       chain: ChainSchema.parse(params.chain),
       jitContext,
+      keySetIdentifier: params.keySetIdentifier,
     })) as RequestItem<z.infer<typeof EncryptedVersion1Schema>>[];
 
     const requestId = requestArray[0].requestId;

@@ -3,6 +3,7 @@ import {
   signTransactionSolanaKey,
   validateUnsignedTransaction,
 } from '../../internal/solana/signTransaction';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 
 import type { UnsignedTransaction } from '../../internal/solana/signTransaction';
 
@@ -13,6 +14,7 @@ export interface SignTransactionWithEncryptedSolanaKeyParams {
   unsignedTransaction: UnsignedTransaction;
   broadcast: boolean; // Flag to determine if the transaction should be broadcasted
   versionedTransaction?: boolean; // Flag to determine if the transaction is a versioned one or a legacy one
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 /**
@@ -30,6 +32,7 @@ export async function signTransactionWithEncryptedSolanaKey({
   unsignedTransaction,
   broadcast,
   versionedTransaction,
+  keySetIdentifier,
 }: SignTransactionWithEncryptedSolanaKeyParams): Promise<string> {
   validateUnsignedTransaction(unsignedTransaction);
 
@@ -37,6 +40,7 @@ export async function signTransactionWithEncryptedSolanaKey({
     accessControlConditions,
     ciphertext,
     dataToEncryptHash,
+    keySetIdentifier,
   });
 
   return signTransactionSolanaKey({

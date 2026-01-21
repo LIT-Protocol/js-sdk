@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { MultipleAccessControlConditionsSchema } from '@lit-protocol/access-control-conditions-schemas';
 import { AuthSigSchema } from '@lit-protocol/schemas';
+import { KEY_SET_IDENTIFIERS } from '@lit-protocol/constants';
 import { FormattedMultipleAccs } from '@lit-protocol/types';
 import { getFormattedAccessControlConditions } from '@lit-protocol/access-control-conditions';
 
@@ -10,6 +11,9 @@ export const DecryptRequestDataSchema =
     dataToEncryptHash: z.string(),
     authSig: AuthSigSchema,
     chain: z.string(),
+    keySetIdentifier: z
+      .enum([KEY_SET_IDENTIFIERS.DATIL, KEY_SET_IDENTIFIERS.NAGA_KEYSET1])
+      .optional(),
   }).transform((data) => {
     const {
       formattedAccessControlConditions,

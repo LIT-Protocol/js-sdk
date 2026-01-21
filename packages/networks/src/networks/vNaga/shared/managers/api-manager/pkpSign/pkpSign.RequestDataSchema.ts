@@ -1,4 +1,7 @@
-import { SigningSchemeSchema } from '@lit-protocol/constants';
+import {
+  KEY_SET_IDENTIFIERS,
+  SigningSchemeSchema,
+} from '@lit-protocol/constants';
 import { walletEncrypt } from '@lit-protocol/crypto';
 import {
   AuthSigSchema,
@@ -27,6 +30,9 @@ export const PKPSignRequestDataSchema = z
     nodeSet: NodeSetsFromUrlsSchema,
     chain: SigningChainSchema,
     bypassAutoHashing: z.boolean().optional(),
+    keySetIdentifier: z
+      .enum([KEY_SET_IDENTIFIERS.DATIL, KEY_SET_IDENTIFIERS.NAGA_KEYSET1])
+      .optional(),
 
     // NEW v2 API fields
     epoch: z.number().default(0),
@@ -49,6 +55,7 @@ export const PKPSignRequestDataSchema = z
       nodeSet: item.nodeSet,
       epoch: item.epoch,
       authMethods: item.authMethods,
+      keySetIdentifier: item.keySetIdentifier,
     };
 
     return unencrypted;

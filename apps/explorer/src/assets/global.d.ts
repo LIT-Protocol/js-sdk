@@ -156,10 +156,12 @@ declare namespace Lit {
       toSign,
       publicKey,
       sigName,
+      keySetIdentifier,
     }: {
       toSign: Uint8Array | number[];
       publicKey: string;
       sigName: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<string>;
 
     /**
@@ -270,6 +272,7 @@ declare namespace Lit {
     }): any;
 
     /**
+     * @deprecated - deprecated unused function
      * Claim a key through a key identifier, the result of the claim will be added to `claim_id`
      * under the `keyId` given.
      * @param {Object} params
@@ -308,12 +311,14 @@ declare namespace Lit {
       dataToEncryptHash,
       authSig,
       chain,
+      keySetIdentifier,
     }: {
       accessControlConditions: string;
       ciphertext: string;
       dataToEncryptHash: string;
       authSig: string;
       chain: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<string>;
 
     /**
@@ -332,12 +337,14 @@ declare namespace Lit {
       dataToEncryptHash,
       authSig,
       chain,
+      keySetIdentifier,
     }: {
       accessControlConditions: string;
       ciphertext: string;
       dataToEncryptHash: string;
       authSig: string;
       chain: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<string>;
 
     /**
@@ -352,10 +359,12 @@ declare namespace Lit {
       toSign,
       publicKey,
       sigName,
+      keySetIdentifier,
     }: {
       toSign: Uint8Array;
       publicKey: string;
       sigName: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<string>;
 
     /**
@@ -395,9 +404,11 @@ declare namespace Lit {
     function encrypt({
       accessControlConditions,
       to_encrypt,
+      keySetIdentifier,
     }: {
       accessControlConditions: string;
       to_encrypt: string;
+      keySetIdentifier?: 'datil' | 'naga-keyset1';
     }): Promise<{
       ciphertext: string;
       dataToEncryptHash: string;

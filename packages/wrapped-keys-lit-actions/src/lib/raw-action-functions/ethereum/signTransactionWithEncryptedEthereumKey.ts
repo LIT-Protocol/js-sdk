@@ -4,6 +4,7 @@ import {
   getValidatedUnsignedTx,
   UnsignedTransaction,
 } from '../../internal/ethereum/signTransaction';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 
 export interface SignTransactionWithEncryptedEthereumKeyParams {
   accessControlConditions: string;
@@ -11,6 +12,7 @@ export interface SignTransactionWithEncryptedEthereumKeyParams {
   dataToEncryptHash: string;
   unsignedTransaction: UnsignedTransaction;
   broadcast: boolean;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 /**
@@ -24,6 +26,7 @@ export async function signTransactionWithEncryptedEthereumKey({
   dataToEncryptHash,
   unsignedTransaction,
   broadcast,
+  keySetIdentifier,
 }: SignTransactionWithEncryptedEthereumKeyParams): Promise<string> {
   const validatedTx = getValidatedUnsignedTx(unsignedTransaction);
 
@@ -31,6 +34,7 @@ export async function signTransactionWithEncryptedEthereumKey({
     accessControlConditions,
     ciphertext,
     dataToEncryptHash,
+    keySetIdentifier,
   });
 
   return signTransactionEthereumKey({

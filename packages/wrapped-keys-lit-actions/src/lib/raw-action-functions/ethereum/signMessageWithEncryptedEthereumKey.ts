@@ -1,11 +1,13 @@
 import { getDecryptedKeyToSingleNode } from '../../internal/common/getDecryptedKeyToSingleNode';
 import { signMessageEthereumKey } from '../../internal/ethereum/signMessage';
+import type { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 
 export interface SignMessageWithEncryptedEthereumKeyParams {
   accessControlConditions: string;
   ciphertext: string;
   dataToEncryptHash: string;
   messageToSign: string;
+  keySetIdentifier?: KEY_SET_IDENTIFIER_VALUES;
 }
 
 /**
@@ -18,11 +20,13 @@ export async function signMessageWithEncryptedEthereumKey({
   ciphertext,
   dataToEncryptHash,
   messageToSign,
+  keySetIdentifier,
 }: SignMessageWithEncryptedEthereumKeyParams): Promise<string> {
   const privateKey = await getDecryptedKeyToSingleNode({
     accessControlConditions,
     ciphertext,
     dataToEncryptHash,
+    keySetIdentifier,
   });
 
   return signMessageEthereumKey({

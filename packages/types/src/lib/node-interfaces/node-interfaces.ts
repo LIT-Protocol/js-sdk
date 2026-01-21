@@ -3,6 +3,7 @@
  */
 
 import { AuthMethod, AuthSig } from '../interfaces';
+import { KEY_SET_IDENTIFIER_VALUES } from '@lit-protocol/constants';
 import {
   AccessControlConditions,
   EvmContractConditions,
@@ -30,6 +31,8 @@ export interface JsonPKPClaimKeyRequest {
 //   #[serde(default = "default_epoch")]
 //   pub epoch: u64,
 // }
+type KeySetIdentifier = KEY_SET_IDENTIFIER_VALUES;
+
 export interface EncryptionSignRequest {
   accessControlConditions?: AccessControlConditions[];
   evmContractConditions?: EvmContractConditions[];
@@ -39,4 +42,5 @@ export interface EncryptionSignRequest {
   dataToEncryptHash: string;
   authSig: AuthSig;
   epoch: number;
+  keySetIdentifier?: KeySetIdentifier;
 }

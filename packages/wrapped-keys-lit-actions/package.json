@@ -30,6 +30,6 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "devDependencies": {
-    "buffer": "^6.0.3"
+    "buffer": "6.0.3"
   }
 }

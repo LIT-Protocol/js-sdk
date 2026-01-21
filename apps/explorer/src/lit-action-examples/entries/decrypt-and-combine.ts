@@ -56,6 +56,7 @@ const code = String.raw`(async () => {
           await Lit.Actions.encrypt({
             accessControlConditions,
             to_encrypt: ethers.utils.toUtf8Bytes(entropyHex),
+            keySetIdentifier: jsParams?.keySetIdentifier,
           })
         );
       }
@@ -98,6 +99,7 @@ const code = String.raw`(async () => {
       dataToEncryptHash: encryptResult.dataToEncryptHash, // Use original format
       authSig: null,
       chain: "ethereum",
+      keySetIdentifier: jsParams?.keySetIdentifier,
     });
 
     // Convert decrypted result to hex for comparison
@@ -158,4 +160,7 @@ export default {
     "Encrypt data tied to the current action CID, decrypt it with decryptAndCombine, and verify the round trip.",
   order: 30,
   code,
+  jsParams: {
+    keySetIdentifier: "naga-keyset1",
+  },
 } satisfies LitActionExample;

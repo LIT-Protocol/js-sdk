@@ -20,6 +20,7 @@ import {
   registerPaymentDelegationTicketSuite,
 } from '@lit-protocol/e2e';
 import { registerWrappedKeysTests } from './test-helpers/executeJs/wrappedKeys';
+import { registerKeysetTests } from './test-helpers/executeJs/keysets';
 
 const SELECTED_NETWORK = process.env['NETWORK'];
 const IS_PAID_NETWORK = SELECTED_NETWORK !== 'naga-dev';
@@ -307,6 +308,9 @@ describe('all', () => {
     });
     describe('wrapped keys', () => {
       registerWrappedKeysTests();
+    });
+    describe('keysets', () => {
+      registerKeysetTests();
     });
   });
 });
