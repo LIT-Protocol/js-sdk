@@ -7,8 +7,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x28759afC5989B961D0A8EB236C9074c4141Baea1",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0xCAB88Cf4c6132c7060Be95AA9254810d2D136E69",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -6873,8 +6873,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xb6AAAd38f552DAd153090Cdd591DeB6a0f346161",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0x0FD5631EB35c6B8DeCfEb31b921e2Ee9D111FEDc",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "anonymous": false,
@@ -7012,7 +7012,7 @@ module.exports = {
         {
           "network": "naga-proto",
           "address_hash": "0x0996A48f8cc3c7c52Caf10d34c804eF5C9E7748B",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -8065,8 +8065,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xB0c6B245B25F2e542c3570b53439825615371231",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0xba9Fd70C56Bc118C2554D10A3526ef33fc601998",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -9199,8 +9199,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xaeEA5fE3654919c8Bb2b356aDCb5dF4eC082C168",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0xfdfdc75fc1e052cd502A8a3430A7021611ba796A",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -10627,8 +10627,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xCCb4A87731B3eFd6732e257381486912eEde24C5",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0xC51cf69De636C405c2E232e154221b790FE6768a",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -11642,8 +11642,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x3894cae120A6ca08150e6e51cBcBdD5c16115F9c",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0xC203c8793664F56DF15950cD29554776B7B5bb1b",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -12977,8 +12977,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x0d49661778415Cd456805AC68d53bAB27C9E9Af6",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0x5a79Cb927E4B9E61Fc78D6b89CCff377111443Ca",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -13141,8 +13141,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xa6c009FD21F9AB44163F6753F57862699B2956CE",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0x4EF8B65461d8B293760Ba785d1e9ecCDCca050e4",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [],
@@ -13378,8 +13378,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x5033b79388EBBAf466B4CF82c0b72Abd9bB940d6",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0x670e109CC61eD86f7cbb388f1C166B4b36c35839",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -14014,8 +14014,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0x25be72246358491Ac7a1eF138C39Ff3b240E50b5",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0x263D7cd845CDAc859585e175Fe157961e2ef2Ce9",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
@@ -15070,8 +15070,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-proto",
-          "address_hash": "0xFF4ceEC38572fEd4a48f6D3DF2bed7ccadD115a6",
-          "inserted_at": "2025-11-14T17:22:15Z",
+          "address_hash": "0x1869ffCA14118aeAf754963d6e21F7a78642fc34",
+          "inserted_at": "2026-01-21T18:01:12Z",
           "ABI": [
             {
               "inputs": [
