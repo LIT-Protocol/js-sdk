@@ -102,7 +102,6 @@ export class PaymentManager {
    */
   async deposit(params: {
     amountInLitkey?: string;
-    /** @deprecated Use `amountInLitkey` instead */
     amountInEth?: string;
   }): Promise<LitTxVoid> {
     const amount = params.amountInLitkey ?? params.amountInEth;
@@ -134,7 +133,6 @@ export class PaymentManager {
   async depositForUser(params: {
     userAddress: string;
     amountInLitkey?: string;
-    /** @deprecated Use `amountInLitkey` instead */
     amountInEth?: string;
   }): Promise<LitTxVoid> {
     const amount = params.amountInLitkey ?? params.amountInEth;
@@ -204,7 +202,6 @@ export class PaymentManager {
    */
   async requestWithdraw(params: {
     amountInLitkey?: string;
-    /** @deprecated Use `amountInLitkey` instead */
     amountInEth?: string;
   }): Promise<LitTxVoid> {
     const amount = params.amountInLitkey ?? params.amountInEth;
@@ -234,7 +231,6 @@ export class PaymentManager {
    */
   async withdraw(params: {
     amountInLitkey?: string;
-    /** @deprecated Use `amountInLitkey` instead */
     amountInEth?: string;
   }): Promise<LitTxVoid> {
     const amount = params.amountInLitkey ?? params.amountInEth;
