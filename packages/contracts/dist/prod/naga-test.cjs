@@ -8,7 +8,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0x149a054CE79A379Ae5E97f5B984B993233b28061",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -6810,7 +6810,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0xd8359D7F5390C8510e6EAab0e3814d472EE34910",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "anonymous": false,
@@ -6948,7 +6948,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0x5E8db2E7af793f4095c4843C8cBD87C5D8604838",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -8002,7 +8002,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0x3EB38bD0B4B081338801f098dFDAe6519D7C9894",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -9162,7 +9162,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0x71F58526F898773Eb6ca168f0f3673f5365718d5",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -10589,8 +10589,8 @@ module.exports = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xD44B4732eA9bcfac666cd6c4B6920e9f29d6042D",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "address_hash": "0xc6c260c149427064C38c46923c4D66335745B2e9",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -11605,7 +11605,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0x9C48C70DD379FCe946f889f0072b1017e2eCF94C",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -12940,7 +12940,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0xE986A13231E6d022466FD849ae3b1C1f6E5D7EE1",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -13104,7 +13104,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0x625af003520ff8F9F4c53E694951277DF68B6dE9",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [],
@@ -13341,7 +13341,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0xeb5C9B118E118C034Ff59ac8B1F0c3c36f22906b",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -13977,7 +13977,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0xBFcA364C37d82bF8D05F931084448798e2b6638b",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -15033,7 +15033,7 @@ module.exports = {
         {
           "network": "naga-test",
           "address_hash": "0x3C18D220947e38EE2BD702ddf353Ab8940a7c72A",
-          "inserted_at": "2026-01-15T03:09:50Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [

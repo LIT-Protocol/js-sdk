@@ -1696,7 +1696,7 @@ export const signatures = {
     ]
   },
   "PKPHelper": {
-    "address": "0xD44B4732eA9bcfac666cd6c4B6920e9f29d6042D",
+    "address": "0xc6c260c149427064C38c46923c4D66335745B2e9",
     "methods": {
       "claimAndMintNextAndAddAuthMethodsWithTypes": {
         "inputs": [
