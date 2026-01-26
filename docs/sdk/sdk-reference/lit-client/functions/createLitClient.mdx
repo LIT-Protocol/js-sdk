@@ -735,13 +735,13 @@ Get a Payment Manager for Ledger contract operations.
     <ResponseField name="deposit(params)" type="Promise<LitTxVoid>">
       Deposit funds to your own account.
       <Expandable title="params">
-        <ResponseField name="amountInEth" type="string" required>
-          Amount to deposit in ETH (string), internally converted to Wei.
+        <ResponseField name="amountInLitkey" type="string" required>
+          Amount to deposit in LITKEY (e.g. "0.1").
         </ResponseField>
       </Expandable>
       <Expandable title="example">
 ```ts
-await paymentManager.deposit({ amountInEth: "0.1" });
+await paymentManager.deposit({ amountInLitkey: "0.1" });
 ```
       </Expandable>
     </ResponseField>
@@ -750,11 +750,13 @@ await paymentManager.deposit({ amountInEth: "0.1" });
       Deposit funds for another user.
       <Expandable title="params">
         <ResponseField name="userAddress" type="string" required />
-        <ResponseField name="amountInEth" type="string" required />
+        <ResponseField name="amountInLitkey" type="string" required>
+          Amount to deposit in LITKEY (e.g. "0.25").
+        </ResponseField>
       </Expandable>
       <Expandable title="example">
 ```ts
-await paymentManager.depositForUser({ userAddress: "0x...", amountInEth: "0.25" });
+await paymentManager.depositForUser({ userAddress: "0x...", amountInLitkey: "0.25" });
 ```
       </Expandable>
     </ResponseField>
@@ -775,11 +777,13 @@ console.log(bal.totalBalance, bal.availableBalance);
     <ResponseField name="requestWithdraw(params)" type="Promise<LitTxVoid>">
       Request withdrawal (starts delay period).
       <Expandable title="params">
-        <ResponseField name="amountInEth" type="string" required />
+        <ResponseField name="amountInLitkey" type="string" required>
+          Amount to withdraw in LITKEY (e.g. "0.05").
+        </ResponseField>
       </Expandable>
       <Expandable title="example">
 ```ts
-await paymentManager.requestWithdraw({ amountInEth: "0.05" });
+await paymentManager.requestWithdraw({ amountInLitkey: "0.05" });
 ```
       </Expandable>
     </ResponseField>
@@ -787,11 +791,13 @@ await paymentManager.requestWithdraw({ amountInEth: "0.05" });
     <ResponseField name="withdraw(params)" type="Promise<LitTxVoid>">
       Execute withdrawal after delay.
       <Expandable title="params">
-        <ResponseField name="amountInEth" type="string" required />
+        <ResponseField name="amountInLitkey" type="string" required>
+          Amount to withdraw in LITKEY (e.g. "0.05").
+        </ResponseField>
       </Expandable>
       <Expandable title="example">
 ```ts
-await paymentManager.withdraw({ amountInEth: "0.05" });
+await paymentManager.withdraw({ amountInLitkey: "0.05" });
 ```
       </Expandable>
     </ResponseField>
