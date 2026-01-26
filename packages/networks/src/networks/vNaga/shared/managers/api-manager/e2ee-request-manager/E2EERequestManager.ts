@@ -82,6 +82,7 @@ const decryptBatchResponse = <T>(
           parsedResult,
         },
       },
+      '%s',
       `${baseMessage}. Batch decryption failed: ${JSON.stringify(parsedResult)}`
     );
   }
@@ -125,6 +126,7 @@ const decryptBatchResponse = <T>(
             verificationKey,
           },
         },
+        '%s',
         `${baseMessage}. No secret key found for verification key: ${verificationKey}`
       );
     }
@@ -159,6 +161,7 @@ const decryptBatchResponse = <T>(
             nodeUrl: keyData.url,
           },
         },
+        '%s',
         `${baseMessage}. Failed to decrypt response ${i} with key from ${keyData.url}: ${convertedError.message}`
       );
     }
@@ -173,6 +176,7 @@ const decryptBatchResponse = <T>(
           requestId,
         },
       },
+      '%s',
       `${baseMessage}. No responses were successfully decrypted`
     );
   }
@@ -241,6 +245,7 @@ const handleEncryptedError = (
               rawNodeError: firstError,
             },
           },
+          '%s',
           `${baseMessage}. ${convertedError.message}${errorDetails}`
         );
       }
@@ -255,6 +260,7 @@ const handleEncryptedError = (
             decryptedErrorValues,
           },
         },
+        '%s',
         `${baseMessage}. ${JSON.stringify(decryptedErrorValues)}`
       );
     } catch (decryptError) {
@@ -282,6 +288,7 @@ const handleEncryptedError = (
             rawError: errorResult,
           },
         },
+        '%s',
         `${baseMessage}. The nodes returned an encrypted error response that could not be decrypted. ${JSON.stringify(
           errorResult
         )}. If you are running custom session sigs, it might mean the validation has failed. We will continue to improve this error message to provide more information.`
@@ -300,6 +307,7 @@ const handleEncryptedError = (
           rawError: errorResult,
         },
       },
+      '%s',
       `${baseMessage}. ${JSON.stringify(errorResult)}`
     );
   }
