@@ -13,9 +13,17 @@
  *  - Custom chains are stored locally via the registry utilities
  */
 
-import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type FC,
+  type FormEvent,
+} from "react";
+
 import {
   getAllChains,
   isCustomChain,
@@ -32,16 +40,18 @@ interface ChainSelectorProps {
   triggerAriaLabel?: string;
 }
 
-export const ChainSelector: React.FC<ChainSelectorProps> = ({
+export const ChainSelector: FC<ChainSelectorProps> = ({
   selectedChain,
   onChainChange,
   disabled = false,
   iconTrigger = false,
   triggerAriaLabel = 'Select chain',
 }) => {
-  const [chains, setChains] = React.useState<Record<string, { name: string; symbol: string; testnet: boolean }>>({});
-  const [isAddOpen, setIsAddOpen] = React.useState(false);
-  const [addForm, setAddForm] = React.useState({
+  const [chains, setChains] = useState<
+    Record<string, { name: string; symbol: string; testnet: boolean }>
+  >({});
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [addForm, setAddForm] = useState({
     slug: "",
     id: "",
     name: "",
@@ -50,9 +60,9 @@ export const ChainSelector: React.FC<ChainSelectorProps> = ({
     explorerUrl: "",
     testnet: false,
   });
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const refreshChains = React.useCallback(() => {
+  const refreshChains = useCallback(() => {
     const all = getAllChains();
     // Map to minimal view for rendering
     const minimal: Record<string, { name: string; symbol: string; testnet: boolean }> = {};
@@ -62,11 +72,11 @@ export const ChainSelector: React.FC<ChainSelectorProps> = ({
     setChains(minimal);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     refreshChains();
   }, [refreshChains]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key && e.key.includes('chains.custom.v1')) {
         refreshChains();
@@ -76,7 +86,7 @@ export const ChainSelector: React.FC<ChainSelectorProps> = ({
     return () => window.removeEventListener('storage', onStorage);
   }, [refreshChains]);
 
-  function handleSubmitAdd(e: React.FormEvent) {
+  function handleSubmitAdd(e: FormEvent) {
     e.preventDefault();
     setError(null);
     const idNum = Number(addForm.id);

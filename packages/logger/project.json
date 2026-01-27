@@ -4,7 +4,7 @@
   "sourceRoot": "packages/logger/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -13,6 +13,26 @@
         "tsConfig": "packages/logger/tsconfig.lib.json",
         "assets": ["packages/logger/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/logger/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/logger/cjs --rootDir packages/logger/src --baseUrl packages/logger/src && node tools/write-cjs-packagejson.mjs dist/packages/logger/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run logger:build-esm"
+          },
+          {
+            "command": "nx run logger:build-cjs"
+          }
+        ],
+        "parallel": false
       }
     },
     "check-deps": {

@@ -165,10 +165,17 @@ export const createStateManager = async <T>(params: {
   };
 
   // --- Setup Staking Event Listener ---
+  const stakingProvider = new ethers.providers.JsonRpcProvider(
+    params.networkConfig.rpcUrl
+  );
+  // This listener is only used to react to rare staking state transitions; avoid
+  // aggressive polling that can spam public RPC endpoints.
+  stakingProvider.pollingInterval = BLOCKHASH_SYNC_INTERVAL;
+
   const stakingContract = new ethers.Contract(
     contractManager.stakingContract.address,
     contractManager.stakingContract.abi,
-    new ethers.providers.JsonRpcProvider(params.networkConfig.rpcUrl)
+    stakingProvider
   );
 
   const eventStateManager: EventState<STAKING_STATES_VALUES | null> =

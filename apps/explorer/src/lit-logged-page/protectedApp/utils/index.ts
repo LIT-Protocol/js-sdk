@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Utility functions for ProtectedApp components
  * Contains shared helper functions and formatters
  */
 
 import bs58 from "bs58";
-import { SCOPE_VALUES } from "../types";
+
+import { AUTH_METHOD_TYPE, SCOPE_VALUES } from "../types";
 
 // Formatting utilities
 export const formatTxHash = (hash: string): string => {
@@ -76,21 +78,6 @@ export const decodeScopeValues = (scopes: any) => {
 
 // Auth method type name mapping
 export const getAuthMethodTypeName = (typeNumber: number): string => {
-  const AUTH_METHOD_TYPE = {
-    EthWallet: 1,
-    LitAction: 2,
-    WebAuthn: 3,
-    Discord: 4,
-    Google: 5,
-    GoogleJwt: 6,
-    AppleJwt: 8,
-    StytchOtp: 9,
-    StytchEmailFactorOtp: 10,
-    StytchSmsFactorOtp: 11,
-    StytchWhatsAppFactorOtp: 12,
-    StytchTotpFactorOtp: 13,
-  };
-
   const entry = Object.entries(AUTH_METHOD_TYPE).find(
     ([, value]) => value === typeNumber
   );

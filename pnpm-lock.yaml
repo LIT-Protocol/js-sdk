@@ -22,24 +22,78 @@ importers:
       '@ethersproject/contracts':
         specifier: 5.7.0
         version: 5.7.0
+      '@ethersproject/providers':
+        specifier: 5.7.0
+        version: 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@ethersproject/transactions':
+        specifier: 5.7.0
+        version: 5.7.0
+      '@lit-protocol/access-control-conditions':
+        specifier: workspace:*
+        version: link:dist/packages/access-control-conditions
+      '@lit-protocol/access-control-conditions-schemas':
+        specifier: workspace:*
+        version: link:dist/packages/access-control-conditions-schemas
+      '@lit-protocol/auth':
+        specifier: workspace:*
+        version: link:dist/packages/auth
+      '@lit-protocol/auth-helpers':
+        specifier: workspace:*
+        version: link:dist/packages/auth-helpers
+      '@lit-protocol/auth-services':
+        specifier: workspace:*
+        version: link:dist/packages/auth-services
+      '@lit-protocol/constants':
+        specifier: workspace:*
+        version: link:dist/packages/constants
       '@lit-protocol/contracts':
         specifier: workspace:*
         version: link:dist/packages/contracts
+      '@lit-protocol/crypto':
+        specifier: workspace:*
+        version: link:dist/packages/crypto
+      '@lit-protocol/lit-client':
+        specifier: workspace:*
+        version: link:dist/packages/lit-client
       '@lit-protocol/lit-status-sdk':
         specifier: 0.1.8
         version: 0.1.8(typescript@5.8.3)
+      '@lit-protocol/logger':
+        specifier: workspace:*
+        version: link:dist/packages/logger
       '@lit-protocol/nacl':
         specifier: 7.1.1
         version: 7.1.1
+      '@lit-protocol/networks':
+        specifier: workspace:*
+        version: link:dist/packages/networks
+      '@lit-protocol/schemas':
+        specifier: workspace:*
+        version: link:dist/packages/schemas
+      '@lit-protocol/types':
+        specifier: workspace:*
+        version: link:dist/packages/types
       '@lit-protocol/uint8arrays':
         specifier: 7.1.1
         version: 7.1.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@lit-protocol/wasm':
+        specifier: workspace:*
+        version: link:dist/packages/wasm
+      '@lit-protocol/wrapped-keys':
+        specifier: workspace:*
+        version: link:dist/packages/wrapped-keys
+      '@lit-protocol/wrapped-keys-lit-actions':
+        specifier: workspace:*
+        version: link:dist/packages/wrapped-keys-lit-actions
       '@metamask/eth-sig-util':
         specifier: 5.0.2
         version: 5.0.2
       '@noble/curves':
         specifier: 1.8.1
         version: 1.8.1
+      '@noble/hashes':
+        specifier: 1.8.0
+        version: 1.8.0
       '@openagenda/verror':
         specifier: 3.1.4
         version: 3.1.4
@@ -51,7 +105,7 @@ importers:
         version: 7.0.0
       '@solana/kit':
         specifier: 4.0.0
-        version: 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@wagmi/core':
         specifier: 2.22.1
         version: 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
@@ -239,6 +293,12 @@ importers:
       prettier:
         specifier: 2.8.8
         version: 2.8.8
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
       rimraf:
         specifier: 6.0.1
         version: 6.0.1
@@ -263,24 +323,54 @@ importers:
 
   apps/explorer:
     dependencies:
+      '@ethersproject/providers':
+        specifier: 5.7.0
+        version: 5.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@lit-protocol/access-control-conditions':
         specifier: workspace:*
         version: link:../../dist/packages/access-control-conditions
+      '@lit-protocol/access-control-conditions-schemas':
+        specifier: workspace:*
+        version: link:../../dist/packages/access-control-conditions-schemas
       '@lit-protocol/auth':
         specifier: workspace:*
         version: link:../../dist/packages/auth
+      '@lit-protocol/auth-helpers':
+        specifier: workspace:*
+        version: link:../../dist/packages/auth-helpers
+      '@lit-protocol/constants':
+        specifier: workspace:*
+        version: link:../../dist/packages/constants
+      '@lit-protocol/crypto':
+        specifier: workspace:*
+        version: link:../../dist/packages/crypto
       '@lit-protocol/lit-client':
         specifier: workspace:*
         version: link:../../dist/packages/lit-client
+      '@lit-protocol/logger':
+        specifier: workspace:*
+        version: link:../../dist/packages/logger
+      '@lit-protocol/login-modal':
+        specifier: workspace:*
+        version: link:../../dist/packages/login-modal
       '@lit-protocol/naga-la-types':
         specifier: 0.1.0
         version: 0.1.0
       '@lit-protocol/networks':
         specifier: workspace:*
         version: link:../../dist/packages/networks
+      '@lit-protocol/schemas':
+        specifier: workspace:*
+        version: link:../../dist/packages/schemas
+      '@lit-protocol/types':
+        specifier: workspace:*
+        version: link:../../dist/packages/types
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.54.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@noble/hashes':
+        specifier: 1.8.0
+        version: 1.8.0
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.16
         version: 2.1.16(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -821,6 +911,26 @@ importers:
         specifier: 9.6.0
         version: 9.6.0
     publishDirectory: ../../dist/packages/logger
+
+  packages/login-modal:
+    dependencies:
+      viem:
+        specifier: 2.38.3
+        version: 2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+    devDependencies:
+      '@types/react':
+        specifier: 18.3.27
+        version: 18.3.27
+      '@types/react-dom':
+        specifier: 18.3.7
+        version: 18.3.7(@types/react@18.3.27)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+    publishDirectory: ../../dist/packages/login-modal
 
   packages/networks:
     dependencies:
@@ -25489,7 +25599,7 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
 
-  '@solana/kit@4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@solana/kit@4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/accounts': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/addresses': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
@@ -25503,11 +25613,11 @@ snapshots:
       '@solana/rpc': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/rpc-parsed-types': 4.0.0(typescript@5.8.3)
       '@solana/rpc-spec-types': 4.0.0(typescript@5.8.3)
-      '@solana/rpc-subscriptions': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/rpc-subscriptions': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/rpc-types': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/signers': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/sysvars': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
-      '@solana/transaction-confirmation': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/transaction-confirmation': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/transaction-messages': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/transactions': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       typescript: 5.8.3
@@ -25586,14 +25696,14 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
 
-  '@solana/rpc-subscriptions-channel-websocket@4.0.0(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@solana/rpc-subscriptions-channel-websocket@4.0.0(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/errors': 4.0.0(typescript@5.8.3)
       '@solana/functional': 4.0.0(typescript@5.8.3)
       '@solana/rpc-subscriptions-spec': 4.0.0(typescript@5.8.3)
       '@solana/subscribable': 4.0.0(typescript@5.8.3)
       typescript: 5.8.3
-      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   '@solana/rpc-subscriptions-spec@4.0.0(typescript@5.8.3)':
     dependencies:
@@ -25603,7 +25713,7 @@ snapshots:
       '@solana/subscribable': 4.0.0(typescript@5.8.3)
       typescript: 5.8.3
 
-  '@solana/rpc-subscriptions@4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@solana/rpc-subscriptions@4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/errors': 4.0.0(typescript@5.8.3)
       '@solana/fast-stable-stringify': 4.0.0(typescript@5.8.3)
@@ -25611,7 +25721,7 @@ snapshots:
       '@solana/promises': 4.0.0(typescript@5.8.3)
       '@solana/rpc-spec-types': 4.0.0(typescript@5.8.3)
       '@solana/rpc-subscriptions-api': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
-      '@solana/rpc-subscriptions-channel-websocket': 4.0.0(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/rpc-subscriptions-channel-websocket': 4.0.0(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/rpc-subscriptions-spec': 4.0.0(typescript@5.8.3)
       '@solana/rpc-transformers': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/rpc-types': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
@@ -25696,7 +25806,7 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
 
-  '@solana/transaction-confirmation@4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@solana/transaction-confirmation@4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/addresses': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/codecs-strings': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
@@ -25704,7 +25814,7 @@ snapshots:
       '@solana/keys': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/promises': 4.0.0(typescript@5.8.3)
       '@solana/rpc': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
-      '@solana/rpc-subscriptions': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/rpc-subscriptions': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/rpc-types': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/transaction-messages': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
       '@solana/transactions': 4.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
@@ -26833,7 +26943,7 @@ snapshots:
 
   '@vue/shared@3.5.22': {}
 
-  '@wagmi/connectors@6.0.1(ca91dfc09229debedec4747ea28138c2)':
+  '@wagmi/connectors@6.0.1(4ivbjbado6jvjrj76kxayej5sq)':
     dependencies:
       '@base-org/account': 1.1.1(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
       '@coinbase/wallet-sdk': 4.3.6(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
@@ -26880,7 +26990,7 @@ snapshots:
       - wagmi
       - zod
 
-  '@wagmi/connectors@6.1.0(a73984ae2cf8f13fff6b4163038b7ac0)':
+  '@wagmi/connectors@6.1.0(xq3q2qgyn5j67huuv3r4r2zjce)':
     dependencies:
       '@base-org/account': 1.1.1(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
       '@coinbase/wallet-sdk': 4.3.6(@types/react@18.3.27)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.3)
@@ -27523,6 +27633,11 @@ snapshots:
     optionalDependencies:
       typescript: 5.8.3
       zod: 3.24.3
+
+  abitype@1.1.0(typescript@5.8.3)(zod@4.1.12):
+    optionalDependencies:
+      typescript: 5.8.3
+      zod: 4.1.12
 
   abitype@1.1.1(typescript@5.8.3)(zod@3.22.4):
     optionalDependencies:
@@ -33060,6 +33175,21 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
+  ox@0.9.6(typescript@5.8.3)(zod@4.1.12):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/ciphers': 1.3.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.1(typescript@5.8.3)(zod@4.1.12)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.8.3
+    transitivePeerDependencies:
+      - zod
+
   p-cancelable@2.1.1: {}
 
   p-filter@2.1.0:
@@ -35224,6 +35354,23 @@ snapshots:
       - utf-8-validate
       - zod
 
+  viem@2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.1.12):
+    dependencies:
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.0(typescript@5.8.3)(zod@4.1.12)
+      isows: 1.0.7(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      ox: 0.9.6(typescript@5.8.3)(zod@4.1.12)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      typescript: 5.8.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
   viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3):
     dependencies:
       '@noble/curves': 1.9.1
@@ -35260,7 +35407,7 @@ snapshots:
   wagmi@2.18.1(@azure/identity@4.13.0)(@azure/storage-blob@12.29.1)(@tanstack/query-core@5.90.5)(@tanstack/react-query@5.90.5(react@18.3.1))(@types/react@18.3.27)(@upstash/redis@1.35.6)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.2)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))(zod@3.24.3):
     dependencies:
       '@tanstack/react-query': 5.90.5(react@18.3.1)
-      '@wagmi/connectors': 6.0.1(ca91dfc09229debedec4747ea28138c2)
+      '@wagmi/connectors': 6.0.1(4ivbjbado6jvjrj76kxayej5sq)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
       react: 18.3.1
       use-sync-external-store: 1.4.0(react@18.3.1)
@@ -35299,7 +35446,7 @@ snapshots:
   wagmi@2.18.2(@azure/identity@4.13.0)(@azure/storage-blob@12.29.1)(@tanstack/query-core@5.90.5)(@tanstack/react-query@5.90.5(react@18.3.1))(@types/react@18.3.27)(@upstash/redis@1.35.6)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.2)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))(zod@3.24.3):
     dependencies:
       '@tanstack/react-query': 5.90.5(react@18.3.1)
-      '@wagmi/connectors': 6.1.0(a73984ae2cf8f13fff6b4163038b7ac0)
+      '@wagmi/connectors': 6.1.0(xq3q2qgyn5j67huuv3r4r2zjce)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
       react: 18.3.1
       use-sync-external-store: 1.4.0(react@18.3.1)

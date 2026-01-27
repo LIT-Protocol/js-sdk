@@ -11,11 +11,11 @@
  *  </StickySidebarLayout>
  */
 
-import React from "react";
+import type { FC, ReactNode } from "react";
 
 interface StickySidebarLayoutProps {
-  sidebar: React.ReactNode;
-  children: React.ReactNode;
+  sidebar: ReactNode;
+  children: ReactNode;
   /** Tailwind class controlling sidebar width */
   sidebarWidthClass?: string; // default w-[18rem]
   /** Breakpoint at which sidebar becomes hidden */
@@ -24,7 +24,7 @@ interface StickySidebarLayoutProps {
   sidebarTopOffsetPx?: number; // default matches current header+nav height
 }
 
-export const StickySidebarLayout: React.FC<StickySidebarLayoutProps> = ({
+export const StickySidebarLayout: FC<StickySidebarLayoutProps> = ({
   sidebar,
   children,
   sidebarWidthClass = "w-[18rem]",
@@ -49,5 +49,4 @@ export const StickySidebarLayout: React.FC<StickySidebarLayoutProps> = ({
     </div>
   );
 };
-
 

@@ -117,8 +117,7 @@ function isValidUrl(url: string): boolean {
 }
 
 export function validateChainConfig(
-  cfg: LitChainConfig,
-  _allChainsById?: Map<number, string>
+  cfg: LitChainConfig
 ): { ok: true } | { ok: false; error: string } {
   if (!cfg) return { ok: false, error: "Missing chain config" };
   if (!Number.isInteger(cfg.id) || cfg.id <= 0)
@@ -207,6 +206,7 @@ export function addCustomChain(
 export function removeCustomChain(slug: string): void {
   const existingCustom = getCustomChains();
   if (!Object.prototype.hasOwnProperty.call(existingCustom, slug)) return;
-  const { [slug]: _removed, ...rest } = existingCustom;
+  const rest = { ...existingCustom };
+  delete rest[slug];
   saveCustomChains(rest);
 }

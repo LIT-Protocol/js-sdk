@@ -14,7 +14,6 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "dependsOn": [],
       "outputs": [
         "{projectRoot}/dist"
       ],

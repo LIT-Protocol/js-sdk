@@ -6,7 +6,19 @@
  * This eliminates the need to repeatedly initialize the permissions manager.
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type FC,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
+
 import { useLitAuth } from '../../../lit-login-modal/LitAuthProvider';
 import { UIPKP } from '../types';
 
@@ -28,7 +40,7 @@ interface PKPPermissionsContextType {
   
   // Remove operations tracking
   removingItems: Set<string>;
-  setRemovingItems: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setRemovingItems: Dispatch<SetStateAction<Set<string>>>;
   
   // Bulk operations
   isRevokingAll: boolean;
@@ -52,13 +64,13 @@ interface PKPPermissionsContextType {
 const PKPPermissionsContext = createContext<PKPPermissionsContextType | undefined>(undefined);
 
 interface PKPPermissionsProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   selectedPkp: UIPKP | null;
   setStatus: (status: string) => void;
   addTransactionToast: (message: string, txHash: string, type?: 'success' | 'error') => void;
 }
 
-export const PKPPermissionsProvider: React.FC<PKPPermissionsProviderProps> = ({ 
+export const PKPPermissionsProvider: FC<PKPPermissionsProviderProps> = ({ 
   children, 
   selectedPkp, 
   setStatus, 
@@ -131,21 +143,27 @@ export const PKPPermissionsProvider: React.FC<PKPPermissionsProviderProps> = ({
       const pkpPermissionsManager = await getPermissionsManager();
       const context = await pkpPermissionsManager.getPermissionsContext();
       // Merge explicit lists into context if missing to ensure UI stops loading
-      let merged = { ...context } as any;
+      const merged = { ...context } as any;
       if (!merged.addresses) {
         try {
           merged.addresses = await pkpPermissionsManager.getPermittedAddresses();
-        } catch {}
+        } catch {
+          // ignore address list errors
+        }
       }
       if (!merged.actions) {
         try {
           merged.actions = await pkpPermissionsManager.getPermittedActions();
-        } catch {}
+        } catch {
+          // ignore action list errors
+        }
       }
       if (!merged.authMethods) {
         try {
           merged.authMethods = await pkpPermissionsManager.getPermittedAuthMethods();
-        } catch {}
+        } catch {
+          // ignore auth method list errors
+        }
       }
       setPermissionsContext(merged);
       console.log("✅ Permissions context loaded successfully");

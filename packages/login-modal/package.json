@@ -1,0 +1,36 @@
+{
+  "name": "@lit-protocol/login-modal",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "tags": [
+    "universal"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/login-modal"
+  },
+  "main": "./cjs/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./cjs/index.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "viem": "2.38.3"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

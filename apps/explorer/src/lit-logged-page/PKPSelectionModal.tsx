@@ -1,7 +1,10 @@
-import React from "react";
-import PKPSelectionSection from "../lit-login-modal/PKPSelectionSection";
-import { PKPData } from "@lit-protocol/schemas";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LitServices } from "@/hooks/useLitServiceSetup";
+import { PKPData } from "@lit-protocol/schemas";
+
+import PKPSelectionSection from "../lit-login-modal/PKPSelectionSection";
+
+import type { FC } from "react";
 
 /**
  * PKPSelectionModal
@@ -35,7 +38,7 @@ export interface PKPSelectionModalProps {
   onPkpSelected: (pkpInfo: PKPData) => void;
 }
 
-const PKPSelectionModal: React.FC<PKPSelectionModalProps> = ({
+const PKPSelectionModal: FC<PKPSelectionModalProps> = ({
   isOpen,
   onClose,
   authData,

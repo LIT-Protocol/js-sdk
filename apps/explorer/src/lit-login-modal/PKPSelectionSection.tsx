@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { getAddress } from "viem";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState, type FC } from "react";
+import { createPublicClient, getAddress, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+
 // import { createLitClient } from "@lit-protocol/lit-client";
-import { PKPData } from "@lit-protocol/schemas";
-import { UIPKP } from "../lit-logged-page/protectedApp/types";
-import { LitServices } from "@/hooks/useLitServiceSetup";
 import { APP_INFO } from "@/_config";
-import { PaymentManagementDashboard } from "../lit-logged-page/protectedApp/components/PaymentManagement/PaymentManagementDashboard";
-import { useLedgerRefresh } from "../lit-logged-page/protectedApp/utils/ledgerRefresh";
 import { SUPPORTED_CHAINS } from "@/domain/lit/chains";
 import {
   getDefaultChainForNetwork,
   isTestnetNetwork,
 } from "@/domain/lit/networkDefaults";
+import { LitServices } from "@/hooks/useLitServiceSetup";
+import { PKPData } from "@lit-protocol/schemas";
+import type { ExpectedAccountOrWalletClient } from "@lit-protocol/networks";
+
+import { PaymentManagementDashboard } from "../lit-logged-page/protectedApp/components/PaymentManagement/PaymentManagementDashboard";
+import { UIPKP } from "../lit-logged-page/protectedApp/types";
+import { useLedgerRefresh } from "../lit-logged-page/protectedApp/utils/ledgerRefresh";
+
 
 // Read-only viem account for PaymentManager (view-only operations)
 const READ_ONLY_PRIVATE_KEY =
@@ -24,23 +29,27 @@ const READ_ONLY_ACCOUNT = privateKeyToAccount(
 interface PKPSelectionSectionProps {
   authData: any;
   onPkpSelected: (pkpInfo: PKPData) => void;
+  authMethod?: string;
   authMethodName: string;
   services: LitServices;
   disabled?: boolean;
   authServiceBaseUrl: string;
   singlePkpMessaging?: boolean;
   currentNetworkName?: string;
+  getEoaMintAccount?: () => Promise<ExpectedAccountOrWalletClient>;
 }
 
-const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
+const PKPSelectionSection: FC<PKPSelectionSectionProps> = ({
   authData,
   onPkpSelected,
+  authMethod,
   authMethodName,
   services,
   disabled = false,
   authServiceBaseUrl,
   singlePkpMessaging = false,
   currentNetworkName = "naga-test",
+  getEoaMintAccount,
 }) => {
   const [mode, setMode] = useState<"existing" | "mint">("existing");
   const [pkps, setPkps] = useState<UIPKP[]>([]);
@@ -48,6 +57,9 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
   const [status, setStatus] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
+  const [eoaMintMode, setEoaMintMode] = useState<"on-chain" | "auth-service">(
+    "on-chain"
+  );
   const [fundingTokenId, setFundingTokenId] = useState<string | null>(null);
 
   // Pagination state
@@ -70,6 +82,8 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
   const ledgerTokenSymbol = isTestnetNetwork(currentNetworkName)
     ? "tstLPX"
     : "LITKEY";
+  const isEoaAuth = authMethod === "eoa" || Number(authData?.authMethodType) === 1;
+  const canSponsorEoaMint = isEoaAuth && Boolean(authServiceBaseUrl);
 
   // Debug logging
   useEffect(() => {
@@ -134,9 +148,6 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
       }
 
       // console.log(`💰 [BALANCE] Using chain: ${chainInfo.name} (${chainInfo.symbol}) RPC: ${chainInfo.rpcUrl}`);
-
-      // Import viem for balance fetching
-      const { createPublicClient, http } = await import("viem");
 
       // Create chain config for viem
       const chainConfig = {
@@ -335,10 +346,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
     setPkps([...updated]);
   };
 
-  const loadExistingPkps = async (
-    page: number,
-    _forceRefresh: boolean = false
-  ) => {
+  const loadExistingPkps = async (page: number) => {
     // console.log(`🔄 [PAGINATION] loadExistingPkps called - Page: ${page}, forceRefresh: ${forceRefresh}`);
     // console.log(`🔄 [PAGINATION] Current state - currentPage: ${currentPage}, pkps.length: ${pkps.length}`);
     // console.log(`🔄 [PAGINATION] Current PKP tokenIds in state:`, pkps.map(p => p.tokenId?.toString().slice(-8)));
@@ -466,12 +474,29 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
     setStatus("Minting new PKP...");
     // console.log("authServiceBaseUrl:", authServiceBaseUrl);
     try {
-      const result = await services.litClient.authService.mintWithAuth({
-        authData,
-        authServiceBaseUrl: authServiceBaseUrl,
-        scopes: ["sign-anything"],
-        apiKey: APP_INFO.litAuthServerApiKey,
-      });
+      const shouldUseAuthServiceForMint =
+        !isEoaAuth || (canSponsorEoaMint && eoaMintMode === "auth-service");
+
+      const result = shouldUseAuthServiceForMint
+        ? await services.litClient.authService.mintWithAuth({
+            authData,
+            authServiceBaseUrl: authServiceBaseUrl,
+            scopes: ["sign-anything"],
+            apiKey: APP_INFO.litAuthServerApiKey,
+          })
+        : await (async () => {
+            if (!getEoaMintAccount) {
+              throw new Error(
+                "EOA mint requires a connected wallet. Provide an EOA wallet provider to the login modal."
+              );
+            }
+            const account = await getEoaMintAccount();
+            return await services.litClient.mintWithAuth({
+              account,
+              authData,
+              scopes: ["sign-anything"],
+            } as any);
+          })();
 
       if (result?.data) {
         const newPkp: UIPKP = {
@@ -501,6 +526,24 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
     } finally {
       setIsMinting(false);
     }
+  };
+
+  const renderEoaSponsoredMintToggle = () => {
+    if (!canSponsorEoaMint) return null;
+    return (
+      <label className="flex items-center gap-2 text-[12px] text-gray-600 mt-3">
+        <input
+          type="checkbox"
+          checked={eoaMintMode === "auth-service"}
+          onChange={(e) =>
+            setEoaMintMode(e.target.checked ? "auth-service" : "on-chain")
+          }
+          disabled={disabled || isMinting}
+          className="accent-blue-600"
+        />
+        Sponsor mint via Auth Service (no gas needed)
+      </label>
+    );
   };
 
   const formatPublicKey = (pubKey: string) => {
@@ -596,7 +639,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
                       setIsRefreshingPkps(true);
                       setPkps([]);
                       try {
-                        await loadExistingPkps(1, true);
+                        await loadExistingPkps(1);
                         setStatus("✅ Refreshed");
                       } catch (e) {
                         setStatus("❌ Failed to refresh");
@@ -650,6 +693,7 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
               <p className="m-0 text-[13px] text-gray-500">
                 Select a PKP wallet to continue. Click any address to copy it.
               </p>
+              {renderEoaSponsoredMintToggle()}
             </div>
           )}
 
@@ -1092,6 +1136,9 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
                   )}
                   {isMinting ? "Minting PKP..." : "⚡ Mint Your First PKP"}
                 </button>
+                <div className="flex justify-center">
+                  {renderEoaSponsoredMintToggle()}
+                </div>
               </div>
             )}
           </div>
@@ -1182,7 +1229,9 @@ const PKPSelectionSection: React.FC<PKPSelectionSectionProps> = ({
                             : p
                         )
                       );
-                    } catch {}
+                    } catch {
+                      // ignore balance refresh errors
+                    }
                   }}
                   onTransactionComplete={() => {
                     const addr = pkps.find(

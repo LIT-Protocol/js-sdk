@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
-  "type": "commonjs",
+  "type": "module",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/auth"
@@ -45,7 +45,15 @@
     "stream": false
   },
   "version": "8.2.2",
-  "main": "./index.js",
+  "main": "./cjs/index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
   "typings": "./index.d.ts",
-  "types": "./index.d.ts"
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "require": "./cjs/index.js"
+    }
+  }
 }

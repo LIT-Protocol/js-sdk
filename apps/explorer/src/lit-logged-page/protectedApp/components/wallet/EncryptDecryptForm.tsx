@@ -4,10 +4,13 @@
  * Form for encrypting and decrypting data with PKP
  */
 
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, type FC } from "react";
+
 import { useLitAuth } from "../../../../lit-login-modal/LitAuthProvider";
 import { UIPKP } from "../../types";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
+
 import type { EncryptResponse } from "@lit-protocol/types";
 
 // Default message constant
@@ -24,7 +27,7 @@ type ExtendedEncryptResponse = EncryptResponse & {
   timestamp: string;
 };
 
-export const EncryptDecryptForm: React.FC<EncryptDecryptFormProps> = ({
+export const EncryptDecryptForm: FC<EncryptDecryptFormProps> = ({
   selectedPkp,
   disabled = false,
 }) => {
@@ -68,7 +71,7 @@ export const EncryptDecryptForm: React.FC<EncryptDecryptFormProps> = ({
         .on("ethereum")
         .build();
 
-      const encrypted = await services!.litClient.encrypt({
+      const encrypted = await services.litClient.encrypt({
         dataToEncrypt: messageToEncrypt,
         unifiedAccessControlConditions: accs,
         chain: "ethereum",
@@ -138,7 +141,7 @@ export const EncryptDecryptForm: React.FC<EncryptDecryptFormProps> = ({
         });
 
       setStatus("Decrypting data...");
-      const decrypted = await services!.litClient.decrypt({
+      const decrypted = await services.litClient.decrypt({
         data: encryptedData,
         unifiedAccessControlConditions: accs,
         authContext: decryptionAuthContext,

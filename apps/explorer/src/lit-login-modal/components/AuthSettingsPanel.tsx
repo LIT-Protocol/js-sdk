@@ -1,5 +1,6 @@
-import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SupportedNetworkName } from "../types";
+import type { FC } from "react";
 
 interface AuthSettingsPanelProps {
   onClose: () => void;
@@ -21,7 +22,7 @@ interface AuthSettingsPanelProps {
   isAuthUrlCustom: (url: string) => boolean;
 }
 
-export const AuthSettingsPanel: React.FC<AuthSettingsPanelProps> = ({
+export const AuthSettingsPanel: FC<AuthSettingsPanelProps> = ({
   onClose,
   loginServiceBaseUrl,
   setLoginServiceBaseUrl,

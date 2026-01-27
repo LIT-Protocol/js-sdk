@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [lit-auth-server, lit-login-server]
+        app: [lit-auth-server, lit-login-server, explorer]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useWalletClient } from "wagmi";
+
+import { Header } from "@/Header";
+
 import { APP_INFO } from "./_config";
 import { LitAuthProvider } from "./lit-login-modal/LitAuthProvider";
-import { Header } from "@/Header";
+import PKPSelectionSection from "./lit-login-modal/PKPSelectionSection";
+import { LedgerFundingPanel } from "./lit-login-modal/components/LedgerFundingPanel";
 
 interface ErrorDisplayProps {
   error: string | null;
@@ -42,6 +49,8 @@ const ErrorDisplay = ({ error, isVisible, onClear }: ErrorDisplayProps) => {
 };
 
 export const HomePage = () => {
+  const { data: walletClient } = useWalletClient();
+
   // Error state management
   const [error, setError] = useState<string | null>(null);
   const [isErrorVisible, setIsErrorVisible] = useState<boolean>(false);
@@ -57,11 +66,42 @@ export const HomePage = () => {
       appName="lit-auth-modal-demo"
       supportedNetworks={["naga-dev", "naga-test", "naga-proto", "naga"]}
       defaultNetwork="naga-dev"
-      authServiceBaseUrl={APP_INFO.litAuthServer}
+      enabledAuthMethods={[
+        "eoa",
+        "google",
+        "discord",
+        "webauthn",
+        "stytch-email",
+        "stytch-sms",
+        "stytch-whatsapp",
+        "stytch-totp",
+      ]}
+      services={{
+        authServiceUrls: APP_INFO.authServiceUrls,
+        authServiceApiKey: APP_INFO.litAuthServerApiKey,
+        loginServerUrl: APP_INFO.litLoginServer,
+        discordClientId: APP_INFO.discordClientId,
+      }}
+      eoa={{
+        getWalletClient: async () => {
+          if (!walletClient) {
+            throw new Error(
+              "No wallet connected. Connect a wallet, then try again."
+            );
+          }
+          return walletClient;
+        },
+        renderConnect: () => <ConnectButton showBalance={false} />,
+      }}
+      features={{ funding: true, settings: true, persistSettings: true }}
+      components={{
+        PkpSelection: PKPSelectionSection,
+        FundingPanel: LedgerFundingPanel,
+      }}
+      faucetUrl={`${APP_INFO.faucetUrl}?action=combined&ledgerPercent=80`}
+      defaultPrivateKey={APP_INFO.defaultPrivateKey}
       persistUser={false}
       closeOnBackdropClick={false}
-      showSettingsButton={true}
-      showSignUpPage={false}
       showNetworkMessage={true}
     >
       {/* ---------- Header ---------- */}

@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
+
 import type { CanExecuteInfo, WithdrawInfo } from "../types";
 
 interface UseWithdrawStatusOptions {

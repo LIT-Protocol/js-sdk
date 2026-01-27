@@ -4,7 +4,7 @@
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -13,6 +13,26 @@
         "tsConfig": "packages/constants/tsconfig.lib.json",
         "assets": ["packages/constants/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/constants/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/constants/cjs --rootDir packages/constants/src --baseUrl packages/constants/src && node tools/write-cjs-packagejson.mjs dist/packages/constants/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run constants:build-esm"
+          },
+          {
+            "command": "nx run constants:build-cjs"
+          }
+        ],
+        "parallel": false
       }
     },
     "check-deps": {

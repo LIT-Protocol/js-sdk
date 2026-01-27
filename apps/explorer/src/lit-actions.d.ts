@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any */
 declare namespace Lit {
   export namespace Actions {
     /**

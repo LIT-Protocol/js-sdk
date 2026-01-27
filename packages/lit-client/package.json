@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
-  "type": "commonjs",
+  "type": "module",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/lit-client"
@@ -22,18 +22,19 @@
     "universal"
   ],
   "version": "8.3.0",
-  "main": "./index.js",
-  "typings": "./index.d.ts",
+  "main": "./cjs/index.js",
+  "module": "./index.js",
   "types": "./index.d.ts",
+  "typings": "./index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "require": "./index.js",
+      "require": "./cjs/index.js",
       "import": "./index.js"
     },
     "./ipfs": {
       "types": "./ipfs/index.d.ts",
-      "require": "./ipfs/index.js",
+      "require": "./cjs/ipfs/index.js",
       "import": "./ipfs/index.js"
     }
   },

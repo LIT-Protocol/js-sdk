@@ -4,11 +4,12 @@
  * Comprehensive dashboard for all PKP wallet operations
  */
 
-import React from "react";
-import { UIPKP, TransactionResult } from "../../types";
 import { LitActionForm } from "./LitActionForm";
-import { ViemAccountForm } from "./ViemAccountForm";
 import { SendTransactionForm } from "./SendTransactionForm";
+import { ViemAccountForm } from "./ViemAccountForm";
+import { UIPKP, TransactionResult } from "../../types";
+
+import type { FC } from "react";
 
 interface WalletOperationsDashboardProps {
   selectedPkp: UIPKP | null;
@@ -17,7 +18,7 @@ interface WalletOperationsDashboardProps {
   onTransactionComplete?: (result: TransactionResult) => void;
 }
 
-export const WalletOperationsDashboard: React.FC<
+export const WalletOperationsDashboard: FC<
   WalletOperationsDashboardProps
 > = ({
   selectedPkp,

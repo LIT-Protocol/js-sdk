@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
-  "type": "commonjs",
+  "type": "module",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/auth-helpers"
@@ -26,8 +26,17 @@
     "stream": false
   },
   "version": "8.2.0",
-  "main": "./src/index.js",
+  "main": "./cjs/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
   "typings": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./cjs/index.js"
+    }
+  },
   "dependencies": {
     "@wagmi/core": "2.22.1",
     "ethers": "5.7.2",

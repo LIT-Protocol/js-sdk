@@ -4,10 +4,11 @@
  * Contains dangerous operations like revoking all permissions
  */
 
-import React from 'react';
 import { usePKPPermissions } from '../../contexts/PKPPermissionsContext';
 
-export const PermissionsDangerZone: React.FC = () => {
+import type { FC } from "react";
+
+export const PermissionsDangerZone: FC = () => {
   const { revokeAllPermissions, isRevokingAll } = usePKPPermissions();
 
   return (

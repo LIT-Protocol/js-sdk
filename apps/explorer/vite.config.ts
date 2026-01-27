@@ -1,8 +1,11 @@
-import { defineConfig, Plugin } from "vite";
-import react from "@vitejs/plugin-react-swc";
 import fs from "fs";
 import path from "path";
+
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react-swc";
+import { defineConfig, type Plugin } from "vite";
+
+import type { OutputAsset } from "rollup";
 // import inject from "@rollup/plugin-inject";
 
 // Rollup's CommonJS plugin only processes node_modules by default. Include our
@@ -132,7 +135,7 @@ function generateVersionPage(): Plugin {
         type: "asset",
         fileName: "version.html",
         source: html,
-      } as any;
+      } as OutputAsset;
     },
   };
 }
@@ -161,5 +164,37 @@ export default defineConfig({
     commonjsOptions: {
       include: [/node_modules/, workspaceDistPackagesPattern],
     },
+    // Silence known third‑party warnings that don't affect runtime.
+    rollupOptions: {
+      onwarn(warning, warn) {
+        const message = warning.message ?? "";
+        const id = (warning as any).id ?? "";
+
+        // ox PURE annotation placement warnings (upstream issue)
+        if (
+          message.includes(
+            "contains an annotation that Rollup cannot interpret"
+          ) &&
+          id.includes("/ox/_esm/")
+        ) {
+          return;
+        }
+
+        // Node builtins externalized from debug‑only deps
+        if (
+          message.includes("has been externalized for browser compatibility") &&
+          (id.includes("source-map-support") ||
+            id.includes("@lit-protocol/nacl") ||
+            message.includes("source-map-support") ||
+            message.includes("@lit-protocol/nacl"))
+        ) {
+          return;
+        }
+
+        warn(warning);
+      },
+    },
+    // Current bundle intentionally exceeds default limit (Monaco, wagmi/viem, etc).
+    chunkSizeWarningLimit: 7000,
   },
 });

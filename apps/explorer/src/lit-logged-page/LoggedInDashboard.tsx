@@ -1,5 +1,18 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useLitAuth } from "../lit-login-modal/LitAuthProvider";
+import { useState, useEffect, useRef, useMemo , useState as useReactState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { createPublicClient, getAddress, http } from "viem";
+
+import { APP_INFO } from "@/_config";
+import { getDefaultChainForNetwork } from "@/domain/lit/networkDefaults";
+import {
+  TopNavBar,
+  GlobalMessage,
+  StickySidebarLayout,
+  type TopNavTab,
+} from "@layout";
+import { PKPData } from "@lit-protocol/schemas";
+
+import PKPSelectionModal from "./PKPSelectionModal";
 import {
   PKPPermissionsProvider,
   PermissionsDashboard,
@@ -12,22 +25,9 @@ import {
   getAllChains,
   PKPInfoCard,
 } from "./protectedApp/index";
-import {
-  TopNavBar,
-  GlobalMessage,
-  StickySidebarLayout,
-  type TopNavTab,
-} from "@layout";
-import { useLocation, useNavigate } from "react-router-dom";
-
-import PKPSelectionModal from "./PKPSelectionModal";
-import { useState as useReactState } from "react";
-import copyIcon from "../assets/copy.svg";
-import { getAddress } from "viem";
 import { formatPublicKey } from "./protectedApp/utils";
-import { PKPData } from "@lit-protocol/schemas";
-import { APP_INFO } from "@/_config";
-import { getDefaultChainForNetwork } from "@/domain/lit/networkDefaults";
+import copyIcon from "../assets/copy.svg";
+import { useLitAuth } from "../lit-login-modal/LitAuthProvider";
 
 enum LOGIN_STYLE {
   button = "button",
@@ -196,7 +196,6 @@ export default function LoggedInDashboard() {
 
     if (!silent) setIsLoadingBalance(true);
     try {
-      const { createPublicClient, http } = await import("viem");
       const allChains = getAllChains();
       const chainInfo = allChains[selectedChain as keyof typeof allChains];
       if (!chainInfo) throw new Error(`Unknown chain: ${selectedChain}`);
@@ -271,7 +270,6 @@ export default function LoggedInDashboard() {
     let cancelled = false;
     (async () => {
       try {
-        const { createPublicClient, http } = await import("viem");
         const allChains = getAllChains();
         const chainInfo = allChains[selectedChain as keyof typeof allChains];
         if (!chainInfo) return;
@@ -597,7 +595,9 @@ function AccountMenu({
       await navigator.clipboard.writeText(value);
       setCopiedField(field);
       setTimeout(() => setCopiedField(null), 1500);
-    } catch {}
+    } catch {
+      // ignore clipboard errors
+    }
   };
   return (
     <div className="fixed top-2 right-2 sm:top-3 sm:right-3 z-[1100] block lg:hidden">

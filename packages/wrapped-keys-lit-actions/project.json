@@ -14,7 +14,7 @@
         "cwd": "."
       }
     },
-    "build": {
+    "build-esm": {
       "cache": false,
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
@@ -33,6 +33,28 @@
         "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": ["build-la", "^build"]
+    },
+    "build-cjs": {
+      "cache": false,
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/wrapped-keys-lit-actions/tsconfig.cjs.json --module commonjs --declaration false --types node --outDir dist/packages/wrapped-keys-lit-actions/cjs --rootDir packages/wrapped-keys-lit-actions/src --baseUrl packages/wrapped-keys-lit-actions/src && mkdir -p dist/packages/wrapped-keys-lit-actions/cjs/generated && cp -R packages/wrapped-keys-lit-actions/src/generated/* dist/packages/wrapped-keys-lit-actions/cjs/generated/ && node tools/write-cjs-packagejson.mjs dist/packages/wrapped-keys-lit-actions/cjs"
+      }
+    },
+    "build": {
+      "cache": false,
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run wrapped-keys-lit-actions:build-esm"
+          },
+          {
+            "command": "nx run wrapped-keys-lit-actions:build-cjs"
+          }
+        ],
+        "parallel": false
+      }
     },
     "lint": {
       "executor": "@nx/linter:eslint",

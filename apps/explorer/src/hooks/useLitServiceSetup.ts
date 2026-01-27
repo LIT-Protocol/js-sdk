@@ -5,10 +5,10 @@
  * Handles network setup, auth manager creation, and storage plugin configuration.
  */
 
-import React, { useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { createLitClient } from "@lit-protocol/lit-client";
-import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
-import { nagaDev, nagaTest, nagaProto, naga } from "@lit-protocol/networks";
+import { naga, nagaDev, nagaProto, nagaTest } from "@lit-protocol/networks";
 
 // Configuration constants at the top
 const DEFAULT_APP_NAME = "lit-auth-app";
@@ -33,7 +33,9 @@ interface LitServiceSetupConfig {
 
 export interface LitServices {
   litClient: Awaited<ReturnType<typeof createLitClient>>;
-  authManager: Awaited<ReturnType<typeof createAuthManager>>;
+  authManager: Awaited<
+    ReturnType<(typeof import("@lit-protocol/auth"))["createAuthManager"]>
+  >;
 }
 
 interface UseLitServiceSetupReturn {
@@ -98,6 +100,9 @@ export const useLitServiceSetup = (
           "No networkName provided for storage configuration. Pass 'networkName' to useLitServiceSetup."
         );
       }
+      const { createAuthManager, storagePlugins } = await import(
+        "@lit-protocol/auth"
+      );
       const authManager = createAuthManager({
         storage: storagePlugins.localStorage({
           appName: config.appName || DEFAULT_APP_NAME,
@@ -113,10 +118,10 @@ export const useLitServiceSetup = (
         `🎉 All Lit Protocol services initialized successfully. Network: ${config.networkName}`
       );
       return newServices;
-    } catch (err: any) {
-      const errorMessage = `Failed to initialize Lit Protocol services: ${
-        err.message || err
-      }`;
+    } catch (err) {
+      const details =
+        err instanceof Error ? err.message : JSON.stringify(err);
+      const errorMessage = `Failed to initialize Lit Protocol services: ${details}`;
       console.error("❌", errorMessage, err);
       setError(errorMessage);
       throw new Error(errorMessage);
@@ -128,12 +133,33 @@ export const useLitServiceSetup = (
 
   const clearServices = useCallback(() => {
     console.log("🧹 Clearing Lit Protocol services...");
-    setServices(null);
+    setServices((current) => {
+      if (current?.litClient && typeof current.litClient.disconnect === "function") {
+        try {
+          current.litClient.disconnect();
+        } catch {
+          // ignore
+        }
+      }
+      return null;
+    });
     setError(null);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (services?.litClient && typeof services.litClient.disconnect === "function") {
+        try {
+          services.litClient.disconnect();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, [services?.litClient]);
+
   // Auto-setup on mount if requested
-  React.useEffect(() => {
+  useEffect(() => {
     if (config.autoSetup && !services && !isInitializing) {
       setupServices().catch(console.error);
     }

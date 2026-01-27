@@ -4,7 +4,7 @@
   "sourceRoot": "packages/lit-client/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -15,6 +15,26 @@
         "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": ["^build"]
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/lit-client/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/lit-client/cjs --rootDir packages/lit-client --baseUrl packages/lit-client && node tools/write-cjs-packagejson.mjs dist/packages/lit-client/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run lit-client:build-esm"
+          },
+          {
+            "command": "nx run lit-client:build-cjs"
+          }
+        ],
+        "parallel": false
+      }
     },
     "check-deps": {
       "executor": "nx:run-commands",

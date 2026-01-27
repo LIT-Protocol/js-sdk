@@ -4,7 +4,7 @@
   "sourceRoot": "packages/networks/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -13,6 +13,26 @@
         "tsConfig": "packages/networks/tsconfig.lib.json",
         "assets": ["packages/networks/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/networks/tsconfig.lib.json --module commonjs --declaration false --types node --outDir dist/packages/networks/cjs --rootDir packages/networks --baseUrl packages/networks && node tools/write-cjs-packagejson.mjs dist/packages/networks/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run networks:build-esm"
+          },
+          {
+            "command": "nx run networks:build-cjs"
+          }
+        ],
+        "parallel": false
       }
     },
     "check-deps": {

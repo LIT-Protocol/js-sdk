@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+
+import { AppHeader } from "@layout";
+
 import litPrimaryOrangeIcon from "./assets/lit-primary-orange.svg";
 import { useOptionalLitAuth } from "./lit-login-modal/LitAuthProvider";
-import { AppHeader } from "@layout";
 
 export const Header = () => {
   const litAuth = useOptionalLitAuth();

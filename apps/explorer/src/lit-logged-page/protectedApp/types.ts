@@ -1,5 +1,9 @@
-import type { PKPData } from "@lit-protocol/schemas";
+import { AUTH_METHOD_TYPE } from "@lit-protocol/constants";
+import { SCOPE_VALUES, type PKPData } from "@lit-protocol/schemas";
+
 import type { LitChainConfig } from "@/domain/lit/chains";
+
+export { SCOPE_VALUES, AUTH_METHOD_TYPE };
 
 export interface BalanceInfo {
   balance: string;
@@ -55,13 +59,6 @@ export interface PermissionCheckResults {
   timestamp: string;
 }
 
-// Scope values used throughout the app
-export const SCOPE_VALUES = [
-  "no-permissions",
-  "sign-anything",
-  "personal-sign",
-] as const;
-
 export type ScopeValue = (typeof SCOPE_VALUES)[number];
 
 // Available scope configurations
@@ -83,22 +80,6 @@ export const AVAILABLE_SCOPES: ScopeConfig[] = [
     description: "Allow personal message signing only",
   },
 ];
-
-// Authentication method types
-export const AUTH_METHOD_TYPE = {
-  EthWallet: 1,
-  LitAction: 2,
-  WebAuthn: 3,
-  Discord: 4,
-  Google: 5,
-  GoogleJwt: 6,
-  AppleJwt: 8,
-  StytchOtp: 9,
-  StytchEmailFactorOtp: 10,
-  StytchSmsFactorOtp: 11,
-  StytchWhatsAppFactorOtp: 12,
-  StytchTotpFactorOtp: 13,
-} as const;
 
 export interface WithdrawInfo {
   amount: string;

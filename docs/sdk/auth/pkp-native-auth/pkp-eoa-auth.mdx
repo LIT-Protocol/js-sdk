@@ -71,12 +71,29 @@ const authData = await ViemAccountAuthenticator.authenticate(myAccount);
   <Step title="Get or Mint a PKP">
 You can select an existing PKP associated with your account or mint a new one.
 
+    <Note>
+      For EOA auth, PKP minting is an <b>on-chain transaction</b> via
+      <code>litClient.mintWithAuth</code> by default. If you run an Auth
+      Service, you can also do a <b>sponsored mint</b> via
+      <code>litClient.authService.mintWithAuth</code> (<code>POST /pkp/mint</code>)
+      so users don&apos;t need gas.
+    </Note>
+
     <CodeGroup>
 
     ```ts Mint a fresh PKP
     const mintedPkpWithEoaAuth = await litClient.mintWithAuth({
       account: myAccount, // or walletClient depending on method
       authData: authData,
+      scopes: ['sign-anything'],
+    });
+    ```
+
+    ```ts Sponsored mint (Auth Service)
+    const mintedPkpWithSponsoredEoaMint = await litClient.authService.mintWithAuth({
+      authData,
+      authServiceBaseUrl: 'https://your-auth-service.example.com',
+      apiKey: 'YOUR_OPTIONAL_API_KEY',
       scopes: ['sign-anything'],
     });
     ```
@@ -122,3 +139,10 @@ const authContext = await authManager.createPkpAuthContext({
 ```
   </Step>
 </Steps>
+
+## Using EOA Auth Context (without a PKP)
+
+Some Lit SDK operations accept an `authContext` and can be performed directly with an EOA (without selecting a PKP). For that flow, use `authManager.createEoaAuthContext` and pass it to the relevant `litClient` call.
+
+- Reference: [createEoaAuthContext](/sdk/sdk-reference/auth/functions/createAuthManager)
+- Example guide: [Encrypt and Decrypt](/sdk/auth-context-consumption/encrypt-and-decrypt)

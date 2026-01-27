@@ -10,7 +10,7 @@
         "script": "rust:build"
       }
     },
-    "build": {
+    "build-esm": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -21,6 +21,26 @@
         "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": ["rust:build"]
+    },
+    "build-cjs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec tsc -p packages/wasm/tsconfig.cjs.json --module commonjs --declaration false --types node --outDir dist/packages/wasm/cjs --rootDir packages/wasm/src --baseUrl packages/wasm/src && node tools/write-cjs-packagejson.mjs dist/packages/wasm/cjs"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run wasm:build-esm"
+          },
+          {
+            "command": "nx run wasm:build-cjs"
+          }
+        ],
+        "parallel": false
+      }
     },
     "check-deps": {
       "executor": "nx:run-commands",

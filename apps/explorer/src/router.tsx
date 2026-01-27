@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { HomePage } from ".";
 
+import { HomePage } from ".";
 import LoggedInDashboard from "./lit-logged-page/LoggedInDashboard";
 
 export const router = createBrowserRouter([

@@ -1,8 +1,5 @@
 export const nagaTest = {
-  "data": [
-    {
-      "name": "Staking",
-      "contracts": [
+    "data": [
         {
           "network": "naga-test",
           "address_hash": "0x149a054CE79A379Ae5E97f5B984B993233b28061",
@@ -15418,664 +15415,9257 @@ export const nagaTest = {
                   "name": "_newOwner",
                   "type": "address"
                 }
-              ],
-              "name": "transferOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "CallerNotOwner",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "MustBeNonzero",
-              "type": "error"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
+            ]
+        },
+        {
+            "name": "Multisender",
+            "contracts": [
                 {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newPrice",
-                  "type": "uint256"
-                }
-              ],
-              "name": "BaseNetworkPriceSet",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newPrice",
-                  "type": "uint256"
-                }
-              ],
-              "name": "MaxNetworkPriceSet",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "newTrustedForwarder",
-                  "type": "address"
-                }
-              ],
-              "name": "TrustedForwarderSet",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "stakingAddress",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "usagePercent",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256[]",
-                  "name": "newPrices",
-                  "type": "uint256[]"
-                }
-              ],
-              "name": "UsageSet",
-              "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
-                }
-              ],
-              "name": "baseNetworkPrices",
-              "outputs": [
-                {
-                  "internalType": "uint256[]",
-                  "name": "",
-                  "type": "uint256[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getLitActionPriceConfigs",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "enum LibPriceFeedStorage.LitActionPriceComponent",
-                      "name": "priceComponent",
-                      "type": "uint8"
-                    },
-                    {
-                      "internalType": "enum LibPriceFeedStorage.NodePriceMeasurement",
-                      "name": "priceMeasurement",
-                      "type": "uint8"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "price",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct LibPriceFeedStorage.LitActionPriceConfig[]",
-                  "name": "",
-                  "type": "tuple[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getNodeCapacityConfig",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "uint256",
-                      "name": "pkpSignMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "encSignMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "litActionMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "signSessionKeyMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "globalMaxCapacity",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct LibPriceFeedStorage.NodeCapacityConfig",
-                  "name": "",
-                  "type": "tuple"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "realmId",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
-                }
-              ],
-              "name": "getNodesForRequest",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                },
-                {
-                  "components": [
-                    {
-                      "components": [
+                    "network": "naga-test",
+                    "address_hash": "0x077eFcaBFF62391b6fd438034fb21E2484C5B9FF",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
                         {
-                          "internalType": "uint32",
-                          "name": "ip",
-                          "type": "uint32"
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
                         },
                         {
-                          "internalType": "uint128",
-                          "name": "ipv6",
-                          "type": "uint128"
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
                         },
                         {
-                          "internalType": "uint32",
-                          "name": "port",
-                          "type": "uint32"
+                            "inputs": [],
+                            "name": "renounceOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
                         },
                         {
-                          "internalType": "address",
-                          "name": "nodeAddress",
-                          "type": "address"
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "_recipients",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "name": "sendEth",
+                            "outputs": [],
+                            "stateMutability": "payable",
+                            "type": "function"
                         },
                         {
-                          "internalType": "uint256",
-                          "name": "reward",
-                          "type": "uint256"
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "_recipients",
+                                    "type": "address[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "tokenContract",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "sendTokens",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
                         },
                         {
-                          "internalType": "uint256",
-                          "name": "senderPubKey",
-                          "type": "uint256"
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "_recipients",
+                                    "type": "address[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "tokenContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amountPerRecipient",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "sendTokensExact",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
                         },
                         {
-                          "internalType": "uint256",
-                          "name": "receiverPubKey",
-                          "type": "uint256"
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
                         },
                         {
-                          "internalType": "uint256",
-                          "name": "lastActiveEpoch",
-                          "type": "uint256"
+                            "inputs": [],
+                            "name": "withdraw",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
                         },
                         {
-                          "internalType": "uint256",
-                          "name": "commissionRate",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "lastRewardEpoch",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "lastRealmId",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "delegatedStakeAmount",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "delegatedStakeWeight",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "lastRewardEpochClaimedFixedCostRewards",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "lastRewardEpochClaimedCommission",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "address",
-                          "name": "operatorAddress",
-                          "type": "address"
-                        },
-                        {
-                          "internalType": "uint256",
-                          "name": "uniqueDelegatingStakerCount",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "bool",
-                          "name": "registerAttestedWalletDisabled",
-                          "type": "bool"
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "tokenContract",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "withdrawTokens",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
                         }
-                      ],
-                      "internalType": "struct LibStakingStorage.Validator",
-                      "name": "validator",
-                      "type": "tuple"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "prices",
-                      "type": "uint256[]"
-                    }
-                  ],
-                  "internalType": "struct LibPriceFeedStorage.NodeInfoAndPrices[]",
-                  "name": "",
-                  "type": "tuple[]"
+                    ]
                 }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getStakingAddress",
-              "outputs": [
+            ]
+        },
+        {
+            "name": "LITToken",
+            "contracts": [
                 {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
+                    "network": "naga-test",
+                    "address_hash": "0x5E8db2E7af793f4095c4843C8cBD87C5D8604838",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "cap",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "constructor"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "InvalidShortString",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "str",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "StringTooLong",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "spender",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "value",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "Approval",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "delegator",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "fromDelegate",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "toDelegate",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "DelegateChanged",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "delegate",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "previousBalance",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "newBalance",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "DelegateVotesChanged",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [],
+                            "name": "EIP712DomainChanged",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "Paused",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "previousAdminRole",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "newAdminRole",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "RoleAdminChanged",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "sender",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RoleGranted",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "sender",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RoleRevoked",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "from",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "value",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "Transfer",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "Unpaused",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "ADMIN_ROLE",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "CLOCK_MODE",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "DEFAULT_ADMIN_ROLE",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "DOMAIN_SEPARATOR",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "MINTER_ROLE",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "PAUSER_ROLE",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "spender",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "allowance",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "spender",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "approve",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "balanceOf",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "burn",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "burnFrom",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "cap",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint32",
+                                    "name": "pos",
+                                    "type": "uint32"
+                                }
+                            ],
+                            "name": "checkpoints",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint32",
+                                            "name": "fromBlock",
+                                            "type": "uint32"
+                                        },
+                                        {
+                                            "internalType": "uint224",
+                                            "name": "votes",
+                                            "type": "uint224"
+                                        }
+                                    ],
+                                    "internalType": "struct ERC20Votes.Checkpoint",
+                                    "name": "",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "clock",
+                            "outputs": [
+                                {
+                                    "internalType": "uint48",
+                                    "name": "",
+                                    "type": "uint48"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "decimals",
+                            "outputs": [
+                                {
+                                    "internalType": "uint8",
+                                    "name": "",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "spender",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "subtractedValue",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "decreaseAllowance",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "delegatee",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "delegate",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "delegatee",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "nonce",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "expiry",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint8",
+                                    "name": "v",
+                                    "type": "uint8"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "r",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "s",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "delegateBySig",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "delegates",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "eip712Domain",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes1",
+                                    "name": "fields",
+                                    "type": "bytes1"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "name",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "version",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "chainId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "verifyingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "salt",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "extensions",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "timepoint",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPastTotalSupply",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "timepoint",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPastVotes",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "getRoleAdmin",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "getVotes",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "grantRole",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "hasRole",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "spender",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "addedValue",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "increaseAllowance",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_recipient",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "_amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "mint",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "name",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "nonces",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "numCheckpoints",
+                            "outputs": [
+                                {
+                                    "internalType": "uint32",
+                                    "name": "",
+                                    "type": "uint32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "pause",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "paused",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "spender",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "value",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "deadline",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint8",
+                                    "name": "v",
+                                    "type": "uint8"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "r",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "s",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "permit",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "renounceRole",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "revokeRole",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "symbol",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "totalSupply",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "transfer",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "from",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "transferFrom",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "unpause",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getTrustedForwarder",
-              "outputs": [
+            ]
+        },
+        {
+            "name": "PubkeyRouter",
+            "contracts": [
                 {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
+                    "network": "naga-test",
+                    "address_hash": "0x054Ddcfef7E9434413ad62A6F37946Bf6B6CFc1A",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotAddSelectorsToZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveFunctionThatDoesNotExist",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionThatDoesNotExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint8",
+                                    "name": "_action",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "name": "IncorrectFacetCutAction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_initializationContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "InitializationFunctionReverted",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "_message",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "NoBytecodeAtAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NoSelectorsProvidedForFacetForCut",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NotContractOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RemoveFacetAddressMustBeZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "DiamondCut",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "diamondCut",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_functionSelector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "facetAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "facetAddress_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facetAddresses",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "facetAddresses_",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facet",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "facetFunctionSelectors",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_facetFunctionSelectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facets",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamondLoupe.Facet[]",
+                                    "name": "facets_",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "CallerNotOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "identifier",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "hash",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "KeySetNotFound",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "curveType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "count",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "RootKeyMiscount",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "ContractResolverAddressSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "string",
+                                    "name": "message",
+                                    "type": "string"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "sender",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "value",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "DebugEvent",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "pubkey",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "stakingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes32",
+                                    "name": "derivedKeyId",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "PubkeyRoutingDataSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "stakingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct IPubkeyRouter.RootKey",
+                                    "name": "rootKey",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "RootKeySet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "value",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "sender",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "ToggleEvent",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newTrustedForwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "TrustedForwarderSet",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "adminResetRootKeys",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct IPubkeyRouter.RootKey[]",
+                                    "name": "rootKeys",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "name": "adminSetRootKeys",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "realmId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "r",
+                                            "type": "bytes32"
+                                        },
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "s",
+                                            "type": "bytes32"
+                                        },
+                                        {
+                                            "internalType": "uint8",
+                                            "name": "v",
+                                            "type": "uint8"
+                                        }
+                                    ],
+                                    "internalType": "struct IPubkeyRouter.Signature[]",
+                                    "name": "signatures",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "signedMessage",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "checkNodeSignatures",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes",
+                                    "name": "pubkey",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "deriveEthAddressFromPubkey",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "pure",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "ethAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "ethAddressToPkpId",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "derivedKeyId",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "getDerivedPubkey",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes",
+                                    "name": "",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getEthAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "ethAddresses",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "name": "getPkpInfoFromEthAddresses",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "tokenId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "address",
+                                            "name": "ethAddress",
+                                            "type": "address"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "tokenIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "getPkpInfoFromTokenIds",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "tokenId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "address",
+                                            "name": "ethAddress",
+                                            "type": "address"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getPkpNftAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPubkey",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes",
+                                    "name": "",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "getRootKeys",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct IPubkeyRouter.RootKey[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getRoutingData",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "derivedKeyId",
+                                            "type": "bytes32"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PubkeyRoutingData",
+                                    "name": "",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getTrustedForwarder",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "isRouted",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "pubkeys",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "derivedKeyId",
+                                            "type": "bytes32"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PubkeyRoutingData",
+                                    "name": "",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setContractResolver",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "pubkey",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "derivedKeyId",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "setRoutingData",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "pubkey",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContract",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "derivedKeyId",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "setRoutingDataAsAdmin",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "forwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setTrustedForwarder",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "identifier",
+                                    "type": "string"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct IPubkeyRouter.RootKey[]",
+                                    "name": "newRootKeys",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "name": "voteForRootKeys",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+            ]
+        },
+        {
+            "name": "PKPNFT",
+            "contracts": [
                 {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
+                    "network": "naga-test",
+                    "address_hash": "0xaf4Dddb07Cdde48042e93eb5bf266b49950bC5BD",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotAddSelectorsToZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveFunctionThatDoesNotExist",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionThatDoesNotExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint8",
+                                    "name": "_action",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "name": "IncorrectFacetCutAction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_initializationContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "InitializationFunctionReverted",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "_message",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "NoBytecodeAtAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NoSelectorsProvidedForFacetForCut",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NotContractOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RemoveFacetAddressMustBeZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "DiamondCut",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "diamondCut",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_functionSelector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "facetAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "facetAddress_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facetAddresses",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "facetAddresses_",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facet",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "facetFunctionSelectors",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_facetFunctionSelectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facets",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamondLoupe.Facet[]",
+                                    "name": "facets_",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "CallerNotOwner",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "approved",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "Approval",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "operator",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bool",
+                                    "name": "approved",
+                                    "type": "bool"
+                                }
+                            ],
+                            "name": "ApprovalForAll",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "ContractResolverAddressSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newFreeMintSigner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "FreeMintSignerSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint8",
+                                    "name": "version",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "name": "Initialized",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "newMintCost",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "MintCostSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "pubkey",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "PKPMinted",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "from",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "Transfer",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newTrustedForwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "TrustedForwarderSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "Withdrew",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "approve",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "balanceOf",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "burn",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "realmId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "derivedKeyId",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "r",
+                                            "type": "bytes32"
+                                        },
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "s",
+                                            "type": "bytes32"
+                                        },
+                                        {
+                                            "internalType": "uint8",
+                                            "name": "v",
+                                            "type": "uint8"
+                                        }
+                                    ],
+                                    "internalType": "struct IPubkeyRouter.Signature[]",
+                                    "name": "signatures",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "stakingContractAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "claimAndMint",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "exists",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "freeMintSigner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getApproved",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getEthAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getNextDerivedKeyId",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "ethAddresses",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "name": "getPkpInfoFromEthAddresses",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "tokenId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "address",
+                                            "name": "ethAddress",
+                                            "type": "address"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "pageSize",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "pageIndex",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPkpInfoFromOwnerAddress",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "tokenId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "address",
+                                            "name": "ethAddress",
+                                            "type": "address"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "pageSize",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "pageIndex",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPkpInfoFromOwnerTokenId",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "tokenId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "address",
+                                            "name": "ethAddress",
+                                            "type": "address"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "tokenIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "getPkpInfoFromTokenIds",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "tokenId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "pubkey",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "address",
+                                            "name": "ethAddress",
+                                            "type": "address"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPubkeyRouterStorage.PkpInfo[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getPkpNftMetadataAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getPkpPermissionsAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPubkey",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes",
+                                    "name": "",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getRouterAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getStakingAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getTrustedForwarder",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "initialize",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "operator",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "isApprovedForAll",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "mintCost",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "ipfsCID",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "mintGrantAndBurnNext",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "mintNext",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "name",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "ownerOf",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "hash",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "prefixed",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "pure",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "redeemedFreeMintIds",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "from",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "safeTransferFrom",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "from",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "data",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "safeTransferFrom",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "operator",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bool",
+                                    "name": "approved",
+                                    "type": "bool"
+                                }
+                            ],
+                            "name": "setApprovalForAll",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setContractResolver",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newFreeMintSigner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setFreeMintSigner",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "newMintCost",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "setMintCost",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "forwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setTrustedForwarder",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "symbol",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "index",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "tokenByIndex",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "index",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "tokenOfOwnerByIndex",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "tokenURI",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "totalSupply",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "from",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "to",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "transferFrom",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "withdraw",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "name": "maxNetworkPrices",
-              "outputs": [
+            ]
+        },
+        {
+            "name": "PKPHelper",
+            "contracts": [
                 {
-                  "internalType": "uint256[]",
-                  "name": "",
-                  "type": "uint256[]"
+                    "network": "naga-test",
+                    "address_hash": "0x13428A18C0b181344F97ceaC5596F31a9d182e5c",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_resolver",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "enum ContractResolver.Env",
+                                    "name": "_env",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "constructor"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "ContractResolverAddressSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "previousAdminRole",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "newAdminRole",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "RoleAdminChanged",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "sender",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RoleGranted",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "sender",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RoleRevoked",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "DEFAULT_ADMIN_ROLE",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "derivedKeyId",
+                                            "type": "bytes32"
+                                        },
+                                        {
+                                            "components": [
+                                                {
+                                                    "internalType": "bytes32",
+                                                    "name": "r",
+                                                    "type": "bytes32"
+                                                },
+                                                {
+                                                    "internalType": "bytes32",
+                                                    "name": "s",
+                                                    "type": "bytes32"
+                                                },
+                                                {
+                                                    "internalType": "uint8",
+                                                    "name": "v",
+                                                    "type": "uint8"
+                                                }
+                                            ],
+                                            "internalType": "struct IPubkeyRouter.Signature[]",
+                                            "name": "signatures",
+                                            "type": "tuple[]"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPKPNFTStorage.ClaimMaterial",
+                                    "name": "claimMaterial",
+                                    "type": "tuple"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedIpfsCIDs",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedIpfsCIDScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "address[]",
+                                            "name": "permittedAddresses",
+                                            "type": "address[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAddressScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "uint256[]",
+                                            "name": "permittedAuthMethodTypes",
+                                            "type": "uint256[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodIds",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodPubkeys",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAuthMethodScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "addPkpEthAddressAsPermittedAddress",
+                                            "type": "bool"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "sendPkpToItself",
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "internalType": "struct PKPHelper.AuthMethodData",
+                                    "name": "authMethodData",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "claimAndMintNextAndAddAuthMethods",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "derivedKeyId",
+                                            "type": "bytes32"
+                                        },
+                                        {
+                                            "components": [
+                                                {
+                                                    "internalType": "bytes32",
+                                                    "name": "r",
+                                                    "type": "bytes32"
+                                                },
+                                                {
+                                                    "internalType": "bytes32",
+                                                    "name": "s",
+                                                    "type": "bytes32"
+                                                },
+                                                {
+                                                    "internalType": "uint8",
+                                                    "name": "v",
+                                                    "type": "uint8"
+                                                }
+                                            ],
+                                            "internalType": "struct IPubkeyRouter.Signature[]",
+                                            "name": "signatures",
+                                            "type": "tuple[]"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPKPNFTStorage.ClaimMaterial",
+                                    "name": "claimMaterial",
+                                    "type": "tuple"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedIpfsCIDs",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedIpfsCIDScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "address[]",
+                                            "name": "permittedAddresses",
+                                            "type": "address[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAddressScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "uint256[]",
+                                            "name": "permittedAuthMethodTypes",
+                                            "type": "uint256[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodIds",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodPubkeys",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAuthMethodScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "addPkpEthAddressAsPermittedAddress",
+                                            "type": "bool"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "sendPkpToItself",
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "internalType": "struct PKPHelper.AuthMethodData",
+                                    "name": "authMethodData",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "claimAndMintNextAndAddAuthMethodsWithTypes",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "string",
+                                            "name": "keySetId",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "internalType": "bytes32",
+                                            "name": "derivedKeyId",
+                                            "type": "bytes32"
+                                        },
+                                        {
+                                            "components": [
+                                                {
+                                                    "internalType": "bytes32",
+                                                    "name": "r",
+                                                    "type": "bytes32"
+                                                },
+                                                {
+                                                    "internalType": "bytes32",
+                                                    "name": "s",
+                                                    "type": "bytes32"
+                                                },
+                                                {
+                                                    "internalType": "uint8",
+                                                    "name": "v",
+                                                    "type": "uint8"
+                                                }
+                                            ],
+                                            "internalType": "struct IPubkeyRouter.Signature[]",
+                                            "name": "signatures",
+                                            "type": "tuple[]"
+                                        },
+                                        {
+                                            "internalType": "address",
+                                            "name": "stakingContractAddress",
+                                            "type": "address"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPKPNFTStorage.ClaimMaterialV2",
+                                    "name": "claimMaterial",
+                                    "type": "tuple"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedIpfsCIDs",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedIpfsCIDScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "address[]",
+                                            "name": "permittedAddresses",
+                                            "type": "address[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAddressScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "uint256[]",
+                                            "name": "permittedAuthMethodTypes",
+                                            "type": "uint256[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodIds",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodPubkeys",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAuthMethodScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "addPkpEthAddressAsPermittedAddress",
+                                            "type": "bool"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "sendPkpToItself",
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "internalType": "struct PKPHelper.AuthMethodData",
+                                    "name": "authMethodData",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "claimAndMintNextAndAddAuthMethodsWithTypesV2",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "contractResolver",
+                            "outputs": [
+                                {
+                                    "internalType": "contract ContractResolver",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "env",
+                            "outputs": [
+                                {
+                                    "internalType": "enum ContractResolver.Env",
+                                    "name": "",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getDomainWalletRegistry",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getPKPNftMetdataAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getPkpNftAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getPkpPermissionsAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "getRoleAdmin",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getStakingAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "grantRole",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "hasRole",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "permittedAuthMethodTypes",
+                                    "type": "uint256[]"
+                                },
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "permittedAuthMethodIds",
+                                    "type": "bytes[]"
+                                },
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "permittedAuthMethodPubkeys",
+                                    "type": "bytes[]"
+                                },
+                                {
+                                    "internalType": "uint256[][]",
+                                    "name": "permittedAuthMethodScopes",
+                                    "type": "uint256[][]"
+                                },
+                                {
+                                    "internalType": "bool",
+                                    "name": "addPkpEthAddressAsPermittedAddress",
+                                    "type": "bool"
+                                },
+                                {
+                                    "internalType": "bool",
+                                    "name": "sendPkpToItself",
+                                    "type": "bool"
+                                }
+                            ],
+                            "name": "mintNextAndAddAuthMethods",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "keyType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "string",
+                                            "name": "keySetId",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedIpfsCIDs",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedIpfsCIDScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "address[]",
+                                            "name": "permittedAddresses",
+                                            "type": "address[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAddressesScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "uint256[]",
+                                            "name": "permittedAuthMethodTypes",
+                                            "type": "uint256[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodIds",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "bytes[]",
+                                            "name": "permittedAuthMethodPubkeys",
+                                            "type": "bytes[]"
+                                        },
+                                        {
+                                            "internalType": "uint256[][]",
+                                            "name": "permittedAuthMethodScopes",
+                                            "type": "uint256[][]"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "addPkpEthAddressAsPermittedAddress",
+                                            "type": "bool"
+                                        },
+                                        {
+                                            "internalType": "bool",
+                                            "name": "sendPkpToItself",
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "internalType": "struct PKPHelper.MintNextAndAddAuthMethodsWithTypesParams",
+                                    "name": "params",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "mintNextAndAddAuthMethodsWithTypes",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "keyType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "keySetId",
+                                    "type": "string"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "permittedAuthMethodTypes",
+                                    "type": "uint256[]"
+                                },
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "permittedAuthMethodIds",
+                                    "type": "bytes[]"
+                                },
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "permittedAuthMethodPubkeys",
+                                    "type": "bytes[]"
+                                },
+                                {
+                                    "internalType": "uint256[][]",
+                                    "name": "permittedAuthMethodScopes",
+                                    "type": "uint256[][]"
+                                },
+                                {
+                                    "internalType": "string[]",
+                                    "name": "nftMetadata",
+                                    "type": "string[]"
+                                },
+                                {
+                                    "internalType": "bool",
+                                    "name": "addPkpEthAddressAsPermittedAddress",
+                                    "type": "bool"
+                                },
+                                {
+                                    "internalType": "bool",
+                                    "name": "sendPkpToItself",
+                                    "type": "bool"
+                                }
+                            ],
+                            "name": "mintNextAndAddDomainWalletMetadata",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "onERC721Received",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "removePkpMetadata",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "renounceOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "renounceRole",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "role",
+                                    "type": "bytes32"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "account",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "revokeRole",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setContractResolver",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string[]",
+                                    "name": "nftMetadata",
+                                    "type": "string[]"
+                                }
+                            ],
+                            "name": "setPkpMetadata",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+            ]
+        },
+        {
+            "name": "PKPPermissions",
+            "contracts": [
                 {
-                  "internalType": "address",
-                  "name": "node",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
+                    "network": "naga-test",
+                    "address_hash": "0x7255737630fCFb4914cF51552123eEe9abEc6120",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotAddSelectorsToZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveFunctionThatDoesNotExist",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionThatDoesNotExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint8",
+                                    "name": "_action",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "name": "IncorrectFacetCutAction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_initializationContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "InitializationFunctionReverted",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "_message",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "NoBytecodeAtAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NoSelectorsProvidedForFacetForCut",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NotContractOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RemoveFacetAddressMustBeZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "DiamondCut",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "diamondCut",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_functionSelector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "facetAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "facetAddress_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facetAddresses",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "facetAddresses_",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facet",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "facetFunctionSelectors",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_facetFunctionSelectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facets",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamondLoupe.Facet[]",
+                                    "name": "facets_",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "CallerNotOwner",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "ContractResolverAddressSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "userPubkey",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "PermittedAuthMethodAdded",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "PermittedAuthMethodRemoved",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "scopeId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "PermittedAuthMethodScopeAdded",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "scopeId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "PermittedAuthMethodScopeRemoved",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "uint256",
+                                    "name": "group",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes32",
+                                    "name": "root",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "RootHashUpdated",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newTrustedForwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "TrustedForwarderSet",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "ipfsCID",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "scopes",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "addPermittedAction",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "scopes",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "addPermittedAddress",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "authMethodType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "id",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "userPubkey",
+                                            "type": "bytes"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPKPPermissionsStorage.AuthMethod",
+                                    "name": "authMethod",
+                                    "type": "tuple"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "scopes",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "addPermittedAuthMethod",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "scopeId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "addPermittedAuthMethodScope",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "permittedAuthMethodTypesToAdd",
+                                    "type": "uint256[]"
+                                },
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "permittedAuthMethodIdsToAdd",
+                                    "type": "bytes[]"
+                                },
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "permittedAuthMethodPubkeysToAdd",
+                                    "type": "bytes[]"
+                                },
+                                {
+                                    "internalType": "uint256[][]",
+                                    "name": "permittedAuthMethodScopesToAdd",
+                                    "type": "uint256[][]"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "permittedAuthMethodTypesToRemove",
+                                    "type": "uint256[]"
+                                },
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "permittedAuthMethodIdsToRemove",
+                                    "type": "bytes[]"
+                                }
+                            ],
+                            "name": "batchAddRemoveAuthMethods",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "getAuthMethodId",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "pure",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getEthAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "getPKPPubKeysByAuthMethod",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "",
+                                    "type": "bytes[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPermittedActions",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes[]",
+                                    "name": "",
+                                    "type": "bytes[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPermittedAddresses",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "maxScopeId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPermittedAuthMethodScopes",
+                            "outputs": [
+                                {
+                                    "internalType": "bool[]",
+                                    "name": "",
+                                    "type": "bool[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPermittedAuthMethods",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "authMethodType",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "id",
+                                            "type": "bytes"
+                                        },
+                                        {
+                                            "internalType": "bytes",
+                                            "name": "userPubkey",
+                                            "type": "bytes"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPKPPermissionsStorage.AuthMethod[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getPkpNftAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "getPubkey",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes",
+                                    "name": "",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getRouterAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "getTokenIdsForAuthMethod",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getTrustedForwarder",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "getUserPubkeyForAuthMethod",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes",
+                                    "name": "",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "ipfsCID",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "isPermittedAction",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "isPermittedAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "isPermittedAuthMethod",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "scopeId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "isPermittedAuthMethodScopePresent",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "ipfsCID",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "removePermittedAction",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "removePermittedAddress",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "removePermittedAuthMethod",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "authMethodType",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "id",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "scopeId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "removePermittedAuthMethodScope",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newResolverAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setContractResolver",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "group",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "root",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "setRootHash",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "forwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setTrustedForwarder",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "group",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes32[]",
+                                    "name": "proof",
+                                    "type": "bytes32[]"
+                                },
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "leaf",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "verifyState",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "group",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes32[]",
+                                    "name": "proof",
+                                    "type": "bytes32[]"
+                                },
+                                {
+                                    "internalType": "bool[]",
+                                    "name": "proofFlags",
+                                    "type": "bool[]"
+                                },
+                                {
+                                    "internalType": "bytes32[]",
+                                    "name": "leaves",
+                                    "type": "bytes32[]"
+                                }
+                            ],
+                            "name": "verifyStates",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "name": "price",
-              "outputs": [
+            ]
+        },
+        {
+            "name": "PKPNFTMetadata",
+            "contracts": [
                 {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "stakerAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "price",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "productId",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "timestamp",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct LibPriceFeedStorage.NodePriceData[]",
-                  "name": "",
-                  "type": "tuple[]"
+                    "network": "naga-test",
+                    "address_hash": "0xE77d6EBD151c02e05a4d9645f816F68f55730733",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_resolver",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "enum ContractResolver.Env",
+                                    "name": "_env",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "constructor"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes",
+                                    "name": "buffer",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "bytesToHex",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "pure",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "contractResolver",
+                            "outputs": [
+                                {
+                                    "internalType": "contract ContractResolver",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "env",
+                            "outputs": [
+                                {
+                                    "internalType": "enum ContractResolver.Env",
+                                    "name": "",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "removeProfileForPkp",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "removeUrlForPKP",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "imgUrl",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "setProfileForPKP",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "url",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "setUrlForPKP",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "tokenId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "pubKey",
+                                    "type": "bytes"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "ethAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "tokenURI",
+                            "outputs": [
+                                {
+                                    "internalType": "string",
+                                    "name": "",
+                                    "type": "string"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+            ]
+        },
+        {
+            "name": "Allowlist",
+            "contracts": [
                 {
-                  "internalType": "uint256",
-                  "name": "productId",
-                  "type": "uint256"
+                    "network": "naga-test",
+                    "address_hash": "0x934d3190ff3A92eB1Cfb6CbD3617629322897969",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "constructor"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newAdmin",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "AdminAdded",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newAdmin",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "AdminRemoved",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "key",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "ItemAllowed",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "bytes32",
+                                    "name": "key",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "ItemNotAllowed",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newAdmin",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "addAdmin",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "allowAll",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "allowedItems",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "key",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "isAllowed",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newAdmin",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "removeAdmin",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "renounceOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "_allowAll",
+                                    "type": "bool"
+                                }
+                            ],
+                            "name": "setAllowAll",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "key",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "setAllowed",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes32",
+                                    "name": "key",
+                                    "type": "bytes32"
+                                }
+                            ],
+                            "name": "setNotAllowed",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "name": "prices",
-              "outputs": [
+            ]
+        },
+        {
+            "name": "PaymentDelegation",
+            "contracts": [
                 {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "stakerAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "price",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "productId",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "timestamp",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct LibPriceFeedStorage.NodePriceData[]",
-                  "name": "",
-                  "type": "tuple[]"
+                    "network": "naga-test",
+                    "address_hash": "0xd1E59c174BcF85012c54086AB600Dd0aB032e88B",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotAddSelectorsToZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveFunctionThatDoesNotExist",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionThatDoesNotExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint8",
+                                    "name": "_action",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "name": "IncorrectFacetCutAction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_initializationContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "InitializationFunctionReverted",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "_message",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "NoBytecodeAtAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NoSelectorsProvidedForFacetForCut",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NotContractOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RemoveFacetAddressMustBeZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "DiamondCut",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "diamondCut",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_functionSelector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "facetAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "facetAddress_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facetAddresses",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "facetAddresses_",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facet",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "facetFunctionSelectors",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_facetFunctionSelectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facets",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamondLoupe.Facet[]",
+                                    "name": "facets_",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "payer",
+                                    "type": "address"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint128",
+                                            "name": "totalMaxPrice",
+                                            "type": "uint128"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "requestsPerPeriod",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "periodSeconds",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct LibPaymentDelegationStorage.Restriction",
+                                    "name": "restriction",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "RestrictionSet",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "delegatePayments",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "users",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "name": "delegatePaymentsBatch",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "getPayers",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "users",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "name": "getPayersAndRestrictions",
+                            "outputs": [
+                                {
+                                    "internalType": "address[][]",
+                                    "name": "",
+                                    "type": "address[][]"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint128",
+                                            "name": "totalMaxPrice",
+                                            "type": "uint128"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "requestsPerPeriod",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "periodSeconds",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPaymentDelegationStorage.Restriction[][]",
+                                    "name": "",
+                                    "type": "tuple[][]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "payer",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "getRestriction",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint128",
+                                            "name": "totalMaxPrice",
+                                            "type": "uint128"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "requestsPerPeriod",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "periodSeconds",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPaymentDelegationStorage.Restriction",
+                                    "name": "",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "payer",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "getUsers",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint128",
+                                            "name": "totalMaxPrice",
+                                            "type": "uint128"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "requestsPerPeriod",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "periodSeconds",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPaymentDelegationStorage.Restriction",
+                                    "name": "r",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "setRestriction",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "undelegatePayments",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "users",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "name": "undelegatePaymentsBatch",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+            ]
+        },
+        {
+            "name": "Ledger",
+            "contracts": [
                 {
-                  "internalType": "uint256",
-                  "name": "newPrice",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
+                    "network": "naga-test",
+                    "address_hash": "0xbA0aEB6Bbf58F1B74E896416A20DB5be51C991f2",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotAddSelectorsToZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveFunctionThatDoesNotExist",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionThatDoesNotExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint8",
+                                    "name": "_action",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "name": "IncorrectFacetCutAction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_initializationContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "InitializationFunctionReverted",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "_message",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "NoBytecodeAtAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NoSelectorsProvidedForFacetForCut",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NotContractOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RemoveFacetAddressMustBeZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "DiamondCut",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "diamondCut",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_functionSelector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "facetAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "facetAddress_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facetAddresses",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "facetAddresses_",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facet",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "facetFunctionSelectors",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_facetFunctionSelectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facets",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamondLoupe.Facet[]",
+                                    "name": "facets_",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "AmountMustBePositive",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "ArrayLengthsMustMatch",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "CallerNotOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "InsufficientFunds",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "InsufficientWithdrawAmount",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "MustBeNonzero",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "NodeNotStakingNode",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "PercentageMustBeLessThan100",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "SessionAlreadyUsed",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "ValueExceedsUint128MaxLimit",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "WithdrawalDelayNotPassed",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "node_address",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "batch_id",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "BatchCharged",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "Deposit",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "depositor",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "DepositForUser",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "FoundationRewardsWithdrawn",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "percentage",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "LitFoundationSplitPercentageSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "RewardWithdraw",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "delay",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "RewardWithdrawDelaySet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "RewardWithdrawRequest",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newTrustedForwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "TrustedForwarderSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "int256",
+                                    "name": "amount",
+                                    "type": "int256"
+                                }
+                            ],
+                            "name": "UserCharged",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "delay",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "UserWithdrawDelaySet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "int256",
+                                    "name": "amount",
+                                    "type": "int256"
+                                }
+                            ],
+                            "name": "Withdraw",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "int256",
+                                    "name": "amount",
+                                    "type": "int256"
+                                }
+                            ],
+                            "name": "WithdrawRequest",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "balance",
+                            "outputs": [
+                                {
+                                    "internalType": "int256",
+                                    "name": "",
+                                    "type": "int256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "int256",
+                                    "name": "amount",
+                                    "type": "int256"
+                                }
+                            ],
+                            "name": "chargeUser",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "users",
+                                    "type": "address[]"
+                                },
+                                {
+                                    "internalType": "int256[]",
+                                    "name": "amounts",
+                                    "type": "int256[]"
+                                },
+                                {
+                                    "internalType": "uint64",
+                                    "name": "batchId",
+                                    "type": "uint64"
+                                }
+                            ],
+                            "name": "chargeUsers",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "deposit",
+                            "outputs": [],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "depositForUser",
+                            "outputs": [],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getStakingAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getTrustedForwarder",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "latestRewardWithdrawRequest",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "timestamp",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "amount",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibLedgerStorage.WithdrawRequest",
+                                    "name": "",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "latestWithdrawRequest",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "timestamp",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "amount",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibLedgerStorage.WithdrawRequest",
+                                    "name": "",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "litFoundationRewards",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "litFoundationSplitPercentage",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "requestRewardWithdraw",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "int256",
+                                    "name": "amount",
+                                    "type": "int256"
+                                }
+                            ],
+                            "name": "requestWithdraw",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "rewardBalance",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "rewardWithdrawDelay",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "percentage",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "setLitFoundationSplitPercentage",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "delay",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "setRewardWithdrawDelay",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "forwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setTrustedForwarder",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "delay",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "setUserWithdrawDelay",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "user",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "stableBalance",
+                            "outputs": [
+                                {
+                                    "internalType": "int256",
+                                    "name": "",
+                                    "type": "int256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "userWithdrawDelay",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "int256",
+                                    "name": "amount",
+                                    "type": "int256"
+                                }
+                            ],
+                            "name": "withdraw",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "withdrawFoundationRewards",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "withdrawRewards",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "name": "setBaseNetworkPrices",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
+            ]
+        },
+        {
+            "name": "PriceFeed",
+            "contracts": [
                 {
-                  "internalType": "enum LibPriceFeedStorage.LitActionPriceComponent",
-                  "name": "priceComponent",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "enum LibPriceFeedStorage.NodePriceMeasurement",
-                  "name": "priceMeasurement",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "new_price",
-                  "type": "uint256"
+                    "network": "naga-test",
+                    "address_hash": "0x556955025dD0981Bac684fbDEcE14cDa897d0837",
+                    "inserted_at": "2025-10-30T16:03:28Z",
+                    "ABI": [
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotAddSelectorsToZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveFunctionThatDoesNotExist",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotRemoveImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionThatDoesNotExists",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_selectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_selector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "CannotReplaceImmutableFunction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint8",
+                                    "name": "_action",
+                                    "type": "uint8"
+                                }
+                            ],
+                            "name": "IncorrectFacetCutAction",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_initializationContractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "InitializationFunctionReverted",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "string",
+                                    "name": "_message",
+                                    "type": "string"
+                                }
+                            ],
+                            "name": "NoBytecodeAtAddress",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NoSelectorsProvidedForFacetForCut",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_user",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_contractOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "NotContractOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facetAddress",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "RemoveFacetAddressMustBeZeroAddress",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "indexed": false,
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "DiamondCut",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "enum IDiamond.FacetCutAction",
+                                            "name": "action",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamond.FacetCut[]",
+                                    "name": "_diamondCut",
+                                    "type": "tuple[]"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "_init",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "bytes",
+                                    "name": "_calldata",
+                                    "type": "bytes"
+                                }
+                            ],
+                            "name": "diamondCut",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_functionSelector",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "facetAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "facetAddress_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facetAddresses",
+                            "outputs": [
+                                {
+                                    "internalType": "address[]",
+                                    "name": "facetAddresses_",
+                                    "type": "address[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_facet",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "facetFunctionSelectors",
+                            "outputs": [
+                                {
+                                    "internalType": "bytes4[]",
+                                    "name": "_facetFunctionSelectors",
+                                    "type": "bytes4[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "facets",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "facetAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "bytes4[]",
+                                            "name": "functionSelectors",
+                                            "type": "bytes4[]"
+                                        }
+                                    ],
+                                    "internalType": "struct IDiamondLoupe.Facet[]",
+                                    "name": "facets_",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "bytes4",
+                                    "name": "_interfaceId",
+                                    "type": "bytes4"
+                                }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                                {
+                                    "internalType": "bool",
+                                    "name": "",
+                                    "type": "bool"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "previousOwner",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "OwnershipTransferred",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "owner",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "owner_",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "_newOwner",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "transferOwnership",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "CallerNotOwner",
+                            "type": "error"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "MustBeNonzero",
+                            "type": "error"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "newPrice",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "BaseNetworkPriceSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "newPrice",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "MaxNetworkPriceSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": false,
+                                    "internalType": "address",
+                                    "name": "newTrustedForwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "TrustedForwarderSet",
+                            "type": "event"
+                        },
+                        {
+                            "anonymous": false,
+                            "inputs": [
+                                {
+                                    "indexed": true,
+                                    "internalType": "address",
+                                    "name": "stakingAddress",
+                                    "type": "address"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256",
+                                    "name": "usagePercent",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "indexed": false,
+                                    "internalType": "uint256[]",
+                                    "name": "newPrices",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "UsageSet",
+                            "type": "event"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "baseNetworkPrices",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getLitActionPriceConfigs",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "enum LibPriceFeedStorage.LitActionPriceComponent",
+                                            "name": "priceComponent",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "enum LibPriceFeedStorage.NodePriceMeasurement",
+                                            "name": "priceMeasurement",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "price",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPriceFeedStorage.LitActionPriceConfig[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getNodeCapacityConfig",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "pkpSignMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "encSignMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "litActionMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "signSessionKeyMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "globalMaxCapacity",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPriceFeedStorage.NodeCapacityConfig",
+                                    "name": "",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "realmId",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "getNodesForRequest",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "components": [
+                                        {
+                                            "components": [
+                                                {
+                                                    "internalType": "uint32",
+                                                    "name": "ip",
+                                                    "type": "uint32"
+                                                },
+                                                {
+                                                    "internalType": "uint128",
+                                                    "name": "ipv6",
+                                                    "type": "uint128"
+                                                },
+                                                {
+                                                    "internalType": "uint32",
+                                                    "name": "port",
+                                                    "type": "uint32"
+                                                },
+                                                {
+                                                    "internalType": "address",
+                                                    "name": "nodeAddress",
+                                                    "type": "address"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "reward",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "senderPubKey",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "receiverPubKey",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "lastActiveEpoch",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "commissionRate",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "lastRewardEpoch",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "lastRealmId",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "delegatedStakeAmount",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "delegatedStakeWeight",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "lastRewardEpochClaimedFixedCostRewards",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "lastRewardEpochClaimedCommission",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "address",
+                                                    "name": "operatorAddress",
+                                                    "type": "address"
+                                                },
+                                                {
+                                                    "internalType": "uint256",
+                                                    "name": "uniqueDelegatingStakerCount",
+                                                    "type": "uint256"
+                                                },
+                                                {
+                                                    "internalType": "bool",
+                                                    "name": "registerAttestedWalletDisabled",
+                                                    "type": "bool"
+                                                }
+                                            ],
+                                            "internalType": "struct LibStakingStorage.Validator",
+                                            "name": "validator",
+                                            "type": "tuple"
+                                        },
+                                        {
+                                            "internalType": "uint256[]",
+                                            "name": "prices",
+                                            "type": "uint256[]"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPriceFeedStorage.NodeInfoAndPrices[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getStakingAddress",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [],
+                            "name": "getTrustedForwarder",
+                            "outputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "",
+                                    "type": "address"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "maxNetworkPrices",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "node",
+                                    "type": "address"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "price",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "stakerAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "price",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "productId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "timestamp",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPriceFeedStorage.NodePriceData[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "productId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "prices",
+                            "outputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "address",
+                                            "name": "stakerAddress",
+                                            "type": "address"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "price",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "productId",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "timestamp",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPriceFeedStorage.NodePriceData[]",
+                                    "name": "",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "newPrice",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "setBaseNetworkPrices",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "enum LibPriceFeedStorage.LitActionPriceComponent",
+                                    "name": "priceComponent",
+                                    "type": "uint8"
+                                },
+                                {
+                                    "internalType": "enum LibPriceFeedStorage.NodePriceMeasurement",
+                                    "name": "priceMeasurement",
+                                    "type": "uint8"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "new_price",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "setLitActionPriceConfig",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "enum LibPriceFeedStorage.LitActionPriceComponent",
+                                            "name": "priceComponent",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "enum LibPriceFeedStorage.NodePriceMeasurement",
+                                            "name": "priceMeasurement",
+                                            "type": "uint8"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "price",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPriceFeedStorage.LitActionPriceConfig[]",
+                                    "name": "configs",
+                                    "type": "tuple[]"
+                                }
+                            ],
+                            "name": "setLitActionPriceConfigs",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "newPrice",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "setMaxNetworkPrices",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "components": [
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "pkpSignMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "encSignMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "litActionMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "signSessionKeyMaxConcurrency",
+                                            "type": "uint256"
+                                        },
+                                        {
+                                            "internalType": "uint256",
+                                            "name": "globalMaxCapacity",
+                                            "type": "uint256"
+                                        }
+                                    ],
+                                    "internalType": "struct LibPriceFeedStorage.NodeCapacityConfig",
+                                    "name": "config",
+                                    "type": "tuple"
+                                }
+                            ],
+                            "name": "setNodeCapacityConfig",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "address",
+                                    "name": "forwarder",
+                                    "type": "address"
+                                }
+                            ],
+                            "name": "setTrustedForwarder",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "usagePercent",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "setUsage",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "usagePercent",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256",
+                                    "name": "productId",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "name": "usagePercentToPrice",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "",
+                                    "type": "uint256"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        },
+                        {
+                            "inputs": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "usagePercent",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "productIds",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "name": "usagePercentToPrices",
+                            "outputs": [
+                                {
+                                    "internalType": "uint256[]",
+                                    "name": "",
+                                    "type": "uint256[]"
+                                }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                        }
+                    ]
                 }
-              ],
-              "name": "setLitActionPriceConfig",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "enum LibPriceFeedStorage.LitActionPriceComponent",
-                      "name": "priceComponent",
-                      "type": "uint8"
-                    },
-                    {
-                      "internalType": "enum LibPriceFeedStorage.NodePriceMeasurement",
-                      "name": "priceMeasurement",
-                      "type": "uint8"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "price",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct LibPriceFeedStorage.LitActionPriceConfig[]",
-                  "name": "configs",
-                  "type": "tuple[]"
-                }
-              ],
-              "name": "setLitActionPriceConfigs",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "newPrice",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
-                }
-              ],
-              "name": "setMaxNetworkPrices",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "uint256",
-                      "name": "pkpSignMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "encSignMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "litActionMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "signSessionKeyMaxConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "globalMaxCapacity",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct LibPriceFeedStorage.NodeCapacityConfig",
-                  "name": "config",
-                  "type": "tuple"
-                }
-              ],
-              "name": "setNodeCapacityConfig",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "forwarder",
-                  "type": "address"
-                }
-              ],
-              "name": "setTrustedForwarder",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "usagePercent",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
-                }
-              ],
-              "name": "setUsage",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "usagePercent",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "productId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "usagePercentToPrice",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "usagePercent",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256[]",
-                  "name": "productIds",
-                  "type": "uint256[]"
-                }
-              ],
-              "name": "usagePercentToPrices",
-              "outputs": [
-                {
-                  "internalType": "uint256[]",
-                  "name": "",
-                  "type": "uint256[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            }
-          ]
+            ]
         }
-      ]
+    ],
+    "config": {
+        "chainId": "175188",
+        "rpcUrl": "https://yellowstone-rpc.litprotocol.com",
+        "chainName": "yellowstone",
+        "litNodeDomainName": "127.0.0.1",
+        "litNodePort": 7470,
+        "rocketPort": 7470
     }
-  ],
-  "config": {
-    "chainId": "175188",
-    "rpcUrl": "https://yellowstone-rpc.litprotocol.com",
-    "chainName": "yellowstone",
-    "litNodeDomainName": "127.0.0.1",
-    "litNodePort": 7470,
-    "rocketPort": 7470
-  }
 };
+//# sourceMappingURL=naga-test.js.map

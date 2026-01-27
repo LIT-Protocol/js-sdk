@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/wrapped-keys",
-  "type": "commonjs",
+  "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -24,8 +24,17 @@
     "genReact": false
   },
   "version": "8.1.2",
-  "main": "./src/index.js",
+  "main": "./cjs/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
   "typings": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./cjs/index.js"
+    }
+  },
   "dependencies": {
     "@lit-protocol/auth": "workspace:*",
     "@lit-protocol/constants": "workspace:*",
