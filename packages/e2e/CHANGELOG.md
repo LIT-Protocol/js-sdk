@@ -1,5 +1,14 @@
 # @lit-protocol/e2e
 
+## 5.1.1
+
+### Patch Changes
+
+- 1dd24b8: add payment delegation auth sig
+- Updated dependencies [1dd24b8]
+  - @lit-protocol/auth-helpers@8.2.1
+  - @lit-protocol/types@8.0.4
+
 ## 5.1.0
 
 ### Minor Changes
