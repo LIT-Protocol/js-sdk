@@ -46,6 +46,8 @@ let authManager: any = null;
 let masterAccountAuthContext: any = null;
 let networkModule: any = null;
 let masterAccount: any = null;
+const CHILD_LIT_ACTION_IPFS_ID =
+  'QmUMbiKFX5q9ThEDkKNcEfkN2Zif57nwHLx3FjSJdumJiv';
 
 /**
  * Initialise shared resources once
@@ -385,6 +387,54 @@ export async function runSignSessionKeyTest() {
   }
 }
 
+// test failure-path for '/web/sign_session_key'
+export async function runSignSessionKeyFailurePathTest() {
+  const startTime = Date.now();
+
+  // Use a valid-length but non-existent PKP pubkey to force failure.
+  const invalidPkpPublicKey =
+    process.env['ARTILLERY_INVALID_PKP_PUBKEY'] ?? `0x04${'11'.repeat(64)}`;
+
+  try {
+    await initialiseSharedResources();
+    const state = await StateManager.readFile();
+
+    await authManager.createPkpAuthContext({
+      authData: state.masterAccount.authData,
+      pkpPublicKey: invalidPkpPublicKey,
+      authConfig: {
+        resources: [
+          ['pkp-signing', '*'],
+          ['lit-action-execution', '*'],
+          ['access-control-condition-decryption', '*'],
+        ],
+        expiration: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
+      },
+      litClient: litClient,
+      cache: {
+        delegationAuthSig: false,
+      },
+    });
+
+    throw new Error('Expected signSessionKey failure did not occur');
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (message.includes('Run init.ts first')) {
+      throw error;
+    }
+
+    if (message.includes('Expected signSessionKey failure did not occur')) {
+      throw error;
+    }
+
+    console.log(`✅ failure-path signSessionKey failed in ${duration}ms`);
+    console.log('✅ failure-path error:', message);
+    return;
+  }
+}
+
 // String enum for the variant
 type Variant =
   | 'sign'
@@ -440,7 +490,7 @@ function getLitActionCodeAndJsParams(
           const { sigName, publicKey } = jsParams;
           let utf8Encode = new TextEncoder();
           const toSign = utf8Encode.encode('This message is exactly 32 bytes');
-          const _ = await Lit.Actions.call({ ipfsId: 'QmRwN9GKHvCn4Vk7biqtr6adjXMs7PzzYPCzNCRjPFiDjm', params: {
+          const _ = await Lit.Actions.call({ ipfsId: '${CHILD_LIT_ACTION_IPFS_ID}', params: {
               toSign: Array.from(toSign),
               publicKey,
               sigName

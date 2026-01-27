@@ -6,7 +6,7 @@ config:
       arrivalRate: 5
       rampTo: 100
       name: 'Ramp Up'
-    # Over 300s, create 100 vusers per second
+    # Over 300s, sustain 100 vusers per second
     - duration: 300
       arrivalRate: 100
       name: 'Sustained Execute JS'
