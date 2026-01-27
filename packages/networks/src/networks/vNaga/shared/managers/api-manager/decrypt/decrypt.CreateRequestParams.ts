@@ -22,4 +22,5 @@ export type DecryptCreateRequestParams = {
   version: string;
   chain: string;
   jitContext: NagaJitContext;
+  keySetIdentifier?: string;
 };

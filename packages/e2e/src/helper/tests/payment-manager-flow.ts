@@ -22,7 +22,7 @@ export const createPaymentManagerFlowTest = (
     // Test deposit
     const depositAmount = '0.00001'; // Very small amount for testing (account only has 0.0001 ETH)
     const depositResult = await paymentManager.deposit({
-      amountInEth: depositAmount,
+      amountInLitkey: depositAmount,
     });
 
     expect(depositResult.hash).toBeDefined();
@@ -44,7 +44,7 @@ export const createPaymentManagerFlowTest = (
     // Test withdrawal request
     const withdrawAmount = '0.000005'; // Half of deposited amount
     const withdrawRequestResult = await paymentManager.requestWithdraw({
-      amountInEth: withdrawAmount,
+      amountInLitkey: withdrawAmount,
     });
 
     expect(withdrawRequestResult.hash).toBeDefined();
@@ -98,7 +98,7 @@ export const createPaymentManagerFlowTest = (
       console.log('💸 Testing withdrawal execution...');
       // Execute withdrawal if possible
       const withdrawResult = await paymentManager.withdraw({
-        amountInEth: withdrawAmount,
+        amountInLitkey: withdrawAmount,
       });
 
       expect(withdrawResult.hash).toBeDefined();
@@ -121,7 +121,7 @@ export const createPaymentManagerFlowTest = (
     const targetUserAddress = ctx.aliceViemAccount.address;
     const depositForUserResult = await paymentManager.depositForUser({
       userAddress: targetUserAddress,
-      amountInEth: '0.00001',
+      amountInLitkey: '0.00001',
     });
 
     expect(depositForUserResult.hash).toBeDefined();
