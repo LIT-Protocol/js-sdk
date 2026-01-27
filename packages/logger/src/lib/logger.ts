@@ -4,114 +4,349 @@ import pinoInstance, {
   Logger as Pino,
 } from 'pino';
 
-const isNode = () => {
-  let isNode = false;
-  // @ts-ignore
-  if (typeof process === 'object') {
-    // @ts-ignore
-    if (typeof process.versions === 'object') {
-      // @ts-ignore
-      if (typeof process.versions.node !== 'undefined') {
-        isNode = true;
-      }
-    }
-  }
-  return isNode;
+export type LogLevel =
+  | 'silent'
+  | 'fatal'
+  | 'error'
+  | 'warn'
+  | 'info'
+  | 'debug'
+  | 'debug_text'
+  | 'debug2' // deprecated alias for debug_text
+  | 'trace';
+
+export interface LogEntry {
+  level: LogLevel;
+  time: number;
+  msg?: string;
+  data?: unknown;
+  bindings: Record<string, unknown>;
+  args: unknown[];
+}
+
+export type LogTransport = (entry: LogEntry) => void | Promise<void>;
+
+const LEVEL_RANK: Record<LogLevel, number> = {
+  silent: 100,
+  fatal: 60,
+  error: 50,
+  warn: 40,
+  info: 30,
+  debug: 20,
+  debug_text: 15,
+  debug2: 15,
+  trace: 10,
 };
 
-export const getDefaultLevel = () => {
-  let logLevel = 'silent';
+const canonicalizeLevel = (level: LogLevel): LogLevel =>
+  level === 'debug2' ? 'debug_text' : level;
 
-  if (isNode()) {
-    logLevel = process.env['LOG_LEVEL'] || 'silent';
+const isNodeEnvironment = () =>
+  typeof process !== 'undefined' &&
+  process.versions != null &&
+  process.versions.node != null;
+
+export const getDefaultLevel = (): LogLevel => {
+  let logLevel: string | undefined;
+
+  if (isNodeEnvironment()) {
+    logLevel = process.env['LOG_LEVEL'];
   } else {
-    // @ts-ignore
-    logLevel = globalThis['LOG_LEVEL'] || 'silent';
+    // @ts-ignore - globalThis is available in browsers
+    logLevel = globalThis['LOG_LEVEL'];
   }
 
-  // console.log('✅ logLevel', logLevel);
-  return logLevel;
+  const level = (logLevel as LogLevel) || 'silent';
+  return canonicalizeLevel(level);
 };
 
-const DEFAULT_LOGGER_OPTIONS = {
+const DEFAULT_LOGGER_OPTIONS: LoggerOptions<string, false> = {
   name: 'LitProtocolSDK',
-  level: getDefaultLevel() === 'debug2' ? 'debug' : getDefaultLevel(),
+  level: getDefaultLevel(),
 };
 
-// Custom logger wrapper for debug2 level
-const createConsoleLogger = (name: string): any => {
-  const baseLogger = {
-    level: 'debug', // Use standard level to avoid pino errors
+type LoggerImpl = {
+  level?: string;
+  fatal: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+  info: (...args: any[]) => void;
+  debug: (...args: any[]) => void;
+  debug_text?: (...args: any[]) => void;
+  debug2?: (...args: any[]) => void;
+  debugText?: (...args: any[]) => void;
+  trace: (...args: any[]) => void;
+  child?: (bindings: Record<string, unknown>) => LoggerImpl;
+  isLevelEnabled?: (level: string) => boolean;
+};
 
-    // Standard log levels that delegate to console
-    fatal: (...args: any[]) => console.error(`[${name}] FATAL:`, ...args),
-    error: (...args: any[]) => console.error(`[${name}] ERROR:`, ...args),
-    warn: (...args: any[]) => console.warn(`[${name}] WARN:`, ...args),
-    info: (...args: any[]) => console.info(`[${name}] INFO:`, ...args),
-    debug: (...args: any[]) => console.log(`[${name}] DEBUG:`, ...args),
-    trace: (...args: any[]) => console.log(`[${name}] TRACE:`, ...args),
+type Logger = Pino<string, boolean> & LoggerImpl;
 
-    // Custom debug2 level using console.log
-    debug2: (...args: any[]) => console.log(`[${name}] DEBUG2:`, ...args),
+interface InternalConfig {
+  level: LogLevel;
+  name: string;
+  bindings: Record<string, unknown>;
+  transports: LogTransport[];
+  useDefaultTransports: boolean;
+  impl: LoggerImpl;
+}
 
-    // Child logger creation
-    child: (bindings: any) => {
-      const childName = bindings.module ? `${name}:${bindings.module}` : name;
+const normalizeLevelForPino = (level: LogLevel): string =>
+  canonicalizeLevel(level) === 'debug_text'
+    ? 'debug'
+    : canonicalizeLevel(level);
+
+const createConsoleLogger = (name: string): LoggerImpl => {
+  const baseLogger: LoggerImpl = {
+    level: 'debug',
+    fatal: (...args) => console.error(`[${name}] FATAL:`, ...args),
+    error: (...args) => console.error(`[${name}] ERROR:`, ...args),
+    warn: (...args) => console.warn(`[${name}] WARN:`, ...args),
+    info: (...args) => console.info(`[${name}] INFO:`, ...args),
+    debug: (...args) => console.log(`[${name}] DEBUG:`, ...args),
+    trace: (...args) => console.log(`[${name}] TRACE:`, ...args),
+    child: (bindings) => {
+      const moduleName = bindings['module'];
+      const childName =
+        typeof moduleName === 'string' ? `${name}:${moduleName}` : name;
       return createConsoleLogger(childName);
     },
-
-    // Silent method (no-op)
-    silent: () => {},
-
-    // Add stub methods for pino compatibility
-    on: () => baseLogger,
-    addLevel: () => {},
     isLevelEnabled: () => true,
-    levelVal: 30,
-    version: '1.0.0',
   };
+
+  const debugText = (...args: any[]) =>
+    console.log(`[${name}] DEBUG_TEXT:`, ...args);
+
+  baseLogger.debug_text = debugText;
+  baseLogger.debugText = debugText;
+  baseLogger.debug2 = debugText;
 
   return baseLogger;
 };
 
-type Logger = Pino<string, boolean>;
-let logger: Logger = (
-  getDefaultLevel() === 'debug2'
-    ? createConsoleLogger(DEFAULT_LOGGER_OPTIONS.name)
-    : pinoInstance(DEFAULT_LOGGER_OPTIONS)
-) as Logger;
-
-function setLoggerOptions(
-  loggerOptions: LoggerOptions<string, false>,
+const createDefaultImpl = (
+  options: LoggerOptions<string, false>,
   destination?: DestinationStream
-): Logger {
-  const finalOptions = {
-    ...DEFAULT_LOGGER_OPTIONS,
-    ...loggerOptions,
-  };
+): LoggerImpl => {
+  const requestedLevel = canonicalizeLevel(
+    ((options.level as LogLevel) || getDefaultLevel()) as LogLevel
+  );
 
-  // Use console logger for debug2 level
-  if (finalOptions.level === 'debug2') {
-    logger = createConsoleLogger(
-      finalOptions.name || 'LitProtocolSDK'
-    ) as Logger;
-  } else {
-    // Ensure we don't pass debug2 to pino - convert to debug instead
-    const pinoOptions = {
-      ...finalOptions,
-      level: finalOptions.level === 'debug2' ? 'debug' : finalOptions.level,
-    };
-    logger = pinoInstance(pinoOptions, destination);
+  if (requestedLevel === 'debug_text') {
+    return createConsoleLogger(options.name || DEFAULT_LOGGER_OPTIONS.name!);
   }
 
-  return logger;
+  const effectiveLevel = normalizeLevelForPino(requestedLevel);
+
+  const pinoOptions: LoggerOptions<string, false> = {
+    ...DEFAULT_LOGGER_OPTIONS,
+    ...options,
+    level: effectiveLevel,
+  };
+
+  if (!isNodeEnvironment()) {
+    pinoOptions.browser = {
+      asObject: true,
+      ...(pinoOptions.browser || {}),
+    };
+  }
+
+  return pinoInstance(pinoOptions, destination) as unknown as LoggerImpl;
+};
+
+const config: InternalConfig = {
+  level: getDefaultLevel(),
+  name: DEFAULT_LOGGER_OPTIONS.name!,
+  bindings: {},
+  transports: [],
+  useDefaultTransports: true,
+  impl: createDefaultImpl(DEFAULT_LOGGER_OPTIONS),
+};
+
+const shouldLog = (level: LogLevel): boolean => {
+  if (config.level === 'silent') return false;
+  return LEVEL_RANK[level] >= LEVEL_RANK[config.level];
+};
+
+const extractMsgAndData = (args: unknown[]): Pick<LogEntry, 'msg' | 'data'> => {
+  if (args.length === 0) return {};
+  const [first, second] = args;
+
+  if (typeof first === 'string') {
+    if (second && typeof second === 'object') {
+      return { msg: first, data: second };
+    }
+    return { msg: first };
+  }
+
+  if (first instanceof Error) {
+    if (typeof second === 'string') {
+      return { msg: second, data: { err: first } };
+    }
+    return { msg: first.message, data: { err: first } };
+  }
+
+  if (first && typeof first === 'object') {
+    const msg =
+      typeof second === 'string'
+        ? second
+        : typeof (first as any).msg === 'string'
+        ? (first as any).msg
+        : undefined;
+    return { msg, data: first };
+  }
+
+  return { msg: String(first) };
+};
+
+const emitToTransports = (entry: LogEntry) => {
+  for (const transport of config.transports) {
+    try {
+      void transport(entry);
+    } catch {
+      // ignore transport errors
+    }
+  }
+};
+
+const logWithLevel = (
+  level: LogLevel,
+  getImpl: () => LoggerImpl,
+  bindings: Record<string, unknown>,
+  args: unknown[]
+) => {
+  const canonicalLevel = canonicalizeLevel(level);
+  if (!shouldLog(canonicalLevel)) return;
+
+  const impl = getImpl();
+  const implLevel = normalizeLevelForPino(canonicalLevel);
+  const mergedBindings = {
+    name: config.name,
+    ...config.bindings,
+    ...bindings,
+  };
+  const implMethod =
+    // @ts-ignore - dynamic level access
+    (impl as any)[canonicalLevel] ||
+    (canonicalLevel === 'debug_text' ? impl.debug : undefined);
+
+  if (
+    config.useDefaultTransports &&
+    typeof implMethod === 'function' &&
+    (!impl.isLevelEnabled || impl.isLevelEnabled(implLevel))
+  ) {
+    implMethod.apply(impl, args as any);
+  }
+
+  if (config.transports.length > 0) {
+    const { msg, data } = extractMsgAndData(args);
+    emitToTransports({
+      level: canonicalLevel,
+      time: Date.now(),
+      msg,
+      data,
+      bindings: mergedBindings,
+      args,
+    });
+  }
+};
+
+const createLoggerWrapper = (
+  getImpl: () => LoggerImpl,
+  bindings: Record<string, unknown>
+): LoggerImpl => {
+  const wrapper: LoggerImpl = {
+    get level() {
+      return config.level;
+    },
+    fatal: (...args) => logWithLevel('fatal', getImpl, bindings, args),
+    error: (...args) => logWithLevel('error', getImpl, bindings, args),
+    warn: (...args) => logWithLevel('warn', getImpl, bindings, args),
+    info: (...args) => logWithLevel('info', getImpl, bindings, args),
+    debug: (...args) => logWithLevel('debug', getImpl, bindings, args),
+    trace: (...args) => logWithLevel('trace', getImpl, bindings, args),
+    debug_text: (...args) =>
+      logWithLevel('debug_text', getImpl, bindings, args),
+    debugText: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
+    debug2: (...args) => logWithLevel('debug_text', getImpl, bindings, args),
+    child: (childBindings) => {
+      const mergedBindings = { ...bindings, ...childBindings };
+      return createLoggerWrapper(() => {
+        const impl = getImpl();
+        return impl.child ? impl.child(childBindings) : impl;
+      }, mergedBindings);
+    },
+  };
+
+  return wrapper;
+};
+
+const rootLogger = createLoggerWrapper(() => config.impl, {
+  name: config.name,
+});
+
+type ExtraLoggerOptions = {
+  transports?: LogTransport[];
+  useDefaultTransports?: boolean;
+  impl?: LoggerImpl;
+  bindings?: Record<string, unknown>;
+};
+
+function setLoggerOptions(
+  loggerOptions: LoggerOptions<string, false> & ExtraLoggerOptions,
+  destination?: DestinationStream
+): Logger {
+  const { transports, useDefaultTransports, impl, bindings, ...pinoOptions } =
+    loggerOptions || {};
+
+  if (bindings) {
+    config.bindings = { ...config.bindings, ...bindings };
+  }
+
+  if (typeof useDefaultTransports === 'boolean') {
+    config.useDefaultTransports = useDefaultTransports;
+  }
+
+  if (transports) {
+    config.transports = transports;
+  }
+
+  const level = canonicalizeLevel(
+    ((loggerOptions.level as LogLevel) || getDefaultLevel()) as LogLevel
+  );
+  config.level = level;
+
+  const name = (loggerOptions.name as string) || DEFAULT_LOGGER_OPTIONS.name!;
+  config.name = name;
+
+  if (impl) {
+    config.impl = impl;
+  } else {
+    if (level === 'debug_text') {
+      config.impl = createConsoleLogger(name);
+    } else {
+      const effectivePinoOptions: LoggerOptions<string, false> = {
+        ...DEFAULT_LOGGER_OPTIONS,
+        ...pinoOptions,
+        level: normalizeLevelForPino(level),
+        name,
+        base: { ...(pinoOptions.base || {}), ...config.bindings },
+      };
+
+      config.impl = createDefaultImpl(effectivePinoOptions, destination);
+    }
+  }
+
+  return rootLogger as unknown as Logger;
 }
 
 function getChildLogger(
-  ...childParams: Parameters<typeof logger.child>
+  ...childParams: Parameters<NonNullable<LoggerImpl['child']>>
 ): Logger {
-  return logger.child(...childParams);
+  // Root logger always has child()
+  // @ts-ignore
+  return (rootLogger.child as any)(...childParams) as Logger;
 }
 
-export { getChildLogger, logger, setLoggerOptions };
+export { getChildLogger, rootLogger as logger, setLoggerOptions };
 export type { Logger };

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { logger } from '@lit-protocol/logger';
 import { DefaultNetworkConfig } from '../../../../../../../shared/interfaces/NetworkContext';
 import {
   PkpIdentifierRaw,
@@ -41,8 +42,10 @@ export async function removePermittedAddressByIdentifier(
     networkCtx
   );
 
-  console.log('❌ TARGET ADDRESS:', targetAddress);
-  console.log('❌ PKP TOKEN ID:', pkpTokenId);
+  logger.debug(
+    { targetAddress, pkpTokenId },
+    'Removing permitted address by identifier'
+  );
 
   return removePermittedAddress(
     {

@@ -43,8 +43,6 @@ export async function removePermittedAuthMethodScope(
   const validatedRequest = removePermittedAuthMethodScopeSchema.parse(request);
   logger.debug({ validatedRequest }, 'Removing permitted auth method scope');
 
-  console.log('🔥 REMOVE PERMITTED AUTH METHOD SCOPE:', validatedRequest);
-
   const { pkpPermissionsContract, publicClient } = createContractsManager(
     networkCtx,
     accountOrWalletClient

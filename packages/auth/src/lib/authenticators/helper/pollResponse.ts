@@ -35,6 +35,10 @@
  * ```
  */
 
+import { getChildLogger } from '@lit-protocol/logger';
+
+const logger = getChildLogger({ module: 'auth.pollResponse' });
+
 /**
  * Defines the parameters for the pollResponse function.
  * @template TResponse The expected type of the JSON response from the URL.
@@ -82,7 +86,7 @@ export async function pollResponse<TResponse>({
 }: PollResponseParams<TResponse>): Promise<TResponse> {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      console.log(
+      logger.debug(
         `${errorMessageContext}: Polling attempt ${
           i + 1
         }/${maxRetries} for ${url}`
@@ -96,27 +100,28 @@ export async function pollResponse<TResponse>({
           );
         }
         // Log other non-ok statuses but continue retrying unless it's a client error type that won't resolve on its own.
-        console.error(
+        logger.warn(
+          { status: response.status, url },
           `${errorMessageContext}: Polling attempt ${
             i + 1
-          } failed with HTTP status: ${
-            response.status
-          } for URL ${url}. Retrying...`
+          } failed with HTTP status. Retrying...`
         );
         // Optionally, specific handling for other critical HTTP errors could be added here to throw immediately.
       } else {
         const data = (await response.json()) as TResponse;
-        console.log(
-          `${errorMessageContext}: Polling attempt ${
-            i + 1
-          }/${maxRetries} - current status/data:`,
-          data
+        logger.debug(
+          {
+            attempt: i + 1,
+            maxRetries,
+            data,
+          },
+          `${errorMessageContext}: Polling attempt - current status/data`
         );
 
         if (isErrorCondition?.(data)) {
-          console.error(
-            `${errorMessageContext}: Error condition met during polling.`,
-            data
+          logger.error(
+            { data },
+            `${errorMessageContext}: Error condition met during polling`
           );
           // Attempt to get more specific error details if available
           const errorDetails =
@@ -133,9 +138,9 @@ export async function pollResponse<TResponse>({
         }
 
         if (isCompleteCondition(data)) {
-          console.log(
-            `${errorMessageContext}: Completion condition met successfully.`,
-            data
+          logger.info(
+            { data },
+            `${errorMessageContext}: Completion condition met successfully`
           );
           return data;
         }
@@ -143,11 +148,9 @@ export async function pollResponse<TResponse>({
       }
     } catch (error: any) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(
-        `${errorMessageContext}: Error during polling attempt ${
-          i + 1
-        }/${maxRetries} for ${url}:`,
-        message
+      logger.warn(
+        { error, attempt: i + 1, maxRetries, url },
+        `${errorMessageContext}: Error during polling attempt`
       );
       // If it's the last attempt, or a critical error (like 404 or an explicit error condition from isErrorCondition), rethrow.
       if (

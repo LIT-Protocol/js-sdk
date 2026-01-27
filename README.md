@@ -69,6 +69,28 @@ pnpm run test:target packages/e2e/src/tickets/delegation.spec.ts
 
 Append additional Jest flags after the path if you need finer filtering.
 
+### Debugging node requests (curl dumps)
+
+When running in Node.js (e2e tests, scripts, etc), you can persist generated curl commands to `./debug/` (this directory is gitignored). This lets you replay the exact request without re-running the full flow.
+
+```bash
+# enable writing curl commands to disk
+export LIT_DEBUG_CURL=1
+
+# optional: change output directory (defaults to ./debug)
+export LIT_DEBUG_CURL_DIR=./debug
+```
+
+After your run, copy the correlation id (for example `X-Request-Id` from node calls, or `x-correlation-id` / the `Request(<id>)` value from Wrapped Keys errors) and print the stored curl command:
+
+```bash
+pnpm debug:curl -- <X-Request-Id>
+```
+
+If you only have a prefix/substring, `pnpm debug:curl` will try to match it (and will list matches if more than one file fits).
+
+More details: `docs/guides/debugging-node-requests.mdx`.
+
 ## QA Starter Kit workflow
 
 When you need to validate SDK integrations against backend or node features, lean on the [QA Starter Kit](https://github.com/LIT-Protocol/QA-kit). That repo installs published packages, so it mirrors how downstream teams will consume the SDK.

@@ -1,0 +1,39 @@
+---
+title: "Debugging Node Requests"
+description: "Dump curl commands by request id so you can replay calls without re-running full flows."
+---
+
+# Overview
+
+When debugging a failing Lit node call, it helps to replay the exact HTTP request without re-running an entire end-to-end flow. The SDK can generate a `curl` command for each request and (optionally) write it to disk keyed by the request correlation id (for example `X-Request-Id` or `x-correlation-id`).
+
+# Enable curl dumps (Node.js only)
+
+Set `LIT_DEBUG_CURL=1` in your environment when running in Node.js (tests, scripts, backends, etc). This is disabled by default and does not write anything in browser builds.
+
+```bash
+export LIT_DEBUG_CURL=1
+```
+
+Optional: override the output directory (defaults to `./debug`, relative to `process.cwd()`):
+
+```bash
+export LIT_DEBUG_CURL_DIR=./debug
+```
+
+After you run whatever code triggers requests, you should see files created under `./debug/` named by request id.
+
+# Retrieve a curl command by request id
+
+Once you have the correlation id (for example `X-Request-Id` from node calls, or `x-correlation-id` from Wrapped Keys service calls), you can print the stored curl command and paste it directly into a terminal:
+
+```bash
+pnpm debug:curl -- <X-Request-Id>
+```
+
+If you only have a prefix/substring, `pnpm debug:curl` will try to match it (and will list matches if more than one file fits).
+
+# Security notes
+
+- The generated curl command includes request headers and body, which may contain signatures or other sensitive data.
+- The default `./debug` directory is gitignored in this repo; keep these files local and do not share them.

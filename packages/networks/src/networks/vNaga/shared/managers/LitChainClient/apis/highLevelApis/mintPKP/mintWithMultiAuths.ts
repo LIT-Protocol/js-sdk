@@ -110,8 +110,6 @@ export const mintWithMultiAuths = async (
 
   logger.debug({ validatedRequest });
 
-  console.log('🔥 mintWithMultiAuths:', validatedRequest);
-
   const tx = await mintNextAndAddAuthMethods(
     {
       keyType: 2,

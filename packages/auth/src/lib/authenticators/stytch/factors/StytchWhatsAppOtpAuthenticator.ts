@@ -3,6 +3,9 @@ import { AuthData } from '@lit-protocol/schemas';
 import { AuthMethod, StytchToken } from '@lit-protocol/types';
 import { AuthMethodTypeStringMap } from '../../../types';
 import { whatsAppOtpAuthFactorParser } from '../parsers';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({ module: 'StytchWhatsAppOtpAuthenticator' });
 
 /**
  * Configuration for initiating the Stytch WhatsApp OTP sending process.
@@ -70,7 +73,7 @@ export class StytchWhatsAppOtpAuthenticator {
       }
       return { methodId: responseData.methodId };
     } catch (e: any) {
-      console.error('Error in StytchWhatsAppOtpAuthenticator sendOtp:', e);
+      _logger.error({ e }, 'Error in StytchWhatsAppOtpAuthenticator sendOtp');
       throw e;
     }
   }
@@ -113,7 +116,7 @@ export class StytchWhatsAppOtpAuthenticator {
       accessToken = verifyData.accessToken;
       userId = verifyData.userId;
     } catch (e: any) {
-      console.error('Error verifying WhatsApp OTP via auth service:', e);
+      _logger.error({ e }, 'Error verifying WhatsApp OTP via auth service');
       throw e;
     }
 
@@ -152,7 +155,7 @@ export class StytchWhatsAppOtpAuthenticator {
           },
         });
       } catch (e) {
-        console.error('Error processing Stytch WhatsApp token:', e);
+        _logger.error({ e }, 'Error processing Stytch WhatsApp token');
         reject(e);
       }
     });

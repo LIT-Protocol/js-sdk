@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@lit-protocol/contracts": "workspace:*",
+    "@lit-protocol/logger": "workspace:*",
     "@lit-protocol/nacl": "7.1.1",
     "@noble/curves": "1.8.1",
     "@wagmi/core": "2.22.1",
@@ -26,8 +27,6 @@
     "elysia": "1.2.25",
     "ethers": "5.7.2",
     "node-localstorage": "3.0.5",
-    "pino": "9.6.0",
-    "pino-caller": "4.0.0",
     "zod": "3.24.3",
     "@noble/hashes": "^1.8.0",
     "tslib": "^2.8.1"

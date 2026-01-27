@@ -202,7 +202,7 @@ export async function createPKPViemAccount({
 
       return tx as TransactionSerializable;
     } catch (err) {
-      console.error('viem => failed to populate tx fields:', err);
+      _logger.error({ err }, 'viem => failed to populate tx fields');
       throw err;
     }
   }
@@ -270,18 +270,21 @@ export async function createPKPViemAccount({
           populatedTx.maxFeePerGas = baseFeeEstimate * 2n + priorityFee; // Conservative estimate
           populatedTx.type = 'eip1559';
 
-          console.log('viem => defaulting to EIP-1559 fees');
-          console.log(
-            'viem => maxPriorityFeePerGas:',
-            populatedTx.maxPriorityFeePerGas
+          _logger.debug('viem => defaulting to EIP-1559 fees');
+          _logger.debug(
+            { maxPriorityFeePerGas: populatedTx.maxPriorityFeePerGas },
+            'viem => maxPriorityFeePerGas'
           );
-          console.log('viem => maxFeePerGas:', populatedTx.maxFeePerGas);
+          _logger.debug(
+            { maxFeePerGas: populatedTx.maxFeePerGas },
+            'viem => maxFeePerGas'
+          );
         }
 
         // Set default gas if not provided
         if (!populatedTx.gas) {
           populatedTx.gas = 21000n; // Default gas for simple transfers
-          console.log('viem => defaulting gas to 21000');
+          _logger.debug({ gas: populatedTx.gas }, 'viem => defaulting gas');
         }
 
         // Ensure type is set for clarity

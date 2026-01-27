@@ -1,4 +1,8 @@
 import { LIT_NETWORK_VALUES } from '@lit-protocol/constants';
+import {
+  generateCurlCommand,
+  writeCurlCommandDebugFile,
+} from '@lit-protocol/logger';
 import { AuthSig } from '@lit-protocol/types';
 
 import {
@@ -114,6 +118,13 @@ export async function makeRequest<T>({
   requestId: string;
 }) {
   try {
+    const curlCommand = generateCurlCommand(url, init);
+    await writeCurlCommandDebugFile({
+      requestId,
+      curlCommand,
+      idHeaderName: 'x-correlation-id',
+    });
+
     const response = await fetch(url, { ...init });
 
     if (!response.ok) {

@@ -17,6 +17,9 @@
 import { PKPData } from '@lit-protocol/schemas';
 import type { LitAuthData } from '../types';
 import type { LitAuthStorageProvider } from './types';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const logger = getChildLogger({ module: 'localStorageNode' });
 
 const LOCALSTORAGE_LIT_AUTH_PREFIX = 'lit-auth';
 const LOCALSTORAGE_LIT_PKP_PREFIX = 'lit-pkp-tokens';
@@ -146,10 +149,9 @@ const getNodeStorageInstance = async (storagePath: string): Promise<any> => {
       const module = await import('node-localstorage');
       NodeLocalStorageConstructor = module.LocalStorage;
     } catch (e) {
-      console.error(
-        "localStorageNode: Failed to dynamically import 'node-localstorage'. " +
-          "Ensure it's installed if running in a Node.js environment. Error: ",
-        e
+      logger.error(
+        { error: e },
+        "localStorageNode: Failed to dynamically import 'node-localstorage'. Ensure it's installed if running in a Node.js environment."
       );
       throw new Error(
         "localStorageNode: 'node-localstorage' module unavailable."
@@ -172,7 +174,7 @@ export function localStorageNode({
 }: LocalStorageNodeConfig): LitAuthStorageProvider {
   if (!isNodeEnvironment) {
     // Return a stub provider for non-Node.js environments
-    console.warn(
+    logger.warn(
       'localStorageNode: Detected non-Node.js environment. ' +
         'Returning a non-functional stub. This provider is for Node.js use only.'
     );
@@ -187,7 +189,7 @@ export function localStorageNode({
         authMethodId,
         tokenIds,
       }): Promise<void> {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): writePKPTokens called in browser.'
         );
       },
@@ -195,59 +197,59 @@ export function localStorageNode({
         authMethodType,
         authMethodId,
       }): Promise<string[] | null> {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): readPKPTokens called in browser.'
         );
         return null;
       },
       async write({ address, authData }): Promise<void> {
-        console.warn('localStorageNode (stub): write called in browser.');
+        logger.warn('localStorageNode (stub): write called in browser.');
       },
       async read({ address }): Promise<LitAuthData | null> {
-        console.warn('localStorageNode (stub): read called in browser.');
+        logger.warn('localStorageNode (stub): read called in browser.');
         return null;
       },
       async writeInnerDelegationAuthSig({ publicKey, authSig }) {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): writeInnerDelegationAuthSig called in browser.'
         );
       },
       async readInnerDelegationAuthSig({ publicKey }) {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): readInnerDelegationAuthSig called in browser.'
         );
         return null;
       },
       async writePKPs({ authMethodType, authMethodId, pkps }): Promise<void> {
-        console.warn('localStorageNode (stub): writePKPs called in browser.');
+        logger.warn('localStorageNode (stub): writePKPs called in browser.');
       },
       async readPKPs({
         authMethodType,
         authMethodId,
       }): Promise<PKPData[] | null> {
-        console.warn('localStorageNode (stub): readPKPs called in browser.');
+        logger.warn('localStorageNode (stub): readPKPs called in browser.');
         return null;
       },
       async writePKPDetails({ tokenId, publicKey, ethAddress }): Promise<void> {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): writePKPDetails called in browser.'
         );
       },
       async readPKPDetails({
         tokenId,
       }): Promise<{ publicKey: string; ethAddress: string } | null> {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): readPKPDetails called in browser.'
         );
         return null;
       },
       async writePKPTokensByAddress({ ownerAddress, tokenIds }): Promise<void> {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): writePKPTokensByAddress called in browser.'
         );
       },
       async readPKPTokensByAddress({ ownerAddress }): Promise<string[] | null> {
-        console.warn(
+        logger.warn(
           'localStorageNode (stub): readPKPTokensByAddress called in browser.'
         );
         return null;
@@ -313,9 +315,9 @@ export function localStorageNode({
           // Ensure robust parsing
           return JSON.parse(value) as LitAuthData;
         } catch (error) {
-          console.error(
-            'localStorageNode: Failed to parse stored auth data:',
-            error
+          logger.error(
+            { error },
+            'localStorageNode: Failed to parse stored auth data'
           );
           // Optionally clear the corrupted item by re-getting store instance
           // const storeToClear = await getMemoisedStorageInstance();
@@ -408,9 +410,9 @@ export function localStorageNode({
 
         return parsed.tokenIds || null;
       } catch (error) {
-        console.error(
-          'localStorageNode: Failed to parse cached PKP tokens:',
-          error
+        logger.error(
+          { error },
+          'localStorageNode: Failed to parse cached PKP tokens'
         );
         return null;
       }
@@ -466,9 +468,9 @@ export function localStorageNode({
 
         return parsed.pkps || null;
       } catch (error) {
-        console.error(
-          'localStorageNode: Failed to parse cached PKP data:',
-          error
+        logger.error(
+          { error },
+          'localStorageNode: Failed to parse cached PKP data'
         );
         return null;
       }
@@ -528,9 +530,9 @@ export function localStorageNode({
         }
         return null;
       } catch (error) {
-        console.error(
-          'localStorageNode: Failed to parse cached PKP details:',
-          error
+        logger.error(
+          { error },
+          'localStorageNode: Failed to parse cached PKP details'
         );
         return null;
       }
@@ -575,9 +577,9 @@ export function localStorageNode({
 
         return parsed.tokenIds || null;
       } catch (error) {
-        console.error(
-          'localStorageNode: Failed to parse cached PKP tokens:',
-          error
+        logger.error(
+          { error },
+          'localStorageNode: Failed to parse cached PKP tokens'
         );
         return null;
       }

@@ -433,7 +433,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
         scopes?: ('sign-anything' | 'personal-sign' | 'no-permissions')[];
         apiKey?: string;
       }) => {
-        console.log('[BaseModuleFactory.authService.pkpMint] params:', params);
+        _logger.debug({ params }, '[authService.pkpMint] params');
         return await handleAuthServerRequest<PKPData>({
           jobName: 'PKP Minting',
           serverUrl: params.authServiceBaseUrl,

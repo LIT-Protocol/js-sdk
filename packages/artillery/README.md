@@ -9,7 +9,6 @@ Usage via root scripts remains the same, now pointing to `packages/artillery`.
 - LOG_LEVEL= `debug` | `info` | `silent` | `debug2` (raw console.log)
 - NETWORK= `naga-dev` | `naga-staging` | `naga-test`
 - LIVE_MASTER_ACCOUNT= `0x...` (required; set to `LIVE_MASTER_ACCOUNT_NAGA` or `LIVE_MASTER_ACCOUNT_NAGA_TEST` as needed)
-- LIT_ACTION_CHILD_IPFS_ID= `Qm...` (optional; used by the sign-child Lit Action scenario)
 
 ## Setup Commands
 

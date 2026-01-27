@@ -3,6 +3,9 @@ import { AuthData } from '@lit-protocol/schemas';
 import { AuthMethod, StytchToken } from '@lit-protocol/types';
 import { AuthMethodTypeStringMap } from '../../../types';
 import { smsOtpAuthFactorParser } from '../parsers';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({ module: 'StytchSmsOtpAuthenticator' });
 
 /**
  * Configuration for initiating the Stytch SMS OTP sending process.
@@ -70,7 +73,7 @@ export class StytchSmsOtpAuthenticator {
       }
       return { methodId: responseData.methodId };
     } catch (e: any) {
-      console.error('Error in StytchSmsOtpAuthenticator sendOtp:', e);
+      _logger.error({ e }, 'Error in StytchSmsOtpAuthenticator sendOtp');
       throw e;
     }
   }
@@ -114,7 +117,7 @@ export class StytchSmsOtpAuthenticator {
       accessToken = verifyData.accessToken;
       userId = verifyData.userId;
     } catch (e: any) {
-      console.error('Error verifying SMS OTP via auth service:', e);
+      _logger.error({ e }, 'Error verifying SMS OTP via auth service');
       throw e;
     }
 
@@ -151,7 +154,7 @@ export class StytchSmsOtpAuthenticator {
           },
         });
       } catch (e) {
-        console.error('Error processing Stytch SMS token:', e);
+        _logger.error({ e }, 'Error processing Stytch SMS token');
         reject(e);
       }
     });

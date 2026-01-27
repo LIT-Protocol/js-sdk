@@ -5,6 +5,7 @@
   "scripts": {
     "sync:contracts": "nx run contracts:sync",
     "sync:docs-changelog": "node tools/sync-docs-changelog.js",
+    "debug:curl": "node tools/debug-curl.js",
     "sync:wk": "node packages/wrapped-keys-lit-actions/sync-actions-to-ipfs.js",
     "sync:check": "sh -c 'if [ -n \"$PKG\" ]; then pnpm syncpack list-mismatches --types prod,dev,peer --filter \"$PKG\"; else pnpm syncpack list-mismatches --types prod,dev,peer; fi'",
     "sync:fix": "sh -c 'if [ -n \"$PKG\" ]; then pnpm syncpack fix-mismatches --types prod,dev,peer --filter \"$PKG\"; else pnpm syncpack fix-mismatches --types prod,dev,peer; fi'",
