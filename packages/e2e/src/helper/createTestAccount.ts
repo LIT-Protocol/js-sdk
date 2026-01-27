@@ -90,14 +90,17 @@ export async function createTestAccount(
 
   // 3. fund it
   if (opts.fundAccount) {
+    const nativeFundingAmount =
+      process.env['LIVE_NETWORK_FUNDING_AMOUNT'] ??
+      testEnv.config.nativeFundingAmount;
     await fundAccount(
       person.account,
       testEnv.masterAccount,
       testEnv.networkModule,
       {
         label: 'owner',
-        ifLessThan: testEnv.config.nativeFundingAmount,
-        thenFund: testEnv.config.nativeFundingAmount,
+        ifLessThan: nativeFundingAmount,
+        thenFund: nativeFundingAmount,
       }
     );
   }
@@ -124,9 +127,12 @@ export async function createTestAccount(
 
   // 4. also fund the ledger
   if (opts.fundLedger) {
+    const ledgerDepositAmount =
+      process.env['LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT'] ??
+      testEnv.config.ledgerDepositAmount;
     await testEnv.masterPaymentManager.depositForUser({
       userAddress: person.account.address,
-      amountInEth: testEnv.config.ledgerDepositAmount,
+      amountInLitkey: testEnv.config.ledgerDepositAmount,
     });
   }
 
@@ -140,23 +146,29 @@ export async function createTestAccount(
 
     // 7. fund the PKP
     if (opts.fundPKP) {
+      const nativeFundingAmount =
+        process.env['LIVE_NETWORK_FUNDING_AMOUNT'] ??
+        testEnv.config.nativeFundingAmount;
       await fundAccount(
         person.pkp.ethAddress as `0x${string}`,
         testEnv.masterAccount,
         testEnv.networkModule,
         {
           label: 'PKP',
-          ifLessThan: testEnv.config.nativeFundingAmount,
-          thenFund: testEnv.config.nativeFundingAmount,
+          ifLessThan: nativeFundingAmount,
+          thenFund: nativeFundingAmount,
         }
       );
     }
 
     // 8. also fund PKP Ledger
     if (opts.fundPKPLedger) {
+      const ledgerDepositAmount =
+        process.env['LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT'] ??
+        testEnv.config.ledgerDepositAmount;
       await testEnv.masterPaymentManager.depositForUser({
         userAddress: person.pkp.ethAddress as `0x${string}`,
-        amountInEth: testEnv.config.ledgerDepositAmount,
+        amountInLitkey: testEnv.config.ledgerDepositAmount,
       });
     }
 

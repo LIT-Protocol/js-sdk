@@ -533,7 +533,7 @@ Environment:
             `Executing withdrawal for ${updatedWithdrawStatus.withdrawRequest.amount} LITKEY...`
             );
             await result.paymentManager!.withdraw({
-              amountInEth: updatedWithdrawStatus.withdrawRequest.amount,
+              amountInLitkey: updatedWithdrawStatus.withdrawRequest.amount,
             });
             executedWithdrawal = true;
           } catch (error) {
@@ -549,7 +549,7 @@ Environment:
           `Requesting withdrawal for ${ledgerBalance.availableBalance} LITKEY...`
           );
           await result.paymentManager!.requestWithdraw({
-            amountInEth: ledgerBalance.availableBalance,
+            amountInLitkey: ledgerBalance.availableBalance,
           });
           requestedWithdrawal = true;
         } catch (error) {
@@ -567,7 +567,7 @@ Environment:
               `Executing withdrawal for ${updatedWithdrawStatus.withdrawRequest.amount} LITKEY...`
             );
             await result.paymentManager!.withdraw({
-              amountInEth: updatedWithdrawStatus.withdrawRequest.amount,
+              amountInLitkey: updatedWithdrawStatus.withdrawRequest.amount,
             });
             executedWithdrawal = true;
           } catch (error) {

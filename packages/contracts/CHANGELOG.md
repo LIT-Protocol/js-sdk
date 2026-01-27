@@ -1,5 +1,11 @@
 # @lit-protocol/contracts
 
+## 0.9.1
+
+### Patch Changes
+
+- cdc4f78: add support for naga-test
+
 ## 0.9.0
 
 ### Minor Changes

@@ -32,4 +32,5 @@ export type PKPSignCreateRequestParams = {
   jitContext: NagaJitContext;
   sessionSigs?: SessionSigsMap;
   delegationAuthSig?: AuthSig;
+  keySetIdentifier?: string;
 };

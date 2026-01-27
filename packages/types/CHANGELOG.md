@@ -1,14 +1,18 @@
 # @lit-protocol/types
 
+## 8.0.3
+
+### Patch Changes
+
+- cdc4f78: add support for naga-test
+
 ## 8.0.2
 
 ### Patch Changes
 
-
 ## 8.0.1
 
 ### Patch Changes
-
 
 ## 8.0.0
 

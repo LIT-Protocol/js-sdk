@@ -1,5 +1,12 @@
 # @lit-protocol/lit-client
 
+## 8.3.1
+
+### Patch Changes
+
+- cdc4f78: add support for naga-test
+- 401e864: Renames the amountInEth parameter to amountInLitkey to prevent future confusion on deposits. Deprecates the amountInEth parameter.
+
 ## 8.3.0
 
 ### Minor Changes
