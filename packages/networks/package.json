@@ -39,7 +39,7 @@
   "tags": [
     "universal"
   ],
-  "version": "8.4.0",
+  "version": "8.4.1",
   "main": "./index.js",
   "typings": "./index.d.ts",
   "types": "./index.d.ts",
