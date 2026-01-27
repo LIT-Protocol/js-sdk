@@ -52,6 +52,14 @@ interface DecryptBatchResponseOptions {
   operationName?: string;
 }
 
+type DecryptedErrorPayload = {
+  __nodeUrl: string;
+  error?: unknown;
+  errorObject?: unknown;
+  value?: unknown;
+  [key: string]: unknown;
+};
+
 /**
  * Generic function to decrypt batch responses using JIT context
  * @param encryptedResult The encrypted batch result from nodes
@@ -212,7 +220,7 @@ const handleEncryptedError = (
         values: [errorResult.error], // Wrap the error payload as if it's a successful response
       };
 
-      const decryptedErrorValues = decryptBatchResponse(
+      const decryptedErrorValues = decryptBatchResponse<DecryptedErrorPayload>(
         errorAsEncryptedPayload as z.infer<
           typeof GenericEncryptedPayloadSchema
         >,

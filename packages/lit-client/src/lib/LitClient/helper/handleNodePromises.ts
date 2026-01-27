@@ -92,7 +92,7 @@ function summarizeError(error: unknown): Record<string, unknown> {
   }
 
   const err = error as Record<string, unknown>;
-  const rawError = err.error;
+  const rawError = err['error'];
   const safeError =
     rawError === null ||
     typeof rawError === 'string' ||
@@ -101,14 +101,14 @@ function summarizeError(error: unknown): Record<string, unknown> {
       ? rawError
       : undefined;
   return {
-    name: typeof err.name === 'string' ? err.name : undefined,
-    message: typeof err.message === 'string' ? err.message : String(err),
-    code: err.code,
-    shortMessage: err.shortMessage,
-    status: err.status,
+    name: typeof err['name'] === 'string' ? err['name'] : undefined,
+    message: typeof err['message'] === 'string' ? err['message'] : String(err),
+    code: err['code'],
+    shortMessage: err['shortMessage'],
+    status: err['status'],
     error: safeError,
-    errorObject: err.errorObject,
-    details: err.details,
+    errorObject: err['errorObject'],
+    details: err['details'],
   };
 }
 
