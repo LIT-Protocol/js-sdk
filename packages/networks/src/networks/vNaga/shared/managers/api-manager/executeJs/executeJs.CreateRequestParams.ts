@@ -18,6 +18,7 @@ type ExecuteJsCreateRequestParamsBase = {
     ipfsId?: string;
     jsParams?: Record<string, any>;
   };
+  keySetIdentifier?: string;
   connectionInfo: ConnectionInfo;
   version: string;
   useSingleNode?: boolean;

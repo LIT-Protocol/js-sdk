@@ -638,6 +638,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             z.infer<typeof EncryptedVersion1Schema>
           >[] = [];
           const urls = Object.keys(sessionSigs);
+          const keySetId = params.keySetIdentifier ?? 'naga-keyset1';
 
           for (const url of urls) {
             _logger.info(
@@ -654,6 +655,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               chain: params.chain,
               bypassAutoHashing: params.signingContext.bypassAutoHashing,
               epoch: params.connectionInfo.epochState.currentNumber,
+              keySetId,
             });
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -778,6 +780,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             z.infer<typeof EncryptedVersion1Schema>
           >[] = [];
           const urls = Object.keys(sessionSigs);
+          const keySetId = params.keySetIdentifier ?? 'naga-keyset1';
 
           for (const url of urls) {
             const _requestData = DecryptRequestDataSchema.parse({
@@ -790,6 +793,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
                 params.unifiedAccessControlConditions,
               authSig: sessionSigs[url],
               chain: params.chain,
+              keySetId,
             });
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -901,6 +905,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           const nodeUrls = requestBody.nodeSet.map(
             (node) => `${httpProtocol}${node.socketAddress}`
           );
+          const pkpKeySetId = requestBody.keySetIdentifier ?? 'naga-keyset1';
 
           const authMethod = {
             authMethodType: requestBody.authData.authMethodType,
@@ -924,6 +929,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               maxPrice: getUserMaxPrice({
                 product: 'SIGN_SESSION_KEY',
               }).toString(),
+              pkpKeySetId,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -1030,6 +1036,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           const nodeUrls = requestBody.nodeSet.map(
             (node) => `${httpProtocol}${node.socketAddress}`
           );
+          const pkpKeySetId = requestBody.keySetIdentifier ?? 'naga-keyset1';
 
           const requests: RequestItem<
             z.infer<typeof EncryptedVersion1Schema>
@@ -1051,6 +1058,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               maxPrice: getUserMaxPrice({
                 product: 'SIGN_SESSION_KEY',
               }).toString(),
+              pkpKeySetId,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -1163,6 +1171,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             'executeJs:createRequest: Creating request'
           );
 
+          const DEFAULT_KEY_SET_ID = 'naga-keyset1';
+
           // Store response strategy for later use in handleResponse
           executeJsResponseStrategy = params.responseStrategy;
 
@@ -1208,6 +1218,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             const _requestData = ExecuteJsRequestDataSchema.parse({
               authSig: sessionSigs[url],
               nodeSet: urls,
+              keySetId: params.keySetIdentifier ?? DEFAULT_KEY_SET_ID,
               ...(encodedCode && { code: encodedCode }),
               ...(params.executionContext.ipfsId && {
                 ipfsId: params.executionContext.ipfsId,

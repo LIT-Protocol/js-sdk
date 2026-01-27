@@ -10,6 +10,7 @@ export const DecryptRequestDataSchema =
     dataToEncryptHash: z.string(),
     authSig: AuthSigSchema,
     chain: z.string(),
+    keySetId: z.string(),
   }).transform((data) => {
     const {
       formattedAccessControlConditions,
