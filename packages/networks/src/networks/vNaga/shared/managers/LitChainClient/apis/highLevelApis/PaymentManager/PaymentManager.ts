@@ -16,7 +16,7 @@
  * );
  *
  * // Deposit funds
- * await paymentManager.deposit({ amountInEth: "0.1" });
+ * await paymentManager.deposit({ amountInLitkey: "0.1" });
  *
  * // Check balance
  * const balance = await paymentManager.getBalance({ userAddress: "0x..." });
@@ -96,12 +96,24 @@ export class PaymentManager {
   /**
    * Deposit funds to your own account
    * @param params - Deposit parameters
+   * @param params.amountInLitkey - Amount to deposit in LITKEY
+   * @param params.amountInEth - @deprecated Use `amountInLitkey` instead. Amount to deposit (kept for backwards compatibility)
    * @returns Transaction result
    */
-  async deposit(params: { amountInEth: string }): Promise<LitTxVoid> {
-    logger.debug({ amountInEth: params.amountInEth }, 'Depositing funds');
+  async deposit(params: {
+    amountInLitkey?: string;
+    amountInEth?: string;
+  }): Promise<LitTxVoid> {
+    const amount = params.amountInLitkey ?? params.amountInEth;
+    if (!amount) {
+      throw new Error(
+        'Either amountInLitkey or amountInEth must be provided for deposit'
+      );
+    }
 
-    const amountInWei = parseEther(params.amountInEth);
+    logger.debug({ amountInLitkey: amount }, 'Depositing funds');
+
+    const amountInWei = parseEther(amount);
 
     return await deposit(
       { amountInWei },
@@ -113,21 +125,32 @@ export class PaymentManager {
   /**
    * Deposit funds for another user's account
    * @param params - Deposit parameters including user address
+   * @param params.userAddress - Address of the user to deposit for
+   * @param params.amountInLitkey - Amount to deposit in LITKEY
+   * @param params.amountInEth - @deprecated Use `amountInLitkey` instead. Amount to deposit (kept for backwards compatibility)
    * @returns Transaction result
    */
   async depositForUser(params: {
     userAddress: string;
-    amountInEth: string;
+    amountInLitkey?: string;
+    amountInEth?: string;
   }): Promise<LitTxVoid> {
+    const amount = params.amountInLitkey ?? params.amountInEth;
+    if (!amount) {
+      throw new Error(
+        'Either amountInLitkey or amountInEth must be provided for depositForUser'
+      );
+    }
+
     logger.debug(
       {
         userAddress: params.userAddress,
-        amountInEth: params.amountInEth,
+        amountInLitkey: amount,
       },
       'Depositing funds for user'
     );
 
-    const amountInWei = parseEther(params.amountInEth);
+    const amountInWei = parseEther(amount);
 
     return await depositForUser(
       {
@@ -173,12 +196,24 @@ export class PaymentManager {
   /**
    * Request a withdrawal
    * @param params - Withdrawal request parameters
+   * @param params.amountInLitkey - Amount to withdraw in LITKEY
+   * @param params.amountInEth - @deprecated Use `amountInLitkey` instead. Amount to withdraw (kept for backwards compatibility)
    * @returns Transaction result
    */
-  async requestWithdraw(params: { amountInEth: string }): Promise<LitTxVoid> {
-    logger.debug({ amountInEth: params.amountInEth }, 'Requesting withdrawal');
+  async requestWithdraw(params: {
+    amountInLitkey?: string;
+    amountInEth?: string;
+  }): Promise<LitTxVoid> {
+    const amount = params.amountInLitkey ?? params.amountInEth;
+    if (!amount) {
+      throw new Error(
+        'Either amountInLitkey or amountInEth must be provided for requestWithdraw'
+      );
+    }
 
-    const amountInWei = parseEther(params.amountInEth);
+    logger.debug({ amountInLitkey: amount }, 'Requesting withdrawal');
+
+    const amountInWei = parseEther(amount);
 
     return await requestWithdraw(
       { amountInWei },
@@ -190,12 +225,24 @@ export class PaymentManager {
   /**
    * Execute a withdrawal (after delay period)
    * @param params - Withdrawal execution parameters
+   * @param params.amountInLitkey - Amount to withdraw in LITKEY
+   * @param params.amountInEth - @deprecated Use `amountInLitkey` instead. Amount to withdraw (kept for backwards compatibility)
    * @returns Transaction result
    */
-  async withdraw(params: { amountInEth: string }): Promise<LitTxVoid> {
-    logger.debug({ amountInEth: params.amountInEth }, 'Executing withdrawal');
+  async withdraw(params: {
+    amountInLitkey?: string;
+    amountInEth?: string;
+  }): Promise<LitTxVoid> {
+    const amount = params.amountInLitkey ?? params.amountInEth;
+    if (!amount) {
+      throw new Error(
+        'Either amountInLitkey or amountInEth must be provided for withdraw'
+      );
+    }
 
-    const amountInWei = parseEther(params.amountInEth);
+    logger.debug({ amountInLitkey: amount }, 'Executing withdrawal');
+
+    const amountInWei = parseEther(amount);
 
     return await withdraw(
       { amountInWei },
