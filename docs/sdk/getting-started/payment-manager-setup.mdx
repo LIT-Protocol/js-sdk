@@ -202,6 +202,48 @@ const response = await litClient.decrypt({
 });
 ```
 
+## Session-scoped delegation (no on-chain delegation)
+
+If you need a one-off or short-lived sponsorship without calling `delegatePayments*`, issue a payment delegation AuthSig and attach it to the user's auth config. The SIWE expiration scopes how long the delegation is valid.
+
+Scenario example:
+
+- Bob has a PKP but no ledger balance.
+- Alice has ledger funds and wants to sponsor a single `pkpSign` call.
+- Alice creates a payment delegation AuthSig scoped to `pkp_sign` for Bob.
+- Bob includes that AuthSig in `capabilityAuthSigs` and calls `pkpSign`.
+- The network charges Alice's ledger balance for that request.
+
+```typescript
+import { createPaymentDelegationAuthSig } from '@lit-protocol/auth-helpers';
+
+const paymentDelegationAuthSig = await createPaymentDelegationAuthSig({
+  signer: sponsorAccount,
+  signerAddress: sponsorAccount.address,
+  delegateeAddresses: [userAccount.address],
+  maxPrice: '50000000000000000',
+  scopes: ['pkp_sign'],
+  litClient,
+  expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(),
+});
+
+const userAuthContext = await authManager.createEoaAuthContext({
+  config: { account: userAccount },
+  authConfig: {
+    resources: [['pkp-signing', '*']],
+    capabilityAuthSigs: [paymentDelegationAuthSig],
+  },
+  litClient,
+});
+
+await litClient.chain.ethereum.pkpSign({
+  authContext: userAuthContext,
+  pubKey: userPkpPublicKey,
+  toSign: 'hello',
+  userMaxPrice: 50000000000000000n,
+});
+```
+
 ## Auth Service API Endpoints
 
 Leverage the hosted Auth Service to manage delegation without exposing private keys in your application. Full request/response details live in the [Auth Services setup guide](/sdk/getting-started/auth-services#payment-delegation-apis). In practice you will:
