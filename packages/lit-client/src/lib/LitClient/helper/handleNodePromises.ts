@@ -77,7 +77,9 @@ export interface NodeResponse {
   [key: string]: any; // Allow other properties
 }
 
-function isErrorResponse(value: unknown): value is { success: false; error?: any } {
+function isErrorResponse(
+  value: unknown
+): value is { success: false; error?: any } {
   return Boolean(
     value &&
       typeof value === 'object' &&
@@ -291,11 +293,11 @@ export async function dispatchRequests<T, M = NodeResponse>(
         } catch {
           // fall back to fullPath if it isn't a valid URL
         }
-      nodeErrors.push({
-        nodeUrl,
-        fullPath: req.fullPath,
-        error: summarizeError(error),
-      });
+        nodeErrors.push({
+          nodeUrl,
+          fullPath: req.fullPath,
+          error: summarizeError(error),
+        });
         throw error;
       })
   );

@@ -34,13 +34,14 @@ const testEnv: Record<
   live: { type: 'live', key: 'LIVE_MASTER_ACCOUNT' },
 };
 
-const LIVE_MASTER_ACCOUNT_BY_NETWORK: Partial<Record<SupportedNetwork, string>> =
-  {
-    naga: 'LIVE_MASTER_ACCOUNT_NAGA',
-    'naga-dev': 'LIVE_MASTER_ACCOUNT_NAGA_DEV',
-    'naga-test': 'LIVE_MASTER_ACCOUNT_NAGA_TEST',
-    'naga-staging': 'LIVE_MASTER_ACCOUNT_NAGA_STAGING',
-  } as const;
+const LIVE_MASTER_ACCOUNT_BY_NETWORK: Partial<
+  Record<SupportedNetwork, string>
+> = {
+  naga: 'LIVE_MASTER_ACCOUNT_NAGA',
+  'naga-dev': 'LIVE_MASTER_ACCOUNT_NAGA_DEV',
+  'naga-test': 'LIVE_MASTER_ACCOUNT_NAGA_TEST',
+  'naga-staging': 'LIVE_MASTER_ACCOUNT_NAGA_STAGING',
+} as const;
 
 export function createEnvVars(): EnvVars {
   // 1. Get network string

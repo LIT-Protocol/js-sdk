@@ -161,7 +161,8 @@ export async function getPkpAuthContextAdapter(
   };
 
   const toSocketAddress = (url: string) =>
-    toSocketAddressSafe(url) ?? url.replace('https://', '').replace('http://', '');
+    toSocketAddressSafe(url) ??
+    url.replace('https://', '').replace('http://', '');
 
   const primaryNodeSet = primaryUrls.map((url: string) => ({
     socketAddress: toSocketAddress(url),
