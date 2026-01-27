@@ -81,7 +81,7 @@ export function createEnvVars(): EnvVars {
         ? `${LIVE_MASTER_ACCOUNT_BY_NETWORK[network]} or LIVE_MASTER_ACCOUNT`
         : 'LIVE_MASTER_ACCOUNT';
     throw new Error(
-      `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${testEnv.live.key} or ${scopedKey} to be set.`
+      `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${expectedKey} to be set.`
     );
   }
 
