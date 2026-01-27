@@ -2,7 +2,6 @@
  * Generated Contract Method Signatures for naga-develop
  * This file is auto-generated. DO NOT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING.
  */
-
 export const signatures = {
   PKPHelper: {
     address: '0x4C4a2f8c81640e47606d3fd77B353E87Ba015584',
@@ -3595,3 +3594,4 @@ export const signatures = {
     ],
   },
 };
+//# sourceMappingURL=naga-develop.js.map

@@ -56,9 +56,9 @@ const envelope = JSON.stringify({
 ```ts
 import {
   createAuthManager,
-  storagePlugins,
   validateDelegationAuthSig,
 } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 import { createLitClient } from '@lit-protocol/lit-client';
 
 const parsedEnvelope = JSON.parse(envelope) as {

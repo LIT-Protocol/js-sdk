@@ -114,13 +114,12 @@
       "types": "./dist/signatures/develop.d.ts"
     },
     "./custom-network-signatures": {
-      "browser": {
-        "import": "./dist/custom-network-signatures.browser.js",
-        "require": "./dist/custom-network-signatures.browser.cjs"
+      "types": "./dist/custom-network-signatures.d.ts",
+      "node": {
+        "import": "./dist/custom-network-signatures.js",
+        "require": "./dist/custom-network-signatures.cjs"
       },
-      "import": "./dist/custom-network-signatures.js",
-      "require": "./dist/custom-network-signatures.cjs",
-      "types": "./dist/custom-network-signatures.d.ts"
+      "default": "./dist/custom-network-signatures.browser.js"
     }
   },
   "typesVersions": {

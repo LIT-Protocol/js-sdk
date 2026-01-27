@@ -1,8 +1,5 @@
-import {
-  createAuthManager,
-  generateSessionKeyPair,
-  storagePlugins,
-} from '@lit-protocol/auth';
+import { createAuthManager, generateSessionKeyPair } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 import { createLitClient } from '@lit-protocol/lit-client';
 import {
   LitNetworkModule,
@@ -113,7 +110,7 @@ export const createTestEnv = async (envVars: EnvVars): Promise<TestEnv> => {
       }
 
       networkModule = applyRpcOverride(
-        nagaLocal.withLocalContext({
+        await nagaLocal.withLocalContext({
           networkContextPath: envVars.localContextPath,
           networkName: 'naga-local',
         })

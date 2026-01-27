@@ -28,6 +28,7 @@
     "@simplewebauthn/typescript-types": "7.0.0",
     "@wagmi/core": "2.22.1",
     "base64url": "3.0.1",
+    "buffer": "6.0.3",
     "cbor-web": "9.0.2",
     "depd": "2.0.0",
     "ethers": "5.7.2",
@@ -54,6 +55,26 @@
       "types": "./index.d.ts",
       "import": "./index.js",
       "require": "./cjs/index.js"
+    },
+    "./storage": {
+      "types": "./storage.d.ts",
+      "import": "./storage.js",
+      "require": "./cjs/storage.js"
+    },
+    "./storage-node": {
+      "types": "./storage-node.d.ts",
+      "import": "./storage-node.js",
+      "require": "./cjs/storage-node.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "storage": [
+        "storage.d.ts"
+      ],
+      "storage-node": [
+        "storage-node.d.ts"
+      ]
     }
   }
 }

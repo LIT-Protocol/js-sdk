@@ -1,3 +1,5 @@
+import './lib/polyfills/buffer';
+
 // -- imports
 // import { createAuthManager } from './lib/auth-manager';
 import * as authenticators from './lib/authenticators';
@@ -12,7 +14,7 @@ import { StytchWhatsAppOtpAuthenticator } from './lib/authenticators/stytch/fact
 import { ViemAccountAuthenticator } from './lib/authenticators/ViemAccountAuthenticator';
 import { WalletClientAuthenticator } from './lib/authenticators/WalletClientAuthenticator';
 // import { GetAuthContext } from './lib/AuthManager/getAuthContext';
-import { localStorage, localStorageNode } from './lib/storage';
+import { localStorage } from './lib/storage/localStorage';
 import type { LitAuthStorageProvider } from './lib/storage/types';
 import type { LitAuthData } from './lib/types';
 
@@ -38,10 +40,10 @@ export type { LitAuthData };
  * A collection of available storage plugins.
  * Currently includes:
  * - `localStorage`: Uses the browser's localStorage API.
+ * - For Node.js storage, use `@lit-protocol/auth/storage-node`.
  */
 export const storagePlugins = {
   localStorage,
-  localStorageNode,
 };
 
 /**

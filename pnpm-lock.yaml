@@ -121,6 +121,9 @@ importers:
       bs58:
         specifier: 6.0.0
         version: 6.0.0
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
       cbor-web:
         specifier: 9.0.2
         version: 9.0.2
@@ -521,6 +524,9 @@ importers:
       base64url:
         specifier: 3.0.1
         version: 3.0.1
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
       cbor-web:
         specifier: 9.0.2
         version: 9.0.2
@@ -558,6 +564,9 @@ importers:
       '@wagmi/core':
         specifier: 2.22.1
         version: 2.22.1(@tanstack/query-core@5.90.5)(@types/react@18.3.27)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.3))
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
       ethers:
         specifier: 5.7.2
         version: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -980,6 +989,9 @@ importers:
 
   packages/schemas:
     dependencies:
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
       ethers:
         specifier: 5.7.2
         version: 5.7.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)

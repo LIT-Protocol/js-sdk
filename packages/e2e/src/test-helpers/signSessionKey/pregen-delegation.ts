@@ -1,9 +1,9 @@
 import {
   createAuthManager,
   generateSessionKeyPair,
-  storagePlugins,
   validateDelegationAuthSig,
 } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 import { createLitClient } from '@lit-protocol/lit-client';
 import { ResolvedNetwork } from '../../helper/network';
 import { AuthData } from '@lit-protocol/schemas';

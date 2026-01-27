@@ -1,4 +1,5 @@
-import { createAuthManager, storagePlugins } from '@lit-protocol/auth';
+import { createAuthManager } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 import { createLitClient, LitClientType } from '@lit-protocol/lit-client';
 import { z } from 'zod';
 import * as StateManager from '../StateManager';

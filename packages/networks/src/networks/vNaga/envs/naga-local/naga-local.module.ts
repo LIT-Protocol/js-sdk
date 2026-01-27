@@ -1,4 +1,3 @@
-import { buildSignaturesFromContext } from '@lit-protocol/contracts/custom-network-signatures';
 import { createBaseModule } from '../../shared/factories/BaseModuleFactory';
 import { createChainManagerFactory } from '../../shared/factories/BaseChainManagerFactory';
 import {
@@ -14,6 +13,27 @@ type NagaLocalContextOptions = {
   networkName?: string;
   rpcUrlOverride?: string;
 };
+
+type CustomNetworkSignaturesModule =
+  typeof import('@lit-protocol/contracts/custom-network-signatures');
+
+const loadCustomNetworkSignatures =
+  async (): Promise<CustomNetworkSignaturesModule> => {
+    const isNodeRuntime =
+      typeof process !== 'undefined' && !!process.versions?.node;
+
+    if (!isNodeRuntime) {
+      throw new Error(
+        'nagaLocal.withLocalContext is only supported in Node.js environments.'
+      );
+    }
+
+    const moduleId = '@lit-protocol/contracts/custom-network-signatures';
+    // Keep the Node-only helper out of browser bundles.
+    return import(
+      /* webpackIgnore: true */ /* @vite-ignore */ moduleId
+    ) as Promise<CustomNetworkSignaturesModule>;
+  };
 
 const REQUIRED_SIGNATURE_KEYS = Object.keys(
   defaultSignatures
@@ -69,9 +89,10 @@ const buildModule = (env: NagaLocalEnvironment) => {
     );
   };
 
-  const withLocalContext = (options: NagaLocalContextOptions) => {
+  const withLocalContext = async (options: NagaLocalContextOptions) => {
     const { networkContextPath, networkName, rpcUrlOverride } = options;
 
+    const { buildSignaturesFromContext } = await loadCustomNetworkSignatures();
     const { signatures } = buildSignaturesFromContext({
       jsonFilePath: networkContextPath,
       networkName: networkName ?? 'naga-develop',

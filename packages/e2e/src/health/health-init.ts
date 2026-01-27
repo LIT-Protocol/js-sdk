@@ -14,9 +14,9 @@
 
 import {
   createAuthManager,
-  storagePlugins,
   ViemAccountAuthenticator,
 } from '@lit-protocol/auth';
+import { storagePlugins } from '@lit-protocol/auth/storage-node';
 import { createLitClient } from '@lit-protocol/lit-client';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';

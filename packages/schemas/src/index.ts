@@ -1,8 +1,5 @@
-import { DomainSchema, ExpirationSchema } from './lib/schemas';
+import './lib/polyfills/buffer';
 
-import { z } from 'zod';
-import { LitResourceAbilityRequestSchema } from './lib/models';
-import { AuthSigSchema } from './lib/schemas';
 export * from './lib/auth/auth-schemas';
 export * from './lib/auth/ScopeSchema';
 export * from './lib/encryption';

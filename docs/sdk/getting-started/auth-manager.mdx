@@ -57,7 +57,8 @@ bun add @lit-protocol/auth viem
     <CodeGroup>
 
 ```typescript Browser Local Storage
-import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
+import { createAuthManager } from "@lit-protocol/auth";
+import { storagePlugins } from "@lit-protocol/auth/storage";
 
 const authManager = createAuthManager({
   storage: storagePlugins.localStorage({
@@ -68,7 +69,8 @@ const authManager = createAuthManager({
 ```
 
 ```typescript Node.js Local Storage
-import { createAuthManager, storagePlugins } from "@lit-protocol/auth";
+import { createAuthManager } from "@lit-protocol/auth";
+import { storagePlugins } from "@lit-protocol/auth/storage-node";
 
 const authManager = createAuthManager({
   storage: storagePlugins.localStorageNode({

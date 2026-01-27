@@ -11,12 +11,6 @@ import {
   VMTYPE,
 } from '@lit-protocol/constants';
 import { computeAddress } from 'ethers/lib/utils';
-import {
-  AuthConfigSchema,
-  AuthDataSchema,
-  ISessionCapabilityObjectSchema,
-  LitResourceAbilityRequestSchema,
-} from '..';
 
 export const PKPDataSchema = z
   .object({
@@ -238,6 +232,37 @@ export const LitResourcePrefixSchema = z.nativeEnum(LIT_RESOURCE_PREFIX);
 
 export const LitAbilitySchema = z.nativeEnum(LIT_ABILITY);
 
+export const ILitResourceSchema = z.object({
+  /**
+   * Gets the fully qualified resource key.
+   * @returns The fully qualified resource key.
+   */
+  getResourceKey: z.function().args().returns(z.string()),
+  /**
+   * Validates that the given LIT ability is valid for this resource.
+   * @param litAbility The LIT ability to validate.
+   */
+  isValidLitAbility: z.function().args(LitAbilitySchema).returns(z.boolean()),
+  toString: z.function().args().returns(z.string()),
+  resourcePrefix: LitResourcePrefixSchema.readonly(),
+  resource: z.string().readonly(),
+});
+
+/**
+ * A LIT resource ability is a combination of a LIT resource and a LIT ability.
+ * It specifies which LIT specific ability is being requested to be performed
+ * on the specified LIT resource.
+ *
+ * @description This object does NOT guarantee compatibility between the
+ * specified LIT resource and the specified LIT ability, and will be validated by
+ * the LIT-internal systems.
+ */
+export const LitResourceAbilityRequestSchema = z.object({
+  resource: ILitResourceSchema,
+  ability: LitAbilitySchema,
+  data: z.record(z.string(), DefinedJsonSchema).optional(),
+});
+
 export const DerivedAddressesSchema = z.object({
   publicKey: z.string(),
   publicKeyBuffer: z.any(), // Buffer
@@ -343,6 +368,27 @@ export const AuthSigSchema = z.object({
   algo: z.string().optional(),
 });
 
+export const AuthConfigSchema = z.preprocess(
+  // Remove undefined values so Zod defaults can be applied properly
+  (data) => {
+    if (typeof data === 'object' && data !== null) {
+      return Object.fromEntries(
+        Object.entries(data).filter(([_, value]) => value !== undefined)
+      );
+    }
+    return data;
+  },
+  z.object({
+    capabilityAuthSigs: z.array(AuthSigSchema).optional().default([]),
+    expiration: ExpirationSchema.optional().default(
+      new Date(Date.now() + 1000 * 60 * 15).toISOString()
+    ),
+    statement: z.string().optional().default(''),
+    domain: DomainSchema.optional().default('localhost'),
+    resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
+  })
+);
+
 export const NodeSignedAuthSig = z
   .object({
     blsCombinedSignature: z.string(),
@@ -409,6 +455,20 @@ export const AuthMethodSchema = z.object({
   authMethodType: z.nativeEnum(AUTH_METHOD_TYPE),
   accessToken: z.string(),
 });
+
+export const AuthDataSchema = z.object({
+  authMethodId: HexPrefixedSchema,
+  authMethodType: z.coerce.number().pipe(z.nativeEnum(AUTH_METHOD_TYPE)),
+  accessToken: AuthMethodSchema.shape.accessToken,
+  publicKey: HexPrefixedSchema.optional(),
+
+  // any other auth specific data
+  // eg. stytch contains user_id
+  metadata: z.any().optional(),
+});
+
+export type AuthData = z.output<typeof AuthDataSchema>;
+export type AuthDataInput = z.input<typeof AuthDataSchema>;
 
 // TODO make it forcefully have litActionCode OR litActionIpfsId, one and only one of them MUST be provided
 export const LitActionSdkParamsSchema = z.object({

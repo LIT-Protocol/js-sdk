@@ -3,7 +3,7 @@
  * @description Provides a storage provider for Node.js environments using 'node-localstorage'.
  * This allows Lit authentication data to be persisted on the server-side or in Node.js scripts.
  * Usage:
- * import { localStorageNode } from '@lit-protocol/auth/storage';
+ * import { localStorageNode } from '@lit-protocol/auth/storage-node';
  *
  * const nodeStorage = localStorageNode({
  *   appName: 'my-node-app',

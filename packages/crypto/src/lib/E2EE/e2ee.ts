@@ -1,5 +1,9 @@
 import { nacl } from '@lit-protocol/nacl';
-import { bytesToHex, hexToBytes } from '@noble/curves/abstract/utils';
+import {
+  bytesToHex,
+  hexToBytes,
+  numberToBytesBE,
+} from '@noble/curves/abstract/utils';
 import { z } from 'zod';
 import {
   Always32BytesSchema,
@@ -21,8 +25,7 @@ export const walletEncrypt = (
 
   const dateNow = Date.now();
   const createdAt = Math.floor(dateNow / 1000);
-  const timestamp = Buffer.alloc(8);
-  timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
+  const timestamp = numberToBytesBE(BigInt(createdAt), 8);
 
   const keyPair = nacl.box.keyPair.fromSecretKey(myWalletSecretKey);
   const myWalletPublicKey = keyPair.publicKey;
@@ -68,8 +71,7 @@ export const walletDecrypt = (
 ): Uint8Array => {
   const dateSent = new Date(data.payload.created_at);
   const createdAt = Math.floor(dateSent.getTime() / 1000);
-  const timestamp = Buffer.alloc(8);
-  timestamp.writeBigUInt64BE(BigInt(createdAt), 0);
+  const timestamp = numberToBytesBE(BigInt(createdAt), 8);
 
   const keyPair = nacl.box.keyPair.fromSecretKey(myWalletSecretKey);
   const myWalletPublicKey = keyPair.publicKey;

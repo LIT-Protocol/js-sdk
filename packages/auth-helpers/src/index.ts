@@ -1,3 +1,5 @@
+import './lib/polyfills/buffer';
+
 export * from './lib/auth-config-builder';
 export * from './lib/generate-auth-sig';
 export * from './lib/models';
