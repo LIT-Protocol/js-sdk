@@ -395,6 +395,10 @@ export const ExecuteJsAdvancedOptionsSchema = z.object({
    * Only run the action on a single node; this will only work if all code in your action is non-interactive
    */
   useSingleNode: z.boolean().optional(),
+  /**
+   * Key set identifier used to select the signing key set
+   */
+  keySetIdentifier: z.string().optional(),
 });
 
 // pub struct AuthMethod {

@@ -42,5 +42,6 @@ export const AuthConfigSchema = z.preprocess(
     statement: z.string().optional().default(''),
     domain: DomainSchema.optional().default('localhost'),
     resources: z.array(LitResourceAbilityRequestSchema).optional().default([]),
+    keySetIdentifier: z.string().optional(),
   })
 );
