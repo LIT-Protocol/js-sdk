@@ -60,6 +60,13 @@
         "command": "artillery run configs/pkp-sign-gen3-60.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
+    "run:pkp-sign-gen3-30": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen3-30.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
     "run:pkp-sign-gen3-80": {
       "executor": "nx:run-commands",
       "options": {
