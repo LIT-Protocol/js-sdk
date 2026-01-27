@@ -132,7 +132,7 @@ export async function createTestAccount(
       testEnv.config.ledgerDepositAmount;
     await testEnv.masterPaymentManager.depositForUser({
       userAddress: person.account.address,
-      amountInEth: ledgerDepositAmount,
+      amountInLitkey: testEnv.config.ledgerDepositAmount,
     });
   }
 
@@ -168,7 +168,7 @@ export async function createTestAccount(
         testEnv.config.ledgerDepositAmount;
       await testEnv.masterPaymentManager.depositForUser({
         userAddress: person.pkp.ethAddress as `0x${string}`,
-        amountInEth: ledgerDepositAmount,
+        amountInLitkey: testEnv.config.ledgerDepositAmount,
       });
     }
 

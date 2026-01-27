@@ -246,7 +246,7 @@ export const PaymentManagementDashboard: React.FC<
       clearError();
 
       const result = await paymentManager.deposit({
-        amountInEth: depositAmount,
+        amountInLitkey: depositAmount,
       });
       showSuccess("deposit");
       onTransactionComplete?.(result);
@@ -277,7 +277,7 @@ export const PaymentManagementDashboard: React.FC<
 
       const result = await paymentManager.depositForUser({
         userAddress: depositForUserAddress,
-        amountInEth: depositForUserAmount,
+        amountInLitkey: depositForUserAmount,
       });
       showSuccess("deposit-for-user");
       onTransactionComplete?.(result);
@@ -312,7 +312,7 @@ export const PaymentManagementDashboard: React.FC<
       clearError();
 
       const result = await paymentManager.requestWithdraw({
-        amountInEth: withdrawAmount,
+        amountInLitkey: withdrawAmount,
       });
       showSuccess("request-withdraw");
       onTransactionComplete?.(result);
@@ -341,7 +341,7 @@ export const PaymentManagementDashboard: React.FC<
       clearError();
 
       const result = await paymentManager.withdraw({
-        amountInEth: withdrawInfo.amount,
+        amountInLitkey: withdrawInfo.amount,
       });
       showSuccess("execute-withdraw");
       onTransactionComplete?.(result);

@@ -325,7 +325,7 @@ async function initInternal(
   async function masterDepositForUser(userAddress: string) {
     await masterPaymentManager.depositForUser({
       userAddress: userAddress,
-      amountInEth: ledgerDepositAmount,
+      amountInLitkey: ledgerDepositAmount,
     });
     console.log(
       `✅ New ${userAddress} Ledger Balance:`,

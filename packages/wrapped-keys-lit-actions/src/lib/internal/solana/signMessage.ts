@@ -39,10 +39,11 @@ function verifyMessageSignature({
   messageToSign,
 }: VerifyMessageSignatureParams): boolean {
   try {
+    const messageBytes = new TextEncoder().encode(messageToSign);
     const isValid = nacl.sign.detached.verify(
-      Buffer.from(messageToSign),
+      messageBytes,
       signature,
-      solanaKeyPair.publicKey.toBuffer()
+      solanaKeyPair.publicKey.toBytes()
     );
 
     return isValid;
@@ -62,7 +63,8 @@ export async function signMessageSolanaKey({
   messageToSign: string;
   privateKey: string;
 }): Promise<string> {
-  const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
+  const privateKeyBytes = Uint8Array.from(Buffer.from(privateKey, 'hex'));
+  const solanaKeyPair = Keypair.fromSecretKey(privateKeyBytes);
 
   const { signature } = signMessage({
     messageToSign,

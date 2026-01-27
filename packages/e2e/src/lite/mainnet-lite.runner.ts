@@ -120,7 +120,7 @@ const ensureLedgerBalance = async (
   if (deltaWei > 0n) {
     await testEnv.masterPaymentManager.depositForUser({
       userAddress,
-      amountInEth: formatEther(deltaWei),
+      amountInLitkey: formatEther(deltaWei),
     });
   }
 };
@@ -346,7 +346,7 @@ const createTestAccountLite = async (
     if (deltaWei > 0n) {
       await testEnv.masterPaymentManager.depositForUser({
         userAddress: person.account.address,
-        amountInEth: formatEther(deltaWei),
+        amountInLitkey: formatEther(deltaWei),
       });
     }
   }
@@ -383,7 +383,7 @@ const createTestAccountLite = async (
       if (deltaWei > 0n) {
         await testEnv.masterPaymentManager.depositForUser({
           userAddress: person.pkp.ethAddress as `0x${string}`,
-          amountInEth: formatEther(deltaWei),
+          amountInLitkey: formatEther(deltaWei),
         });
       }
     }

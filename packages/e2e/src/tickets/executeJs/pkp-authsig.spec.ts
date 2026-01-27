@@ -57,7 +57,7 @@ describe('PKP AuthSig Access Control', () => {
     // Ensure the PKP ledger has enough balance to pay for executeJs
     await testEnv.masterPaymentManager.depositForUser({
       userAddress: pkp.ethAddress as `0x${string}`,
-      amountInEth: '0.2',
+      amountInLitkey: '0.2',
     });
 
     const accessControlConditions = createAccBuilder()
