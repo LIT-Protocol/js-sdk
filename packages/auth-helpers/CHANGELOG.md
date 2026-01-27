@@ -1,5 +1,11 @@
 # @lit-protocol/auth-helpers
 
+## 8.2.1
+
+### Patch Changes
+
+- 1dd24b8: add payment delegation auth sig
+
 ## 8.2.0
 
 ### Minor Changes

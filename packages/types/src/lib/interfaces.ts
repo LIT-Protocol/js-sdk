@@ -18,6 +18,7 @@ import {
   SessionKeyPairSchema,
   NodeSetSchema,
   UrlSchema,
+  type DefinedJson,
 } from '@lit-protocol/schemas';
 
 import { SigType } from './EndpointResponses';
@@ -1209,6 +1210,48 @@ export interface CapacityCreditsReq {
 
 export interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
+}
+
+export type PaymentDelegationScope =
+  | 'encryption_sign'
+  | 'lit_action'
+  | 'pkp_sign'
+  | 'sign_session_key';
+
+export interface PaymentDelegationAuthSigData
+  extends Record<string, DefinedJson> {
+  delegate_to: string[];
+  max_price: string;
+  scopes: PaymentDelegationScope[];
+}
+
+export type PaymentDelegationSigner =
+  | SignerLike
+  | {
+      signMessage: (message: string | any) => Promise<string>;
+      getAddress?: () => Promise<string>;
+      address?: string;
+    };
+
+export interface PaymentDelegationAuthSigParams {
+  signer: PaymentDelegationSigner;
+  signerAddress?: string;
+  delegateeAddresses: string[];
+  maxPrice: string | number | bigint;
+  scopes: PaymentDelegationScope[];
+  nonce?: string;
+  litClient?: {
+    getContext: () => Promise<{
+      latestBlockhash?: string;
+    }>;
+  };
+  expiration?: string;
+  domain?: string;
+  statement?: string;
+}
+
+export interface PaymentDelegationAuthSigRes {
+  paymentDelegationAuthSig: AuthSig;
 }
 
 export type LitActionSdkParams = z.infer<typeof LitActionSdkParamsSchema>;

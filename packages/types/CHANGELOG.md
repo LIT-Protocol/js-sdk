@@ -1,5 +1,11 @@
 # @lit-protocol/types
 
+## 8.0.4
+
+### Patch Changes
+
+- 1dd24b8: add payment delegation auth sig
+
 ## 8.0.3
 
 ### Patch Changes
