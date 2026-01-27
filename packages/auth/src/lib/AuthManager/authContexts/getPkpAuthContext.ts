@@ -111,6 +111,7 @@ const preparePkpAuthRequestBody = async (
     curveType: 'BLS' as const,
     signingScheme: 'BLS' as const,
     epoch: params.deps.currentEpoch,
+    keySetIdentifier: _authConfig.keySetIdentifier,
   };
 };
 
@@ -139,6 +140,7 @@ export const getPkpAuthContext = async (
     statement: _params.authConfig.statement,
     domain: _params.authConfig.domain,
     resources: _params.authConfig.resources,
+    keySetIdentifier: _params.authConfig.keySetIdentifier,
   };
 
   const hasProvidedSessionKeyPair = !!_params.sessionKeyPair;

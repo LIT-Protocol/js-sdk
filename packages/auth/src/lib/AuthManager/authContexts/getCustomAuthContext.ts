@@ -114,6 +114,7 @@ const prepareCustomAuthRequestBody = async (
     curveType: 'BLS' as const,
     signingScheme: 'BLS' as const,
     epoch: params.deps.currentEpoch,
+    keySetIdentifier: _authConfig.keySetIdentifier,
   };
 
   // Add lit action parameters - ensure at least one is present

@@ -25,6 +25,55 @@
         "command": "artillery run configs/pkp-sign.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
+    "run:pkp-sign-gen7-60": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen7-60.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:pkp-sign-gen7-80": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen7-80.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:pkp-sign-gen7-120": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen7-120.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:pkp-sign-gen7-soak": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen7-soak.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:pkp-sign-gen3-60": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen3-60.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:pkp-sign-gen3-80": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen3-80.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:pkp-sign-gen3-120": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/pkp-sign-gen3-120.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
     "run:encrypt-decrypt": {
       "executor": "nx:run-commands",
       "options": {
@@ -32,11 +81,39 @@
         "command": "artillery run configs/encrypt-decrypt.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
+    "run:encrypt-decrypt-gen3-70": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/encrypt-decrypt-gen3-70.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:encrypt-decrypt-gen3-150": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/encrypt-decrypt-gen3-150.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
     "run:execute": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
         "command": "artillery run configs/execute.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:execute-gen3-60": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/execute-gen3-60.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:execute-gen3-100": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/execute-gen3-100.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     },
     "run:mix": {
@@ -51,6 +128,27 @@
       "options": {
         "cwd": "{projectRoot}",
         "command": "artillery run configs/sign-session-key.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:sign-session-key-gen3-50": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/sign-session-key-gen3-50.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:sign-session-key-gen3-60": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/sign-session-key-gen3-60.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
+      }
+    },
+    "run:failure-paths": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "artillery run configs/failure-paths.yml $([ -n \"$ARTILLERY_KEY\" ] && echo \"--record --key $ARTILLERY_KEY\")"
       }
     }
   },

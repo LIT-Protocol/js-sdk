@@ -36,6 +36,11 @@ const ExecuteJsSharedFieldsSchema = z.object({
     .optional(),
 
   /**
+   * Key set identifier used to select the signing key set
+   */
+  keySetIdentifier: z.string().optional(),
+
+  /**
    * User's maximum price they're willing to pay for the request
    */
   userMaxPrice: z.bigint().optional(),

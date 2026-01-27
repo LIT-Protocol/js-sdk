@@ -1,0 +1,21 @@
+config:
+  target: 'dummy'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 150
+      name: 'Ramp Up'
+    - duration: 300
+      arrivalRate: 150
+      name: 'Sustained Failure Paths'
+    - duration: 60
+      arrivalRate: 20
+      name: 'Ramp Down'
+  processor: '../src/processors/multi-endpoints.ts'
+
+scenarios:
+  - name: 'Sign Session Key Failure Paths'
+    weight: 100
+    flow:
+      - function: 'runSignSessionKeyFailurePathTest'
+      - think: 0.1
