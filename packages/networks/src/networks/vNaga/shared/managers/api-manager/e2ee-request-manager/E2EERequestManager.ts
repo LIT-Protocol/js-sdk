@@ -194,6 +194,11 @@ const handleEncryptedError = (
     ? `"${operationName}" failed for request ${requestId}`
     : `"${operationName}" failed`;
 
+  const nodeErrors =
+    errorResult?.error && typeof errorResult.error === 'object'
+      ? (errorResult.error as { __nodeErrors?: unknown }).__nodeErrors
+      : undefined;
+
   if (errorResult.error && errorResult.error.payload) {
     // Try to decrypt the error payload to get the actual error message
     try {
@@ -212,8 +217,15 @@ const handleEncryptedError = (
           typeof GenericEncryptedPayloadSchema
         >,
         jitContext,
-        (decryptedJson) => {
-          return decryptedJson.data || decryptedJson; // Return whatever we can get
+        (decryptedJson, nodeUrl) => {
+          const payload = decryptedJson.data || decryptedJson;
+          if (payload && typeof payload === 'object') {
+            return {
+              ...(payload as Record<string, unknown>),
+              __nodeUrl: nodeUrl,
+            };
+          }
+          return { value: payload, __nodeUrl: nodeUrl };
         },
         {
           operationName: `${operationName} error payload`,
@@ -243,6 +255,7 @@ const handleEncryptedError = (
               operationName,
               requestId,
               rawNodeError: firstError,
+              nodeErrors,
             },
           },
           '%s',
@@ -258,6 +271,7 @@ const handleEncryptedError = (
             operationName,
             requestId,
             decryptedErrorValues,
+            nodeErrors,
           },
         },
         '%s',
@@ -286,6 +300,7 @@ const handleEncryptedError = (
             operationName,
             requestId,
             rawError: errorResult,
+            nodeErrors,
           },
         },
         '%s',
@@ -305,6 +320,7 @@ const handleEncryptedError = (
           operationName,
           requestId,
           rawError: errorResult,
+          nodeErrors,
         },
       },
       '%s',
