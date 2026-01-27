@@ -6,7 +6,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x8a861B3640c1ff058CCB109ba11CA3224d228159",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -6872,7 +6872,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x12a165660141EBc78cFcb79D88E0aDBAf2e107F0",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "anonymous": false,
@@ -7010,7 +7010,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x0996A48f8cc3c7c52Caf10d34c804eF5C9E7748B",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -8064,7 +8064,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x5655D71832f6f2AFD72c3012a60144f5572897F1",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -9198,7 +9198,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x11eBfFeab32f6cb5775BeF83E09124B9322E4026",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -10626,7 +10626,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0xAe666c3080AA5Dd935574099c18E1eD779FFB231",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -11641,7 +11641,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0xEB1F9A8567bC01b8cfa9d6e7078bEf587D908342",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -12976,7 +12976,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x20DC21B64c59807A491f6739B2B9d39bb304Fb9d",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -13140,7 +13140,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x094CF9F8BBfc633AB2Eb8CdbBE8552a172fAdD80",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [],
@@ -13377,7 +13377,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x5EF658cB6ab3C3BfB75C8293B9a6C8ccb0b96C3c",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -14013,7 +14013,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x9BD023448d2D3b2D73fe61E4d7859007F6dA372c",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [
@@ -15069,7 +15069,7 @@ export const naga = {
         {
           "network": "naga",
           "address_hash": "0x88F5535Fa6dA5C225a3C06489fE4e3405b87608C",
-          "inserted_at": "2025-10-29T22:25:19Z",
+          "inserted_at": "2026-01-23T16:58:21Z",
           "ABI": [
             {
               "inputs": [

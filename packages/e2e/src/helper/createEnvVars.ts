@@ -34,6 +34,15 @@ const testEnv: Record<
   live: { type: 'live', key: 'LIVE_MASTER_ACCOUNT' },
 };
 
+const LIVE_MASTER_ACCOUNT_BY_NETWORK: Partial<
+  Record<SupportedNetwork, string>
+> = {
+  naga: 'LIVE_MASTER_ACCOUNT_NAGA',
+  'naga-dev': 'LIVE_MASTER_ACCOUNT_NAGA_DEV',
+  'naga-test': 'LIVE_MASTER_ACCOUNT_NAGA_TEST',
+  'naga-staging': 'LIVE_MASTER_ACCOUNT_NAGA_STAGING',
+} as const;
+
 export function createEnvVars(): EnvVars {
   // 1. Get network string
   const networkEnv = process.env['NETWORK'];
@@ -58,19 +67,19 @@ export function createEnvVars(): EnvVars {
     privateKey = process.env[testEnv.local.key] as `0x${string}`;
   } else {
     Object.assign(testEnv.live, { type: 'live' });
-    const legacyKey = testEnv.live.key;
-    const scopedKey = `LIVE_MASTER_ACCOUNT_${network
-      .toUpperCase()
-      .replace(/-/g, '_')}`;
-    privateKey =
-      (process.env[legacyKey] as `0x${string}` | undefined) ??
-      (process.env[scopedKey] as `0x${string}` | undefined);
+    const overrideKey = LIVE_MASTER_ACCOUNT_BY_NETWORK[network];
+    const liveKey =
+      overrideKey && process.env[overrideKey] ? overrideKey : testEnv.live.key;
+    privateKey = process.env[liveKey]!! as `0x${string}`;
   }
 
   if (!privateKey) {
-    const scopedKey = `LIVE_MASTER_ACCOUNT_${network
-      .toUpperCase()
-      .replace(/-/g, '_')}`;
+    const expectedKey =
+      selectedNetwork === 'local'
+        ? 'LOCAL_MASTER_ACCOUNT'
+        : LIVE_MASTER_ACCOUNT_BY_NETWORK[network]
+        ? `${LIVE_MASTER_ACCOUNT_BY_NETWORK[network]} or LIVE_MASTER_ACCOUNT`
+        : 'LIVE_MASTER_ACCOUNT';
     throw new Error(
       `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${testEnv.live.key} or ${scopedKey} to be set.`
     );

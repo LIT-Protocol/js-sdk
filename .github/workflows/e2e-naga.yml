@@ -50,9 +50,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - environment: naga-dev
-            network: naga-dev
-            privateKey: LIVE_MASTER_ACCOUNT_NAGA_DEV
+          # - environment: naga-dev
+          #   network: naga-dev
+          #   privateKey: LIVE_MASTER_ACCOUNT_NAGA_DEV
           # - environment: naga-staging
           #   network: naga-staging
           #   privateKey: LIVE_MASTER_ACCOUNT_NAGA_STAGING
@@ -91,6 +91,7 @@ jobs:
             cp -a build-output/packages/wasm/src/pkg/. packages/wasm/src/pkg/
           fi
           rm -rf build-output
+      # Uncomment the steps below to re-enable naga-dev/naga-test e2e runs.
       - name: Verify required secrets
         run: |
           if [ -z "${LIVE_MASTER_ACCOUNT}" ]; then

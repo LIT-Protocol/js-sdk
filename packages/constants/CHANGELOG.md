@@ -1,5 +1,14 @@
 # @lit-protocol/constants
 
+## 9.0.1
+
+### Patch Changes
+
+- e58998d: remove deprecated alchemy rpc url and replace with a new one
+- cdc4f78: add support for naga-test
+- Updated dependencies [cdc4f78]
+  - @lit-protocol/contracts@0.9.1
+
 ## 9.0.0
 
 ### Major Changes

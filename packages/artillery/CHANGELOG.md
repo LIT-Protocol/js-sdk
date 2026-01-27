@@ -1,5 +1,16 @@
 # @lit-protocol/artillery
 
+## 0.1.3
+
+### Patch Changes
+
+- cdc4f78: add support for naga-test
+- 401e864: Renames the amountInEth parameter to amountInLitkey to prevent future confusion on deposits. Deprecates the amountInEth parameter.
+- Updated dependencies [cdc4f78]
+- Updated dependencies [401e864]
+- Updated dependencies [3a644ec]
+  - @lit-protocol/e2e@5.1.0
+
 ## 0.1.2
 
 ### Patch Changes

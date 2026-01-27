@@ -190,6 +190,7 @@ export interface JsonPkpSignSdkParams {
   toSign: ArrayLike<number>;
   authContext: AuthenticationContext;
   userMaxPrice?: bigint;
+  keySetIdentifier?: string;
 }
 
 /**
@@ -206,6 +207,7 @@ export interface JsonPkpSignRequest<T> extends NodeSetRequired {
   pubkey: string;
 
   signingScheme: T;
+  keySetId?: string;
 }
 
 /**
@@ -244,6 +246,7 @@ export interface JsonSignSessionKeyRequestV1
   siweMessage: string;
   curveType: 'BLS';
   epoch?: number;
+  pkpKeySetId?: string;
 
   // custom auth params
   code?: string;
@@ -262,6 +265,7 @@ export interface JsonSignSessionKeyRequestForPKP {
   curveType: 'BLS';
   signingScheme: 'BLS';
   epoch: number;
+  pkpKeySetId?: string;
 }
 /**
  * module: LitNodeClient
@@ -462,6 +466,7 @@ export interface JsonExecutionRequest
   ipfsId?: string;
   code?: string;
   authMethods?: AuthMethod[];
+  keySetId?: string;
 }
 
 export type EncryptSdkParams = z.infer<typeof EncryptRequestSchema>;

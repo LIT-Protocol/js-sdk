@@ -161,6 +161,7 @@
           {
             "group": "Guides",
             "pages": [
+              "guides/v7-to-v8-migration",
               "guides/lit-action-sign-as-action",
               "guides/server-sessions"
             ]

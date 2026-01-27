@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/e2e",
-  "version": "5.0.2",
+  "version": "5.1.0",
   "description": "Lit Protocol E2E testing package for running comprehensive integration tests",
   "main": "src/index.js",
   "type": "commonjs",
