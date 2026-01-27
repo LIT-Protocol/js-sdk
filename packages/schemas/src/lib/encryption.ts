@@ -11,6 +11,7 @@ export const DecryptRequestBaseSchema =
     .extend({
       authContext: z.union([PKPAuthContextSchema, EoaAuthContextSchema]),
       authSig: AuthSigSchema.optional(),
+      keySetIdentifier: z.string().optional(),
     });
 
 // Metadata schema for encryption

@@ -1,5 +1,10 @@
 import * as LitNodeApi from '../../LitNodeClient/LitNodeApi';
 import { RequestItem } from '@lit-protocol/types';
+import { getChildLogger } from '@lit-protocol/logger';
+
+const _logger = getChildLogger({
+  module: 'handleNodePromises',
+});
 
 /**
  * @fileOverview
@@ -70,6 +75,43 @@ export interface NodeResponse {
   rawPubKey?: string;
   // Potentially other fields like status, etc.
   [key: string]: any; // Allow other properties
+}
+
+function isErrorResponse(
+  value: unknown
+): value is { success: false; error?: any } {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'success' in (value as Record<string, unknown>) &&
+      (value as { success?: boolean }).success === false
+  );
+}
+
+function summarizeError(error: unknown): Record<string, unknown> {
+  if (!error || typeof error !== 'object') {
+    return { message: String(error) };
+  }
+
+  const err = error as Record<string, unknown>;
+  const rawError = err['error'];
+  const safeError =
+    rawError === null ||
+    typeof rawError === 'string' ||
+    typeof rawError === 'number' ||
+    typeof rawError === 'boolean'
+      ? rawError
+      : undefined;
+  return {
+    name: typeof err['name'] === 'string' ? err['name'] : undefined,
+    message: typeof err['message'] === 'string' ? err['message'] : String(err),
+    code: err['code'],
+    shortMessage: err['shortMessage'],
+    status: err['status'],
+    error: safeError,
+    errorObject: err['errorObject'],
+    details: err['details'],
+  };
 }
 
 //------------------------------------------------------------------------------------
@@ -230,7 +272,35 @@ export async function dispatchRequests<T, M = NodeResponse>(
     };
   }
 
-  const nodePromises = requests.map((req) => executeSingleRequest<T, M>(req));
+  const nodeErrors: {
+    nodeUrl: string;
+    fullPath: string;
+    error: Record<string, unknown>;
+  }[] = [];
+
+  const nodePromises = requests.map((req) =>
+    executeSingleRequest<T, M>(req)
+      .then((result) => {
+        if (isErrorResponse(result)) {
+          throw result;
+        }
+        return result;
+      })
+      .catch((error) => {
+        let nodeUrl = req.fullPath;
+        try {
+          nodeUrl = new URL(req.fullPath).host;
+        } catch {
+          // fall back to fullPath if it isn't a valid URL
+        }
+        nodeErrors.push({
+          nodeUrl,
+          fullPath: req.fullPath,
+          error: summarizeError(error),
+        });
+        throw error;
+      })
+  );
 
   const { successes, errors: failures } =
     await waitForNSuccessesWithErrorsHelper<M>(nodePromises, minSuccessCount);
@@ -264,6 +334,24 @@ export async function dispatchRequests<T, M = NodeResponse>(
 
   // Not enough successes, and there were failures.
   const mostCommonError = getMostCommonError(failures);
+
+  if (nodeErrors.length > 0) {
+    _logger.warn(
+      {
+        batchRequestId,
+        nodeErrors,
+      },
+      'dispatchRequests: node failures'
+    );
+  }
+
+  if (mostCommonError && typeof mostCommonError === 'object') {
+    try {
+      (mostCommonError as { __nodeErrors?: unknown }).__nodeErrors = nodeErrors;
+    } catch {
+      // ignore if we cannot attach metadata
+    }
+  }
 
   return {
     success: false,

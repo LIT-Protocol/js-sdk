@@ -60,7 +60,7 @@ const LEDGER_MINIMUM_BALANCE = 10000;
       '\x1b[90m✅ Depositing the difference to Live Master Account Payment Manager...\x1b[0m'
     );
     await masterAccountDetails.paymentManager.deposit({
-      amountInEth: difference.toString(),
+      amountInLitkey: difference.toString(),
     });
 
     // print the new balance

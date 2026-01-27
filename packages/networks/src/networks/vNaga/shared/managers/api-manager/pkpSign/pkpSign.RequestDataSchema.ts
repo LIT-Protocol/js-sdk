@@ -27,6 +27,7 @@ export const PKPSignRequestDataSchema = z
     nodeSet: NodeSetsFromUrlsSchema,
     chain: SigningChainSchema,
     bypassAutoHashing: z.boolean().optional(),
+    keySetId: z.string(),
 
     // NEW v2 API fields
     epoch: z.number().default(0),
@@ -49,6 +50,7 @@ export const PKPSignRequestDataSchema = z
       nodeSet: item.nodeSet,
       epoch: item.epoch,
       authMethods: item.authMethods,
+      keySetId: item.keySetId,
     };
 
     return unencrypted;

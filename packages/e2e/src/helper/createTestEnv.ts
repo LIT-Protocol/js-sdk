@@ -24,11 +24,17 @@ export const CONFIG = {
     },
   },
   LIVE: {
-    nativeFundingAmount: '0.01',
-    ledgerDepositAmount: '0.01',
+    nativeFundingAmount: process.env['LIVE_NETWORK_FUNDING_AMOUNT'] ?? '5',
+    ledgerDepositAmount:
+      process.env['LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT'] ?? '5',
     sponsorshipLimits: {
-      totalMaxPriceInWei: '50000000000000000',
-      userMaxPrice: 50000000000000000n,
+      totalMaxPriceInWei:
+        process.env['LIVE_NETWORK_SPONSORSHIP_TOTAL_MAX_PRICE_IN_WEI'] ??
+        '5000000000000000000',
+      userMaxPrice: BigInt(
+        process.env['LIVE_NETWORK_SPONSORSHIP_USER_MAX_PRICE_IN_WEI'] ??
+          '5000000000000000000'
+      ),
     },
   },
   MAINNET: {

@@ -31,4 +31,9 @@ export const ExecuteJsRequestDataSchema = z.object({
    * Node set for the request - automatically transforms URLs to nodeSet format
    */
   nodeSet: NodeSetsFromUrlsSchema,
+
+  /**
+   * Key set identifier required by the nodes for Lit Action execution
+   */
+  keySetId: z.string(),
 });

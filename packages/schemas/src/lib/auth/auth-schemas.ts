@@ -27,6 +27,7 @@ export const JsonSignSessionKeyRequestForPkpReturnSchema = z.object({
   curveType: z.literal('BLS'),
   signingScheme: z.literal('BLS'),
   epoch: z.number(),
+  keySetIdentifier: z.string().optional(),
 });
 
 export const JsonSignCustomSessionKeyRequestForPkpReturnSchema = z
@@ -42,6 +43,7 @@ export const JsonSignCustomSessionKeyRequestForPkpReturnSchema = z
 
     // custom auth params
     jsParams: z.record(z.any()).optional(),
+    keySetIdentifier: z.string().optional(),
   })
   .and(
     z.union([

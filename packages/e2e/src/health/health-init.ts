@@ -177,7 +177,7 @@ export const initHealthCheck = async (
   // Deposit for Alice
   await masterPaymentManager.depositForUser({
     userAddress: aliceViemAccount.address,
-    amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+    amountInLitkey: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
   });
 
   /**
@@ -207,7 +207,7 @@ export const initHealthCheck = async (
   // Deposit for Alice's PKP
   await masterPaymentManager.depositForUser({
     userAddress: aliceViemAccountPkp.ethAddress,
-    amountInEth: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
+    amountInLitkey: LIVE_NETWORK_LEDGER_DEPOSIT_AMOUNT,
   });
 
   console.log('✅ PKP created and funded');
