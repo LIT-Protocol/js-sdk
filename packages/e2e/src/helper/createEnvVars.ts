@@ -61,10 +61,10 @@ export function createEnvVars(): EnvVars {
   const selectedNetwork = network.includes('local') ? 'local' : 'live';
 
   // 2. Get private key
-  let privateKey: `0x${string}`;
+  let privateKey: `0x${string}` | undefined;
   if (network.includes('local')) {
     Object.assign(testEnv.local, { type: 'local' });
-    privateKey = process.env[testEnv.local.key]!! as `0x${string}`;
+    privateKey = process.env[testEnv.local.key] as `0x${string}`;
   } else {
     Object.assign(testEnv.live, { type: 'live' });
     const overrideKey = LIVE_MASTER_ACCOUNT_BY_NETWORK[network];
@@ -81,7 +81,7 @@ export function createEnvVars(): EnvVars {
         ? `${LIVE_MASTER_ACCOUNT_BY_NETWORK[network]} or LIVE_MASTER_ACCOUNT`
         : 'LIVE_MASTER_ACCOUNT';
     throw new Error(
-      `❌ ${expectedKey} env var is not set for NETWORK=${network}.`
+      `❌ You are on "${selectedNetwork}" environment, network ${network}. We are expecting ${expectedKey} to be set.`
     );
   }
 
