@@ -6,8 +6,9 @@ Usage via root scripts remains the same, now pointing to `packages/artillery`.
 
 # 🚀 Run Artillery tests
 
-- LOG_LEVEL= `debug` | `info` | `silent` | `debug_text` (console-style text output, not JSON; `debug2` is a deprecated alias)
-- NETWORK= `naga-dev` | `naga-staging`
+- LOG_LEVEL= `debug` | `info` | `silent` | `debug2` (raw console.log)
+- NETWORK= `naga-dev` | `naga-staging` | `naga-test`
+- LIVE_MASTER_ACCOUNT= `0x...` (required; set to `LIVE_MASTER_ACCOUNT_NAGA` or `LIVE_MASTER_ACCOUNT_NAGA_TEST` as needed)
 
 ## Setup Commands
 
@@ -68,6 +69,47 @@ nx run artillery:mix
 ```bash
 nx run artillery:sign-session-key
 ```
+
+## Gen3 Reference Configs
+
+These mirror the run configs captured in `.tom/task-load-test/context/gen3-network-testing.pdf`.
+
+### PKP Sign
+
+```bash
+nx run artillery:pkp-sign-gen3-60
+nx run artillery:pkp-sign-gen3-80
+nx run artillery:pkp-sign-gen3-120
+```
+
+### Encrypt-Decrypt
+
+```bash
+nx run artillery:encrypt-decrypt-gen3-70
+nx run artillery:encrypt-decrypt-gen3-150
+```
+
+### Sign Session Key
+
+```bash
+nx run artillery:sign-session-key-gen3-50
+nx run artillery:sign-session-key-gen3-60
+```
+
+### Execute JS
+
+```bash
+nx run artillery:execute-gen3-60
+nx run artillery:execute-gen3-100
+```
+
+> ℹ️ Gen3 often ran multiple Artillery instances in parallel (x2/x3) to reach total vusers/s. Repeat the same config on multiple hosts to match those totals.
+
+> ℹ️ Execute JS Gen3 configs default to the `sign` variant. Switch the `variant` in the YAML to run other Lit Action scenarios.
+
+## Benchmark Template
+
+Use `packages/artillery/benchmark-template.md` to capture consistent run metadata and results.
 
 ## (Optional) Generating a report
 

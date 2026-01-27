@@ -60,6 +60,7 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
       const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
         [];
       const urls = Object.keys(sessionSigs);
+      const keySetId = params.keySetIdentifier ?? 'naga-keyset1';
 
       for (const url of urls) {
         _logger.info({ url }, 'pkpSign:createRequest: Generating request data');
@@ -73,6 +74,7 @@ export function createPKPSignAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
           chain: params.chain,
           bypassAutoHashing: params.signingContext.bypassAutoHashing,
           epoch: params.connectionInfo.epochState.currentNumber,
+          keySetId,
         });
 
         const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -183,6 +185,7 @@ export function createDecryptAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
       const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
         [];
       const urls = Object.keys(sessionSigs);
+      const keySetId = params.keySetIdentifier ?? 'naga-keyset1';
 
       for (const url of urls) {
         const _requestData = DecryptRequestDataSchema.parse({
@@ -194,6 +197,7 @@ export function createDecryptAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
           unifiedAccessControlConditions: params.unifiedAccessControlConditions,
           authSig: sessionSigs[url],
           chain: params.chain,
+          keySetId,
         });
 
         const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -291,6 +295,7 @@ export function createExecuteJsAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
       const requests: RequestItem<z.infer<typeof EncryptedVersion1Schema>>[] =
         [];
       const urls = Object.keys(sessionSigs);
+      const keySetId = params.keySetIdentifier ?? 'naga-keyset1';
 
       for (const url of urls) {
         // Base64 encode the code if provided
@@ -312,6 +317,7 @@ export function createExecuteJsAPI<T, M>(networkConfig: INetworkConfig<T, M>) {
           ...(params.executionContext.jsParams && {
             jsParams: { jsParams: params.executionContext.jsParams },
           }),
+          keySetId,
         });
 
         const encryptedPayload = E2EERequestManager.encryptRequestData(

@@ -5,8 +5,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x9f3cE810695180C5f693a7cD2a0203A381fd57E1",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0x149a054CE79A379Ae5E97f5B984B993233b28061",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -400,6 +400,11 @@ export const nagaTest = {
               "type": "function"
             },
             {
+              "inputs": [],
+              "name": "CallerNotOwner",
+              "type": "error"
+            },
+            {
               "inputs": [
                 {
                   "internalType": "address",
@@ -591,6 +596,71 @@ export const nagaTest = {
             {
               "inputs": [
                 {
+                  "internalType": "uint256",
+                  "name": "realmId",
+                  "type": "uint256"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "maxConcurrentRequests",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "maxPresignCount",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "minPresignCount",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "peerCheckingIntervalSecs",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "maxPresignConcurrency",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "rpcHealthcheckEnabled",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "minEpochForRewards",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "permittedValidatorsOn",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "defaultKeySet",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct LibStakingStorage.RealmConfig",
+                  "name": "newConfig",
+                  "type": "tuple"
+                }
+              ],
+              "name": "setRealmConfig",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
                   "internalType": "address",
                   "name": "stakerAddress",
                   "type": "address"
@@ -698,11 +768,6 @@ export const nagaTest = {
               ],
               "stateMutability": "view",
               "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "CallerNotOwner",
-              "type": "error"
             },
             {
               "inputs": [],
@@ -1339,7 +1404,7 @@ export const nagaTest = {
                     },
                     {
                       "internalType": "uint256[]",
-                      "name": "keyTypes",
+                      "name": "keyTypes_deprecated",
                       "type": "uint256[]"
                     },
                     {
@@ -1689,66 +1754,6 @@ export const nagaTest = {
                 }
               ],
               "name": "setPermittedValidatorsOn",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "realmId",
-                  "type": "uint256"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "uint256",
-                      "name": "maxConcurrentRequests",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "maxPresignCount",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "minPresignCount",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "peerCheckingIntervalSecs",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "maxPresignConcurrency",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "rpcHealthcheckEnabled",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "minEpochForRewards",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "permittedValidatorsOn",
-                      "type": "bool"
-                    }
-                  ],
-                  "internalType": "struct LibStakingStorage.RealmConfig",
-                  "name": "newConfig",
-                  "type": "tuple"
-                }
-              ],
-              "name": "setRealmConfig",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -2694,9 +2699,9 @@ export const nagaTest = {
                       "type": "uint256[]"
                     },
                     {
-                      "internalType": "address[]",
-                      "name": "recoveryPartyMembers",
-                      "type": "address[]"
+                      "internalType": "bytes",
+                      "name": "recoverySessionId",
+                      "type": "bytes"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.KeySetConfig",
@@ -2754,9 +2759,9 @@ export const nagaTest = {
                       "type": "uint256[]"
                     },
                     {
-                      "internalType": "address[]",
-                      "name": "recoveryPartyMembers",
-                      "type": "address[]"
+                      "internalType": "bytes",
+                      "name": "recoverySessionId",
+                      "type": "bytes"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.KeySetConfig[]",
@@ -2812,9 +2817,9 @@ export const nagaTest = {
                       "type": "uint256[]"
                     },
                     {
-                      "internalType": "address[]",
-                      "name": "recoveryPartyMembers",
-                      "type": "address[]"
+                      "internalType": "bytes",
+                      "name": "recoverySessionId",
+                      "type": "bytes"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.KeySetConfig",
@@ -3306,67 +3311,6 @@ export const nagaTest = {
                 }
               ],
               "name": "ComplaintConfigSet",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newTokenRewardPerTokenPerEpoch",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256[]",
-                  "name": "newKeyTypes",
-                  "type": "uint256[]"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newMinimumValidatorCount",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newMaxConcurrentRequests",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newMaxPresignCount",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newMinPresignCount",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newPeerCheckingIntervalSecs",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "newMaxPresignConcurrency",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "bool",
-                  "name": "newRpcHealthcheckEnabled",
-                  "type": "bool"
-                }
-              ],
-              "name": "ConfigSet",
               "type": "event"
             },
             {
@@ -4689,19 +4633,6 @@ export const nagaTest = {
               "type": "function"
             },
             {
-              "inputs": [],
-              "name": "getKeyTypes",
-              "outputs": [
-                {
-                  "internalType": "uint256[]",
-                  "name": "",
-                  "type": "uint256[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
               "inputs": [
                 {
                   "internalType": "uint256",
@@ -5997,7 +5928,7 @@ export const nagaTest = {
                     },
                     {
                       "internalType": "uint256[]",
-                      "name": "keyTypes",
+                      "name": "keyTypes_deprecated",
                       "type": "uint256[]"
                     },
                     {
@@ -6650,6 +6581,11 @@ export const nagaTest = {
                       "internalType": "bool",
                       "name": "permittedValidatorsOn",
                       "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "defaultKeySet",
+                      "type": "string"
                     }
                   ],
                   "internalType": "struct LibStakingStorage.RealmConfig",
@@ -6871,8 +6807,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x077eFcaBFF62391b6fd438034fb21E2484C5B9FF",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0xd8359D7F5390C8510e6EAab0e3814d472EE34910",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "anonymous": false,
@@ -7010,7 +6946,7 @@ export const nagaTest = {
         {
           "network": "naga-test",
           "address_hash": "0x5E8db2E7af793f4095c4843C8cBD87C5D8604838",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -8063,8 +7999,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x054Ddcfef7E9434413ad62A6F37946Bf6B6CFc1A",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0x3EB38bD0B4B081338801f098dFDAe6519D7C9894",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -8564,6 +8500,12 @@ export const nagaTest = {
                   "internalType": "bytes32",
                   "name": "derivedKeyId",
                   "type": "bytes32"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "string",
+                  "name": "keySetIdentifier",
+                  "type": "string"
                 }
               ],
               "name": "PubkeyRoutingDataSet",
@@ -8681,6 +8623,156 @@ export const nagaTest = {
                 }
               ],
               "name": "adminSetRootKeys",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getTrustedForwarder",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newResolverAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "setContractResolver",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "pubkey",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "address",
+                  "name": "stakingContractAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "keyType",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "derivedKeyId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "keySetIdentifier",
+                  "type": "string"
+                }
+              ],
+              "name": "setRoutingData",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "pubkey",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "address",
+                  "name": "stakingContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "keyType",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "derivedKeyId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "keySetIdentifier",
+                  "type": "string"
+                }
+              ],
+              "name": "setRoutingDataAsAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "forwarder",
+                  "type": "address"
+                }
+              ],
+              "name": "setTrustedForwarder",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "stakingContractAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "string",
+                  "name": "identifier",
+                  "type": "string"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "pubkey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "keyType",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct IPubkeyRouter.RootKey[]",
+                  "name": "newRootKeys",
+                  "type": "tuple[]"
+                }
+              ],
+              "name": "voteForRootKeys",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -8983,24 +9075,16 @@ export const nagaTest = {
                       "internalType": "bytes32",
                       "name": "derivedKeyId",
                       "type": "bytes32"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "keySetIdentifier",
+                      "type": "string"
                     }
                   ],
                   "internalType": "struct LibPubkeyRouterStorage.PubkeyRoutingData",
                   "name": "",
                   "type": "tuple"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getTrustedForwarder",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
                 }
               ],
               "stateMutability": "view",
@@ -9051,6 +9135,11 @@ export const nagaTest = {
                       "internalType": "bytes32",
                       "name": "derivedKeyId",
                       "type": "bytes32"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "keySetIdentifier",
+                      "type": "string"
                     }
                   ],
                   "internalType": "struct LibPubkeyRouterStorage.PubkeyRoutingData",
@@ -9059,133 +9148,6 @@ export const nagaTest = {
                 }
               ],
               "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "newResolverAddress",
-                  "type": "address"
-                }
-              ],
-              "name": "setContractResolver",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "pubkey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "address",
-                  "name": "stakingContractAddress",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "keyType",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "derivedKeyId",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "setRoutingData",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "pubkey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "address",
-                  "name": "stakingContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "keyType",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "derivedKeyId",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "setRoutingDataAsAdmin",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "forwarder",
-                  "type": "address"
-                }
-              ],
-              "name": "setTrustedForwarder",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "stakingContractAddress",
-                  "type": "address"
-                },
-                {
-                  "internalType": "string",
-                  "name": "identifier",
-                  "type": "string"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "bytes",
-                      "name": "pubkey",
-                      "type": "bytes"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "keyType",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct IPubkeyRouter.RootKey[]",
-                  "name": "newRootKeys",
-                  "type": "tuple[]"
-                }
-              ],
-              "name": "voteForRootKeys",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             }
           ]
@@ -9197,8 +9159,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xaf4Dddb07Cdde48042e93eb5bf266b49950bC5BD",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0x71F58526F898773Eb6ca168f0f3673f5365718d5",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -10625,8 +10587,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x13428A18C0b181344F97ceaC5596F31a9d182e5c",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0xc6c260c149427064C38c46923c4D66335745B2e9",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -11640,8 +11602,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x7255737630fCFb4914cF51552123eEe9abEc6120",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0x9C48C70DD379FCe946f889f0072b1017e2eCF94C",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -12975,8 +12937,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xE77d6EBD151c02e05a4d9645f816F68f55730733",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0xE986A13231E6d022466FD849ae3b1C1f6E5D7EE1",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -13139,8 +13101,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x934d3190ff3A92eB1Cfb6CbD3617629322897969",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0x625af003520ff8F9F4c53E694951277DF68B6dE9",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [],
@@ -13376,8 +13338,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xd1E59c174BcF85012c54086AB600Dd0aB032e88B",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0xeb5C9B118E118C034Ff59ac8B1F0c3c36f22906b",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -14012,8 +13974,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0xbA0aEB6Bbf58F1B74E896416A20DB5be51C991f2",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0xBFcA364C37d82bF8D05F931084448798e2b6638b",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [
@@ -15068,8 +15030,8 @@ export const nagaTest = {
       "contracts": [
         {
           "network": "naga-test",
-          "address_hash": "0x556955025dD0981Bac684fbDEcE14cDa897d0837",
-          "inserted_at": "2025-10-30T16:03:28Z",
+          "address_hash": "0x3C18D220947e38EE2BD702ddf353Ab8940a7c72A",
+          "inserted_at": "2026-01-23T17:02:42Z",
           "ABI": [
             {
               "inputs": [

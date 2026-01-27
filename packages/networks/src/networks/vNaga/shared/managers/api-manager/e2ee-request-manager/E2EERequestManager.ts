@@ -52,6 +52,14 @@ interface DecryptBatchResponseOptions {
   operationName?: string;
 }
 
+type DecryptedErrorPayload = {
+  __nodeUrl: string;
+  error?: unknown;
+  errorObject?: unknown;
+  value?: unknown;
+  [key: string]: unknown;
+};
+
 /**
  * Generic function to decrypt batch responses using JIT context
  * @param encryptedResult The encrypted batch result from nodes
@@ -82,6 +90,7 @@ const decryptBatchResponse = <T>(
           parsedResult,
         },
       },
+      '%s',
       `${baseMessage}. Batch decryption failed: ${JSON.stringify(parsedResult)}`
     );
   }
@@ -125,6 +134,7 @@ const decryptBatchResponse = <T>(
             verificationKey,
           },
         },
+        '%s',
         `${baseMessage}. No secret key found for verification key: ${verificationKey}`
       );
     }
@@ -159,6 +169,7 @@ const decryptBatchResponse = <T>(
             nodeUrl: keyData.url,
           },
         },
+        '%s',
         `${baseMessage}. Failed to decrypt response ${i} with key from ${keyData.url}: ${convertedError.message}`
       );
     }
@@ -173,6 +184,7 @@ const decryptBatchResponse = <T>(
           requestId,
         },
       },
+      '%s',
       `${baseMessage}. No responses were successfully decrypted`
     );
   }
@@ -190,6 +202,11 @@ const handleEncryptedError = (
     ? `"${operationName}" failed for request ${requestId}`
     : `"${operationName}" failed`;
 
+  const nodeErrors =
+    errorResult?.error && typeof errorResult.error === 'object'
+      ? (errorResult.error as { __nodeErrors?: unknown }).__nodeErrors
+      : undefined;
+
   if (errorResult.error && errorResult.error.payload) {
     // Try to decrypt the error payload to get the actual error message
     try {
@@ -203,13 +220,20 @@ const handleEncryptedError = (
         values: [errorResult.error], // Wrap the error payload as if it's a successful response
       };
 
-      const decryptedErrorValues = decryptBatchResponse(
+      const decryptedErrorValues = decryptBatchResponse<DecryptedErrorPayload>(
         errorAsEncryptedPayload as z.infer<
           typeof GenericEncryptedPayloadSchema
         >,
         jitContext,
-        (decryptedJson) => {
-          return decryptedJson.data || decryptedJson; // Return whatever we can get
+        (decryptedJson, nodeUrl) => {
+          const payload = decryptedJson.data || decryptedJson;
+          if (payload && typeof payload === 'object') {
+            return {
+              ...(payload as Record<string, unknown>),
+              __nodeUrl: nodeUrl,
+            };
+          }
+          return { value: payload, __nodeUrl: nodeUrl };
         },
         {
           operationName: `${operationName} error payload`,
@@ -239,8 +263,10 @@ const handleEncryptedError = (
               operationName,
               requestId,
               rawNodeError: firstError,
+              nodeErrors,
             },
           },
+          '%s',
           `${baseMessage}. ${convertedError.message}${errorDetails}`
         );
       }
@@ -253,8 +279,10 @@ const handleEncryptedError = (
             operationName,
             requestId,
             decryptedErrorValues,
+            nodeErrors,
           },
         },
+        '%s',
         `${baseMessage}. ${JSON.stringify(decryptedErrorValues)}`
       );
     } catch (decryptError) {
@@ -280,8 +308,10 @@ const handleEncryptedError = (
             operationName,
             requestId,
             rawError: errorResult,
+            nodeErrors,
           },
         },
+        '%s',
         `${baseMessage}. The nodes returned an encrypted error response that could not be decrypted. ${JSON.stringify(
           errorResult
         )}. If you are running custom session sigs, it might mean the validation has failed. We will continue to improve this error message to provide more information.`
@@ -298,8 +328,10 @@ const handleEncryptedError = (
           operationName,
           requestId,
           rawError: errorResult,
+          nodeErrors,
         },
       },
+      '%s',
       `${baseMessage}. ${JSON.stringify(errorResult)}`
     );
   }

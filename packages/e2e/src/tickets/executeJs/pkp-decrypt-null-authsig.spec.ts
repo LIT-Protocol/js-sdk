@@ -53,7 +53,7 @@ describe('PKP decrypt with null authSig', () => {
 
     await testEnv.masterPaymentManager.depositForUser({
       userAddress: pkp.ethAddress as `0x${string}`,
-      amountInEth: '0.2',
+      amountInLitkey: '0.2',
     });
 
     const accessControlConditions = createAccBuilder()
@@ -112,7 +112,7 @@ describe('PKP decrypt with null authSig', () => {
 
     await testEnv.masterPaymentManager.depositForUser({
       userAddress: pkp.ethAddress as `0x${string}`,
-      amountInEth: '0.2',
+      amountInLitkey: '0.2',
     });
 
     const accessControlConditions = createAccBuilder()

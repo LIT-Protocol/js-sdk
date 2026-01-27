@@ -1,5 +1,11 @@
 # @lit-protocol/wrapped-keys-lit-actions
 
+## 8.1.1
+
+### Patch Changes
+
+- cdc4f78: add support for naga-test
+
 ## 8.1.0
 
 ### Minor Changes

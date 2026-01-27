@@ -98,21 +98,22 @@ export async function signTransactionSolanaKey({
 }) {
   // Be sure you call validateUnsignedTransaction(unsignedTransaction); before calling this method!
 
-  const solanaKeyPair = Keypair.fromSecretKey(Buffer.from(privateKey, 'hex'));
+  const privateKeyBytes = Uint8Array.from(Buffer.from(privateKey, 'hex'));
+  const solanaKeyPair = Keypair.fromSecretKey(privateKeyBytes);
 
   let transaction;
   let signature;
   if (versionedTransaction) {
-    const swapTransactionBuf = Buffer.from(
-      unsignedTransaction.serializedTransaction,
-      'base64'
-    );
-    transaction = VersionedTransaction.deserialize(swapTransactionBuf);
-    signature = signVersionedTransaction({ transaction, solanaKeyPair });
-  } else {
-    transaction = Transaction.from(
+    const serializedTxBytes = Uint8Array.from(
       Buffer.from(unsignedTransaction.serializedTransaction, 'base64')
     );
+    transaction = VersionedTransaction.deserialize(serializedTxBytes);
+    signature = signVersionedTransaction({ transaction, solanaKeyPair });
+  } else {
+    const serializedTxBytes = Uint8Array.from(
+      Buffer.from(unsignedTransaction.serializedTransaction, 'base64')
+    );
+    transaction = Transaction.from(serializedTxBytes);
     signature = signLegacyTransaction({ transaction, solanaKeyPair });
   }
 

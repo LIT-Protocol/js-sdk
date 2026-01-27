@@ -3,6 +3,7 @@ import { getChildLogger } from '@lit-protocol/logger';
 import {
   AuthData,
   HexPrefixedSchema,
+  JsonSignSessionKeyRequestForPkpReturnSchema,
   NodeUrlsSchema,
   SessionKeyUriSchema,
 } from '@lit-protocol/schemas';
@@ -131,14 +132,55 @@ export async function getPkpAuthContextAdapter(
     );
   }
 
+  const userMaxPrice = litClientCtx.getUserMaxPrice({
+    product: 'SIGN_SESSION_KEY',
+  });
+
   const nodeUrls = litClientCtx.getMaxPricesForNodeProduct({
     nodePrices: respondingNodePrices,
-    userMaxPrice: litClientCtx.getUserMaxPrice({
-      product: 'SIGN_SESSION_KEY',
-    }),
+    userMaxPrice,
     productId: PRODUCT_IDS['SIGN_SESSION_KEY'],
     numRequiredNodes: threshold,
   });
+
+  const primaryUrls = nodeUrls.map((node: { url: string }) => node.url);
+  const toSocketAddressSafe = (value?: string | null) => {
+    if (!value) return null;
+    try {
+      if (value.includes('://')) {
+        const host = new URL(value).host;
+        if (!host) return null;
+        return host.includes(':') ? host : `${host}:443`;
+      }
+    } catch {
+      // fall through to manual parsing
+    }
+    const trimmed = value.replace(/^https?:\/\//, '').split('/')[0];
+    if (!trimmed) return null;
+    return trimmed.includes(':') ? trimmed : `${trimmed}:443`;
+  };
+
+  const toSocketAddress = (url: string) =>
+    toSocketAddressSafe(url) ??
+    url.replace('https://', '').replace('http://', '');
+
+  const primaryNodeSet = primaryUrls.map((url: string) => ({
+    socketAddress: toSocketAddress(url),
+    value: 1,
+  }));
+
+  const signSessionKey = async (
+    requestBody: z.input<typeof JsonSignSessionKeyRequestForPkpReturnSchema>
+  ) =>
+    litClientCtx.signSessionKey({
+      requestBody: {
+        ...JsonSignSessionKeyRequestForPkpReturnSchema.parse(requestBody),
+        nodeSet: primaryNodeSet,
+      },
+      nodeUrls: primaryNodeSet.map(
+        (node: { socketAddress: string }) => `https://${node.socketAddress}`
+      ),
+    });
 
   const pkpAddress = ethers.utils.computeAddress(params.pkpPublicKey);
 
@@ -169,7 +211,7 @@ export async function getPkpAuthContextAdapter(
           litClientCtx.latestConnectionInfo.epochState.currentNumber,
         nodeUrls: nodeUrls,
       },
-      signSessionKey: litClientCtx.signSessionKey,
+      signSessionKey: ({ requestBody }) => signSessionKey(requestBody),
       storage: upstreamParams.storage,
       pkpAddress: pkpAddress,
     },

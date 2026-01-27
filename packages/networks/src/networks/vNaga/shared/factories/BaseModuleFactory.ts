@@ -638,6 +638,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             z.infer<typeof EncryptedVersion1Schema>
           >[] = [];
           const urls = Object.keys(sessionSigs);
+          const keySetId = params.keySetIdentifier ?? 'naga-keyset1';
 
           for (const url of urls) {
             _logger.info(
@@ -654,6 +655,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               chain: params.chain,
               bypassAutoHashing: params.signingContext.bypassAutoHashing,
               epoch: params.connectionInfo.epochState.currentNumber,
+              keySetId,
             });
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -778,6 +780,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             z.infer<typeof EncryptedVersion1Schema>
           >[] = [];
           const urls = Object.keys(sessionSigs);
+          const keySetId = params.keySetIdentifier ?? 'naga-keyset1';
 
           for (const url of urls) {
             const _requestData = DecryptRequestDataSchema.parse({
@@ -790,6 +793,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
                 params.unifiedAccessControlConditions,
               authSig: sessionSigs[url],
               chain: params.chain,
+              keySetId,
             });
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -901,11 +905,16 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           const nodeUrls = requestBody.nodeSet.map(
             (node) => `${httpProtocol}${node.socketAddress}`
           );
+          const pkpKeySetId = requestBody.keySetIdentifier ?? 'naga-keyset1';
 
           const authMethod = {
             authMethodType: requestBody.authData.authMethodType,
             accessToken: requestBody.authData.accessToken,
           } as AuthMethod;
+
+          const maxPriceHex = `0x${getUserMaxPrice({
+            product: 'SIGN_SESSION_KEY',
+          }).toString(16)}`;
 
           const requests: RequestItem<
             z.infer<typeof EncryptedVersion1Schema>
@@ -924,6 +933,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               maxPrice: getUserMaxPrice({
                 product: 'SIGN_SESSION_KEY',
               }).toString(),
+              pkpKeySetId,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -1030,6 +1040,29 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
           const nodeUrls = requestBody.nodeSet.map(
             (node) => `${httpProtocol}${node.socketAddress}`
           );
+          const pkpKeySetId = requestBody.keySetIdentifier ?? 'naga-keyset1';
+
+          const encodedCode = requestBody.litActionCode
+            ? Buffer.from(requestBody.litActionCode, 'utf-8').toString('base64')
+            : undefined;
+
+          const maxPriceHex = `0x${getUserMaxPrice({
+            product: 'SIGN_SESSION_KEY',
+          }).toString(16)}`;
+
+          // `requestBody.jsParams` can arrive in either shape:
+          // - raw: `<raw>`
+          // - nested (AuthManager): `{ jsParams: <raw> }` via
+          //   `params.customAuthParams.jsParams = { jsParams: params.customAuthParams.jsParams };`
+          //   in `packages/auth/src/lib/AuthManager/auth-manager.ts`
+          //
+          // Example:
+          // - user passes: `{ foo: 1 }`
+          // - AuthManager wraps: `{ jsParams: { foo: 1 } }`
+          // - normalized here: `rawJsParams = { foo: 1 }`
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const rawJsParams =
+            (requestBody.jsParams as any)?.jsParams ?? requestBody.jsParams;
 
           const requests: RequestItem<
             z.infer<typeof EncryptedVersion1Schema>
@@ -1045,12 +1078,20 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
               curveType: 'BLS' as const,
               epoch: requestBody.epoch,
               nodeSet: requestBody.nodeSet,
-              litActionCode: requestBody.litActionCode,
-              litActionIpfsId: requestBody.litActionIpfsId,
-              jsParams: requestBody.jsParams,
-              maxPrice: getUserMaxPrice({
-                product: 'SIGN_SESSION_KEY',
-              }).toString(),
+              ...(encodedCode && { code: encodedCode }),
+              ...(requestBody.litActionIpfsId && {
+                litActionIpfsId: requestBody.litActionIpfsId,
+              }),
+              ...(rawJsParams && {
+                // Expose both raw + nested `jsParams` for compatibility:
+                // - Lit Action can read `jsParams.foo`
+                // - or `jsParams.jsParams.foo`
+                jsParams: {
+                  ...rawJsParams,
+                  jsParams: rawJsParams,
+                },
+              }),
+              maxPrice: maxPriceHex,
             };
 
             const encryptedPayload = E2EERequestManager.encryptRequestData(
@@ -1163,6 +1204,8 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             'executeJs:createRequest: Creating request'
           );
 
+          const DEFAULT_KEY_SET_ID = 'naga-keyset1';
+
           // Store response strategy for later use in handleResponse
           executeJsResponseStrategy = params.responseStrategy;
 
@@ -1208,6 +1251,7 @@ export function createBaseModule<T, M>(config: BaseModuleConfig<T, M>) {
             const _requestData = ExecuteJsRequestDataSchema.parse({
               authSig: sessionSigs[url],
               nodeSet: urls,
+              keySetId: params.keySetIdentifier ?? DEFAULT_KEY_SET_ID,
               ...(encodedCode && { code: encodedCode }),
               ...(params.executionContext.ipfsId && {
                 ipfsId: params.executionContext.ipfsId,

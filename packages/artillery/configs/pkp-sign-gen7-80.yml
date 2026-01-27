@@ -1,0 +1,24 @@
+config:
+  target: 'dummy'
+  phases:
+    # Over 60s, ramp up to creating 80 vusers per second
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 80
+      name: 'Ramp Up'
+    # Over 300s, sustain 80 vusers per second
+    - duration: 300
+      arrivalRate: 80
+      name: 'Sustained PKP Signing'
+    # Over 60s, ramp down to creating 20 vusers per second
+    - duration: 60
+      arrivalRate: 20
+      name: 'Ramp Down'
+  processor: '../src/processors/multi-endpoints.ts'
+
+scenarios:
+  - name: 'PKP Sign Stress Test'
+    weight: 100
+    flow:
+      - function: 'runPkpSignTest'
+      - think: 0.1
