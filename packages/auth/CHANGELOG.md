@@ -1,5 +1,11 @@
 # @lit-protocol/auth
 
+## 8.2.3
+
+### Patch Changes
+
+- cdc4f78: add support for naga-test
+
 ## 8.2.2
 
 ### Patch Changes

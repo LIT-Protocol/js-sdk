@@ -1,5 +1,23 @@
 # @lit-protocol/wrapped-keys
 
+## 8.2.0
+
+### Minor Changes
+
+- 3a644ec: Wrapped-keys now supports updating ciphertext/ACCs via a new PUT endpoint, returns version history when requested.
+
+### Patch Changes
+
+- Updated dependencies [e58998d]
+- Updated dependencies [cdc4f78]
+- Updated dependencies [401e864]
+  - @lit-protocol/constants@9.0.1
+  - @lit-protocol/lit-client@8.3.1
+  - @lit-protocol/networks@8.4.1
+  - @lit-protocol/schemas@8.0.3
+  - @lit-protocol/types@8.0.3
+  - @lit-protocol/auth@8.2.3
+
 ## 8.1.2
 
 ### Patch Changes
