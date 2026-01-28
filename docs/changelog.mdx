@@ -12,16 +12,16 @@ rss: true
 | [@lit-protocol/auth-services](#auth-services) | [2.1.1](https://www.npmjs.com/package/%40lit-protocol%2Fauth-services) | Updated dependencies |
 | [@lit-protocol/access-control-conditions](#access-control-conditions) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions) | - |
 | [@lit-protocol/access-control-conditions-schemas](#access-control-conditions-schemas) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Faccess-control-conditions-schemas) | - |
-| [@lit-protocol/artillery](#artillery) | [0.1.4](https://www.npmjs.com/package/%40lit-protocol%2Fartillery) | Updated dependencies |
+| [@lit-protocol/artillery](#artillery) | [0.1.5](https://www.npmjs.com/package/%40lit-protocol%2Fartillery) | @lit-protocol/e2e@5.1.2 |
 | [@lit-protocol/auth-helpers](#auth-helpers) | [8.2.1](https://www.npmjs.com/package/%40lit-protocol%2Fauth-helpers) | add payment delegation auth sig |
 | [@lit-protocol/constants](#constants) | [9.0.1](https://www.npmjs.com/package/%40lit-protocol%2Fconstants) | remove deprecated alchemy rpc url and replace with a new one |
 | [@lit-protocol/contracts](#contracts) | [0.9.1](https://www.npmjs.com/package/%40lit-protocol%2Fcontracts) | add support for naga-test |
 | [@lit-protocol/crypto](#crypto) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fcrypto) | Introduce wrapped-keys support to v8 so applications can generate, import, export, and sign with encrypted keys across EVM and Solana without exposing private key material. New `auth` package APIs include `validateDelegationAuthSig`, `generatePkpDelegationAuthSig`, `generateEoaDelegationAuthSig`, `createPkpAuthContextFromPreGenerated`, and `createPkpSessionSigs`. New `wrapped-keys` APIs include `generatePrivateKey`, `importPrivateKey`, `exportPrivateKey`, `listEncryptedKeyMetadata`, `getEncryptedKey`, `storeEncryptedKey`, `storeEncryptedKeyBatch`, `batchGeneratePrivateKeys`, `signMessageWithEncryptedKey`, and `signTransactionWithEncryptedKey`. See the updated docs (guides/server-sessions, sdk-reference/wrapped-keys, and the new auth references) for end-to-end examples. [PR](https://github.com/LIT-Protocol/js-sdk/pull/972) |
-| [@lit-protocol/e2e](#e2e) | [5.1.1](https://www.npmjs.com/package/%40lit-protocol%2Fe2e) | add payment delegation auth sig |
+| [@lit-protocol/e2e](#e2e) | [5.1.2](https://www.npmjs.com/package/%40lit-protocol%2Fe2e) | Updated dependencies |
 | [@lit-protocol/logger](#logger) | [8.0.2](https://www.npmjs.com/package/%40lit-protocol%2Flogger) | - |
 | [@lit-protocol/schemas](#schemas) | [8.0.3](https://www.npmjs.com/package/%40lit-protocol%2Fschemas) | add support for naga-test |
 | [@lit-protocol/types](#types) | [8.0.4](https://www.npmjs.com/package/%40lit-protocol%2Ftypes) | add payment delegation auth sig |
-| [@lit-protocol/wasm](#wasm) | [8.1.0](https://www.npmjs.com/package/%40lit-protocol%2Fwasm) | Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before. |
+| [@lit-protocol/wasm](#wasm) | [8.1.1](https://www.npmjs.com/package/%40lit-protocol%2Fwasm) | Add explicit module parameter to wasm initialization to remove the initSync warning |
 | [@lit-protocol/wrapped-keys](#wrapped-keys) | [8.2.1](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys) | Updated dependencies |
 | [@lit-protocol/wrapped-keys-lit-actions](#wrapped-keys-lit-actions) | [8.1.1](https://www.npmjs.com/package/%40lit-protocol%2Fwrapped-keys-lit-actions) | add support for naga-test |
 
@@ -106,16 +106,15 @@ rss: true
 
 <Update
   label="artillery"
-  description="v0.1.4"
+  description="v0.1.5"
   tags={["Patch Changes"]}
-  rss={{ title: "artillery", description: "Updated dependencies" }}
+  rss={{ title: "artillery", description: "@lit-protocol/e2e@5.1.2" }}
   id="artillery"
 >
 
   ## Patch Changes
 
-  - Updated dependencies
-  - @lit-protocol/e2e@5.1.1
+  - @lit-protocol/e2e@5.1.2
 </Update>
 
 <Update
@@ -175,18 +174,16 @@ rss: true
 
 <Update
   label="e2e"
-  description="v5.1.1"
+  description="v5.1.2"
   tags={["Patch Changes"]}
-  rss={{ title: "e2e", description: "add payment delegation auth sig" }}
+  rss={{ title: "e2e", description: "Updated dependencies" }}
   id="e2e"
 >
 
   ## Patch Changes
 
-  - add payment delegation auth sig
   - Updated dependencies
-  - @lit-protocol/auth-helpers@8.2.1
-  - @lit-protocol/types@8.0.4
+  - @lit-protocol/wasm@8.1.1
 </Update>
 
 <Update
@@ -228,15 +225,15 @@ rss: true
 
 <Update
   label="wasm"
-  description="v8.1.0"
-  tags={["Minor Changes"]}
-  rss={{ title: "wasm", description: "Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before." }}
+  description="v8.1.1"
+  tags={["Patch Changes"]}
+  rss={{ title: "wasm", description: "Add explicit module parameter to wasm initialization to remove the initSync warning" }}
   id="wasm"
 >
 
-  ## Minor Changes
+  ## Patch Changes
 
-  - Naga-local consumers can now point at a local networkContext.json with a lightweight withLocalContext call (or by setting NAGA_LOCAL_CONTEXT_PATH) while the default bundled signatures keep working as before.
+  - Add explicit module parameter to wasm initialization to remove the initSync warning
 </Update>
 
 <Update
