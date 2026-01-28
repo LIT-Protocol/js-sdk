@@ -1,5 +1,11 @@
 # @lit-protocol/wasm
 
+## 8.1.1
+
+### Patch Changes
+
+- 467c4d4: Add explicit module parameter to wasm initialization to remove the initSync warning
+
 ## 8.1.0
 
 ### Minor Changes

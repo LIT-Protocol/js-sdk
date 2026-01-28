@@ -1,5 +1,12 @@
 # @lit-protocol/e2e
 
+## 5.1.2
+
+### Patch Changes
+
+- Updated dependencies [467c4d4]
+  - @lit-protocol/wasm@8.1.1
+
 ## 5.1.1
 
 ### Patch Changes
