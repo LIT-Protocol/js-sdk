@@ -1,5 +1,12 @@
 # @lit-protocol/wrapped-keys
 
+## 8.2.1
+
+### Patch Changes
+
+- Updated dependencies [1dd24b8]
+  - @lit-protocol/types@8.0.4
+
 ## 8.2.0
 
 ### Minor Changes
