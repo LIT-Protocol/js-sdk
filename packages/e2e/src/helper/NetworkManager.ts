@@ -36,7 +36,25 @@ export const getLitNetworkModule = async (
   }
 
   const networksModule = await import('@lit-protocol/networks');
-  const _networkModule = networksModule[config.importName];
+  const baseNetworkModule = networksModule[config.importName];
+  let _networkModule = baseNetworkModule;
+
+  const defaultRpcUrl = _networkModule.getChainConfig().rpcUrls.default.http[0];
+  const isLocalNetwork = defaultRpcUrl.includes('127.0.0.1');
+  const isMainnetNetwork = _network === 'naga' || _network === 'naga-proto';
+  const customRpcUrl = isLocalNetwork
+    ? process.env['LOCAL_RPC_URL']
+    : process.env[
+        isMainnetNetwork
+          ? 'LIT_MAINNET_RPC_URL'
+          : 'LIT_YELLOWSTONE_PRIVATE_RPC_URL'
+      ];
+
+  if (customRpcUrl && typeof _networkModule.withOverrides === 'function') {
+    _networkModule = _networkModule.withOverrides({ rpcUrl: customRpcUrl });
+    console.log(`🔧 Using custom network RPC URL: ***${customRpcUrl.slice(-6)}`);
+  }
+
   console.log('✅ Lit Network Module created for network:', _network);
   console.log('🔍 Chain:', _networkModule.getChainConfig().name);
   console.log(
