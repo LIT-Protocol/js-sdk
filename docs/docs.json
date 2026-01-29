@@ -154,6 +154,7 @@
           {
             "group": "Resources",
             "pages": [
+              "sdk/resources/debug-logging",
               "sdk/resources/supported-evm-chains",
               "sdk/resources/network-status"
             ]

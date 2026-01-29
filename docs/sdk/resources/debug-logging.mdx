@@ -1,0 +1,57 @@
+---
+title: "Debug Logging"
+description: "Enable Lit JS SDK debug logging in browsers and Node.js."
+---
+
+# Overview
+
+Use SDK logs to inspect Lit Action requests and responses. Logging is disabled by default.
+
+## Browser
+
+Set `window.LOG_LEVEL` before the SDK bundle loads (or before your first `@lit-protocol/*` import). The logger is initialized at module load time, so setting it afterward will not take effect.
+
+```html
+<script>
+  window.LOG_LEVEL = 'debug';
+</script>
+<script type="module" src="/src/main.tsx"></script>
+```
+
+If your entrypoint is a module, set the flag before a dynamic import:
+
+```ts
+window.LOG_LEVEL = 'debug';
+const { createLitClient } = await import('@lit-protocol/lit-client');
+```
+
+## Node.js
+
+Set `LOG_LEVEL=debug` (or `info`) before running the app:
+
+```bash
+LOG_LEVEL=debug node app.js
+```
+
+## HTTP Response Logging
+
+Set `DEBUG_HTTP=true` to log raw HTTP responses and a generated `curl` command for each node request.
+
+```bash
+LOG_LEVEL=debug DEBUG_HTTP=true node app.js
+```
+
+In browsers, set the flag on `window` before the SDK loads:
+
+```html
+<script>
+  window.DEBUG_HTTP = 'true';
+  window.LOG_LEVEL = 'debug';
+</script>
+```
+
+## What You Can and Cannot See
+
+- The SDK does not surface decrypted per-node payloads in browser logs.
+- `executeJs` returns `result.response` and `result.logs` (aggregated console output from your Lit Action).
+- To inspect decrypted data, explicitly log or return it from the Lit Action (be careful with secrets).
